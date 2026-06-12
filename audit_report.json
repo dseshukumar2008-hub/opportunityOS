@@ -1,0 +1,373 @@
+[
+  {
+    "file": "src\\components\\copilot\\OpportunityOSCopilot.jsx",
+    "line": 227,
+    "variable": "messages",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{(messages || []).length === 0 && !isTyping && ("
+  },
+  {
+    "file": "src\\components\\copilot\\OpportunityOSCopilot.jsx",
+    "line": 237,
+    "variable": "messages",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{(messages || []).map((msg, index) => {"
+  },
+  {
+    "file": "src\\components\\copilot\\OpportunityOSCopilot.jsx",
+    "line": 284,
+    "variable": "messages",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{(messages || []).length <= 1 && ("
+  },
+  {
+    "file": "src\\components\\dashboard\\AICommandCenterWidget.jsx",
+    "line": 12,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const activeApps = (applications || []).filter(a => a.status !== 'Rejected' && a.status !== 'Offer').length;"
+  },
+  {
+    "file": "src\\components\\dashboard\\AICommandCenterWidget.jsx",
+    "line": 13,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const interviewApps = (applications || []).filter(a => a.status === 'Interview').length;"
+  },
+  {
+    "file": "src\\components\\dashboard\\AICopilotSection.jsx",
+    "line": 387,
+    "variable": "recommendations",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{plan.skill_(recommendations || []).map((s, i) => ("
+  },
+  {
+    "file": "src\\components\\dashboard\\ApplicationFunnelWidget.jsx",
+    "line": 7,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const totalApplications = (applications || []).length;"
+  },
+  {
+    "file": "src\\components\\dashboard\\ApplicationFunnelWidget.jsx",
+    "line": 8,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const interviewCount = (applications || []).filter(a => a.status === 'Interview').length;"
+  },
+  {
+    "file": "src\\components\\dashboard\\ApplicationFunnelWidget.jsx",
+    "line": 9,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const offerCount = (applications || []).filter(a => a.status === 'Offer').length;"
+  },
+  {
+    "file": "src\\components\\dashboard\\CareerCoachWidget.jsx",
+    "line": 59,
+    "variable": "messages",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{(messages || []).length > 0 && ("
+  },
+  {
+    "file": "src\\components\\dashboard\\CareerCoachWidget.jsx",
+    "line": 94,
+    "variable": "messages",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{(messages || []).length === 0 && !isLoading && ("
+  },
+  {
+    "file": "src\\components\\dashboard\\CareerCoachWidget.jsx",
+    "line": 113,
+    "variable": "messages",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{(messages || []).map((msg, i) => ("
+  },
+  {
+    "file": "src\\components\\dashboard\\CategoryBreakdownChart.jsx",
+    "line": 6,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const totalApps = (applications || []).length;"
+  },
+  {
+    "file": "src\\components\\dashboard\\DashboardWidgets.jsx",
+    "line": 17,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "value: (applications || []).length.toString(),"
+  },
+  {
+    "file": "src\\components\\dashboard\\DashboardWidgets.jsx",
+    "line": 29,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "value: (applications || []).filter(a => a.status === 'Interview').length.toString(),"
+  },
+  {
+    "file": "src\\components\\dashboard\\DashboardWidgets.jsx",
+    "line": 41,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "value: (applications || []).filter(a => a.status === 'Offer').length.toString(),"
+  },
+  {
+    "file": "src\\components\\dashboard\\PersonalInsights.jsx",
+    "line": 19,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const appliedCount = (applications || []).length;"
+  },
+  {
+    "file": "src\\components\\dashboard\\PersonalInsights.jsx",
+    "line": 20,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const interviewCount = (applications || []).filter(a => a.status === 'Interview').length;"
+  },
+  {
+    "file": "src\\components\\dashboard\\PersonalInsights.jsx",
+    "line": 21,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const offerCount = (applications || []).filter(a => a.status === 'Offer').length;"
+  },
+  {
+    "file": "src\\components\\dashboard\\StatusDistributionChart.jsx",
+    "line": 6,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const totalApps = (applications || []).length;"
+  },
+  {
+    "file": "src\\components\\network\\RecommendedConnectionsWidget.jsx",
+    "line": 36,
+    "variable": "recommendations",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "if ((recommendations || []).length === 0) {"
+  },
+  {
+    "file": "src\\components\\network\\RecommendedConnectionsWidget.jsx",
+    "line": 69,
+    "variable": "recommendations",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{(recommendations || []).map(user => {"
+  },
+  {
+    "file": "src\\components\\opportunities\\RecommendedForYouSection.jsx",
+    "line": 16,
+    "variable": "recommendations",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const filteredRecommendations = (recommendations || []).filter(opp => {"
+  },
+  {
+    "file": "src\\components\\opportunities\\SkillGapAnalysis.jsx",
+    "line": 131,
+    "variable": "recommendations",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{!isPerfectMatch && (recommendations || []).length > 0 && ("
+  },
+  {
+    "file": "src\\components\\opportunities\\SkillGapAnalysis.jsx",
+    "line": 139,
+    "variable": "recommendations",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{(recommendations || []).map((rec, i) => ("
+  },
+  {
+    "file": "src\\contexts\\ApplicationContext.jsx",
+    "line": 153,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "totalCount: (applications || []).length,"
+  },
+  {
+    "file": "src\\contexts\\GoalContext.jsx",
+    "line": 193,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "newCurrentValue = (applications || []).length;"
+  },
+  {
+    "file": "src\\contexts\\GoalContext.jsx",
+    "line": 205,
+    "variable": "teams",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "newCurrentValue = (teams || []).length;"
+  },
+  {
+    "file": "src\\contexts\\GoalContext.jsx",
+    "line": 282,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "(applications || []).length,"
+  },
+  {
+    "file": "src\\contexts\\GoalContext.jsx",
+    "line": 284,
+    "variable": "teams",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "(teams || []).length,"
+  },
+  {
+    "file": "src\\contexts\\MessageContext.jsx",
+    "line": 57,
+    "variable": "messages",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "if ((messages || []).length > 0) {"
+  },
+  {
+    "file": "src\\contexts\\TeamContext.jsx",
+    "line": 274,
+    "variable": "teams",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "return (teams || []).filter((t) => Array.isArray(t.members) && t.members.includes(currentUserId));"
+  },
+  {
+    "file": "src\\contexts\\TeamContext.jsx",
+    "line": 284,
+    "variable": "teams",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "return (teams || []).filter((t) => !(Array.isArray(t.members) && t.members.includes(currentUserId)));"
+  },
+  {
+    "file": "src\\contexts\\TeamContext.jsx",
+    "line": 288,
+    "variable": "teams",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const teamsTotal = (teams || []).length;"
+  },
+  {
+    "file": "src\\hooks\\useDashboardInsights.js",
+    "line": 32,
+    "variable": "profile.skills",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "} else if (!profile?.skills || (profile.skills || []).length < 3) {"
+  },
+  {
+    "file": "src\\hooks\\useDashboardInsights.js",
+    "line": 42,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "} else if (!applications || (applications || []).length === 0) {"
+  },
+  {
+    "file": "src\\hooks\\useDashboardInsights.js",
+    "line": 66,
+    "variable": "profile.skills",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "if (!profile?.skills || (profile.skills || []).length === 0) missingProfileItems.push('skills');"
+  },
+  {
+    "file": "src\\hooks\\useMessageNotifications.js",
+    "line": 35,
+    "variable": "teams",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const myTeamIds = (teams || []).filter(t => t.members && t.members.includes(currentUserId)).map(t => t.id);"
+  },
+  {
+    "file": "src\\hooks\\useRecommendations.js",
+    "line": 92,
+    "variable": "recommendations",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "if (recommendations && (recommendations || []).length > 0) {"
+  },
+  {
+    "file": "src\\hooks\\useRecommendations.js",
+    "line": 93,
+    "variable": "recommendations",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const totalScore = (recommendations || []).reduce((sum, opp) => sum + (opp.matchData?.score || 0), 0);"
+  },
+  {
+    "file": "src\\hooks\\useRecommendations.js",
+    "line": 94,
+    "variable": "recommendations",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const averageMatchScore = Math.round(totalScore / (recommendations || []).length);"
+  },
+  {
+    "file": "src\\hooks\\useRecommendations.js",
+    "line": 97,
+    "variable": "recommendations",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "addSnapshot(averageMatchScore, topRecommendation, (recommendations || []).length);"
+  },
+  {
+    "file": "src\\hooks\\useRecommendedConnections.js",
+    "line": 61,
+    "variable": "teams",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const mutualTeams = (teams || []).filter(t => t.members?.includes(currentUserId) && t.members?.includes(targetUser.id));"
+  },
+  {
+    "file": "src\\pages\\dashboard\\AnalyticsPage.jsx",
+    "line": 22,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const totalApplications = (applications || []).length;"
+  },
+  {
+    "file": "src\\pages\\dashboard\\AnalyticsPage.jsx",
+    "line": 23,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const interviewCount = (applications || []).filter(a => a.status === 'Interview').length;"
+  },
+  {
+    "file": "src\\pages\\dashboard\\AnalyticsPage.jsx",
+    "line": 24,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const offerCount = (applications || []).filter(a => a.status === 'Offer').length;"
+  },
+  {
+    "file": "src\\pages\\dashboard\\ApplicationsPage.jsx",
+    "line": 181,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{(applications || []).filter(a => a.status === 'Interview').length}"
+  },
+  {
+    "file": "src\\pages\\dashboard\\ApplicationsPage.jsx",
+    "line": 239,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": ") : (applications || []).length === 0 ? ("
+  },
+  {
+    "file": "src\\pages\\dashboard\\ApplicationsPage.jsx",
+    "line": 265,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{(applications || []).map((app) => ("
+  },
+  {
+    "file": "src\\pages\\dashboard\\DeadlinesPage.jsx",
+    "line": 196,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "{(applications || []).length === 0 && ("
+  },
+  {
+    "file": "src\\pages\\dashboard\\UserProfilePage.jsx",
+    "line": 192,
+    "variable": "teams",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "const myTeams = (teams || []).filter(t => t.members.includes(currentUserId));"
+  },
+  {
+    "file": "src\\pages\\dashboard\\UserProfilePage.jsx",
+    "line": 378,
+    "variable": "applications",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "<StatCard icon={Briefcase}  label=\"Opportunities Applied\" value={(applications || []).length}          color=\"bg-blue-50 text-blue-600\" />"
+  },
+  {
+    "file": "src\\services\\opportunityAggregator.js",
+    "line": 62,
+    "variable": "opportunities",
+    "rootCause": "Unprotected array operation potentially causing undefined error",
+    "fixApplied": "if ((opportunities || []).length === 0 || isStale) {"
+  }
+]
