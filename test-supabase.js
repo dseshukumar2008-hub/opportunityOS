@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
+import 'dotenv/config';
 
 const supabase = createClient(
   'https://lkaiqaqazpyfuvdtvtqz.supabase.co',
-  'REDACTED_SUPABASE_KEY'
+  process.env.SUPABASE_ANON_KEY
 );
 
 async function testConnection() {
