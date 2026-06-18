@@ -26,3 +26,5 @@ export default function OpportunityMatchBadge({ score, size = 'md' }) {
     </div>
   );
 }
+
+

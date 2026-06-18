@@ -57,7 +57,7 @@ export default function DashboardKPIsWidget() {
 
   const resumeScore = hasInsights ? atsScore : 0;
   const totalApplications = applicationInsights?.submitted ?? 0;
-  const matchesCount = 27; // Mock for now
+  const matchesCount = 0; // Replace with actual matches count logic when available
   const savedCount = savedOpportunities?.length ?? 0;
   const activeTeams = getMyTeams()?.length ?? 0;
   const aiScore = careerReadiness?.score ?? 0;

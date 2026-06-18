@@ -47,6 +47,7 @@ export default function ResumeBuilderPage() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isResumeDropdownOpen, setIsResumeDropdownOpen] = useState(false);
 
+
   const handleSave = () => {
     saveResume();
   };
@@ -172,7 +173,7 @@ export default function ResumeBuilderPage() {
             onClick={() => setIsResumeDropdownOpen(!isResumeDropdownOpen)}
           >
             <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">
-              {resumes.find(r => r.id === activeResumeId)?.title || 'Resume Builder'}
+              {resumes.find(r => r.id === activeResumeId)?.title || 'Create Resume'}
             </h1>
             <ChevronDown size={20} className="text-slate-400 group-hover:text-indigo-600 transition-colors" />
           </div>

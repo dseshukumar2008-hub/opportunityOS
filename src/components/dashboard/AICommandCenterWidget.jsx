@@ -2,11 +2,13 @@ import { Sparkles, Target, Zap, TrendingUp, AlertCircle, CheckCircle2 } from 'lu
 import { useApplications } from '../../contexts/ApplicationContext';
 import { useResume } from '../../contexts/ResumeContext';
 import { useGoals } from '../../contexts/GoalContext';
+import { useProfile } from '../../contexts/ProfileContext';
 
 export default function AICommandCenterWidget() {
   const { applications } = useApplications();
   const { getResumeStrength } = useResume();
   const { goals } = useGoals();
+  const { profile } = useProfile();
 
   const atsScore = getResumeStrength ? getResumeStrength() : 0;
   const activeApps = (applications || []).filter(a => a.status !== 'Rejected' && a.status !== 'Offer').length;
@@ -15,15 +17,15 @@ export default function AICommandCenterWidget() {
   // AI Mock Calculations for Demo/Premium Feel
   const interviewReadiness = Math.min(100, Math.max(0, atsScore + (interviewApps * 5) + 10));
   
-  // Offer Probability formula: Base 15% + (Active Apps * 2) + (Interviews * 15) + (ATS > 80 ? 10 : 0)
   const offerProbability = Math.min(98, 15 + (activeApps * 2) + (interviewApps * 15) + (atsScore > 80 ? 10 : 0));
 
-  // Skill Gaps (mock data based on active goals or target role if we had one)
-  const targetRole = goals.length > 0 ? goals[0].title : 'Software Engineer';
-  const skillGaps = [
-    { skill: 'System Design', match: 45, impact: 'High' },
-    { skill: 'React Native', match: 70, impact: 'Medium' }
-  ];
+  // Skill Gaps based on profile
+  const targetRole = profile?.targetRole || (goals.length > 0 ? goals[0].title : 'Software Engineer');
+  const skillGaps = (profile?.missingSkills || []).slice(0, 3).map(skill => ({
+    skill,
+    match: Math.floor(Math.random() * 40) + 20, // Mock match percentage for missing skills
+    impact: Math.random() > 0.5 ? 'High' : 'Medium'
+  }));
 
   return (
     <div className="mb-6 w-full relative overflow-hidden bg-white border border-slate-200/60 rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]">
@@ -104,7 +106,7 @@ export default function AICommandCenterWidget() {
               </span>
             </div>
             <div className="space-y-3 mt-auto">
-              {skillGaps.map((gap, i) => (
+              {skillGaps.length > 0 ? skillGaps.map((gap, i) => (
                 <div key={i} className="group">
                   <div className="flex justify-between text-[12px] font-bold mb-1.5">
                     <span className="text-slate-700 flex items-center gap-1">
@@ -117,7 +119,9 @@ export default function AICommandCenterWidget() {
                     <div className={`h-full rounded-full transition-all duration-1000 ${gap.impact === 'High' ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${gap.match}%` }}></div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <p className="text-[12px] text-slate-500">No skill gaps detected yet. Run a skill gap analysis!</p>
+              )}
               <button className="text-[12px] font-bold text-indigo-600 hover:text-indigo-700 mt-2 w-full text-left">
                 Generate Study Plan →
               </button>

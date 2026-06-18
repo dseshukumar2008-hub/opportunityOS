@@ -117,7 +117,7 @@ export default function ConnectionRequestsPage() {
 
       {/* ─── INCOMING TAB ─────────────────────────────────────────────── */}
       {activeTab === 'incoming' && (
-        <div>
+        <div> 
           {incomingRequests.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-100">
               <EmptyState

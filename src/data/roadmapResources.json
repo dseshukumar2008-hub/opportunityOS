@@ -1,0 +1,93 @@
+{
+  "Data Structures & Algorithms": {
+    "title": "Data Structures and Algorithms Specialization",
+    "provider": "Coursera",
+    "platform": "Coursera",
+    "rating": "4.8 (15k)",
+    "url": "https://www.coursera.org/specializations/data-structures-algorithms"
+  },
+  "DBMS": {
+    "title": "Database Management Systems",
+    "provider": "NPTEL",
+    "platform": "YouTube",
+    "rating": "4.7 (8k)",
+    "url": "https://nptel.ac.in/courses/106105175"
+  },
+  "React.js": {
+    "title": "React - The Complete Guide",
+    "provider": "Udemy",
+    "platform": "Udemy",
+    "rating": "4.8 (20k)",
+    "url": "https://www.udemy.com/course/react-the-complete-guide-incl-redux/"
+  },
+  "Node.js": {
+    "title": "Node.js Complete Course",
+    "provider": "Udemy",
+    "platform": "Udemy",
+    "rating": "4.7 (12k)",
+    "url": "https://www.udemy.com/course/nodejs-the-complete-guide/"
+  },
+  "System Design": {
+    "title": "System Design Fundamentals",
+    "provider": "YouTube",
+    "platform": "YouTube",
+    "rating": "4.9 (25k)",
+    "url": "https://www.youtube.com/watch?v=bUHFg8CZFws"
+  },
+  "Machine Learning": {
+    "title": "Machine Learning Specialization",
+    "provider": "Coursera",
+    "platform": "Coursera",
+    "rating": "4.9 (50k)",
+    "url": "https://www.coursera.org/specializations/machine-learning-introduction"
+  },
+  "Cloud Computing": {
+    "title": "AWS Certified Solutions Architect",
+    "provider": "Udemy",
+    "platform": "Udemy",
+    "rating": "4.8 (30k)",
+    "url": "https://www.udemy.com/course/aws-certified-solutions-architect-associate-saa-c03/"
+  },
+  "Cyber Security": {
+    "title": "Cybersecurity for Beginners",
+    "provider": "Coursera",
+    "platform": "Coursera",
+    "rating": "4.6 (10k)",
+    "url": "https://www.coursera.org/learn/cybersecurity-for-beginners"
+  },
+  "Python": {
+    "title": "100 Days of Code: The Complete Python Pro Bootcamp",
+    "provider": "Udemy",
+    "platform": "Udemy",
+    "rating": "4.8 (40k)",
+    "url": "https://www.udemy.com/course/100-days-of-code/"
+  },
+  "Foundation": {
+    "title": "CS50: Introduction to Computer Science",
+    "provider": "Harvard",
+    "platform": "edX",
+    "rating": "4.9 (100k)",
+    "url": "https://www.edx.org/course/introduction-computer-science-harvardx-cs50x"
+  },
+  "Frontend Development": {
+    "title": "Meta Front-End Developer Professional Certificate",
+    "provider": "Coursera",
+    "platform": "Coursera",
+    "rating": "4.8 (18k)",
+    "url": "https://www.coursera.org/professional-certificates/meta-front-end-developer"
+  },
+  "Backend Development": {
+    "title": "Meta Back-End Developer Professional Certificate",
+    "provider": "Coursera",
+    "platform": "Coursera",
+    "rating": "4.7 (10k)",
+    "url": "https://www.coursera.org/professional-certificates/meta-back-end-developer"
+  },
+  "Data Science": {
+    "title": "IBM Data Science Professional Certificate",
+    "provider": "Coursera",
+    "platform": "Coursera",
+    "rating": "4.8 (80k)",
+    "url": "https://www.coursera.org/professional-certificates/ibm-data-science"
+  }
+}

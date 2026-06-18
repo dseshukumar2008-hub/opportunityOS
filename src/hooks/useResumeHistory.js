@@ -90,7 +90,7 @@ export function useResumeHistory() {
       throw err;
     }
   }, [user?.id, history]);
-
+  
   const clearHistory = useCallback(async () => {
     if (!user?.id) return;
     try {

@@ -1,6 +1,7 @@
 import { ErrorBoundary } from 'react-error-boundary';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { analyticsService } from '../../services/analyticsService';
 
 
 function FallbackUI({ error, resetErrorBoundary, type = 'global' }) {
@@ -59,6 +60,7 @@ export function GlobalErrorBoundary({ children }) {
       onError={(error, info) => {
         console.error('Global Crash Detected:', error);
         console.error('Component Stack:', info.componentStack);
+        analyticsService.trackError('UI_CRASH_GLOBAL', error);
       }}
     >
       {children}
@@ -73,6 +75,7 @@ export function RouteErrorBoundary({ children }) {
       onError={(error, info) => {
         console.error('Route Crash Detected:', error);
         console.error('Component Stack:', info.componentStack);
+        analyticsService.trackError('UI_CRASH_ROUTE', error);
       }}
     >
       {children}
@@ -87,6 +90,7 @@ export function WidgetErrorBoundary({ children }) {
       onError={(error, info) => {
         console.error('Widget Crash Detected:', error);
         console.error('Component Stack:', info.componentStack);
+        analyticsService.trackError('UI_CRASH_WIDGET', error);
       }}
     >
       {children}

@@ -3,6 +3,7 @@ import { Mail, Lock, User, ArrowRight, AlertCircle, CheckCircle2, Briefcase } fr
 import AuthLayout from './AuthLayout';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { analyticsService } from '../../services/analyticsService';
 
 
 export default function SignupPage() {
@@ -50,6 +51,7 @@ export default function SignupPage() {
     try {
       const userType = isEmployer ? 'employer' : 'student';
       await signup(formData.email, formData.password, formData.name, userType);
+      analyticsService.trackEvent('Sign Up', { userType });
       setSuccess(true);
       setTimeout(() => navigate(isEmployer ? '/employer/dashboard' : '/dashboard'), 2000);
     } catch (err) {
@@ -98,7 +100,7 @@ export default function SignupPage() {
       </div>
 
       <div className="bg-white py-8 px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-2xl sm:px-10 border border-slate-100">
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form className="space-y-5" onSubmit={handleSubmit} noValidate>
 
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
@@ -122,7 +124,7 @@ export default function SignupPage() {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all"
+                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('name') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all`}
                 placeholder="John Doe"
               />
             </div>

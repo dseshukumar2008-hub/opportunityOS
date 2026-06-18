@@ -56,7 +56,7 @@ export function useDeadlineReminders() {
         const timeText = diffDays === 1 ? 'tomorrow' : `in ${diffDays} days`;
         
         // Prevent duplicate checks by ensuring we haven't already notified for this exact timeframe
-        const reminderExists = notifications.some(n => 
+        const reminderExists = notifications  .some(n => 
           n.title === 'Deadline Reminder' && 
           n.message.includes(item.company) && 
           n.message.includes(item.title) &&

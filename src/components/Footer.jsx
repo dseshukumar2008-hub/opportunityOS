@@ -80,7 +80,7 @@ export default function Footer() {
               <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
             </ul>
-          </div>
+          </div>  
 
           {/* Newsletter */}
           <div className="col-span-1 md:col-span-1">

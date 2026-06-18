@@ -5,6 +5,7 @@ import CreateGoalModal from '../../components/goals/CreateGoalModal';
 import EmptyState from '../../components/ui/EmptyState';
 import Skeleton from '../../components/ui/Skeleton';
 
+
 export default function GoalsPage() {
   const { goals } = useGoals();
   const [isModalOpen, setIsModalOpen] = useState(false);

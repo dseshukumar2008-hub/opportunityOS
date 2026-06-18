@@ -18,48 +18,7 @@ const INITIAL_CHECKLIST = [
 
 const INITIAL_SKILLS = ['React', 'TypeScript', 'JavaScript', 'HTML5', 'CSS3', 'Git'];
 
-const MOCK_OPPORTUNITIES = [
-  {
-    id: 'opp-1',
-    title: 'Software Engineer Intern',
-    company: 'Google',
-    score: 92,
-    location: 'Remote',
-    type: 'Internship',
-    category: 'Engineering',
-    tags: ['Next.js', 'TypeScript', 'Redux']
-  },
-  {
-    id: 'opp-2',
-    title: 'Frontend React Developer',
-    company: 'Vercel',
-    score: 88,
-    location: 'Hybrid (New York)',
-    type: 'Full-time',
-    category: 'Engineering',
-    tags: ['React', 'Next.js', 'Tailwind']
-  },
-  {
-    id: 'opp-3',
-    title: 'UI/UX Design Specialist',
-    company: 'Figma',
-    score: 85,
-    location: 'Hybrid (San Francisco)',
-    type: 'Full-time',
-    category: 'Design',
-    tags: ['Figma', 'UI Design', 'Design Systems']
-  },
-  {
-    id: 'opp-4',
-    title: 'Junior Product Manager',
-    company: 'Stripe',
-    score: 79,
-    location: 'Onsite (Chicago)',
-    type: 'Full-time',
-    category: 'Product',
-    tags: ['Agile', 'Jira', 'Analytics']
-  }
-];
+const MOCK_OPPORTUNITIES = [];
 
 export default function InteractiveFormSearchWidget() {
   // ATS Checklist state

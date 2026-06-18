@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom';
 import { FileEdit, Search, Bot, Target, Users, BarChart3, ArrowRight } from 'lucide-react';
 
 const actions = [
-  { icon: FileEdit,   label: 'Improve Resume',    sub: 'Optimize your ATS score',    path: '/resume-review', color: 'indigo' },
+  { icon: FileEdit,   label: 'Create Resume',      sub: 'Build your profile',          path: '/resume-builder',  color: 'indigo' },
   { icon: Search,     label: 'Find Opportunities', sub: 'Discover top matches',        path: '/opportunities',   color: 'violet' },
-  { icon: Bot,        label: 'AI Resume Review',   sub: 'Get AI-powered feedback',     path: '/resume-review', color: 'violet' },
+  { icon: Bot,        label: 'Analyze Resume',     sub: 'Get AI-powered feedback',     path: '/resume-review',   color: 'violet' },
   { icon: Target,     label: 'Career Coach',       sub: 'Plan your next steps',        path: '/career-coach',  color: 'emerald' },
   { icon: Users,      label: 'Build Team',          sub: 'Connect with peers',          path: '/team-finder',   color: 'amber' },
   { icon: BarChart3,  label: 'View Analytics',     sub: 'Track your progress',         path: '/analytics',     color: 'rose' },

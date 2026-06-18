@@ -4,9 +4,11 @@ import { useResumeHistory } from './useResumeHistory';
 import { useApplications } from '../contexts/ApplicationContext';
 import { useTeam } from '../contexts/TeamContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useProfile } from '../contexts/ProfileContext';
 import { geminiService } from '../services/geminiService';
 import { db } from '../config/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useNotifications } from '../contexts/NotificationContext';
 
 const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
@@ -16,6 +18,8 @@ export function useGeminiSkillGap(opportunity) {
   const { applications } = useApplications();
   const { teams } = useTeam();
   const { user } = useAuth();
+  const { profile, mergeProfileData } = useProfile();
+  const { addNotification } = useNotifications();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -56,7 +60,7 @@ export function useGeminiSkillGap(opportunity) {
         type: opportunity.type,
       },
       user: {
-        skills: user.skills || [],
+        skills: profile?.extractedSkills || user.skills || [],
         interests: user.interests || [],
         goals: user.goals || [],
       },
@@ -92,6 +96,19 @@ export function useGeminiSkillGap(opportunity) {
           recommendations: results.recommendations || [],
           reasoning: results.reasoning || ""
         }).catch(err => console.error("Firebase save failed", err));
+
+        if (results.missingSkills?.length > 0) {
+          await mergeProfileData({ missingSkills: results.missingSkills });
+        }
+
+        if (!cachedString) {
+          addNotification({
+            title: 'Skill Gap Analysis Ready',
+            message: `Analysis completed for ${opportunity.title} at ${opportunity.company}.`,
+            type: 'System',
+            targetUrl: '/skill-gap'
+          });
+        }
       }
     } catch (err) {
       console.error("Skill Gap Analysis Error:", err);

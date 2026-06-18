@@ -3,7 +3,7 @@ import { corsHeaders } from "../_shared/cors.ts";
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -21,7 +21,7 @@ serve(async (req) => {
     }
 
     let prompt = '';
-    const parts = [];
+    const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
 
     // Route actions to specific prompts
     if (action === 'analyzeResume') {
@@ -30,7 +30,7 @@ Act as an expert technical recruiter and Applicant Tracking System (ATS) evaluat
 Analyze the following candidate resume.
 
 Return ONLY a valid JSON object matching exactly this schema, and nothing else (do not wrap in markdown \`\`\`json):
-{
+{ 
   "atsScore": number (0-100),
   "summary": "A 2-3 sentence overarching summary of their profile",
   "strengths": ["string", "string"],
@@ -140,9 +140,9 @@ Return ONLY a valid JSON object matching exactly this schema, and nothing else (
 `;
       parts.push({ text: prompt });
     } else if (action === 'copilotChat') {
-      const { mode, contextData, history, message } = payload;
-      
-      const systemInstruction = mode === 'student' 
+      const { mode, contextData, message } = payload;
+
+      const systemInstruction = mode === 'student'
         ? "You are the OpportunityOS Copilot, an expert AI assistant for students. Use the provided Student Context to answer their career, resume, and application questions. Be helpful, concise, and highly specific to their data."
         : "You are the OpportunityOS Copilot, an expert AI assistant for employers. Use the provided Employer Context to answer questions about candidates, job postings, and recruitment strategies. Be helpful, analytical, and concise.";
 
@@ -164,14 +164,14 @@ Return ONLY a valid JSON object matching exactly this schema, and nothing else (
       throw new Error(`Unsupported action: ${action}`);
     }
 
-    let requestBody: any = {
+    let requestBody: Record<string, unknown> = {
       contents: [],
       generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
     };
 
     if (action === 'copilotChat' && payload.history && Array.isArray(payload.history)) {
       // Add history
-      const formattedHistory = payload.history.map((msg: any) => ({
+      const formattedHistory = payload.history.map((msg: { role: string; content: string }) => ({
         role: msg.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: msg.content }]
       }));
@@ -188,7 +188,7 @@ Return ONLY a valid JSON object matching exactly this schema, and nothing else (
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData?.error?.message || \`Gemini API Error: \${response.status}\`);
+      throw new Error(errorData?.error?.message || `Gemini API Error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -199,11 +199,11 @@ Return ONLY a valid JSON object matching exactly this schema, and nothing else (
     }
 
     // Clean Markdown wrapper if present and attempt parse to validate
-    const cleanedText = rawText.replace(/^\\s*\`\`\`json/m, '').replace(/\`\`\`\\s*$/m, '').trim();
+    const cleanedText = rawText.replace(/^\s*```json/m, '').replace(/```\s*$/m, '').trim();
     let jsonResult;
     try {
       jsonResult = JSON.parse(cleanedText);
-    } catch (parseError) {
+    } catch {
       throw new Error('Gemini returned malformed JSON.');
     }
 
@@ -212,9 +212,10 @@ Return ONLY a valid JSON object matching exactly this schema, and nothing else (
       status: 200,
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Edge Function Error:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Internal Server Error' }), {
+    const errorMessage = error instanceof Error ? error.message : 'Internal Server Error';
+    return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
     });

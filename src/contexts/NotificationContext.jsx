@@ -26,7 +26,7 @@ export function NotificationProvider({ children }) {
     const qWithOrder = query(
       collection(db, 'notifications'),
       where('userId', '==', user.id),
-      orderBy('timestamp', 'desc')
+      orderBy('createdAt', 'desc')
     );
 
     let fallbackUnsubscribe;
@@ -34,7 +34,7 @@ export function NotificationProvider({ children }) {
     const unsubscribe = onSnapshot(qWithOrder, (snapshot) => {
       // Show toast for newly added ones if it's not the initial load
       snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added' && !loading && !change.doc.data().isRead) {
+        if (change.type === 'added' && !loading && !change.doc.data().read) {
           toast(change.doc.data().title, { icon: '🔔' });
         }
       });
@@ -42,7 +42,7 @@ export function NotificationProvider({ children }) {
       const fetched = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        timestamp: doc.data().timestamp?.toDate().toISOString() || new Date().toISOString()
+        createdAt: doc.data().createdAt?.toDate().toISOString() || new Date().toISOString()
       }));
       setNotifications(fetched);
       setLoading(false);
@@ -55,8 +55,8 @@ export function NotificationProvider({ children }) {
           const fetched = fallbackSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
-            timestamp: doc.data().timestamp?.toDate().toISOString() || new Date().toISOString()
-          })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            createdAt: doc.data().createdAt?.toDate().toISOString() || new Date().toISOString()
+          })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
           setNotifications(fetched);
           setLoading(false);
         });
@@ -71,13 +71,13 @@ export function NotificationProvider({ children }) {
     };
   }, [user, loading]);
 
-  const getUnreadCount = () => notifications.filter(n => !n.isRead).length;
+  const getUnreadCount = () => notifications.filter(n => !n.read).length;
 
   const markAsRead = async (id) => {
     if (!user) return;
     try {
       const ref = doc(db, 'notifications', id);
-      await updateDoc(ref, { isRead: true });
+      await updateDoc(ref, { read: true });
     } catch (err) {
       console.error('Failed to mark notification as read:', err);
     }
@@ -85,14 +85,14 @@ export function NotificationProvider({ children }) {
 
   const markAllAsRead = async () => {
     if (!user) return;
-    const unread = notifications.filter(n => !n.isRead);
+    const unread = notifications.filter(n => !n.read);
     if (unread.length === 0) return;
 
     try {
       const batch = writeBatch(db);
       unread.forEach(n => {
         const ref = doc(db, 'notifications', n.id);
-        batch.update(ref, { isRead: true });
+        batch.update(ref, { read: true });
       });
       await batch.commit();
     } catch (err) {
@@ -128,12 +128,12 @@ export function NotificationProvider({ children }) {
     try {
       await addDoc(collection(db, 'notifications'), {
         userId: user.id,
-        category: notification.category || 'System',
+        type: notification.type || 'System',
         title: notification.title,
         message: notification.message,
         targetUrl: notification.targetUrl || null,
-        isRead: false,
-        timestamp: serverTimestamp()
+        read: false,
+        createdAt: serverTimestamp()
       });
     } catch (err) {
       console.error('Failed to add notification:', err);

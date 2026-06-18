@@ -24,7 +24,7 @@ export default function SecurityCard() {
         </button>
 
         {/* Row 2 */}
-        <button className="w-full flex items-center justify-between py-5 border-b border-slate-100 hover:bg-slate-50 px-2 -mx-2 rounded-lg transition-colors group">
+        <button className="w-full flex items-center justify-be  tween py-5 border-b border-slate-100 hover:bg-slate-50 px-2 -mx-2 rounded-lg transition-colors group">
           <div className="text-left">
             <h3 className="text-[14px] font-bold text-slate-900">Two-Factor Authentication</h3>
             <p className="text-[13px] text-slate-500 mt-0.5">Add an extra layer of security</p>

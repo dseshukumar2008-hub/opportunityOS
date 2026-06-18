@@ -43,7 +43,7 @@ export default function NetworkDirectoryPage() {
   const [selectedBranch, setSelectedBranch] = useState('');
   const [selectedSkill, setSelectedSkill] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
-  
+
   const [visibleCount, setVisibleCount] = useState(12);
 
   // Exclude current user from directory
@@ -115,6 +115,7 @@ export default function NetworkDirectoryPage() {
     setSelectedBranch('');
     setSelectedSkill('');
     setSelectedYear('');
+
   };
 
   return (

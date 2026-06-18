@@ -17,7 +17,9 @@ function StatPill({ label, value, color }) {
 export default function CareerHealthWidget() {
   const { careerReadiness, profileCompletion, applicationInsights, isLoading: isDashboardLoading } = useDashboardInsights();
   const { atsScore, hasInsights } = useResumeInsights();
-  const { roadmapData, isLoading: isRoadmapLoading } = useCareerRoadmap();
+  const { state: roadmapState } = useCareerRoadmap();
+  const isRoadmapLoading = roadmapState.status === 'idle' || roadmapState.status === 'loading';
+  const roadmapData      = roadmapState.roadmap;
   
   const isLoading = isDashboardLoading || isRoadmapLoading;
 

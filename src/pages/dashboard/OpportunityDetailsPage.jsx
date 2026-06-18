@@ -433,18 +433,18 @@ export default function OpportunityDetailsPage() {
             </div>
 
             {/* Match Score Card */}
-            <div className="bg-gradient-to-br from-[#6C4CF1] to-indigo-800 rounded-[20px] shadow-lg p-6 text-white relative overflow-hidden">
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-              <div className="relative z-10 flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-full border-4 border-white/20 flex items-center justify-center mb-3 relative">
-                  <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90 absolute top-0 left-0">
-                    <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="rgba(255,255,255,0.2)" strokeWidth="4" />
-                    <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="#fff" strokeWidth="4" strokeDasharray={`${opportunity.matchScore || 0} ${100 - (opportunity.matchScore || 0)}`} strokeDashoffset="0" />
-                  </svg>
-                  <span className="text-[18px] font-extrabold">{opportunity.matchScore || 0}%</span>
-                </div>
-                <h3 className="text-[16px] font-bold mb-1">Great Match!</h3>
-                <p className="text-[13px] text-white/80 font-medium">Your profile matches this opportunity perfectly.</p>
+            <div className="bg-gradient-to-br from-[#6C4CF1] to-indigo-800 rounded-xl shadow-md p-4 text-white relative overflow-hidden flex items-center gap-4">
+              <div className="absolute -top-10 -right-10 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+              <div className="w-12 h-12 shrink-0 rounded-full border-[2.5px] border-white/20 flex items-center justify-center relative z-10">
+                <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90 absolute top-0 left-0">
+                  <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="rgba(255,255,255,0.2)" strokeWidth="2.5" />
+                  <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="#fff" strokeWidth="2.5" strokeDasharray={`${opportunity.matchScore || 0} ${100 - (opportunity.matchScore || 0)}`} strokeDashoffset="0" />
+                </svg>
+                <span className="text-[13px] font-bold">{opportunity.matchScore || 0}%</span>
+              </div>
+              <div className="flex-1 min-w-0 relative z-10">
+                <h3 className="text-[14px] font-bold mb-0.5 truncate">Great Match!</h3>
+                <p className="text-[12px] text-white/80 font-medium leading-tight line-clamp-2">Your profile matches this opportunity perfectly.</p>
               </div>
             </div>
 

@@ -13,6 +13,8 @@ import { useLiveOpportunities } from '../../hooks/useLiveOpportunities';
 import OpportunityCard from '../../components/opportunities/OpportunityCard';
 import RecommendedForYouSection from '../../components/opportunities/RecommendedForYouSection';
 import Skeleton from '../../components/ui/Skeleton';
+import SubmitOpportunityModal from '../../components/opportunities/SubmitOpportunityModal';
+import { PlusCircle } from 'lucide-react';
 
 export default function OpportunitiesPage() {
   const navigate = useNavigate();
@@ -20,6 +22,8 @@ export default function OpportunitiesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const { opportunities: liveOpportunities, isLoading } = useLiveOpportunities();
 
+  const [activeTab, setActiveTab] = useState('All');
+  const tabs = ['All', 'Jobs', 'Internships', 'Hackathons', 'Competitions', 'Scholarships'];
   
   // Filter states
   const [selectedTypes, setSelectedTypes] = useState([]);
@@ -27,6 +31,7 @@ export default function OpportunitiesPage() {
   const [selectedDurations, setSelectedDurations] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
 
 
   
@@ -57,7 +62,7 @@ export default function OpportunitiesPage() {
       title: 'Opportunity Type',
       state: selectedTypes,
       setState: setSelectedTypes,
-      options: ['Full-Time', 'Internship']
+      options: ['Job', 'Internship', 'Hackathon', 'Competition', 'Scholarship']
     },
     {
       id: 'location',
@@ -102,15 +107,18 @@ export default function OpportunitiesPage() {
   // Filter Logic
   const filteredOpportunities = useMemo(() => {
     return liveOpportunities.filter(opp => {
-      const query = searchQuery.toLowerCase();
+      const query = searchQuery ? searchQuery.toLowerCase() : '';
       const matchesSearch = !query || 
-        opp.title.toLowerCase().includes(query) || 
-        opp.company.toLowerCase().includes(query) || 
-        (opp.tags && opp.tags.some(tag => tag.label.toLowerCase().includes(query)));
+        (opp.title && opp.title.toLowerCase().includes(query)) || 
+        (opp.company && opp.company.toLowerCase().includes(query)) || 
+        (opp.tags && Array.isArray(opp.tags) && opp.tags.some(tag => tag?.label?.toLowerCase().includes(query)));
 
+      const mappedTabType = activeTab.endsWith('s') ? activeTab.slice(0, -1) : activeTab;
+      const matchesTab = activeTab === 'All' || opp.type === mappedTabType;
+      
       const matchesType = selectedTypes.length === 0 || selectedTypes.includes(opp.type);
       
-      const isRemote = opp.location.toLowerCase().includes('remote');
+      const isRemote = opp.location ? opp.location.toLowerCase().includes('remote') : false;
       let matchesLocation = true;
       if (selectedLocations.length > 0) {
         if (selectedLocations.includes('Remote') && isRemote) matchesLocation = true;
@@ -118,9 +126,9 @@ export default function OpportunitiesPage() {
         else matchesLocation = false;
       }
       
-      return matchesSearch && matchesType && matchesLocation;
+      return matchesSearch && matchesTab && matchesType && matchesLocation;
     });
-  }, [liveOpportunities, searchQuery, selectedTypes, selectedLocations]);
+  }, [liveOpportunities, searchQuery, activeTab, selectedTypes, selectedLocations]);
 
   return (
     <div className="max-w-[1600px] mx-auto flex flex-col h-full relative p-4 lg:p-6">
@@ -131,6 +139,23 @@ export default function OpportunitiesPage() {
       <div className="mb-6">
         <h1 className="page-header">Opportunities</h1>
         <p className="page-subheader mt-0">Discover internships, hackathons, scholarships and competitions tailored for you.</p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex overflow-x-auto gap-2 mb-6 pb-2 hide-scrollbar">
+        {tabs.map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-5 py-2.5 rounded-full text-[14px] font-bold whitespace-nowrap transition-colors ${
+              activeTab === tab
+                ? 'bg-[#6C4CF1] text-white shadow-md'
+                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
       </div>
 
       {/* Header Actions */}
@@ -147,6 +172,13 @@ export default function OpportunitiesPage() {
           />
         </div>
         <div className="flex gap-3 shrink-0">
+          <button 
+            onClick={() => setIsSubmitModalOpen(true)}
+            className="px-4 py-3 bg-[#F4F2FF] text-[#6C4CF1] font-bold rounded-xl text-[14px] hover:bg-indigo-100 transition-colors flex items-center gap-2"
+          >
+            <PlusCircle size={18} />
+            Submit Opportunity
+          </button>
           <button 
             onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
             aria-expanded={isMobileFiltersOpen}

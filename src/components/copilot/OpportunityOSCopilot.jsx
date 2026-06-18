@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { geminiService } from '../../services/geminiService';
 import ReactMarkdown from 'react-markdown';
 import toast from 'react-hot-toast';
+import { analyticsService } from '../../services/analyticsService';
 
 export default function OpportunityOSCopilot({ mode = 'student', contextData }) {
   const { user } = useAuth();
@@ -98,6 +99,7 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
 
     const userText = input.trim();
     setInput('');
+    analyticsService.trackEvent('Message Sent', { mode, messageLength: userText.length });
     
     // Optimistic UI
     const tempUserMsg = { id: Date.now().toString(), role: 'user', content: userText };
@@ -179,7 +181,10 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
     <>
       {/* Floating Button */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setIsOpen(true);
+          analyticsService.trackEvent('Chat Started', { mode });
+        }}
         aria-expanded={isOpen}
         aria-label="Toggle Copilot"
         className={`fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-[#6C4CF1] to-[#8b73f5] rounded-full shadow-lg shadow-indigo-500/30 flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all z-40 ${isOpen ? 'opacity-0 pointer-events-none translate-y-4' : 'opacity-100 translate-y-0'}`}

@@ -101,15 +101,15 @@ export default function UserProfilePage() {
 
   // Resolve which user we're viewing
   const isOwnProfile = !userId || userId === 'me' || userId === user?.id || userId === user?.email;
-  
+
   useEffect(() => {
     if (isOwnProfile) {
       setViewedProfile(ownProfile);
     } else {
       // User lookup first, if not found then Supabase fetch
-      const mock = allUsers.find(u => u.id === userId);
-      if (mock) {
-        setViewedProfile(mock);
+      const directoryUser = allUsers.find(u => u.id === userId);
+      if (directoryUser) {
+        setViewedProfile(directoryUser);
       } else {
         fetchUserProfile(userId).then(res => {
           if (res.data) setViewedProfile(res.data);
@@ -119,7 +119,7 @@ export default function UserProfilePage() {
   }, [isOwnProfile, ownProfile, userId]);
 
   // For other users, look them up; for own profile use auth user
-  const viewedMockUser = !isOwnProfile ? allUsers.find(u => u.id === userId) : null;
+  const viewedDirectoryUser = !isOwnProfile ? allUsers.find(u => u.id === userId) : null;
 
   // Connection state for the viewed user
   const targetUserId = isOwnProfile ? null : userId;
@@ -130,7 +130,7 @@ export default function UserProfilePage() {
 
   const handleConnect = () => {
     if (!targetUserId) return;
-    const p = viewedMockUser || viewedProfile || { name: userId };
+    const p = viewedDirectoryUser || viewedProfile || { name: userId };
     sendConnectionRequest(targetUserId);
     addNotification({
       category: 'Connections',
@@ -141,7 +141,7 @@ export default function UserProfilePage() {
 
   const handleAccept = () => {
     if (!incomingRequestId) return;
-    const p = viewedMockUser || viewedProfile || { name: userId };
+    const p = viewedDirectoryUser || viewedProfile || { name: userId };
     acceptConnectionRequest(incomingRequestId);
     addNotification({
       category: 'Connections',
@@ -163,7 +163,7 @@ export default function UserProfilePage() {
   const handleDisconnect = () => {
     const conn = connections.find(
       c => (c.userId1 === (user?.id || 'me') && c.userId2 === targetUserId) ||
-           (c.userId1 === targetUserId && c.userId2 === (user?.id || 'me'))
+        (c.userId1 === targetUserId && c.userId2 === (user?.id || 'me'))
     );
     if (conn) removeConnection(conn.id);
   };
@@ -171,22 +171,22 @@ export default function UserProfilePage() {
   // ── Pull all data from contexts ─────────────────────────────
   const pi = resumeData.personalInfo;
 
-  const location      = pi.location                    || 'India';
-  const github        = pi.github;
-  const linkedin      = pi.linkedin;
-  const portfolio     = pi.portfolio;
+  const location = pi.location || 'India';
+  const github = pi.github;
+  const linkedin = pi.linkedin;
+  const portfolio = pi.portfolio;
 
   // Profile fields from AuthContext (set via ProfilePage)
-  const fullName      = viewedProfile?.full_name || pi.fullName    || user?.name   || 'Your Name';
-  const college       = viewedProfile?.education?.[0]?.institution || viewedProfile?.college || 'NIAT';
-  const branch        = viewedProfile?.education?.[0]?.field || viewedProfile?.branch || 'Computer Science Engineering';
-  const gradYear      = viewedProfile?.education?.[0]?.endYear || viewedProfile?.expectedGraduation  || '2029';
-  const bio           = viewedProfile?.bio || 'Passionate Computer Science student building impactful web applications. Open to collaborations, hackathons, and innovative projects.';
-  const skillsStr     = viewedProfile?.skills?.join(', ') || 'React, JavaScript, Python, HTML, CSS, Node.js';
-  const headline      = viewedProfile?.headline || `${branch} Student | Full Stack Developer`;
+  const fullName = viewedProfile?.full_name || pi.fullName || user?.name || 'Your Name';
+  const college = viewedProfile?.education?.[0]?.institution || viewedProfile?.college || 'NIAT';
+  const branch = viewedProfile?.education?.[0]?.field || viewedProfile?.branch || 'Computer Science Engineering';
+  const gradYear = viewedProfile?.education?.[0]?.endYear || viewedProfile?.expectedGraduation || '2029';
+  const bio = viewedProfile?.bio || 'Passionate Computer Science student building impactful web applications. Open to collaborations, hackathons, and innovative projects.';
+  const skillsStr = viewedProfile?.skills?.join(', ') || 'React, JavaScript, Python, HTML, CSS, Node.js';
+  const headline = viewedProfile?.headline || `${branch} Student | Full Stack Developer`;
 
   const skillsList = skillsList => skillsList.split(',').map(s => s.trim()).filter(Boolean);
-  const skills = isOwnProfile && resumeData.skills.length > 0
+  const skills = isOwnProfile && (resumeData.skills ?? []).length > 0
     ? resumeData.skills
     : viewedProfile?.skills?.map(s => ({ name: s })) || skillsList(skillsStr).map(s => ({ name: s }));
 
@@ -195,7 +195,7 @@ export default function UserProfilePage() {
 
   // ── Activity feed from ActivityContext ───────────────────────
   const [activityFilter, setActivityFilter] = useState('All');
-  
+
   const allActivities = getUserActivities(isOwnProfile ? currentUserId : targetUserId);
   const activities = allActivities.filter(a => activityFilter === 'All' || a.category === activityFilter).slice(0, 5);
 
@@ -350,7 +350,7 @@ export default function UserProfilePage() {
               <div className="flex items-center gap-3 mt-5 flex-wrap">
                 {linkedin && (
                   <a href={linkedin} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-[#6C4CF1] transition-colors">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg> LinkedIn
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg> LinkedIn
                   </a>
                 )}
                 {github && (
@@ -376,10 +376,10 @@ export default function UserProfilePage() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <StatCard icon={Briefcase}  label="Opportunities Applied" value={(applications || []).length}          color="bg-blue-50 text-blue-600" />
-              <StatCard icon={Users}      label="Teams Joined"          value={myTeams.length}               color="bg-emerald-50 text-emerald-600" />
-              <StatCard icon={Link2}      label="Connections"           value={isOwnProfile ? myConnectionCount : viewedUserConnectionCount}  color="bg-amber-50 text-amber-600" />
-              <StatCard icon={Star}       label="Resume Score"          value={`${resumeScore}%`}             color="bg-purple-50 text-purple-600" />
+              <StatCard icon={Briefcase} label="Opportunities Applied" value={(applications || []).length} color="bg-blue-50 text-blue-600" />
+              <StatCard icon={Users} label="Teams Joined" value={myTeams.length} color="bg-emerald-50 text-emerald-600" />
+              <StatCard icon={Link2} label="Connections" value={isOwnProfile ? myConnectionCount : viewedUserConnectionCount} color="bg-amber-50 text-amber-600" />
+              <StatCard icon={Star} label="Resume Score" value={`${resumeScore}%`} color="bg-purple-50 text-purple-600" />
             </div>
 
             {/* About */}
@@ -400,17 +400,17 @@ export default function UserProfilePage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-[13px] text-slate-400 font-medium">No skills added yet. Update your Resume Builder.</p>
+                <p className="text-[13px] text-slate-400 font-medium">No skills added yet. Update your Create Resume tool.</p>
               )}
             </Card>
 
             {/* Projects */}
-            {resumeData.projects.length > 0 && (
+            {(resumeData.projects ?? []).length > 0 && (
               <Card>
                 <SectionHeader icon={Zap} title="Projects" />
                 <div className="flex flex-col gap-5">
-                  {resumeData.projects.map((proj, i) => (
-                    <div key={proj.id || i} className={`${i < resumeData.projects.length - 1 ? 'pb-5 border-b border-slate-100' : ''}`}>
+                  {(resumeData.projects ?? []).map((proj, i) => (
+                    <div key={proj.id || i} className={`${i < (resumeData.projects ?? []).length - 1 ? 'pb-5 border-b border-slate-100' : ''}`}>
                       <div className="flex items-start justify-between gap-2 mb-1.5">
                         <h3 className="text-[15px] font-bold text-slate-900">{proj.name || proj.title}</h3>
                         {(proj.link || proj.github) && (
@@ -441,12 +441,12 @@ export default function UserProfilePage() {
             )}
 
             {/* Certifications */}
-            {resumeData.certifications.length > 0 && (
+            {(resumeData.certifications ?? []).length > 0 && (
               <Card>
                 <SectionHeader icon={Award} title="Certifications" />
                 <div className="flex flex-col gap-4">
-                  {resumeData.certifications.map((cert, i) => (
-                    <div key={cert.id || i} className={`flex items-start gap-4 ${i < resumeData.certifications.length - 1 ? 'pb-4 border-b border-slate-100' : ''}`}>
+                  {(resumeData.certifications ?? []).map((cert, i) => (
+                    <div key={cert.id || i} className={`flex items-start gap-4 ${i < (resumeData.certifications ?? []).length - 1 ? 'pb-4 border-b border-slate-100' : ''}`}>
                       <div className="w-10 h-10 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center shrink-0">
                         <Award size={18} />
                       </div>
@@ -472,18 +472,17 @@ export default function UserProfilePage() {
                     <button
                       key={filter}
                       onClick={() => setActivityFilter(filter)}
-                      className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors ${
-                        activityFilter === filter
+                      className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors ${activityFilter === filter
                           ? 'bg-[#6C4CF1] text-white'
                           : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
-                      }`}
+                        }`}
                     >
                       {filter}
                     </button>
                   ))}
                 </div>
               </div>
-              
+
               {activities.length > 0 ? (
                 <div className="flex flex-col gap-3">
                   {activities.map(act => {
@@ -518,12 +517,12 @@ export default function UserProfilePage() {
           <div className="flex flex-col gap-6">
 
             {/* Education */}
-            {resumeData.education.length > 0 ? (
+            {(resumeData.education ?? []).length > 0 ? (
               <Card>
                 <SectionHeader icon={GraduationCap} title="Education" />
                 <div className="flex flex-col gap-5">
-                  {resumeData.education.map((edu, i) => (
-                    <div key={edu.id || i} className={i < resumeData.education.length - 1 ? 'pb-5 border-b border-slate-100' : ''}>
+                  {(resumeData.education ?? []).map((edu, i) => (
+                    <div key={edu.id || i} className={i < (resumeData.education ?? []).length - 1 ? 'pb-5 border-b border-slate-100' : ''}>
                       <p className="text-[14px] font-bold text-slate-900">{edu.institution || edu.school}</p>
                       <p className="text-[12px] font-semibold text-[#6C4CF1] mt-0.5">{edu.degree}{edu.field ? ` · ${edu.field}` : ''}</p>
                       <p className="text-[11px] font-medium text-slate-400 mt-0.5">
@@ -598,7 +597,7 @@ export default function UserProfilePage() {
                     {resumeScore >= 80 ? 'Excellent' : resumeScore >= 60 ? 'Good' : resumeScore >= 40 ? 'Fair' : 'Needs Work'}
                   </p>
                   <p className="text-[12px] font-medium text-slate-500 leading-relaxed">
-                    {resumeScore < 80 ? 'Complete more sections in Resume Builder to improve your score.' : 'Your profile is strong and ready to impress recruiters!'}
+                    {resumeScore < 80 ? 'Complete more sections in Create Resume to improve your score.' : 'Your profile is strong and ready to impress recruiters!'}
                   </p>
                 </div>
               </div>

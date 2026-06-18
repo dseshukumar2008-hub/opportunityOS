@@ -1,19 +1,21 @@
 import { useState } from 'react';
 import { useResumeAnalysis } from '../../hooks/useResumeAnalysis';
-import { useResume } from '../../contexts/ResumeContext';
 import { useResumeHistory } from '../../hooks/useResumeHistory';
+import { useResume } from '../../contexts/ResumeContext';
+import { useMatchResume } from '../../hooks/useMatchResume';
 import ResumeUploadZone from '../../components/resume/ResumeUploadZone';
 import ResumeAnalysisResults from '../../components/resume/ResumeAnalysisResults';
 import ResumeSmartSuggestions from '../../components/resume/ResumeSmartSuggestions';
 import ResumeHistory from '../../components/resume/ResumeHistory';
-import { Bot, Sparkles, FileText, ArrowRight, Activity, CheckCircle2, History } from 'lucide-react';
+import { Bot, Sparkles, FileText, Activity, CheckCircle2, History } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ResumeReviewPage() {
   const [activeTab, setActiveTab] = useState('Review');
   const { analyzeResume, resetAnalysis, isAnalyzing, analysisResults, error } = useResumeAnalysis();
-  const { resumeData } = useResume();
   const { history, addHistory, getBestVersion, compareVersions } = useResumeHistory();
+  const { resumeData, activeResumeId } = useResume();
+  const { matchResume } = useMatchResume();
 
   const handleAnalyzeFile = async (file) => {
     const results = await analyzeResume(file);
@@ -26,11 +28,33 @@ export default function ResumeReviewPage() {
     }
   };
 
-  const handleAnalyzeProfile = async () => {
-    const results = await analyzeResume(resumeData);
+  const handleAnalyzeExisting = async () => {
+    let payload = '';
+    let name = 'Built Resume';
+
+    if (matchResume?.resume_text) {
+      payload = matchResume.resume_text;
+      name = matchResume.resume_file_name || 'Uploaded Resume';
+    } else if (activeResumeId && resumeData) {
+      // Build text from resumeData
+      payload += `Name: ${resumeData.personalInfo?.fullName || ''}\n`;
+      payload += `Email: ${resumeData.personalInfo?.email || ''}\n`;
+      if (resumeData.skills?.length) payload += `Skills: ${resumeData.skills.join(', ')}\n`;
+      if (resumeData.experience?.length) {
+        payload += `Experience:\n`;
+        resumeData.experience.forEach(e => { payload += `- ${e.title} at ${e.company}\n`; });
+      }
+    }
+
+    if (!payload) {
+      toast.error('No existing resume found to analyze.');
+      return;
+    }
+
+    const results = await analyzeResume(payload);
     if (results) {
       toast.success('Analysis complete!');
-      addHistory(results, 'OpportunityOS Profile');
+      addHistory(results, name);
       setActiveTab('ATS Score');
     } else {
       toast.error(error || 'Analysis failed. Please try again.');
@@ -96,34 +120,22 @@ export default function ResumeReviewPage() {
             <>
               {!isAnalyzing && (
                 <div className="max-w-2xl mx-auto space-y-6">
-                  {/* Analyze Profile Box */}
-                  <div className="bg-gradient-to-br from-[#6C4CF1] to-[#4F46E5] rounded-2xl shadow-md p-6 sm:p-8 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                    <div>
-                      <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-                        <FileText size={20} />
-                        Analyze Your Profile
-                      </h3>
-                      <p className="text-indigo-100 text-sm font-medium max-w-sm">
-                        Instantly calculate your ATS score and get actionable feedback based on the resume you built in OpportunityOS.
-                      </p>
-                    </div>
-                    <button
-                      onClick={handleAnalyzeProfile}
-                      className="bg-white text-indigo-600 hover:bg-slate-50 font-bold px-6 py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 shrink-0 group"
-                    >
-                      Analyze Now
-                      <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  </div>
 
-                  <div className="flex items-center gap-4 text-slate-400">
-                    <div className="flex-1 h-px bg-slate-200"></div>
-                    <span className="text-xs font-bold uppercase tracking-wider">OR</span>
-                    <div className="flex-1 h-px bg-slate-200"></div>
-                  </div>
 
                   {/* Upload Zone */}
                   <ResumeUploadZone onAnalyze={handleAnalyzeFile} />
+
+                  {(matchResume || activeResumeId) && (
+                    <div className="mt-6 flex flex-col items-center justify-center p-6 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                      <p className="text-sm text-slate-600 mb-3 font-medium">We found an existing resume in your profile.</p>
+                      <button
+                        onClick={handleAnalyzeExisting}
+                        className="bg-[#6C4CF1] hover:bg-[#5a3dd9] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors flex items-center gap-2"
+                      >
+                        <Sparkles size={16} /> Analyze Existing Resume
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 

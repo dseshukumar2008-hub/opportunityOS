@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { opportunityAggregator } from '../services/opportunityAggregator';
+import { useUserProfile } from './useUserProfile';
 
 export function useLiveOpportunities() {
+  const { profile } = useUserProfile();
   const [opportunities, setOpportunities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,7 +15,8 @@ export function useLiveOpportunities() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await opportunityAggregator.getOpportunities();
+      const preferredLocs = profile?.preferredLocations || [];
+      const data = await opportunityAggregator.getOpportunities(preferredLocs);
       setOpportunities(data);
     } catch (err) {
       console.error('Error fetching live opportunities:', err);
@@ -21,7 +24,7 @@ export function useLiveOpportunities() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [profile?.preferredLocations]);
 
   useEffect(() => {
     fetchOpportunities();

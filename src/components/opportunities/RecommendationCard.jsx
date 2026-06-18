@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Clock, Bookmark, CheckCircle2, AlertCircle } from 'lucide-react';
+import { MapPin, Clock, Bookmark, CheckCircle2, AlertCircle, Building2, Code, Trophy, GraduationCap } from 'lucide-react';
 import OpportunityMatchBadge from './OpportunityMatchBadge';
 
 export default function RecommendationCard({ opp, isSaved, onSave, onApply }) {
@@ -11,18 +12,33 @@ export default function RecommendationCard({ opp, isSaved, onSave, onApply }) {
   const matchedSkillsCount = matchData?.matchedSkillsCount || 0;
   const totalSkillsCount = matchData?.totalSkillsCount || 0;
 
+  const [imgError, setImgError] = useState(false);
+
+  const getFallbackIcon = () => {
+    switch(opp.type?.toLowerCase()) {
+      case 'hackathon': return <Code size={24} className="text-slate-400" />;
+      case 'competition': return <Trophy size={24} className="text-slate-400" />;
+      case 'scholarship': return <GraduationCap size={24} className="text-slate-400" />;
+      default: return <Building2 size={24} className="text-slate-400" />;
+    }
+  };
+
   return (
     <div className="bg-white rounded-[20px] border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:border-[#6C4CF1]/30 transition-all duration-300 p-6 flex flex-col relative h-full">
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex gap-4 items-start">
           <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 p-2.5 shrink-0 flex items-center justify-center overflow-hidden shadow-sm">
-            <img 
-              src={opp.logo} 
-              alt={opp.company} 
-              className="w-full h-full object-contain"
-              onError={(e) => { e.target.src = "/placeholder-company-logo.png"; }}
-            />
+            {!imgError && opp.logo ? (
+              <img 
+                src={opp.logo} 
+                alt={opp.company} 
+                className="w-full h-full object-contain"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              getFallbackIcon()
+            )}
           </div>
           <div>
             <h3 className="text-[16px] font-bold text-slate-900 leading-snug mb-1 line-clamp-2">{opp.title}</h3>
@@ -54,9 +70,11 @@ export default function RecommendationCard({ opp, isSaved, onSave, onApply }) {
             <MapPin size={14} className="text-slate-400" />
             <span className="line-clamp-1">{opp.location || 'Location Not Specified'}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-indigo-500 font-bold px-2 py-0.5 bg-indigo-50 rounded text-[11px] uppercase tracking-wider">{opp.source || 'JSearch'}</span>
-          </div>
+          {opp.source && opp.source !== 'MockSeeder' && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-indigo-500 font-bold px-2 py-0.5 bg-indigo-50 rounded text-[11px] uppercase tracking-wider">{opp.source}</span>
+            </div>
+          )}
         </div>
       </div> 
 

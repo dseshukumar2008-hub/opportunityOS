@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
+import { getUserFirstName } from '../../utils/userUtils';
 
 export default function DailyDigestStrip() {
   const { user } = useAuth();
   const { recommendedOpportunities, applicationInsights, isLoading } = useDashboardInsights();
 
-  const firstName = user?.name?.split(' ')[0] || 'there';
+  const firstName = getUserFirstName(user, null);
   
   const newMatches = recommendedOpportunities?.length ?? 0;
   const activeApps = applicationInsights?.active ?? 0;
@@ -25,7 +26,7 @@ export default function DailyDigestStrip() {
         <div className="shrink-0">
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-[22px] font-black text-slate-900 leading-tight">
-              Welcome back, {firstName} 👋
+              {firstName ? `Welcome back, ${firstName} 👋` : `Welcome back! 👋`}
             </h1>
             <span className="hidden sm:inline-flex px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-bold border border-indigo-100 uppercase tracking-wider">
               {user?.track || 'Software Engineering'}

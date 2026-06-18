@@ -6,6 +6,7 @@ import { useSavedOpportunities } from '../../contexts/SavedOpportunitiesContext'
 import RecommendationCard from './RecommendationCard';
 import { toast } from 'react-hot-toast';
 
+
 export default function RecommendedForYouSection({ limit = 0, layout = 'grid' }) {
   const { recommendations, isLoading } = useRecommendations();
   const { toggleSavedOpportunity, isSaved } = useSavedOpportunities();

@@ -1,5 +1,6 @@
 import { collection, getDocs, writeBatch, doc } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { ingestionService } from './OpportunityIngestionService';
 
 const CACHE_KEY = 'opportunityos_aggregator_sync';
 const SESSION_CACHE_KEY = 'opportunityos_aggregator_opps';
@@ -28,13 +29,13 @@ function writeSessionCache(data) {
 }
 
 export const opportunityAggregator = {
-  async getOpportunities() {
-    // Level 1: In-memory cache (same page lifecycle — zero latency)
+  async getOpportunities(preferredLocations = []) {
+    // Level 1: In-memory cache
     if (_memoryCache && Date.now() - _memoryCacheTime < SESSION_CACHE_TTL_MS) {
       return _memoryCache;
     }
 
-    // Level 2: sessionStorage cache (survives dashboard tab switches, 10 min TTL)
+    // Level 2: sessionStorage cache
     const sessionCached = readSessionCache();
     if (sessionCached) {
       _memoryCache = sessionCached;
@@ -42,33 +43,62 @@ export const opportunityAggregator = {
       return sessionCached;
     }
 
-    // Level 3: Firestore + conditional JSearch sync
+    // Level 3: Firestore + Ingestion Service Sync
     try {
       const oppsRef = collection(db, 'opportunities');
-
-      const snapshot = await Promise.race([
-        getDocs(oppsRef),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore timeout')), 5000))
-      ]);
+      let snapshot = { forEach: () => {} };
+      try {
+        snapshot = await Promise.race([
+          getDocs(oppsRef),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore timeout')), 5000))
+        ]);
+      } catch (fbError) {
+        console.warn('Aggregator: Firestore fetch failed or timed out, bypassing to live sync.', fbError);
+      }
 
       let opportunities = [];
       snapshot.forEach(d => {
         opportunities.push({ id: d.id, ...d.data() });
       });
 
+      // One-time cleanup of MockSeeder data has been disabled
+      // so the app retains fallback data if live APIs fail.
+      /*
+      const mockIds = opportunities.filter(o => o.source === 'MockSeeder').map(o => o.id);
+      if (mockIds.length > 0) {
+        console.log(`Cleaning up ${mockIds.length} MockSeeder opportunities from Firestore...`);
+        const cleanupBatch = writeBatch(db);
+        mockIds.forEach(id => {
+          cleanupBatch.delete(doc(db, 'opportunities', id));
+        });
+        cleanupBatch.commit().catch(e => console.error("Aggregator: Failed to cleanup mocks:", e));
+        opportunities = opportunities.filter(o => o.source !== 'MockSeeder');
+      }
+      */
+
       const lastSync = localStorage.getItem(CACHE_KEY);
       const isStale = !lastSync || (Date.now() - parseInt(lastSync, 10) > SYNC_INTERVAL_MS);
 
+      // We no longer rely on mock data counting.
+      // If data is stale or completely empty, we run full ingestion.
       if ((opportunities || []).length === 0 || isStale) {
         try {
-          const syncedJobs = await this.syncJSearchToFirestore();
-          if (syncedJobs.length > 0) {
-            const newIds = new Set(syncedJobs.map(j => j.id));
-            opportunities = [...syncedJobs, ...opportunities.filter(o => !newIds.has(o.id))];
+          const syncedOpps = await ingestionService.ingestAll({ preferredLocations });
+          if (syncedOpps.length > 0) {
+            const newIds = new Set(syncedOpps.map(j => j.id));
+            opportunities = [...syncedOpps, ...opportunities.filter(o => !newIds.has(o.id))];
             localStorage.setItem(CACHE_KEY, Date.now().toString());
+
+            // Write new records to Firestore
+            const batch = writeBatch(db);
+            syncedOpps.forEach(opp => {
+              const oppRef = doc(collection(db, 'opportunities'), opp.id);
+              batch.set(oppRef, opp, { merge: true });
+            });
+            batch.commit().catch(err => console.error("Aggregator: Failed to commit batch to Firestore:", err));
           }
         } catch (syncError) {
-          console.error('Aggregator: JSearch Sync Failed:', syncError);
+          console.error('Aggregator: Ingestion Service Sync Failed:', syncError);
         }
       }
 
@@ -90,74 +120,5 @@ export const opportunityAggregator = {
     _memoryCache = null;
     _memoryCacheTime = 0;
     try { sessionStorage.removeItem(SESSION_CACHE_KEY); } catch {}
-  },
-
-
-
-  async syncJSearchToFirestore() {
-    const apiKey = import.meta.env.VITE_RAPIDAPI_KEY;
-    if (!apiKey) {
-      throw new Error("Missing VITE_RAPIDAPI_KEY environment variable.");
-    }
-
-    const queries = [
-      'Internships',
-      'Entry-Level Jobs',
-      'Software Engineering Roles',
-      'AI/ML Roles',
-      'Web Development Roles'
-    ];
-    
-    // Pick a random query to keep things fresh without blowing through rate limits on a single page load
-    const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-    const url = `https://jsearch.p.rapidapi.com/search?query=${encodeURIComponent(randomQuery)}&page=1&num_pages=1`;
-    
-    const options = {
-      method: 'GET',
-      headers: {
-        'X-RapidAPI-Key': apiKey,
-        'X-RapidAPI-Host': 'jsearch.p.rapidapi.com'
-      }
-    };
-
-    
-    const response = await fetch(url, options);
-
-    if (!response.ok) {
-      throw new Error(`JSearch API responded with status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    if (!data || !data.data) {
-       return [];
-    }
-
-    const mappedJobs = data.data.map(job => {
-      // Normalize to Unified Opportunity Model
-      return {
-        id: `jsearch_${job.job_id}`,
-        title: job.job_title || 'Unknown Title',
-        company: job.employer_name || 'Unknown Company',
-        location: job.job_city ? `${job.job_city}, ${job.job_country}` : (job.job_is_remote ? 'Remote' : 'Location Not Specified'),
-        description: job.job_description || 'No description provided.',
-        skills: job.job_required_skills || [], // Some jsearch endpoints return this, otherwise fallback in UI
-        type: job.job_employment_type === 'INTERN' ? 'Internship' : 'Job',
-        source: 'JSearch',
-        url: job.job_apply_link || job.job_google_link || '#',
-        logo: job.employer_logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(job.employer_name || 'C')}&background=random`,
-        postedDate: job.job_posted_at_datetime_utc || new Date().toISOString()
-      };
-    });
-
-    if (mappedJobs.length > 0) {
-      const batch = writeBatch(db);
-      mappedJobs.forEach(job => {
-        const jobRef = doc(collection(db, 'opportunities'), job.id);
-        batch.set(jobRef, job, { merge: true });
-      });
-      batch.commit().catch(err => console.error("Aggregator: Failed to commit batch to Firestore:", err));
-    }
-
-    return mappedJobs;
   }
 };

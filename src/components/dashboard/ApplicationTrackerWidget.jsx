@@ -46,7 +46,7 @@ export default function ApplicationTrackerWidget() {
     .slice(0, 4);
 
   return (
-    <div className="card-standard p-5 h-full flex flex-col bg-white rounded-[24px] border border-slate-100 shadow-sm">
+    <div className="card-standard p-5 h-full flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm">
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <div className="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">

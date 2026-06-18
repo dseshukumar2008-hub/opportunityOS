@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Sparkles, Send, RefreshCw, Zap, Target, FileText, TrendingUp, Briefcase, Code2, Users2, ArrowRight, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useUserProfile } from '../../hooks/useUserProfile';
+import { useProfile } from '../../contexts/ProfileContext';
+import { useCareerRoadmap } from '../../hooks/useCareerRoadmap';
+import { geminiService } from '../../services/geminiService';
 
 const QUICK_PROMPTS = [
   { icon: FileText,   label: 'Resume Tips',           prompt: 'Give me 5 actionable tips to improve my resume for tech roles.' },
@@ -45,7 +47,7 @@ function MessageBubble({ message }) {
           // Bold markdown
           const parts = line.split(/\*\*(.*?)\*\*/g);
           return (
-            <p key={i} className={`text-[14px] font-medium leading-relaxed ${i > 0 ? 'mt-1.5' : ''} ${isUser ? 'text-white' : 'text-slate-700'}`}>
+            <p key={i} className={`text-[14px] font-medium leading-[1.7] ${i > 0 ? 'mt-2' : ''} ${isUser ? 'text-white' : 'text-slate-700'}`}>
               {parts.map((part, j) =>
                 j % 2 === 1
                   ? <strong key={j} className={isUser ? 'text-white font-black' : 'text-slate-900 font-black'}>{part}</strong>
@@ -90,7 +92,8 @@ function TypingIndicator() {
 
 export default function CareerCoachPage() {
   const { user } = useAuth();
-  const { profile } = useUserProfile();
+  const { profile } = useProfile();
+  const { state: roadmapState } = useCareerRoadmap();
   const [messages, setMessages] = useState([WELCOME_MESSAGE]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -113,23 +116,26 @@ export default function CareerCoachPage() {
     setIsTyping(true);
     setShowPrompts(false);
 
-    // Simulate AI response (replace with actual Gemini API call)
-    await new Promise(res => setTimeout(res, 1500 + Math.random() * 1000));
+    try {
+      const history = messages.slice(-10).map(m => ({ role: m.role, content: m.content }));
+      
+      const result = await geminiService.chatWithCopilot({
+        mode: 'career_coach',
+        contextData: { profile },
+        history: history,
+        message: text
+      });
 
-    const responses = {
-      resume: `Here are **5 actionable resume tips** for tech roles:\n\n1. **Lead with impact metrics** — Quantify your achievements (e.g., "Reduced load time by 40%")\n2. **Optimize for ATS** — Mirror exact keywords from job descriptions\n3. **Use strong action verbs** — Built, Engineered, Deployed, Optimized\n4. **Keep it to 1 page** — Recruiters spend ~7 seconds on a first scan\n5. **Add a skills section** — List your tech stack clearly at the top`,
-      interview: `**Technical Interview Prep Strategy:**\n\n**Week 1-2:** Data Structures & Algorithms\n- Arrays, HashMaps, Trees, Graphs\n- Practice on LeetCode (Easy → Medium)\n\n**Week 3:** System Design\n- Learn scalability patterns\n- Practice designing Twitter, Uber, etc.\n\n**Week 4:** Behavioral Questions\n- Use the STAR method\n- Prepare 5–7 strong stories`,
-      default: `That's a great question! Based on your career goals, here's my recommendation:\n\n**Key Focus Areas:**\n1. **Build your portfolio** — Create 2–3 impressive projects that showcase your skills\n2. **Network actively** — Connect with 5 new professionals per week on LinkedIn\n3. **Upskill strategically** — Focus on high-demand skills like React, Python, or Cloud\n4. **Apply consistently** — Aim for 5–10 quality applications per week\n\nWould you like me to go deeper on any of these?`,
-    };
-
-    let responseText = responses.default;
-    const lowerText = text.toLowerCase();
-    if (lowerText.includes('resume')) responseText = responses.resume;
-    if (lowerText.includes('interview')) responseText = responses.interview;
-
-    const aiMessage = { role: 'assistant', content: responseText, timestamp: new Date().toISOString() };
-    setMessages(prev => [...prev, aiMessage]);
-    setIsTyping(false);
+      const responseText = result.response || "I'm sorry, I couldn't process that.";
+      const aiMessage = { role: 'assistant', content: responseText, timestamp: new Date().toISOString() };
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (err) {
+      console.error("AI Coach Error:", err);
+      const aiMessage = { role: 'assistant', content: "Sorry, I am having trouble connecting to the network right now.", timestamp: new Date().toISOString() };
+      setMessages(prev => [...prev, aiMessage]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -167,6 +173,31 @@ export default function CareerCoachPage() {
         </button>
       </div>
 
+      {/* ── Context Bar ── */}
+      <div className="shrink-0 bg-indigo-50/50 border-b border-indigo-100/50 px-6 py-2.5 flex items-center gap-4 lg:gap-6 overflow-x-auto hide-scrollbar">
+        <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest shrink-0">Profile Context:</span>
+        <div className="flex items-center gap-4 lg:gap-6">
+          <div className="flex items-center gap-1.5 shrink-0 text-slate-600">
+            <Target size={14} className="text-indigo-500" />
+            <span className="text-[12px] font-bold">{profile?.targetRole || profile?.title || 'Target Role Not Set'}</span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0 text-slate-600">
+            <FileText size={14} className="text-emerald-500" />
+            <span className="text-[12px] font-bold">{profile?.extractedSkills?.length || 0} Resume Skills</span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0 text-slate-600">
+            <Zap size={14} className="text-amber-500" />
+            <span className="text-[12px] font-bold">{profile?.missingSkills?.length || 0} Missing Skills</span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0 text-slate-600">
+            <TrendingUp size={14} className="text-blue-500" />
+            <span className="text-[12px] font-bold">
+              Roadmap: {roadmapState?.roadmap?.roadmapData?.header?.currentPhase || 'Not Started'}
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* ── Messages Area ── */}
       <div className="flex-1 overflow-y-auto px-4 lg:px-8 py-6 scrollbar-thin scrollbar-thumb-slate-200">
         <div className="max-w-3xl mx-auto">
@@ -188,7 +219,7 @@ export default function CareerCoachPage() {
                   <button
                     key={i}
                     onClick={() => sendMessage(prompt.prompt)}
-                    className="flex items-center gap-3 p-4 bg-white border border-slate-100 hover:border-indigo-200 hover:shadow-md rounded-[16px] text-left transition-all group"
+                    className="flex items-center gap-3 p-4 bg-white border border-slate-200 hover:border-indigo-200 hover:shadow-md rounded-2xl text-left transition-all group"
                   >
                     <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 group-hover:bg-indigo-100 transition-colors">
                       <prompt.icon size={16} className="text-indigo-600" />

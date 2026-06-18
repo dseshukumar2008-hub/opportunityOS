@@ -4,6 +4,7 @@ import { useUserProfile } from '../../hooks/useUserProfile';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 import { TrendingUp, Zap, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getUserFirstName } from '../../utils/userUtils';
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -43,7 +44,7 @@ export default function DashboardHeroWidget() {
 
   const greeting = useMemo(() => getGreeting(), []);
   const isLoading = profileLoading || insightsLoading;
-  const firstName = profile?.name?.split(' ')[0] || user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || 'there';
+  const firstName = getUserFirstName(user, profile);
   const aiScore = careerReadiness?.score ?? 62;
   const nextMilestone = aiScore < 70 ? 70 : aiScore < 85 ? 85 : 100;
 
@@ -70,7 +71,7 @@ export default function DashboardHeroWidget() {
             <Zap size={13} /> Career Readiness
           </p>
           <h1 className="text-[26px] lg:text-[30px] font-black text-slate-900 mb-1 leading-tight">
-            {greeting}, {firstName}! 👋
+            {firstName ? `${greeting}, ${firstName}! 👋` : `${greeting}! 👋`}
           </h1>
           <p className="text-[14px] text-slate-500 font-medium mb-6">
             Let's make progress toward your dream career.

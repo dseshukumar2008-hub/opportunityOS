@@ -14,7 +14,7 @@ export default function OpportunityRecommendationWidget() {
         <div className="h-6 w-48 bg-slate-200 rounded mb-4"></div>
         <div className="flex gap-4 overflow-x-auto pb-4">
           {[1,2,3,4,5].map(i => (
-            <div key={i} className="min-w-[260px] h-32 bg-white rounded-2xl border border-slate-100 shrink-0"></div>
+            <div key={i} className="min-w-[260px] h-32 bg-white rounded-2xl border border-slate-200 shrink-0 shadow-sm"></div>
           ))}
         </div>
       </div>
@@ -39,7 +39,7 @@ export default function OpportunityRecommendationWidget() {
             return (
               <div 
                 key={opp.id} 
-                className="flex flex-col p-4 rounded-[16px] border border-slate-200 bg-white shadow-sm hover:shadow-md hover:-translate-y-1 transition-all min-w-[240px] max-w-[260px] shrink-0 relative group"
+                className="flex flex-col p-4 rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:-translate-y-1 transition-all min-w-[240px] max-w-[260px] shrink-0 relative group"
               >
                 {/* Logo and Match Badge */}
                 <div className="flex items-start justify-between mb-3">
@@ -86,7 +86,7 @@ export default function OpportunityRecommendationWidget() {
           })}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-10 bg-white rounded-[16px] border border-slate-200 shadow-sm">
+        <div className="flex flex-col items-center justify-center py-10 bg-white rounded-2xl border border-slate-200 shadow-sm">
            <Info className="text-slate-400 mb-3" size={24} />
            <p className="text-[14px] font-bold text-slate-700">No matches available</p>
         </div>

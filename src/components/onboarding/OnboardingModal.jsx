@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { db, storage } from '../../config/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { X, User, Code, Heart, Target, FileText, CheckCircle2, ChevronRight, Rocket } from 'lucide-react';
+import { X, User, Code, Heart, Target, FileText, CheckCircle2, ChevronRight, Rocket, MapPin, Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const STEPS = [
@@ -11,18 +11,20 @@ const STEPS = [
   { id: 'skills', icon: Code, title: '2. Choose Skills', desc: 'Add the skills you know' },
   { id: 'interests', icon: Heart, title: '3. Select Interests', desc: 'Choose your areas of interest' },
   { id: 'goals', icon: Target, title: '4. Career Goals', desc: 'What do you want to achieve?' },
-  { id: 'resume', icon: FileText, title: '5. Upload Resume (Optional)', desc: 'Get AI analysis and better matches' }
+  { id: 'locations', icon: MapPin, title: '5. Preferred Locations', desc: 'Where do you want to work?' },
+  { id: 'resume', icon: FileText, title: '6. Upload Resume (Optional)', desc: 'Get AI analysis and better matches' }
 ];
 
 const SKILLS_LIST = ['Python', 'Java', 'C++', 'React', 'Node.js', 'AI/ML', 'Data Science', 'Cybersecurity', 'UI/UX', 'Cloud Computing'];
 const INTERESTS_LIST = ['AI', 'Web Development', 'Data Science', 'Product Management', 'Cybersecurity', 'Cloud', 'Startups'];
 const GOALS_LIST = ['Internships', 'Jobs', 'Hackathons', 'Scholarships', 'Competitions', 'Research', 'Freelancing', 'Startup Opportunities'];
+const LOCATIONS_LIST = ['India', 'Remote', 'United States', 'Europe', 'Singapore', 'Australia'];
 
 export default function OnboardingModal() {
   const { user, updateUser } = useAuth();
   
   // Synchronous check to avoid loading flash for returning users
-  const isLocallyCompleted = user ? localStorage.getItem(`onboarding_${user.id}`) === 'completed' : false;
+  const isLocallyCompleted = user ? localStorage.getItem(`onboarding_${user.uid}`) === 'completed' : false;
 
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(!isLocallyCompleted);
@@ -31,13 +33,16 @@ export default function OnboardingModal() {
   const [isCompleted, setIsCompleted] = useState(false);
 
   const [formData, setFormData] = useState({
-    profile: { fullName: '', college: '', degree: '', graduationYear: '', location: '' },
+    profile: { fullName: '', college: '', degree: '', graduationYear: '', country: '', state: '', city: '' },
     skills: [],
     interests: [],
     goals: [],
+    preferredLocations: [],
     resumeUrl: '',
     onboardingProgress: []
   });
+
+  const [customLocation, setCustomLocation] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -50,22 +55,14 @@ export default function OnboardingModal() {
 
     const checkOnboardingStatus = async () => {
       try {
-        // Supabase fallback metadata check
-        if (user.onboardingCompleted === true || user.onboarding_completed === true) {
-           localStorage.setItem(`onboarding_${user.id}`, 'completed');
-           setIsVisible(false);
-           setIsLoading(false);
-           return;
-        }
-
-        const userDocRef = doc(db, 'users', user.id);
+        const userDocRef = doc(db, 'users', user.uid);
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
           const data = userDoc.data();
           
-          if (data.onboardingCompleted === true) {
-            localStorage.setItem(`onboarding_${user.id}`, 'completed');
+          if (data.onboardingCompleted === true || data.onboardingCompleted === 'true' || data.onboarding_completed === true || data.onboarding_completed === 'true') {
+            localStorage.setItem(`onboarding_${user.uid}`, 'completed');
             setIsVisible(false);
           } else {
             setFormData(prev => ({ ...prev, ...data }));
@@ -88,12 +85,13 @@ export default function OnboardingModal() {
   }, [user, isLocallyCompleted]);
 
   const calculateProgress = () => {
-    const totalSteps = 4; // Mandatory steps: profile, skills, interests, goals
+    const totalSteps = 5; // Mandatory steps: profile, skills, interests, goals, locations
     let completedSteps = 0;
     if (formData.profile.fullName && formData.profile.college) completedSteps++;
     if (formData.skills.length > 0) completedSteps++;
     if (formData.interests.length > 0) completedSteps++;
     if (formData.goals.length > 0) completedSteps++;
+    if (formData.preferredLocations?.length > 0) completedSteps++;
     return Math.min(100, Math.round((completedSteps / totalSteps) * 100));
   };
 
@@ -103,6 +101,7 @@ export default function OnboardingModal() {
       case 'skills': return formData.skills.length > 0;
       case 'interests': return formData.interests.length > 0;
       case 'goals': return formData.goals.length > 0;
+      case 'locations': return formData.preferredLocations?.length > 0;
       case 'resume': return !!formData.resumeUrl;
       default: return false;
     }
@@ -111,7 +110,7 @@ export default function OnboardingModal() {
   const saveProgress = async (newFormData, completedStepId = null) => {
     if (!user) return;
     
-    const userDocRef = doc(db, 'users', user.id);
+    const userDocRef = doc(db, 'users', user.uid);
     let newProgress = [...(newFormData.onboardingProgress || [])];
     if (completedStepId && !newProgress.includes(completedStepId)) {
       newProgress.push(completedStepId);
@@ -138,18 +137,13 @@ export default function OnboardingModal() {
     }
     
     setIsSaving(true);
-    const userDocRef = doc(db, 'users', user.id);
+    const userDocRef = doc(db, 'users', user.uid);
     
     try {
       // 1. Save to local storage for instant robust persistence across reloads/logouts
-      localStorage.setItem(`onboarding_${user.id}`, 'completed');
+      localStorage.setItem(`onboarding_${user.uid}`, 'completed');
 
-      // 2. Save to Supabase metadata if available
-      if (updateUser) {
-        await updateUser({ onboardingCompleted: true }).catch(e => console.warn('Supabase update failed:', e));
-      }
-
-      // 3. Save to Firestore
+      // 2. Save to Firestore
       await setDoc(userDocRef, { 
         onboardingCompleted: true,
         ...formData 
@@ -178,7 +172,7 @@ export default function OnboardingModal() {
     setIsSaving(true);
     const toastId = toast.loading('Uploading resume...');
     try {
-      const resumeRef = ref(storage, `resumes/${user.id}/resume.pdf`);
+      const resumeRef = ref(storage, `resumes/${user.uid}/resume.pdf`);
       await uploadBytes(resumeRef, file);
       const url = await getDownloadURL(resumeRef);
       
@@ -255,7 +249,7 @@ export default function OnboardingModal() {
               className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-2xl cursor-pointer hover:border-[#6D5DF6] hover:shadow-[0_4px_20px_rgb(109,93,246,0.08)] transition-all group"
             >
               <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${completed ? 'bg-green-50 text-green-600' : step.id === 'profile' ? 'bg-[#F3F0FF] text-[#6D5DF6]' : step.id === 'skills' ? 'bg-blue-50 text-blue-500' : step.id === 'interests' ? 'bg-pink-50 text-pink-500' : step.id === 'goals' ? 'bg-orange-50 text-orange-500' : 'bg-emerald-50 text-emerald-500'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${completed ? 'bg-green-50 text-green-600' : step.id === 'profile' ? 'bg-[#F3F0FF] text-[#6D5DF6]' : step.id === 'skills' ? 'bg-blue-50 text-blue-500' : step.id === 'interests' ? 'bg-pink-50 text-pink-500' : step.id === 'goals' ? 'bg-orange-50 text-orange-500' : step.id === 'locations' ? 'bg-indigo-50 text-indigo-500' : 'bg-emerald-50 text-emerald-500'}`}>
                   <Icon size={18} />
                 </div>
                 <div>
@@ -383,16 +377,40 @@ export default function OnboardingModal() {
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-[12px] font-bold text-slate-700 mb-1">Location</label>
-                <input 
-                  type="text" 
-                  value={formData.profile.location}
-                  onChange={(e) => setFormData({...formData, profile: {...formData.profile, location: e.target.value}})}
-                  maxLength={100}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[13px] focus:outline-none focus:border-[#6D5DF6] focus:ring-2 focus:ring-[#6D5DF6]/20 transition-all"
-                  placeholder="e.g. San Francisco, CA"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[12px] font-bold text-slate-700 mb-1">Country</label>
+                  <input 
+                    type="text" 
+                    value={formData.profile.country}
+                    onChange={(e) => setFormData({...formData, profile: {...formData.profile, country: e.target.value}})}
+                    maxLength={100}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[13px] focus:outline-none focus:border-[#6D5DF6] focus:ring-2 focus:ring-[#6D5DF6]/20 transition-all"
+                    placeholder="e.g. India, USA"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-bold text-slate-700 mb-1">State/Province</label>
+                  <input 
+                    type="text" 
+                    value={formData.profile.state}
+                    onChange={(e) => setFormData({...formData, profile: {...formData.profile, state: e.target.value}})}
+                    maxLength={100}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[13px] focus:outline-none focus:border-[#6D5DF6] focus:ring-2 focus:ring-[#6D5DF6]/20 transition-all"
+                    placeholder="e.g. California"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[12px] font-bold text-slate-700 mb-1">City</label>
+                  <input 
+                    type="text" 
+                    value={formData.profile.city}
+                    onChange={(e) => setFormData({...formData, profile: {...formData.profile, city: e.target.value}})}
+                    maxLength={100}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-[13px] focus:outline-none focus:border-[#6D5DF6] focus:ring-2 focus:ring-[#6D5DF6]/20 transition-all"
+                    placeholder="e.g. San Francisco"
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -448,6 +466,63 @@ export default function OnboardingModal() {
                   {goal}
                 </button>
               ))}
+            </div>
+          )}
+
+          {currentStep === 'locations' && (
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {(formData.preferredLocations || []).filter(loc => !LOCATIONS_LIST.includes(loc)).map(customLoc => (
+                  <button
+                    key={customLoc}
+                    onClick={() => toggleArrayItem('preferredLocations', customLoc)}
+                    className="px-4 py-2 rounded-full text-[13px] font-medium transition-all bg-[#6D5DF6] text-white shadow-md flex items-center gap-1"
+                  >
+                    {customLoc} <X size={14} />
+                  </button>
+                ))}
+                {LOCATIONS_LIST.map(loc => (
+                  <button
+                    key={loc}
+                    onClick={() => toggleArrayItem('preferredLocations', loc)}
+                    className={`px-4 py-2 rounded-full text-[13px] font-medium transition-all ${
+                      (formData.preferredLocations || []).includes(loc)
+                        ? 'bg-[#6D5DF6] text-white shadow-md'
+                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    {loc}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 mt-4 border-t border-slate-100 pt-4">
+                <input 
+                  type="text" 
+                  value={customLocation}
+                  onChange={(e) => setCustomLocation(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && customLocation.trim()) {
+                      if (!(formData.preferredLocations || []).includes(customLocation.trim())) {
+                         setFormData({ ...formData, preferredLocations: [...(formData.preferredLocations || []), customLocation.trim()] });
+                      }
+                      setCustomLocation('');
+                    }
+                  }}
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-[13px] focus:outline-none focus:border-[#6D5DF6]"
+                  placeholder="Other location (e.g. London)"
+                />
+                <button 
+                  onClick={() => {
+                    if (customLocation.trim() && !(formData.preferredLocations || []).includes(customLocation.trim())) {
+                      setFormData({ ...formData, preferredLocations: [...(formData.preferredLocations || []), customLocation.trim()] });
+                      setCustomLocation('');
+                    }
+                  }}
+                  className="p-2 bg-[#6D5DF6] text-white rounded-xl hover:bg-[#5a4add] transition-colors"
+                >
+                  <Plus size={18} />
+                </button>
+              </div>
             </div>
           )}
 

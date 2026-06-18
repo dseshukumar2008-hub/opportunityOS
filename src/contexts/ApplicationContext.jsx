@@ -4,12 +4,14 @@ import { useActivity } from './ActivityContext';
 import { db } from '../config/firebase';
 import { collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, doc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { useNotifications } from './NotificationContext';
 
 const ApplicationContext = createContext(null);
 
 export function ApplicationProvider({ children }) {
   const { user } = useAuth();
   const { addActivity } = useActivity();
+  const { addNotification } = useNotifications();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -110,6 +112,13 @@ export function ApplicationProvider({ children }) {
         description: `At ${newApp.company}`,
         iconType: 'Briefcase',
         color: 'bg-indigo-50 text-[#6C4CF1]'
+      });
+
+      addNotification({
+        title: 'Application Submitted',
+        message: `Successfully applied to ${newApp.company} for ${newApp.role}.`,
+        type: 'Applications',
+        targetUrl: '/applications'
       });
 
       toast.success('Application added successfully');

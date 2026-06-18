@@ -3,7 +3,7 @@ import { ArrowRight, Check, AlertTriangle, Sparkles, Bot, Wand2 } from 'lucide-r
 export default function FeaturesSection() {
   const showcases = [
     {
-      title: 'AI Resume Review',
+      title: 'Analyze Resume',
       desc: 'Get instant feedback on your resume. Optimize for ATS tracking with precise keyword suggestions and action verb improvements.',
       mockup: (
         <div className="absolute inset-0 p-8 flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-50/50">
@@ -135,7 +135,7 @@ export default function FeaturesSection() {
 
   return (
     <section id="features" className="w-full max-w-[1400px] mx-auto px-6 py-24 flex flex-col items-center">
-      <div className="text-center mb-20 max-w-2xl">
+      <div className="text-cent er mb-20 max-w-2xl">
         <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-6 tracking-tight">Everything you need to succeed, supercharged by AI.</h2>
         <p className="text-lg text-slate-600 leading-relaxed">Experience a workspace that doesn't just store your data, but actively works to accelerate your career.</p>
       </div>

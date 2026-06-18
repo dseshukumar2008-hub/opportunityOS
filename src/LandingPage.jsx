@@ -7,9 +7,14 @@ import TestimonialsSection from './components/TestimonialsSection';
 import FAQSection from './components/FAQSection';
 import CTASection from './components/CTASection';
 import Footer from './components/Footer';
-
+import { useEffect } from 'react';
+import { analyticsService } from './services/analyticsService';
 
 export default function LandingPage() {
+  useEffect(() => {
+    analyticsService.trackEvent('Page Visit', { page: 'Landing Page' });
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#FCFCFD] text-slate-900 font-sans overflow-x-hidden flex flex-col">
       <Navbar />
@@ -24,7 +29,7 @@ export default function LandingPage() {
         <div className="flex-1 w-full">
           <FAQSection />
         </div>
-        <div className="flex-1 w-full mt-10 lg:mt-0">
+        <div className= "flex-1 w-full mt-10 lg:mt-0">
           <CTASection />
         </div>
       </section>

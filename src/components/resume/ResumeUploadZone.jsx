@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { UploadCloud, FileText, X, File as FileIcon, CheckCircle2, RefreshCw } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { analyticsService } from '../../services/analyticsService';
 
 export default function ResumeUploadZone({ onAnalyze, uploadProgress = 0, storedResumeName = null, onDeleteResume }) {
   const [dragActive, setDragActive] = useState(false);
@@ -37,7 +38,10 @@ export default function ResumeUploadZone({ onAnalyze, uploadProgress = 0, stored
     setDragActive(false);
     if (e.dataTransfer.files?.[0]) {
       const file = e.dataTransfer.files[0];
-      if (validateFile(file)) setSelectedFile(file);
+      if (validateFile(file)) {
+        setSelectedFile(file);
+        analyticsService.trackEvent('Resume Uploaded', { fileName: file.name, fileSize: file.size });
+      }
     }
   };
 
@@ -45,7 +49,10 @@ export default function ResumeUploadZone({ onAnalyze, uploadProgress = 0, stored
     e.preventDefault();
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
-      if (validateFile(file)) setSelectedFile(file);
+      if (validateFile(file)) {
+        setSelectedFile(file);
+        analyticsService.trackEvent('Resume Uploaded', { fileName: file.name, fileSize: file.size });
+      }
     }
   };
 

@@ -57,7 +57,7 @@ export default function NotificationsPage() {
   const [activeTab, setActiveTab] = useState('All');
 
   const filteredNotifications = notifications.filter(
-    (n) => activeTab === 'All' || n.category === activeTab
+    (n) => activeTab === 'All' || n.type === activeTab
   );
 
   return (
@@ -78,7 +78,7 @@ export default function NotificationsPage() {
           <div className="flex items-center gap-3 shrink-0">
             <button 
               onClick={markAllAsRead}
-              disabled={notifications.every(n => n.isRead)}
+              disabled={notifications.every(n => n.read)}
               className="px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:text-[#6C4CF1] hover:border-indigo-100 hover:bg-indigo-50 rounded-xl text-[13px] font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
             >
               <CheckCircle size={16} /> Mark All Read
@@ -133,22 +133,22 @@ export default function NotificationsPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                     onClick={() => {
-                      if (!notification.isRead) markAsRead(notification.id);
+                      if (!notification.read) markAsRead(notification.id);
                       if (notification.targetUrl) navigate(notification.targetUrl);
                     }}
                     className={`group relative p-5 sm:p-6 flex gap-4 transition-colors ${notification.targetUrl ? 'cursor-pointer' : ''} hover:bg-slate-50 ${
-                      !notification.isRead ? 'bg-[#7C3AED]/[0.02]' : 'bg-white'
+                      !notification.read ? 'bg-[#7C3AED]/[0.02]' : 'bg-white'
                     }`}
                   >
                     {/* Unread Indicator */}
-                    {!notification.isRead && (
+                    {!notification.read && (
                       <div className="absolute top-1/2 -translate-y-1/2 left-0 w-1 h-12 bg-[#6C4CF1] rounded-r-full" />
                     )}
 
                     {/* Icon */}
                     <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm relative">
-                      {getCategoryIcon(notification.category)}
-                      {!notification.isRead && (
+                      {getCategoryIcon(notification.type)}
+                      {!notification.read && (
                         <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#6C4CF1] border-2 border-white rounded-full"></div>
                       )}
                     </div>
@@ -157,26 +157,26 @@ export default function NotificationsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-1.5">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide uppercase border ${getCategoryBadgeStyle(notification.category)}`}>
-                            {notification.category}
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide uppercase border ${getCategoryBadgeStyle(notification.type)}`}>
+                            {notification.type}
                           </span>
                           <span className="text-[12px] font-bold text-slate-400">
-                            {formatTime(notification.timestamp)}
+                            {formatTime(notification.createdAt)}
                           </span>
                         </div>
                       </div>
                       
-                      <h4 className={`text-[15px] mb-1 leading-tight ${!notification.isRead ? 'font-extrabold text-slate-900' : 'font-bold text-slate-700'}`}>
+                      <h4 className={`text-[15px] mb-1 leading-tight ${!notification.read ? 'font-extrabold text-slate-900' : 'font-bold text-slate-700'}`}>
                         {notification.title}
                       </h4>
-                      <p className={`text-[14px] leading-relaxed ${!notification.isRead ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>
+                      <p className={`text-[14px] leading-relaxed ${!notification.read ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>
                         {notification.message}
                       </p>
                     </div>
 
                     {/* Actions */}
                     <div className="flex flex-col sm:flex-row items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                      {!notification.isRead && (
+                      {!notification.read && (
                         <button 
                           onClick={(e) => { e.stopPropagation(); markAsRead(notification.id); }}
                           className="w-8 h-8 rounded-full bg-white border border-slate-200 text-[#6C4CF1] flex items-center justify-center hover:bg-indigo-50 hover:border-indigo-100 transition-colors shadow-sm"

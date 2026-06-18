@@ -19,6 +19,15 @@ export function useRecommendations() {
 
   const [isSaving, setIsSaving] = useState(false);
 
+  console.log("DEBUG_RECOMMENDATIONS:", {
+    userId: user?.id,
+    profile: profile,
+    skills: profile?.skills || [],
+    interests: profile?.interests || [],
+    careerGoals: profile?.careerGoals || profile?.goals || [],
+    liveOpportunitiesLength: liveOpportunities?.length || 0
+  });
+
   const recommendations = useMemo(() => {
     // Exclude opportunities we've already applied to
     const unappliedOpportunities = liveOpportunities.filter(opp => {

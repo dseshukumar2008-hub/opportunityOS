@@ -22,7 +22,7 @@ export default function DemoPage() {
 
   const handleNext = () => {
     setCurrentStep(prev => prev + 1);
-  };
+  };  
 
   const handlePrevious = () => {
     setCurrentStep(prev => Math.max(1, prev - 1));

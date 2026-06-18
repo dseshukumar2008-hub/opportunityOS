@@ -22,6 +22,8 @@ import { useApplications } from '../contexts/ApplicationContext';
 import { useGoals } from '../contexts/GoalContext';
 import { useTeam } from '../contexts/TeamContext';
 import OnboardingModal from '../components/onboarding/OnboardingModal';
+import LocationMigrationModal from '../components/onboarding/LocationMigrationModal';
+import { getUserFullName, getUserFirstName } from '../utils/userUtils';
 
 const formatTime = (isoString) => {
   const date = new Date(isoString);
@@ -75,7 +77,7 @@ export default function DashboardLayout() {
 
   const studentContext = {
     user: {
-      name: user?.name || user?.user_metadata?.full_name || 'User',
+      name: getUserFullName(user, profile),
       email: user?.email
     },
     profile,
@@ -162,8 +164,8 @@ export default function DashboardLayout() {
             { name: 'Dashboard',     path: '/dashboard',      icon: LayoutDashboard },
             { name: 'Opportunities', path: '/opportunities',  icon: Briefcase },
             { name: 'Applications',  path: '/applications',   icon: FileText },
-            { name: 'Resume Builder',path: '/resume-builder', icon: FileEdit },
-            { name: 'AI Resume Review',path: '/resume-review',icon: Bot },
+            { name: 'Create Resume',path: '/resume-builder', icon: FileEdit },
+            { name: 'Analyze Resume',path: '/resume-review',icon: Bot },
             { name: 'Team Finder',   path: '/team-finder',    icon: Users },
             { name: 'Messages',      path: '/messages',       icon: MessageSquare, badge: 3 },
             { name: 'Saved',         path: '/saved',          icon: Bookmark },
@@ -241,6 +243,10 @@ export default function DashboardLayout() {
           {[
             { name: 'Analytics',  path: '/analytics',  icon: BarChart3 },
             { name: 'AI Copilot', path: '/copilot', icon: Bot, badgeText: 'New' },
+            { name: 'Match Engine', path: '/match-engine', icon: Sparkles, badgeText: 'New' },
+            { name: 'Career Roadmap', path: '/career-roadmap', icon: Map, badgeText: 'Hot' },
+            { name: 'Skill Gap Analysis', path: '/skill-gap', icon: Sparkles },
+            { name: 'Project Recommendations', path: '/project-recommendations', icon: Sparkles, badgeText: 'New' },
             { name: 'Career Coach', path: '/career-coach', icon: Target },
             { name: 'Resources', path: '/resources', icon: BookOpen },
           ].map((item) => {
@@ -276,9 +282,9 @@ export default function DashboardLayout() {
             onClick={() => { navigate('/user/me'); setIsSidebarOpen(false); }}
           >
             <div className="flex items-center gap-3">
-              <img src={profile?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${profile?.full_name || user?.name || 'User'}&backgroundColor=e2e8f0`} alt="Avatar" className="w-10 h-10 rounded-full bg-slate-200 object-cover" />
+              <img src={profile?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${getUserFullName(user, profile)}&backgroundColor=e2e8f0`} alt="Avatar" className="w-10 h-10 rounded-full bg-slate-200 object-cover" />
               <div>
-                <p className="text-[13px] font-extrabold text-slate-900 leading-none">{profile?.full_name || user?.name || 'Seshu kumar'}</p>
+                <p className="text-[13px] font-extrabold text-slate-900 leading-none">{getUserFullName(user, profile)}</p>
                 <p className="text-[11px] font-semibold text-slate-500 mt-1.5 leading-none">{profile?.headline || 'Student'}</p>
               </div>
             </div>
@@ -380,38 +386,38 @@ export default function DashboardLayout() {
                         <div 
                           key={notification.id} 
                           onClick={() => {
-                            if (!notification.isRead) markAsRead(notification.id);
+                            if (!notification.read) markAsRead(notification.id);
                             if (notification.targetUrl) {
                               navigate(notification.targetUrl);
                               setIsNotificationDropdownOpen(false);
                             }
                           }}
-                          className={`group relative flex gap-3 px-5 py-3 transition-colors cursor-pointer ${!notification.isRead ? 'bg-indigo-50/30 hover:bg-indigo-50/50' : 'hover:bg-slate-50'}`}
+                          className={`group relative flex gap-3 px-5 py-3 transition-colors cursor-pointer ${!notification.read ? 'bg-indigo-50/30 hover:bg-indigo-50/50' : 'hover:bg-slate-50'}`}
                         >
-                          {!notification.isRead && (
+                          {!notification.read && (
                             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-8 bg-[#6C4CF1] rounded-r-full" />
                           )}
                           <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 mt-0.5 relative shadow-sm">
-                            {getCategoryIcon(notification.category)}
-                            {!notification.isRead && (
+                            {getCategoryIcon(notification.type)}
+                            {!notification.read && (
                               <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#6C4CF1] border-2 border-white rounded-full"></div>
                             )}
                           </div>
                           <div className="flex-1 min-w-0 pr-12">
-                            <h4 className={`text-[13px] leading-tight mb-1 truncate ${!notification.isRead ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
+                            <h4 className={`text-[13px] leading-tight mb-1 truncate ${!notification.read ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
                               {notification.title}
                             </h4>
                             <p className="text-[12px] text-slate-500 truncate mb-1">
                               {notification.message}
                             </p>
                             <span className="text-[11px] font-medium text-slate-400">
-                              {formatTime(notification.timestamp)}
+                              {formatTime(notification.createdAt)}
                             </span>
                           </div>
                           
                           {/* Actions */}
                           <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm p-1 rounded-lg border border-slate-100 shadow-sm">
-                            {!notification.isRead && (
+                            {!notification.read && (
                               <button 
                                 onClick={(e) => { e.stopPropagation(); markAsRead(notification.id); }}
                                 className="w-7 h-7 rounded-md text-[#6C4CF1] hover:bg-indigo-50 flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-[#6C4CF1] focus-visible:outline-none"
@@ -473,7 +479,7 @@ export default function DashboardLayout() {
               >
                 <div className="relative">
                   <img
-                    src={profile?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${profile?.full_name || user?.name || 'User'}&backgroundColor=e2e8f0`}
+                    src={profile?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${getUserFullName(user, profile)}&backgroundColor=e2e8f0`}
                     alt="User Avatar"
                     className="w-8 h-8 rounded-full border border-slate-200 bg-slate-100"
                   />
@@ -482,7 +488,7 @@ export default function DashboardLayout() {
                   </span>
                 </div>
                 <div className="hidden sm:block">
-                  <p className="text-[13px] font-bold text-slate-900 leading-none">{user?.name || 'Seshu'}</p>
+                  <p className="text-[13px] font-bold text-slate-900 leading-none">{getUserFirstName(user, profile) || getUserFullName(user, profile)}</p>
                   <p className="text-[11px] font-medium text-slate-500 mt-1 leading-none">Student</p>
                 </div>
                 <ChevronDown size={14} className={`text-slate-400 ml-1 transition-transform duration-200 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
@@ -541,6 +547,9 @@ export default function DashboardLayout() {
 
         {/* First Time User Onboarding */}
         <OnboardingModal />
+        
+        {/* Existing User Location Migration */}
+        <LocationMigrationModal />
       </main>
     </div>
   );

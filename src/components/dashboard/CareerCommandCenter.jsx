@@ -11,6 +11,7 @@ import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 import { useResumeInsights } from '../../hooks/useResumeInsights';
 import { useSavedOpportunities } from '../../contexts/SavedOpportunitiesContext';
 import { useTeam } from '../../contexts/TeamContext';
+import { getUserFirstName } from '../../utils/userUtils';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -112,7 +113,7 @@ export default function CareerCommandCenter() {
 
   const isLoading = profileLoading || insightsLoading;
 
-  const firstName = profile?.name?.split(' ')[0] || user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || 'there';
+  const firstName = getUserFirstName(user, profile);
   const initials = (profile?.name || user?.displayName || 'U')
     .split(' ')
     .map((n) => n[0])
@@ -181,7 +182,7 @@ export default function CareerCommandCenter() {
             <div>
               <div className="flex items-center flex-wrap gap-2 mb-0.5">
                 <h1 className="text-[22px] lg:text-[26px] font-black text-slate-900 leading-tight">
-                  {greeting}, {firstName} 👋
+                  {firstName ? `${greeting}, ${firstName} 👋` : `${greeting}! 👋`}
                 </h1>
                 {user?.track && (
                   <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded-full border border-indigo-100 uppercase tracking-wider shrink-0">

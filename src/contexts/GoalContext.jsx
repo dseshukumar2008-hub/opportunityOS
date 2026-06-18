@@ -56,7 +56,7 @@ export const GoalProvider = ({ children }) => {
           setGoals([]);
         } else {
           throw error;
-        }
+        } 
       } else {
         const mapped = data.map(g => ({
           id: g.id,

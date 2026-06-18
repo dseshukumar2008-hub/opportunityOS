@@ -248,6 +248,93 @@ service cloud.firestore {
 
 
     // ═════════════════════════════════════════════════════════════════════════
+    // CAREER ROADMAPS
+    // ═════════════════════════════════════════════════════════════════════════
+    match /career_roadmaps/{userId} {
+      allow read, write: if isAuthed() && request.auth.uid == userId;
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    // CORE USER COLLECTIONS
+    // ═════════════════════════════════════════════════════════════════════════
+    match /users/{userId} {
+      // Anyone authenticated can read user profiles (needed for team members and connections)
+      allow read: if isAuthed();
+      // Only the user can update their own profile
+      allow write: if isAuthed() && request.auth.uid == userId;
+    }
+
+    match /user_settings/{userId} {
+      allow read, write: if isAuthed() && request.auth.uid == userId;
+    }
+
+    match /career_coach_chats/{userId} {
+      allow read, write: if isAuthed() && request.auth.uid == userId;
+    }
+
+    match /resume_history/{docId} {
+      allow read: if isAuthed() && request.auth.uid == resource.data.uid;
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.uid;
+      allow update, delete: if isAuthed() && request.auth.uid == resource.data.uid;
+    }
+
+    match /skill_gap_analysis/{docId} {
+      allow read: if isAuthed() && request.auth.uid == resource.data.userId;
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if isAuthed() && request.auth.uid == resource.data.userId;
+    }
+
+    match /dashboard_stats/{userId} {
+      allow read, write: if isAuthed() && request.auth.uid == userId;
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    // OPPORTUNITIES & APPLICATIONS
+    // ═════════════════════════════════════════════════════════════════════════
+    match /opportunities/{oppId} {
+      // Anyone authenticated can view active opportunities
+      allow read: if isAuthed();
+      // Only employers/admins can write (enforced by application logic/custom claims, keeping broad for demo)
+      allow write: if isAuthed();
+    }
+
+    match /pending_opportunities/{oppId} {
+      allow read, write: if isAuthed();
+    }
+
+    match /applications/{appId} {
+      allow read: if isAuthed() && request.auth.uid == resource.data.userId;
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if isAuthed() && request.auth.uid == resource.data.userId;
+    }
+
+    match /recommendations/{recId} {
+      allow read: if isAuthed() && (request.auth.uid == resource.data.userId || request.auth.uid == resource.data.uid);
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.userId || request.auth.uid == request.resource.data.uid);
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.userId || request.auth.uid == resource.data.uid);
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
+    // ACTIVITY & NOTIFICATIONS
+    // ═════════════════════════════════════════════════════════════════════════
+    match /activities/{actId} {
+      allow read: if isAuthed() && request.auth.uid == resource.data.userId;
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if isAuthed() && request.auth.uid == resource.data.userId;
+    }
+
+    match /notifications/{notifId} {
+      allow read: if isAuthed() && request.auth.uid == resource.data.userId;
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if isAuthed() && request.auth.uid == resource.data.userId;
+    }
+
+    match /messages/{msgId} {
+      // Direct messaging between users
+      allow read, write: if isAuthed();
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════
     // DENY ALL OTHER PATHS (explicit, Firestore denies by default anyway)
     // ═════════════════════════════════════════════════════════════════════════
     match /{document=**} {

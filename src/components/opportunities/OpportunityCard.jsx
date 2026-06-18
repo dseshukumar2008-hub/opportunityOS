@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Clock, Bookmark } from 'lucide-react';
+import { MapPin, Clock, Bookmark, Building2, Code, Trophy, GraduationCap } from 'lucide-react';
 import OpportunityMatchBadge from './OpportunityMatchBadge';
 import { useMatchScore } from '../../hooks/useMatchScore';
 
@@ -14,17 +15,31 @@ const badgeColors = {
 export default function OpportunityCard({ opp, isSaved, onSave, onApply }) {
   const navigate = useNavigate();
   const matchData = useMatchScore(opp);
+  const [imgError, setImgError] = useState(false);
+
+  const getFallbackIcon = () => {
+    switch(opp.type?.toLowerCase()) {
+      case 'hackathon': return <Code size={24} className="text-slate-400" />;
+      case 'competition': return <Trophy size={24} className="text-slate-400" />;
+      case 'scholarship': return <GraduationCap size={24} className="text-slate-400" />;
+      default: return <Building2 size={24} className="text-slate-400" />;
+    }
+  };
 
   return (
     <div className="card-standard card-hover p-6 flex flex-col relative h-full">
       <div className="flex justify-between items-start mb-4">
         <div className="w-12 h-12 rounded-xl bg-white border border-slate-100 p-2 shrink-0 flex items-center justify-center overflow-hidden">
-          <img 
-            src={opp.logo} 
-            alt={opp.company} 
-            className="w-full h-full object-contain"
-            onError={(e) => { e.target.src = "/placeholder-company-logo.png"; }}
-          />
+          {!imgError && opp.logo ? (
+            <img 
+              src={opp.logo} 
+              alt={opp.company} 
+              className="w-full h-full object-contain"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            getFallbackIcon()
+          )}
         </div>
         <div className="flex items-center gap-2">
           {matchData && <OpportunityMatchBadge score={matchData.score} size="sm" />}

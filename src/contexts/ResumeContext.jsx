@@ -295,6 +295,56 @@ export const ResumeProvider = ({ children }) => {
 
       if (error) throw error;
       
+      // Auto-sync with Match Engine (Persistent Resume Storage)
+      try {
+        let text = `Name: ${resumeData.personalInfo?.fullName || ''}\n`;
+        text += `Email: ${resumeData.personalInfo?.email || ''}\n\n`;
+
+        if (resumeData.education?.length) {
+          text += `Education:\n`;
+          resumeData.education.forEach(e => {
+            text += `- ${e.degree} at ${e.school} (${e.startDate} - ${e.endDate})\n`;
+          });
+          text += `\n`;
+        }
+
+        if (resumeData.experience?.length) {
+          text += `Experience:\n`;
+          resumeData.experience.forEach(e => {
+            text += `- ${e.title} at ${e.company} (${e.startDate} - ${e.endDate})\n  ${e.description}\n`;
+          });
+          text += `\n`;
+        }
+
+        if (resumeData.projects?.length) {
+          text += `Projects:\n`;
+          resumeData.projects.forEach(p => {
+            text += `- ${p.title}\n  ${p.description}\n`;
+          });
+          text += `\n`;
+        }
+
+        if (resumeData.skills?.length) {
+          text += `Skills:\n${resumeData.skills.join(', ')}\n`;
+        }
+
+        const payload = {
+          user_id: user.id,
+          resume_file_name: 'Resume Builder Profile',
+          resume_text: text,
+          extracted_skills: resumeData.skills || [],
+          upload_date: new Date().toISOString(),
+          last_updated: new Date().toISOString()
+        };
+
+        await supabase
+          .from('match_resumes')
+          .upsert(payload, { onConflict: 'user_id' });
+          
+      } catch (syncErr) {
+        console.error('Error syncing resume builder with match engine:', syncErr);
+      }
+
       setLastUpdated(Date.now());
       setSaveState('Saved');
       setResumes(resumes.map(r => r.id === data.id ? data : r));

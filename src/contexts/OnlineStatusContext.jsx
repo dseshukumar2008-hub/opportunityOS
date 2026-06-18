@@ -14,13 +14,7 @@ const AWAY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
 // Mock statuses for other users — keyed by participant name
 // In a real app these would come from a WebSocket / server heartbeat
-const MOCK_USER_STATUSES = {
-  'Rohan Mehta':   { status: STATUS.ONLINE,  lastSeen: new Date().toISOString() },
-  'Priya Singh':   { status: STATUS.AWAY,    lastSeen: new Date(Date.now() - 1000 * 60 * 8).toISOString() },
-  'Seshu Rao':     { status: STATUS.OFFLINE, lastSeen: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() },
-  'Arjun Verma':   { status: STATUS.ONLINE,  lastSeen: new Date().toISOString() },
-  'Kavya Reddy':   { status: STATUS.OFFLINE, lastSeen: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString() },
-};
+const MOCK_USER_STATUSES = {};
 
 function formatLastSeen(isoString) {
   const date = new Date(isoString);

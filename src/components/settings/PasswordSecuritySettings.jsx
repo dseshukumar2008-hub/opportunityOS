@@ -68,7 +68,7 @@ export default function PasswordSecuritySettings() {
             <Lock size={24} />
           </div>
           <div>
-            <h2 className="text-[18px] font-bold text-slate-900">Password & Security</h2>
+            <h2 className="text-[18px] font-bold text-sl  ate-900">Password & Security</h2>
             <p className="text-[13px] text-slate-500 font-medium mt-0.5">Ensure your account stays secure.</p>
           </div>
         </div>

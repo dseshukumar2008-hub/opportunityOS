@@ -76,31 +76,31 @@ export default function NotificationsWidget() {
               <div
                 key={notification.id}
                 onClick={() => {
-                  if (!notification.isRead) markAsRead(notification.id);
+                  if (!notification.read) markAsRead(notification.id);
                   if (notification.targetUrl) navigate(notification.targetUrl);
                 }}
                 className={`flex gap-3 p-3 rounded-xl cursor-pointer transition-colors ${
-                  !notification.isRead ? 'bg-indigo-50/50 hover:bg-indigo-50' : 'hover:bg-slate-50'
+                  !notification.read ? 'bg-indigo-50/50 hover:bg-indigo-50' : 'hover:bg-slate-50'
                 }`}
               >
                 <div className="w-8 h-8 rounded-full bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm mt-0.5 relative">
-                  {getCategoryIcon(notification.category)}
-                  {!notification.isRead && (
+                  {getCategoryIcon(notification.type)}
+                  {!notification.read && (
                     <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#6C4CF1] border-2 border-white rounded-full"></div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className={`text-[13px] leading-tight mb-1 truncate ${!notification.isRead ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
+                  <h4 className={`text-[13px] leading-tight mb-1 truncate ${!notification.read ? 'font-bold text-slate-900' : 'font-semibold text-slate-700'}`}>
                     {notification.title}
                   </h4>
                   <p className="text-[12px] text-slate-500 truncate mb-1.5">
                     {notification.message}
                   </p>
                   <span className="text-[10px] font-semibold text-slate-400">
-                    {formatTimeAgo(notification.timestamp)}
+                    {formatTimeAgo(notification.createdAt)}
                   </span>
                 </div>
-                {!notification.isRead && (
+                {!notification.read && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

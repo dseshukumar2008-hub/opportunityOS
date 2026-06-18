@@ -5,7 +5,7 @@ export default function YourActivityWidget() {
   const activities = [
     {
       id: 1,
-      title: 'AI Resume Review',
+      title: 'Analyze Resume',
       description: 'Improved score by 18%',
       time: '2h ago',
       icon: <ArrowUp size={16} className="text-emerald-500" />,

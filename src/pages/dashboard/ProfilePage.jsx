@@ -9,6 +9,7 @@ import {
 import CareerReadinessPanel from '../../components/dashboard/CareerReadinessPanel';
 import AchievementsShowcase from '../../components/profile/AchievementsShowcase';
 import toast from 'react-hot-toast';
+import { getUserFullName } from '../../utils/userUtils';
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
@@ -16,14 +17,17 @@ export default function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
   const [profileData, setProfileData] = useState({
-    name: user?.name || '',
+    name: getUserFullName(user, null),
     email: user?.email || '',
     phone: user?.phone || '+91 98765 43210',
     college: user?.college || 'NIAT',
     branch: user?.branch || 'Computer Science Engineering',
     year: user?.year || '1st Year',
     expectedGraduation: user?.expectedGraduation || '2029',
-    location: user?.location || 'India',
+    country: user?.country || user?.profile?.country || 'India',
+    state: user?.state || user?.profile?.state || '',
+    city: user?.city || user?.profile?.city || '',
+    location: user?.location || '',
     bio: user?.bio || 'Passionate first year Computer Science student who loves building web applications and solving real-world problems. I enjoy learning new technologies and working on innovative projects that create impact. Always excited to collaborate and grow together!',
     skills: user?.skills || 'React, JavaScript, Python, HTML, CSS, Git, GitHub, C++, Node.js, Tailwind CSS, Figma, MongoDB, Firebase'
   });
@@ -97,7 +101,7 @@ export default function ProfilePage() {
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div className="relative shrink-0">
                 <img 
-                  src={`https://api.dicebear.com/7.x/notionists/svg?seed=${user?.name || 'User'}&backgroundColor=e2e8f0`} 
+                  src={`https://api.dicebear.com/7.x/notionists/svg?seed=${getUserFullName(user, null)}&backgroundColor=e2e8f0`} 
                   alt="Profile Avatar" 
                   className="w-[120px] h-[120px] rounded-full border border-slate-200 bg-slate-100 object-cover"
                 />
@@ -116,7 +120,7 @@ export default function ProfilePage() {
                     <Mail size={16} className="text-slate-400" /> {profileData.email}
                   </span>
                   <span className="flex items-center gap-2.5 justify-center sm:justify-start">
-                    <MapPin size={16} className="text-slate-400" /> {profileData.location}
+                    <MapPin size={16} className="text-slate-400" /> {[profileData.city, profileData.state, profileData.country].filter(Boolean).join(', ') || profileData.location || 'Location not set'}
                   </span>
                 </div>
               </div>
@@ -386,6 +390,34 @@ export default function ProfilePage() {
                       <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     </div>
                   </div>
+                  
+                  <div>
+                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">Country</label>
+                    <input 
+                      type="text" 
+                      value={editForm.country} 
+                      onChange={e => setEditForm({...editForm, country: e.target.value})}
+                      className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">State/Province</label>
+                    <input 
+                      type="text" 
+                      value={editForm.state} 
+                      onChange={e => setEditForm({...editForm, state: e.target.value})}
+                      className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">City</label>
+                    <input 
+                      type="text" 
+                      value={editForm.city} 
+                      onChange={e => setEditForm({...editForm, city: e.target.value})}
+                      className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700"
+                    />
+                  </div>
                 </div>
                 
                 <div className="w-full border-b border-slate-100 mb-8"></div>
@@ -434,7 +466,7 @@ export default function ProfilePage() {
                   
                   <div className="relative mb-4">
                     <img 
-                      src={`https://api.dicebear.com/7.x/notionists/svg?seed=${user?.name || 'User'}&backgroundColor=e2e8f0`} 
+                      src={`https://api.dicebear.com/7.x/notionists/svg?seed=${getUserFullName(user, null)}&backgroundColor=e2e8f0`} 
                       alt="Profile Avatar" 
                       className="w-[140px] h-[140px] rounded-full border border-slate-200 object-cover bg-slate-100"
                     />

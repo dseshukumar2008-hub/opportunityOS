@@ -10,7 +10,7 @@ import HeroMetrics from './HeroMetrics';
 import PresentationCharts from './PresentationCharts';
 
 const FEATURES = [
-  { title: 'AI Resume Review', icon: BrainCircuit, color: 'text-indigo-500', bg: 'bg-indigo-50', desc: 'Instant feedback on resume quality and structure' },
+  { title: 'Analyze Resume', icon: BrainCircuit, color: 'text-indigo-500', bg: 'bg-indigo-50', desc: 'Instant feedback on resume quality and structure' },
   { title: 'ATS Score Engine', icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-50', desc: 'Beat applicant tracking systems with smart optimization' },
   { title: 'Opportunity Matching', icon: Target, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'AI-ranked opportunities personalized to your profile' },
   { title: 'Skill Gap Analysis', icon: Zap, color: 'text-pink-500', bg: 'bg-pink-50', desc: 'Know exactly what to learn next for your target role' },

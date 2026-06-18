@@ -35,14 +35,14 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState({});
 
   useEffect(() => {
-    if (!user?.id) {
+    if (!user?.uid) {
       setSettings({});
       setIsLoadingSettings(false);
       return;
     }
 
     setIsLoadingSettings(true);
-    const docRef = doc(db, 'user_settings', user.id);
+    const docRef = doc(db, 'user_settings', user.uid);
 
     const unsubscribe = onSnapshot(docRef, async (snap) => {
       if (snap.exists()) {
@@ -72,14 +72,14 @@ export default function SettingsPage() {
     });
 
     return () => unsubscribe();
-  }, [user?.id]);
+  }, [user?.uid]);
 
   const updateSetting = async (key, value) => {
-    if (!user?.id) return;
+    if (!user?.uid) return;
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
     try {
-      await setDoc(doc(db, 'user_settings', user.id), { [key]: value }, { merge: true });
+      await setDoc(doc(db, 'user_settings', user.uid), { [key]: value }, { merge: true });
     } catch (err) {
       console.error('Failed to update user setting in Firestore:', err);
     }
@@ -87,7 +87,7 @@ export default function SettingsPage() {
 
   // Mock edit form state for the modal
   const [editForm, setEditForm] = useState({
-    name: profile?.full_name || user?.name || '',
+    name: profile?.name || profile?.full_name || user?.name || '',
     email: user?.email || '',
     college: profile?.education?.[0]?.institution || '',
     branch: profile?.education?.[0]?.field || '',
@@ -113,7 +113,7 @@ export default function SettingsPage() {
     setIsUploadingAvatar(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const storagePath = `users/${user.id}/avatar/${Date.now()}.${fileExt}`;
+      const storagePath = `users/${user.uid}/avatar/${Date.now()}.${fileExt}`;
       const storageRef = ref(storage, storagePath);
 
       const uploadTask = await uploadBytes(storageRef, file);
