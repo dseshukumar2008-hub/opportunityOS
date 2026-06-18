@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "REDACTED",
+  apiKey: typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_FIREBASE_API_KEY : process.env.VITE_FIREBASE_API_KEY,
   authDomain: "oppurtunity-os.firebaseapp.com",
   projectId: "oppurtunity-os",
 };

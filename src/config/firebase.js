@@ -4,7 +4,7 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "REDACTED",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "oppurtunity-os.firebaseapp.com",
   projectId: "oppurtunity-os",
   storageBucket: "oppurtunity-os.firebasestorage.app",
