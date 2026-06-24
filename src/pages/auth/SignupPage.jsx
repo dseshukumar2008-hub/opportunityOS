@@ -13,7 +13,6 @@ export default function SignupPage() {
     password: '',
     confirmPassword: ''
   });
-  const [isEmployer, setIsEmployer] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,11 +48,11 @@ export default function SignupPage() {
     setIsLoading(true);
     
     try {
-      const userType = isEmployer ? 'employer' : 'student';
+      const userType = 'student';
       await signup(formData.email, formData.password, formData.name, userType);
       analyticsService.trackEvent('Sign Up', { userType });
       setSuccess(true);
-      setTimeout(() => navigate(isEmployer ? '/employer/dashboard' : '/dashboard'), 2000);
+      setTimeout(() => navigate('/dashboard'), 2000);
     } catch (err) {
       console.error("Signup Error:", err);
       if (err.message.includes('User already registered')) {
@@ -192,20 +191,6 @@ export default function SignupPage() {
                 placeholder="••••••••"
               />
             </div>
-          </div>
-
-          <div className="flex items-center mt-2 p-3 bg-slate-50 border border-slate-200 rounded-lg">
-            <input
-              id="employer-role"
-              type="checkbox"
-              checked={isEmployer}
-              onChange={(e) => setIsEmployer(e.target.checked)}
-              className="w-4 h-4 text-[#6C4CF1] bg-white border-slate-300 rounded focus:ring-[#6C4CF1] focus:ring-2"
-            />
-            <label htmlFor="employer-role" className="ml-3 text-sm font-medium text-slate-700 flex items-center gap-2 cursor-pointer">
-              <Briefcase size={16} className="text-[#6C4CF1]" />
-              I am an Employer posting opportunities
-            </label>
           </div>
 
           <div className="pt-2">

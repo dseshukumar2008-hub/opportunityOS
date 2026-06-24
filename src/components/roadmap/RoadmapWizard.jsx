@@ -187,9 +187,16 @@ function GeneratingScreen({ targetCareer }) {
 
 // ─── Main Wizard ──────────────────────────────────────────────────────────────
 
+import { useLocation } from 'react-router-dom';
+
 export default function RoadmapWizard({ onGenerate, isGenerating, genError }) {
+  const location = useLocation();
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({ course: '', branch: '', year: '', targetCareer: '' });
+  const [form, setForm] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    const targetRole = params.get('targetRole');
+    return { course: '', branch: '', year: '', targetCareer: targetRole || '' };
+  });
 
   const set      = (k, v) => setForm(prev => ({ ...prev, [k]: v }));
   const branches = BRANCHES_BY_COURSE[form.course] || BRANCHES_BY_COURSE.default;

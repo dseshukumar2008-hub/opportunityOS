@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { ShieldAlert, CheckCircle2, XCircle, Search, Building2, Briefcase, MapPin, Clock, BarChart3, Users, FileText, Map, Target, MessageSquare } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
@@ -19,6 +20,10 @@ export default function AdminDashboardPage() {
     careerCoach: 0
   });
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Modal state
+  const [actionOpportunity, setActionOpportunity] = useState(null); // { opp, action: 'approve' | 'reject' }
+  const [isConfirming, setIsConfirming] = useState(false);
 
   useEffect(() => {
     // Basic admin check - in a real app this would be a strict middleware
@@ -72,66 +77,60 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleApprove = async (opp) => {
-    const confirmApprove = window.confirm(`Are you sure you want to approve "${opp.title}"?`);
-    if (!confirmApprove) return;
-
-    try {
-      // Create canonical ID for opportunities collection
-      const newOppId = `community_${Date.now()}_${opp.id.substring(0, 5)}`;
-      
-      const newOppData = {
-        title: opp.title,
-        organization: opp.organization,
-        type: opp.type,
-        description: opp.description || '',
-        country: opp.country || '',
-        location: opp.country || '',
-        deadline: opp.deadline || '',
-        applyUrl: opp.applyUrl,
-        logoUrl: opp.logoUrl || null,
-        skills: opp.skills || [],
-        source: 'Community',
-        status: 'active',
-        createdAt: serverTimestamp(),
-        approvedBy: user.uid
-      };
-
-      // 1. Move to active opportunities
-      await setDoc(doc(db, 'opportunities', newOppId), newOppData);
-      
-      // 2. Mark pending as approved (or delete it, here we mark it for audit)
-      await updateDoc(doc(db, 'pending_opportunities', opp.id), {
-        status: 'approved',
-        approvedAt: serverTimestamp(),
-        approvedBy: user.uid
-      });
-
-      toast.success('Opportunity approved and published!');
-      setPendingOpps(prev => prev.filter(o => o.id !== opp.id));
-    } catch (error) {
-      console.error('Error approving opportunity:', error);
-      toast.error('Failed to approve opportunity');
-    }
+  const triggerAction = (opp, action) => {
+    setActionOpportunity({ opp, action });
   };
 
-  const handleReject = async (oppId) => {
-    const confirmReject = window.confirm(`Are you sure you want to reject this opportunity?`);
-    if (!confirmReject) return;
+  const executeAction = async () => {
+    if (!actionOpportunity) return;
+    const { opp, action } = actionOpportunity;
+    setIsConfirming(true);
 
     try {
-      // Mark as rejected
-      await updateDoc(doc(db, 'pending_opportunities', oppId), {
-        status: 'rejected',
-        rejectedAt: serverTimestamp(),
-        rejectedBy: user.uid
-      });
-      
-      toast.success('Opportunity rejected');
-      setPendingOpps(prev => prev.filter(o => o.id !== oppId));
+      if (action === 'approve') {
+        const newOppId = `community_${Date.now()}_${opp.id.substring(0, 5)}`;
+        const newOppData = {
+          title: opp.title,
+          organization: opp.organization,
+          type: opp.type,
+          description: opp.description || '',
+          country: opp.country || '',
+          location: opp.country || '',
+          deadline: opp.deadline || '',
+          applyUrl: opp.applyUrl,
+          logoUrl: opp.logoUrl || null,
+          skills: opp.skills || [],
+          source: 'Community',
+          status: 'active',
+          createdAt: serverTimestamp(),
+          approvedBy: user.uid
+        };
+
+        await setDoc(doc(db, 'opportunities', newOppId), newOppData);
+        await updateDoc(doc(db, 'pending_opportunities', opp.id), {
+          status: 'approved',
+          approvedAt: serverTimestamp(),
+          approvedBy: user.uid
+        });
+
+        toast.success('Opportunity approved and published!');
+        setPendingOpps(prev => prev.filter(o => o.id !== opp.id));
+      } else if (action === 'reject') {
+        await updateDoc(doc(db, 'pending_opportunities', opp.id), {
+          status: 'rejected',
+          rejectedAt: serverTimestamp(),
+          rejectedBy: user.uid
+        });
+        
+        toast.success('Opportunity rejected');
+        setPendingOpps(prev => prev.filter(o => o.id !== opp.id));
+      }
     } catch (error) {
-      console.error('Error rejecting opportunity:', error);
-      toast.error('Failed to reject opportunity');
+      console.error(`Error ${action}ing opportunity:`, error);
+      toast.error(`Failed to ${action} opportunity`);
+    } finally {
+      setIsConfirming(false);
+      setActionOpportunity(null);
     }
   };
 
@@ -277,14 +276,14 @@ export default function AdminDashboardPage() {
                   {/* Right Column: Actions */}
                   <div className="lg:w-[200px] shrink-0 flex flex-row lg:flex-col gap-3 justify-start">
                     <button
-                      onClick={() => handleApprove(opp)}
+                      onClick={() => triggerAction(opp, 'approve')}
                       className="flex-1 lg:w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-colors"
                     >
                       <CheckCircle2 size={18} />
                       Approve
                     </button>
                     <button
-                      onClick={() => handleReject(opp.id)}
+                      onClick={() => triggerAction(opp, 'reject')}
                       className="flex-1 lg:w-full px-4 py-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold rounded-xl flex items-center justify-center gap-2 transition-colors"
                     >
                       <XCircle size={18} />
@@ -297,6 +296,23 @@ export default function AdminDashboardPage() {
           </div>
         )}
       </div>
+
+      <ConfirmationModal
+        isOpen={!!actionOpportunity}
+        onClose={() => !isConfirming && setActionOpportunity(null)}
+        onConfirm={executeAction}
+        title={actionOpportunity?.action === 'approve' ? 'Approve Opportunity' : 'Reject Opportunity'}
+        message={
+          <>
+            Are you sure you want to {actionOpportunity?.action} {' '}
+            <span className="font-bold text-slate-900">{actionOpportunity?.opp?.title}</span>?
+            {actionOpportunity?.action === 'reject' && '\n\nThis action cannot be undone.'}
+          </>
+        }
+        confirmText={actionOpportunity?.action === 'approve' ? 'Approve' : 'Reject'}
+        isDestructive={actionOpportunity?.action === 'reject'}
+        isLoading={isConfirming}
+      />
     </div>
   );
 }

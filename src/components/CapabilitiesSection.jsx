@@ -6,7 +6,7 @@ export default function CapabilitiesSection() {
     { icon: ShieldCheck, title: "Secure Cloud", desc: "Enterprise-grade data protection" },
     { icon: Users, title: "Realtime Sync", desc: "Collaborate seamlessly with teams" },
     { icon: Building, title: "Employer Portal", desc: "Direct access to top talent" },
-    { icon: Bot, title: "AI Recruiter", desc: "Automated candidate screening" },
+    { icon: Bot, title: "AI Analyzer", desc: "Automated candidate screening" },
     { icon: Wand2, title: "Opportunity Copilot", desc: "Your personal career assistant" },
     { icon: Database, title: "Supabase Backend", desc: "Scalable & reliable database" },
     { icon: MonitorSmartphone, title: "Responsive UI", desc: "Flawless experience on any device" },

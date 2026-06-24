@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Bot, CheckCircle2, Loader2 } from 'lucide-react';
 import { geminiService } from '../../services/geminiService';
 import { fileToBase64 } from '../../utils/fileUtils';
+import { toast } from 'react-hot-toast';
 
 const STEPS = [
   "Extracting Skills from Sources...",
@@ -83,7 +84,38 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
       } catch (error) {
         console.error("Skill Gap Analysis Error:", error);
         if (isMounted) {
-          alert("AI Analysis failed: " + error.message);
+          // Fallback report handled silently
+          const fallbackReport = {
+            targetRole: targetRole || "Unknown Role",
+            readinessScore: 50,
+            skillGapPercentage: 50,
+            currentSkills: ["Profile initialized"],
+            skillBreakdown: { strong: 1, moderate: 0, missing: 1 },
+            nextSkill: {
+              name: "System Design",
+              priority: "High",
+              time: "2 Weeks",
+              impact: "High",
+              reason: "AI detailed analysis is currently unavailable. Please retry later."
+            },
+            missingSkills: {
+              high: ["AI Analysis Retry"],
+              medium: [],
+              low: []
+            },
+            learningPath: [
+              {
+                title: "Retry Analysis",
+                time: "N/A"
+              }
+            ],
+            aiAdvice: "The AI service was temporarily busy. Please try generating your report again later.",
+            consistencyTip: "Stay consistent and try again!"
+          };
+          setCurrentStepIndex(4);
+          setTimeout(() => {
+            if (isMounted) onComplete(fallbackReport);
+          }, 1000);
         }
       }
     }

@@ -30,7 +30,25 @@ export default function SkillGapAnalysis({ opportunity }) {
     );
   }
 
-  if (!gapData) return null;
+  if (!gapData) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-100 p-6 md:p-8 shadow-sm flex flex-col items-center justify-center min-h-[300px] text-center">
+        <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mb-4">
+          <Target size={32} className="text-indigo-600" />
+        </div>
+        <h3 className="text-[18px] font-bold text-slate-900 mb-2">Skill Gap Analysis</h3>
+        <p className="text-[14px] text-slate-500 max-w-sm mb-6">Compare your profile against this opportunity to find out what skills you need to learn.</p>
+        <button 
+          onClick={() => generateGapAnalysis()}
+          disabled={isLoading}
+          className="bg-[#6C4CF1] hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-xl transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          <Bot size={18} />
+          {isLoading ? "Generating..." : "Generate Analysis"}
+        </button>
+      </div>
+    );
+  }
 
   const { 
     currentSkills = [], 

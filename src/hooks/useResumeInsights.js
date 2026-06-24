@@ -17,6 +17,8 @@ export function useResumeInsights() {
   const [storedResumeName, setStoredResumeName] = useState(null);
   const [hasInsights, setHasInsights] = useState(false);
 
+
+
   const loadInsights = useCallback(async () => {
     if (!user?.id) {
       setIsLoading(false);

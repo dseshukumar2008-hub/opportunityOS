@@ -3,10 +3,10 @@ import { FileEdit, Search, Bot, Target, Users, BarChart3, ArrowRight } from 'luc
 
 const actions = [
   { icon: FileEdit,   label: 'Create Resume',      sub: 'Build your profile',          path: '/resume-builder',  color: 'indigo' },
-  { icon: Search,     label: 'Find Opportunities', sub: 'Discover top matches',        path: '/opportunities',   color: 'violet' },
   { icon: Bot,        label: 'Analyze Resume',     sub: 'Get AI-powered feedback',     path: '/resume-review',   color: 'violet' },
+  { icon: Target,     label: 'Skill Gap Analysis', sub: 'Identify missing skills',     path: '/skill-gap',  color: 'emerald' },
+  { icon: Users,      label: 'Interview Prep',     sub: 'Practice with AI',            path: '/interview-prep',   color: 'amber' },
   { icon: Target,     label: 'Career Coach',       sub: 'Plan your next steps',        path: '/career-coach',  color: 'emerald' },
-  { icon: Users,      label: 'Build Team',          sub: 'Connect with peers',          path: '/team-finder',   color: 'amber' },
   { icon: BarChart3,  label: 'View Analytics',     sub: 'Track your progress',         path: '/analytics',     color: 'rose' },
 ];
 

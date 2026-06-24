@@ -11,7 +11,7 @@ export default function Step7ConnectStudents() {
           </div>
           <div>
             <h2 className="text-xl font-bold text-slate-900">Grow your network</h2>
-            <p className="text-sm font-medium text-slate-500">Connect with peers, alumni, and recruiters in your field.</p>
+            <p className="text-sm font-medium text-slate-500">Connect with peers, alumni, and industry professionals in your field.</p>
           </div>
         </div>
         <div className="flex items-center gap-4 bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm">
@@ -65,7 +65,7 @@ export default function Step7ConnectStudents() {
             <div className="relative z-10 bg-white/10 border border-white/20 p-4 rounded-xl mb-4 backdrop-blur-sm">
               <p className="text-sm font-semibold mb-2">Insight:</p>
               <p className="text-xs leading-relaxed text-pink-50">
-                You share 4 technical skills with Sarah Chen, a recruiter at Google. Sending a connection request now will place you in the top 5% of early applicants for the Summer 2026 cohort.
+                You share 4 technical skills with Sarah Chen, an alumni at Google. Sending a connection request now will place you in the top 5% of early applicants for the Summer 2026 cohort.
               </p>
             </div>
             <button className="relative z-10 w-full bg-white hover:bg-slate-50 text-pink-700 py-2.5 rounded-xl text-xs font-bold transition-colors shadow-sm">
@@ -91,7 +91,7 @@ export default function Step7ConnectStudents() {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <h4 className="text-sm font-bold text-slate-900">Sarah Chen</h4>
-                  <span className="px-2 py-0.5 bg-rose-50 text-rose-700 text-[10px] font-black uppercase rounded border border-rose-100">Recruiter</span>
+                  <span className="px-2 py-0.5 bg-rose-50 text-rose-700 text-[10px] font-black uppercase rounded border border-rose-100">Professional</span>
                 </div>
                 <p className="text-xs text-slate-500 font-medium mt-0.5">University Tech Recruiting @ Google</p>
                 <div className="flex items-center gap-2 mt-2">

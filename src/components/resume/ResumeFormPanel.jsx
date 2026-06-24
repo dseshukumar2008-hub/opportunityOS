@@ -10,13 +10,23 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  FileText,
+  BookOpen,
   Plus,
   Trash2,
   ArrowRight,
-  Upload,
-  Camera
+  Wand2,
+  Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { geminiService } from '../../services/geminiService';
+
+const AI_ACTIONS = [
+  { id: 'enhance', label: 'Enhance with AI', icon: Wand2 },
+  { id: 'ats', label: 'ATS Optimize', icon: CheckCircle2 },
+  { id: 'shorten', label: 'Shorten', icon: ChevronUp },
+  { id: 'professional', label: 'Make More Professional', icon: Briefcase }
+];
 
 export default function ResumeFormPanel() {
   const { 
@@ -30,42 +40,64 @@ export default function ResumeFormPanel() {
   } = useResume();
 
   const [activeSection, setActiveSection] = useState('Personal Info');
-  const fileInputRef = useRef(null);
+  const [enhancingField, setEnhancingField] = useState(null); // stores { type, id }
+  const [aiMenuOpen, setAiMenuOpen] = useState(null); // stores { type, id }
+  const [aiDrafts, setAiDrafts] = useState({}); // stores { [id]: draftText }
 
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Check size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
+  const handleEnhanceText = async (type, id, currentValue, contextType, actionType = 'enhance') => {
+    if (!currentValue?.trim()) {
+      toast.error('Please enter some text to enhance first.');
       return;
     }
-
-    // Check type
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      toast.error('Only JPG, PNG, and WEBP formats are supported');
-      return;
+    setAiMenuOpen(null);
+    setEnhancingField({ type, id });
+    try {
+      const enhanced = await geminiService.enhanceResumeText(currentValue, contextType, actionType);
+      setAiDrafts(prev => ({ ...prev, [id]: enhanced }));
+      toast.success('AI generation complete!');
+    } catch (err) {
+      toast.error('Failed to enhance text.');
+    } finally {
+      setEnhancingField(null);
     }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      updatePersonalInfo({ photo: reader.result });
-      toast.success('Profile photo updated!');
-    };
-    reader.onerror = () => {
-      toast.error('Failed to read file');
-    };
-    reader.readAsDataURL(file);
   };
+
+  const acceptAiDraft = (type, id) => {
+    const enhanced = aiDrafts[id];
+    if (!enhanced) return;
+    
+    if (type === 'projects') {
+      updateArrayItem('projects', id, { description: enhanced });
+    } else if (type === 'experience') {
+      updateArrayItem('experience', id, { responsibilities: enhanced });
+    } else if (type === 'certifications') {
+      updateArrayItem('certifications', id, { issuer: enhanced });
+    } else if (type === 'summary') {
+      updatePersonalInfo({ summary: enhanced });
+    }
+    
+    discardAiDraft(id);
+    toast.success('AI changes accepted');
+  };
+
+  const discardAiDraft = (id) => {
+    setAiDrafts(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
 
   const sections = [
     { id: 'Personal Info', title: 'Personal Information', icon: User, description: 'Add your basic personal details.' },
+    { id: 'Summary', title: 'Professional Summary', icon: FileText, description: 'Write a compelling overview of your career.' },
     { id: 'Education', title: 'Education', icon: GraduationCap, description: 'Add your educational background.' },
     { id: 'Skills', title: 'Skills', icon: Code, description: 'Add your technical and professional skills.' },
     { id: 'Projects', title: 'Projects', icon: FolderGit2, description: 'Add the projects you have worked on.' },
     { id: 'Experience', title: 'Experience', icon: Briefcase, description: 'Add your work and internship experience.' },
-    { id: 'Certifications', title: 'Certifications', icon: Award, description: 'Add your certifications and achievements.' }
+    { id: 'Certifications', title: 'Certifications', icon: Award, description: 'Add your certifications and achievements.' },
+    { id: 'Workshops', title: 'Workshops & Training', icon: BookOpen, description: 'Add your workshops and training programs.' }
   ];
 
   const handleNext = () => {
@@ -75,116 +107,163 @@ export default function ResumeFormPanel() {
     }
   };
 
-  const renderPersonalInfoForm = () => (
-    <div className="flex flex-col gap-6 mt-6 pb-2">
-      {/* Profile Photo Upload */}
-      <div className="flex items-center gap-5 p-4 rounded-2xl border border-slate-200 bg-slate-50/50">
-        <div className="relative w-20 h-20 shrink-0">
-          <img 
-            src={resumeData.personalInfo.photo || `https://api.dicebear.com/7.x/notionists/svg?seed=${resumeData.personalInfo.fullName || 'User'}&backgroundColor=e2e8f0`} 
-            alt="Profile Preview" 
-            className="w-full h-full object-cover rounded-full border-2 border-white shadow-sm"
-          />
+  const renderAiButton = (type, id, currentValue, contextType) => {
+    const isEnhancing = enhancingField?.type === type && enhancingField?.id === id;
+    const isMenuOpen = aiMenuOpen?.type === type && aiMenuOpen?.id === id;
+
+    return (
+      <div className="relative">
+        <button
+          onClick={() => isMenuOpen ? setAiMenuOpen(null) : setAiMenuOpen({ type, id })}
+          disabled={isEnhancing}
+          className="text-[11px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1.5 rounded-md flex items-center gap-1.5 transition-colors"
+        >
+          {isEnhancing ? (
+            <><Loader2 size={12} className="animate-spin" /> Enhancing...</>
+          ) : (
+            <><Wand2 size={12} /> Enhance with AI <ChevronDown size={12} /></>
+          )}
+        </button>
+
+        {isMenuOpen && !isEnhancing && (
+          <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-10 animate-in fade-in slide-in-from-top-2">
+            {AI_ACTIONS.map(action => {
+              const ActionIcon = action.icon;
+              return (
+                <button
+                  key={action.id}
+                  onClick={() => handleEnhanceText(type, id, currentValue, contextType, action.id)}
+                  className="w-full px-3 py-2 text-left text-[12px] font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 flex items-center gap-2 transition-colors"
+                >
+                  <ActionIcon size={14} />
+                  {action.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderAiDraft = (type, id) => {
+    const draft = aiDrafts[id];
+    if (!draft) return null;
+    
+    return (
+      <div className="mt-2 bg-indigo-50/50 border border-indigo-100 rounded-xl p-3 text-[13px] animate-in fade-in slide-in-from-top-1">
+        <div className="flex items-center gap-2 mb-2">
+          <Wand2 size={14} className="text-indigo-500" />
+          <span className="font-bold text-indigo-900">AI Suggestion</span>
+        </div>
+        <p className="text-slate-700 mb-3 whitespace-pre-wrap">{draft}</p>
+        <div className="flex items-center gap-2">
           <button 
-            onClick={() => fileInputRef.current?.click()}
-            className="absolute bottom-0 right-0 w-7 h-7 bg-white rounded-full border border-slate-200 shadow-sm flex items-center justify-center text-slate-600 hover:text-indigo-600 hover:border-indigo-200 transition-colors"
+            onClick={() => acceptAiDraft(type, id)}
+            className="px-3 py-1.5 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 transition-colors"
           >
-            <Camera size={14} />
+            Replace
+          </button>
+          <button 
+            onClick={() => discardAiDraft(id)}
+            className="px-3 py-1.5 bg-white text-slate-600 font-semibold border border-slate-200 rounded-md hover:bg-slate-50 transition-colors"
+          >
+            Discard
           </button>
         </div>
-        <div className="flex flex-col gap-2 flex-1">
-          <div>
-            <h4 className="text-[14px] font-bold text-slate-800">Profile Photo</h4>
-            <p className="text-[12px] text-slate-500 font-medium">Supported formats: JPG, PNG, WEBP (Max 5MB)</p>
+      </div>
+    );
+  };
+
+  const renderSummaryForm = () => {
+    const summary = resumeData?.personalInfo?.summary || '';
+    return (
+      <div className="flex flex-col gap-4 mt-6 pb-2">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <label className="text-[13px] font-bold text-slate-800">Professional Summary</label>
+            {renderAiButton('summary', 'summary-1', summary, 'professional summary')}
           </div>
-          <div className="flex gap-3">
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[12px] font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-1.5"
-            >
-              <Upload size={14} />
-              {resumeData.personalInfo.photo ? 'Change Photo' : 'Upload Photo'}
-            </button>
-            {resumeData.personalInfo.photo && (
-              <button 
-                onClick={() => {
-                  updatePersonalInfo({ photo: '' });
-                  if (fileInputRef.current) fileInputRef.current.value = '';
-                }}
-                className="px-3 py-1.5 bg-red-50 border border-red-100 rounded-lg text-[12px] font-bold text-red-600 hover:bg-red-100 transition-colors"
-              >
-                Remove
-              </button>
-            )}
-          </div>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handlePhotoUpload} 
-            accept="image/jpeg, image/png, image/webp" 
-            className="hidden" 
+          <textarea 
+            rows={5}
+            value={summary}
+            onChange={(e) => updatePersonalInfo({ summary: e.target.value })}
+            placeholder="Results-driven professional with experience in..."
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[#6C4CF1] focus:bg-white transition-all resize-none placeholder:text-slate-400"
           />
+          <p className="text-xs text-slate-500 flex justify-end">
+            {summary.length} / 500 characters
+          </p>
+          {renderAiDraft('summary', 'summary-1')}
+        </div>
+        <div className="flex justify-end mt-4">
+          <button onClick={handleNext} className="bg-[#6C4CF1] hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-[0_4px_14px_0_rgba(108,76,241,0.39)] hover:shadow-[0_6px_20px_rgba(108,76,241,0.23)]">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
         </div>
       </div>
+    );
+  };
+
+  const renderPersonalInfoForm = () => (
+    <div className="flex flex-col gap-6 mt-6 pb-2">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
         <div className="flex flex-col gap-2">
           <label className="text-[13px] font-bold text-slate-800">Full Name <span className="text-red-500">*</span></label>
           <input 
             type="text" 
-            value={resumeData.personalInfo.fullName}
+            value={resumeData?.personalInfo?.fullName || ''}
             onChange={(e) => updatePersonalInfo({ fullName: e.target.value })}
-            placeholder="Seshu Kumar"
-            className="px-4 py-3 rounded-xl border border-slate-200 text-[14px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+            placeholder="Enter your full name"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[#6C4CF1] focus:bg-white transition-all placeholder:text-slate-400"
           />
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-[13px] font-bold text-slate-800">Email <span className="text-red-500">*</span></label>
           <input 
             type="email" 
-            value={resumeData.personalInfo.email}
+            value={resumeData?.personalInfo?.email || ''}
             onChange={(e) => updatePersonalInfo({ email: e.target.value })}
-            placeholder="seshu@example.com"
-            className="px-4 py-3 rounded-xl border border-slate-200 text-[14px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+            placeholder="your.email@example.com"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[#6C4CF1] focus:bg-white transition-all placeholder:text-slate-400"
           />
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-[13px] font-bold text-slate-800">Phone <span className="text-red-500">*</span></label>
           <input 
             type="tel" 
-            value={resumeData.personalInfo.phone}
+            value={resumeData?.personalInfo?.phone || ''}
             onChange={(e) => updatePersonalInfo({ phone: e.target.value })}
-            placeholder="+91 98765 43210"
-            className="px-4 py-3 rounded-xl border border-slate-200 text-[14px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+            placeholder="+91 XXXXX XXXXX"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[#6C4CF1] focus:bg-white transition-all placeholder:text-slate-400"
           />
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-[13px] font-bold text-slate-800">Location <span className="text-red-500">*</span></label>
           <input 
             type="text" 
-            value={resumeData.personalInfo.location}
+            value={resumeData?.personalInfo?.location || ''}
             onChange={(e) => updatePersonalInfo({ location: e.target.value })}
-            placeholder="Bangalore, India"
-            className="px-4 py-3 rounded-xl border border-slate-200 text-[14px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+            placeholder="City, Country"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[#6C4CF1] focus:bg-white transition-all placeholder:text-slate-400"
           />
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-[13px] font-bold text-slate-800">LinkedIn</label>
           <input 
             type="url" 
-            value={resumeData.personalInfo.linkedin}
+            value={resumeData?.personalInfo?.linkedin || ''}
             onChange={(e) => updatePersonalInfo({ linkedin: e.target.value })}
-            placeholder="linkedin.com/in/seshu-kumar"
-            className="px-4 py-3 rounded-xl border border-slate-200 text-[14px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+            placeholder="linkedin.com/in/your-profile"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[#6C4CF1] focus:bg-white transition-all placeholder:text-slate-400"
           />
         </div>
         <div className="flex flex-col gap-2">
           <label className="text-[13px] font-bold text-slate-800">GitHub</label>
           <input 
             type="url" 
-            value={resumeData.personalInfo.github}
+            value={resumeData?.personalInfo?.github || ''}
             onChange={(e) => updatePersonalInfo({ github: e.target.value })}
-            placeholder="github.com/seshu-dev"
-            className="px-4 py-3 rounded-xl border border-slate-200 text-[14px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+            placeholder="github.com/your-username"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[#6C4CF1] focus:bg-white transition-all placeholder:text-slate-400"
           />
         </div>
       </div>
@@ -194,8 +273,8 @@ export default function ResumeFormPanel() {
           type="url" 
           value={resumeData.personalInfo.portfolio}
           onChange={(e) => updatePersonalInfo({ portfolio: e.target.value })}
-          placeholder="https://seshu.dev"
-          className="px-4 py-3 rounded-xl border border-slate-200 text-[14px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+          placeholder="https://yourportfolio.com"
+          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[#6C4CF1] focus:bg-white transition-all placeholder:text-slate-400"
         />
       </div>
       <div className="flex justify-end mt-4">
@@ -312,8 +391,8 @@ export default function ResumeFormPanel() {
                 <input 
                   type="text" value={proj.title || ''}
                   onChange={(e) => updateArrayItem('projects', proj.id, { title: e.target.value })}
-                  placeholder="OpportunityOS"
-                  className="px-4 py-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:border-indigo-500"
+                  placeholder="e.g., E-commerce Platform"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[#6C4CF1] focus:bg-white transition-all"
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -321,19 +400,24 @@ export default function ResumeFormPanel() {
                 <input 
                   type="text" value={proj.link || ''}
                   onChange={(e) => updateArrayItem('projects', proj.id, { link: e.target.value })}
-                  placeholder="github.com/seshu-dev/opportunityos"
-                  className="px-4 py-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:border-indigo-500"
+                  placeholder="github.com/your-username/project"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-[#6C4CF1] focus:bg-white transition-all"
                 />
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[13px] font-bold text-slate-800">Description</label>
-              <input 
-                type="text" value={proj.description || ''}
+              <div className="flex items-center justify-between">
+                <label className="text-[13px] font-bold text-slate-800">Description</label>
+                {renderAiButton('projects', proj.id, proj.description, 'project description')}
+              </div>
+              <textarea 
+                rows={3}
+                value={proj.description || ''}
                 onChange={(e) => updateArrayItem('projects', proj.id, { description: e.target.value })}
                 placeholder="A full-stack platform..."
-                className="px-4 py-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:border-indigo-500"
+                className="px-4 py-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:border-indigo-500 resize-none"
               />
+              {renderAiDraft('projects', proj.id)}
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-[13px] font-bold text-slate-800">Tech Stack</label>
@@ -382,8 +466,8 @@ export default function ResumeFormPanel() {
                 <input 
                   type="text" value={exp.company || ''}
                   onChange={(e) => updateArrayItem('experience', exp.id, { company: e.target.value })}
-                  placeholder="CodeTech Solutions"
-                  className="px-4 py-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:border-indigo-500"
+                  placeholder="e.g., Tech Solutions Inc."
+                  className="px-4 py-3 rounded-lg border border-slate-200 text-[14px] font-bold focus:outline-none focus:border-indigo-500"
                 />
               </div>
             </div>
@@ -397,13 +481,17 @@ export default function ResumeFormPanel() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[13px] font-bold text-slate-800">Responsibilities (New line for bullet)</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[13px] font-bold text-slate-800">Responsibilities (New line for bullet)</label>
+                {renderAiButton('experience', exp.id, exp.responsibilities, 'work experience bullet points')}
+              </div>
               <textarea 
                 rows={4} value={exp.responsibilities || ''}
                 onChange={(e) => updateArrayItem('experience', exp.id, { responsibilities: e.target.value })}
                 placeholder="Built responsive web applications..."
                 className="px-4 py-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:border-indigo-500 resize-none"
               />
+              {renderAiDraft('experience', exp.id)}
             </div>
           </div>
         </div>
@@ -447,13 +535,17 @@ export default function ResumeFormPanel() {
               />
             </div>
             <div className="flex flex-col gap-2 sm:col-span-3">
-              <label className="text-[13px] font-bold text-slate-800">Issuer / Detail</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[13px] font-bold text-slate-800">Issuer / Detail</label>
+                {renderAiButton('certifications', cert.id, cert.issuer, 'certification achievement details')}
+              </div>
               <input 
                 type="text" value={cert.issuer || ''}
                 onChange={(e) => updateArrayItem('certifications', cert.id, { issuer: e.target.value })}
                 placeholder="freeCodeCamp"
                 className="px-4 py-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:border-indigo-500"
               />
+              {renderAiDraft('certifications', cert.id)}
             </div>
           </div>
         </div>
@@ -464,12 +556,62 @@ export default function ResumeFormPanel() {
       >
         <Plus size={18} strokeWidth={2.5} /> Add Certification
       </button>
+      <div className="flex justify-end mt-4">
+        <button onClick={handleNext} className="bg-[#6C4CF1] hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-[0_4px_14px_0_rgba(108,76,241,0.39)]">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
+      </div>
+    </div>
+  );
+
+  const renderWorkshopsForm = () => (
+    <div className="flex flex-col gap-4 mt-6 pb-2">
+      {(resumeData.workshops || []).map((ws) => (
+        <div key={ws.id} className="p-5 border border-slate-200 rounded-xl bg-white shadow-sm relative group">
+          <button onClick={() => removeArrayItem('workshops', ws.id)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors">
+            <Trash2 size={18} />
+          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <label className="text-[13px] font-bold text-slate-800">Workshop / Training Title</label>
+              <input 
+                type="text" value={ws.title || ''}
+                onChange={(e) => updateArrayItem('workshops', ws.id, { title: e.target.value })}
+                placeholder="Advanced System Design"
+                className="px-4 py-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-[13px] font-bold text-slate-800">Year</label>
+              <input 
+                type="text" value={ws.year || ''}
+                onChange={(e) => updateArrayItem('workshops', ws.id, { year: e.target.value })}
+                placeholder="2023"
+                className="px-4 py-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+            <div className="flex flex-col gap-2 sm:col-span-3">
+              <label className="text-[13px] font-bold text-slate-800">Issuer / Organization</label>
+              <input 
+                type="text" value={ws.issuer || ''}
+                onChange={(e) => updateArrayItem('workshops', ws.id, { issuer: e.target.value })}
+                placeholder="Tech Talks Conference"
+                className="px-4 py-3 rounded-lg border border-slate-200 text-[14px] focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+        </div>
+      ))}
+      <button 
+        onClick={() => addArrayItem('workshops', { title: '', issuer: '', year: '' })}
+        className="w-full py-4 border-2 border-dashed border-indigo-200 text-indigo-600 rounded-xl font-bold text-[14px] hover:bg-indigo-50 transition-colors flex items-center justify-center gap-2"
+      >
+        <Plus size={18} strokeWidth={2.5} /> Add Workshop
+      </button>
     </div>
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      {sections.map(section => {
+    <div className="flex flex-col bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      {sections.map((section, index) => {
         const isActive = activeSection === section.id;
         const isComplete = isSectionComplete(section.id);
         const Icon = section.icon;
@@ -477,37 +619,39 @@ export default function ResumeFormPanel() {
         return (
           <div 
             key={section.id} 
-            className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden transition-all duration-300"
+            className={`bg-white overflow-hidden transition-all duration-300 ${index !== sections.length - 1 ? 'border-b border-slate-100' : ''}`}
           >
             {/* Accordion Header */}
             <div 
               onClick={() => setActiveSection(isActive ? null : section.id)}
-              className={`flex items-center justify-between p-6 cursor-pointer transition-colors ${isActive ? 'bg-white' : 'hover:bg-slate-50'}`}
+              className={`flex items-center justify-between p-5 cursor-pointer transition-colors ${isActive ? 'bg-slate-50/50' : 'hover:bg-slate-50'}`}
             >
-              <div className="flex items-center gap-5">
-                <div className={`w-12 h-12 rounded-[16px] flex items-center justify-center shrink-0 ${isActive || isComplete ? 'bg-indigo-50 text-[#6C4CF1]' : 'bg-slate-50 text-slate-400'}`}>
-                  <Icon size={20} strokeWidth={2.5} />
+              <div className="flex items-center gap-4">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isActive || isComplete ? 'bg-indigo-50 text-[#6C4CF1]' : 'bg-slate-50 text-slate-400'}`}>
+                  <Icon size={18} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h3 className="text-[16px] font-bold text-slate-900">{section.title}</h3>
-                  <p className="text-[13px] text-slate-500 font-medium mt-0.5">{section.description}</p>
+                  <h3 className="text-[15px] font-bold text-slate-900">{section.title}</h3>
+                  <p className="text-[12px] text-slate-500 font-medium mt-0.5">{section.description}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                {isComplete && <CheckCircle2 className="text-emerald-500" size={24} strokeWidth={2} />}
-                {isActive ? <ChevronUp size={24} className="text-slate-400" /> : <ChevronDown size={24} className="text-slate-400" />}
+                {isComplete && <CheckCircle2 className="text-emerald-500" size={20} strokeWidth={2.5} />}
+                {isActive ? <ChevronUp size={20} className="text-slate-400" /> : <ChevronDown size={20} className="text-slate-400" />}
               </div>
             </div>
 
             {/* Accordion Body */}
             {isActive && (
-              <div className="px-6 pb-6 pt-0">
+              <div className="px-5 pb-6 pt-0">
                 {section.id === 'Personal Info' && renderPersonalInfoForm()}
+                {section.id === 'Summary' && renderSummaryForm()}
                 {section.id === 'Education' && renderEducationForm()}
                 {section.id === 'Skills' && renderSkillsForm()}
                 {section.id === 'Projects' && renderProjectsForm()}
                 {section.id === 'Experience' && renderExperienceForm()}
                 {section.id === 'Certifications' && renderCertificationsForm()}
+                {section.id === 'Workshops' && renderWorkshopsForm()}
               </div>
             )}
           </div>

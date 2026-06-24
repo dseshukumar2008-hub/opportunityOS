@@ -8,6 +8,7 @@ import {
 import { generateRoadmapPDF } from '../../utils/generateRoadmapPDF';
 import { useProfile } from '../../contexts/ProfileContext';
 import roadmapResources from '../../data/roadmapResources.json';
+import ConfirmationModal from '../common/ConfirmationModal';
 
 const PHASE_COLORS = [
   { bg: 'bg-[#6C4CF1]', text: 'text-[#6C4CF1]', light: 'bg-indigo-50', border: 'border-[#6C4CF1]' },
@@ -279,6 +280,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
   }, [phases, activePhaseIdx, completedTasks]);
 
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showProgressResetModal, setShowProgressResetModal] = useState(false);
 
   // Expand the active phase by default
   const [expandedPhases, setExpandedPhases] = useState({});
@@ -333,7 +335,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
             <button onClick={() => setShowResetModal(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold backdrop-blur-md transition-all">
               <Target size={14}/> Change Goal
             </button>
-            <button onClick={() => window.confirm('Reset current progress?') && onReset()} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold backdrop-blur-md transition-all">
+            <button onClick={() => setShowProgressResetModal(true)} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold backdrop-blur-md transition-all">
               <RotateCcw size={14}/> Reset
             </button>
           </div>
@@ -394,6 +396,25 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
           </div>
         </div>
       )}
+
+      {/* ── PROGRESS RESET CONFIRMATION MODAL ── */}
+      <ConfirmationModal
+        isOpen={showProgressResetModal}
+        onClose={() => setShowProgressResetModal(false)}
+        onConfirm={() => {
+          setShowProgressResetModal(false);
+          onReset();
+        }}
+        title="Reset Progress"
+        message={
+          <>
+            Are you sure you want to reset your current progress?
+            {'\n\n'}This action cannot be undone.
+          </>
+        }
+        confirmText="Reset Progress"
+        isDestructive={true}
+      />
 
       {/* ── ROADMAP JOURNEY TIMELINE ── */}
       <div>

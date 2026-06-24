@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Lock, Loader2 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { auth } from '../../config/firebase';
+import { updatePassword, sendPasswordResetEmail } from 'firebase/auth';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -23,13 +24,17 @@ export default function PasswordSecuritySettings() {
 
     setIsUpdating(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password: form.new });
-      if (error) throw error;
+      if (!auth.currentUser) throw new Error('No active user session');
+      await updatePassword(auth.currentUser, form.new);
       toast.success('Password updated successfully');
       setForm({ new: '', confirm: '' });
     } catch (err) {
       console.error('Failed to update password:', err);
-      toast.error(err.message || 'Failed to update password');
+      if (err.code === 'auth/requires-recent-login') {
+        toast.error('For security reasons, please log out and log back in to change your password.');
+      } else {
+        toast.error(err.message || 'Failed to update password');
+      }
     } finally {
       setIsUpdating(false);
     }
@@ -43,8 +48,7 @@ export default function PasswordSecuritySettings() {
 
     setIsResetting(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(user.email);
-      if (error) throw error;
+      await sendPasswordResetEmail(auth, user.email);
       toast.success('Password reset email sent. Please check your inbox.');
     } catch (err) {
       console.error('Failed to send password reset:', err);

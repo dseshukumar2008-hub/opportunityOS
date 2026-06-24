@@ -25,7 +25,7 @@ export default function Step9CompleteOnboarding() {
           </div>
           <h2 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-3">You're ready to win opportunities</h2>
           <p className="text-base font-medium text-slate-500 max-w-lg">
-            Your profile is fully optimized, your resume is ATS-ready, and top recruiters can now discover you.
+            Your profile is fully optimized, your resume is ATS-ready, and top companies can now discover you.
           </p>
         </div>
 

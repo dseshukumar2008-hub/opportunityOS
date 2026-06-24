@@ -25,7 +25,7 @@ export default function Step2AnalysisSource({ onSubmit, onBack, initialSources }
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-6 lg:p-8 animate-in fade-in slide-in-from-right-8 duration-500">
+    <div className="w-full max-w-[900px] mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-6 lg:p-8 animate-in fade-in slide-in-from-right-8 duration-500">
       <div className="flex flex-col items-center text-center mb-6">
         <h1 className="text-xl lg:text-2xl font-black text-slate-900 mb-1">How should we analyze your skills?</h1>
         <p className="text-[13px] text-slate-500 font-medium">Select sources to build your profile. Don't worry if you only have a resume — that's usually enough to get a great analysis!</p>

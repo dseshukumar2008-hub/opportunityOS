@@ -88,7 +88,7 @@ export default function AchievementsShowcase() {
               </div>
             );
           }
-
+          
           return (
             <div key={badge.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col justify-between opacity-70 hover:opacity-100 transition-opacity">
               <div>

@@ -135,7 +135,7 @@ export function useAICopilot() {
             setPlan(parsed.data);
             return;
           }
-        } catch { /* stale */ }
+        } catch (err) { console.warn('Failed to parse AI Copilot cache', err); }
       }
     }
 

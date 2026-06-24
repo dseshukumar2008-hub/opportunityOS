@@ -2,7 +2,8 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { useActivity } from './ActivityContext';
-import { supabase } from '../lib/supabase';
+import { auth, db } from '../config/firebase';
+import { collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
 const ResumeContext = createContext(null);
@@ -15,14 +16,14 @@ export const DEFAULT_RESUME_STATE = {
     location: '',
     linkedin: '',
     github: '',
-    portfolio: '',
-    photo: ''
+    portfolio: ''
   },
   education: [],
   skills: [],
   projects: [],
   experience: [],
-  certifications: []
+  certifications: [],
+  workshops: []
 };
 
 export const ResumeProvider = ({ children }) => {
@@ -46,22 +47,31 @@ export const ResumeProvider = ({ children }) => {
   const [lastUpdated, setLastUpdated] = useState(() => Date.now());
   const [hasLocalMigration, setHasLocalMigration] = useState(false);
 
-  // Fetch resumes from Supabase
+  // Fetch resumes from Firestore
   const fetchResumes = useCallback(async () => {
-    if (!user) {
+    if (!user || !user.uid) {
       setLoading(false);
       return;
     }
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('resumes')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('updated_at', { ascending: false });
-
-      if (error) throw error;
+      const q = query(
+        collection(db, 'resumes'),
+        where('userId', '==', user.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      const data = querySnapshot.docs.map(doc => {
+        const docData = doc.data();
+        return { 
+          ...docData,
+          id: doc.id, 
+          title: docData.resumeName || docData.title || 'Untitled Resume'
+        };
+      });
+      
+      // Sort by updatedAt descending
+      data.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
 
       if (data && data.length > 0) {
         setResumes(data);
@@ -71,12 +81,13 @@ export const ResumeProvider = ({ children }) => {
           setActiveTemplate(data[0].template || 'Modern');
           
           setResumeData({
-            personalInfo: data[0].personal_info || DEFAULT_RESUME_STATE.personalInfo,
+            personalInfo: data[0].personalInfo || DEFAULT_RESUME_STATE.personalInfo,
             education: data[0].education || [],
             skills: data[0].skills || [],
             projects: data[0].projects || [],
             experience: data[0].experience || [],
             certifications: data[0].certifications || [],
+            workshops: data[0].workshops || [],
             languages: data[0].languages || [],
             achievements: data[0].achievements || []
           });
@@ -94,8 +105,8 @@ export const ResumeProvider = ({ children }) => {
             ...DEFAULT_RESUME_STATE,
             personalInfo: {
               ...DEFAULT_RESUME_STATE.personalInfo,
-              fullName: user.user_metadata?.name || '',
-              email: user.email || ''
+              fullName: '',
+              email: ''
             }
           });
         }
@@ -118,12 +129,13 @@ export const ResumeProvider = ({ children }) => {
       setActiveResumeId(id);
       setActiveTemplate(resume.template || 'Modern');
       setResumeData({
-        personalInfo: resume.personal_info || DEFAULT_RESUME_STATE.personalInfo,
+        personalInfo: resume.personalInfo || DEFAULT_RESUME_STATE.personalInfo,
         education: resume.education || [],
         skills: resume.skills || [],
         projects: resume.projects || [],
         experience: resume.experience || [],
         certifications: resume.certifications || [],
+        workshops: resume.workshops || [],
         languages: resume.languages || [],
         achievements: resume.achievements || []
       });
@@ -132,131 +144,180 @@ export const ResumeProvider = ({ children }) => {
 
   // Migrate local resume
   const migrateLocalResume = async () => {
-    if (!user) return;
+    if (!user || !user.uid) return;
     
     setSaveState('Saving...');
     try {
       const localData = JSON.parse(localStorage.getItem('resumeData'));
+      const resumeId = crypto.randomUUID();
+      const newResume = {
+        resumeId,
+        userId: user.uid,
+        resumeName: 'Migrated Resume',
+        template: activeTemplate,
+        personalInfo: localData.personalInfo || {},
+        education: localData.education || [],
+        experience: localData.experience || [],
+        projects: localData.projects || [],
+        skills: localData.skills || [],
+        certifications: localData.certifications || [],
+        workshops: localData.workshops || [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
       
-      const { data, error } = await supabase
-        .from('resumes')
-        .insert([{
-          user_id: user.id,
-          title: 'Migrated Resume',
-          template: activeTemplate,
-          personal_info: localData.personalInfo || {},
-          education: localData.education || [],
-          experience: localData.experience || [],
-          projects: localData.projects || [],
-          skills: localData.skills || [],
-          certifications: localData.certifications || []
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
+      await setDoc(doc(db, 'resumes', resumeId), newResume);
       
       // Clean up local storage
       localStorage.removeItem('resumeData');
       setHasLocalMigration(false);
       
       // Update state
-      setResumes([data, ...resumes]);
-      setActiveResumeId(data.id);
+      setResumes([newResume, ...resumes]);
+      setActiveResumeId(resumeId);
       setSaveState('Saved');
       toast.success('Resume successfully migrated to cloud!');
     } catch (err) {
       console.error('Error migrating resume:', err);
-      toast.error('Failed to migrate resume');
+      toast.error(`Failed to migrate resume: ${err.message}`);
       setSaveState('');
     }
   };
 
   // Create new resume
-  const createResume = async (title = 'New Resume') => {
-    if (!user) return;
+  const createResume = async (resumeName = 'Untitled Resume') => {
+    if (!user || !user.uid) {
+      console.error('No authenticated user found for creating resume');
+      toast.error('You must be logged in to create a resume.');
+      return null;
+    }
+    
+    console.log('[ResumeContext] Creating resume for user:', user.uid);
     setSaveState('Saving...');
+    
     try {
-      const { data, error } = await supabase
-        .from('resumes')
-        .insert([{
-          user_id: user.id,
-          title,
-          template: 'Modern',
-          personal_info: { fullName: user.user_metadata?.name || '', email: user.email || '' }
-        }])
-        .select()
-        .single();
+      const resumeId = crypto.randomUUID();
+      const newResume = {
+        id: resumeId,
+        resumeId,
+        title: resumeName,
+        resumeName,
+        userId: user.uid,
+        template: 'Modern',
+        personalInfo: { fullName: '', email: '', phone: '', location: '', website: '', summary: '' },
+        education: [],
+        skills: [],
+        projects: [],
+        experience: [],
+        certifications: [],
+        workshops: [],
+        languages: [],
+        achievements: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      console.log("User:", auth.currentUser);
+      console.log("Resume Payload:", newResume);
+      
+      await setDoc(doc(db, 'resumes', resumeId), newResume);
+      console.log('[ResumeContext] Firestore Response: Success');
 
-      if (error) throw error;
-      setResumes([data, ...resumes]);
-      switchResume(data.id);
+      setResumes(prev => [newResume, ...prev]);
+      
+      // Directly update the active resume state because setResumes is async
+      setActiveResumeId(resumeId);
+      setActiveTemplate('Modern');
+      localStorage.removeItem('resumeData');
+      setResumeData({
+        personalInfo: newResume.personalInfo || DEFAULT_RESUME_STATE.personalInfo,
+        education: newResume.education || [],
+        skills: newResume.skills || [],
+        projects: newResume.projects || [],
+        experience: newResume.experience || [],
+        certifications: newResume.certifications || [],
+        workshops: newResume.workshops || [],
+        languages: newResume.languages || [],
+        achievements: newResume.achievements || []
+      });
+
       setSaveState('Saved');
       toast.success('Created new resume');
+      return resumeId;
     } catch (err) {
-      console.error('Error creating resume:', err);
-      toast.error('Failed to create resume');
+      console.error('[ResumeContext] Error creating resume in Firestore:', err);
+      toast.error(`Failed to create resume: ${err.message}`);
       setSaveState('');
+      return null;
     }
   };
 
   // Delete resume
   const deleteResume = async (id) => {
-    if (!user) return;
+    if (!user || !user.uid) return;
     try {
-      const { error } = await supabase.from('resumes').delete().eq('id', id);
-      if (error) throw error;
+      const targetResume = resumes.find(r => r.id === id || r.resumeId === id);
+
+      // Primary delete operation
+      await deleteDoc(doc(db, 'resumes', id));
       
-      const remaining = resumes.filter(r => r.id !== id);
-      setResumes(remaining);
+      // Secondary cleanups - wrap in try/catch to prevent partial failures from blocking UI
+      try {
+        const historyQ = query(
+          collection(db, 'resume_history'), 
+          where('resumeId', '==', id),
+          where('uid', '==', user.uid)
+        );
+        const historySnapshot = await getDocs(historyQ);
+        const deletePromises = historySnapshot.docs.map(docSnap => deleteDoc(doc(db, 'resume_history', docSnap.id)));
+        await Promise.all(deletePromises);
+
+        if (targetResume?.storagePath) {
+          import('../services/resumeStorageService').then(mod => {
+            mod.resumeStorageService.deleteResume(targetResume.storagePath);
+          }).catch(err => console.warn('Storage cleanup failed', err));
+        }
+
+        try {
+          await deleteDoc(doc(db, 'users', user.uid, 'match_resume', 'current'));
+        } catch (e) {
+          console.log('No current match to delete');
+        }
+      } catch (cleanupErr) {
+        console.warn('Resume secondary cleanup failed', cleanupErr);
+      }
+
+      // UI state updates must happen unconditionally if the primary delete succeeded
+      setResumes(prev => prev.filter(r => r.id !== id && r.resumeId !== id));
       
       if (activeResumeId === id) {
-        if (remaining.length > 0) {
-          switchResume(remaining[0].id);
-        } else {
-          setActiveResumeId(null);
-          setResumeData({ ...DEFAULT_RESUME_STATE });
-        }
+        setActiveResumeId(null);
+        localStorage.removeItem('resumeData');
+        setResumeData({ ...DEFAULT_RESUME_STATE });
       }
-      toast.success('Resume deleted');
+      toast.success('Resume deleted successfully');
     } catch (err) {
       console.error('Error deleting resume:', err);
-      toast.error('Failed to delete resume');
+      toast.error(`Failed to delete resume: ${err.message}`);
+      throw err;
     }
   };
 
-  // Duplicate resume
-  const duplicateResume = async (id) => {
-    if (!user) return;
+  // Rename resume
+  const renameResume = async (id, newTitle) => {
+    if (!user || !user.uid) return;
     try {
-      const source = resumes.find(r => r.id === id);
-      if (!source) return;
+      await updateDoc(doc(db, 'resumes', id), {
+        resumeName: newTitle,
+        title: newTitle,
+        updatedAt: new Date().toISOString()
+      });
 
-      const { data, error } = await supabase
-        .from('resumes')
-        .insert([{
-          user_id: user.id,
-          title: `${source.title} (Copy)`,
-          template: source.template,
-          personal_info: source.personal_info,
-          education: source.education,
-          experience: source.experience,
-          projects: source.projects,
-          skills: source.skills,
-          certifications: source.certifications,
-          languages: source.languages,
-          achievements: source.achievements
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      setResumes([data, ...resumes]);
-      switchResume(data.id);
-      toast.success('Resume duplicated');
+      setResumes(prev => prev.map(r => (r.id === id || r.resumeId === id) ? { ...r, resumeName: newTitle, title: newTitle } : r));
+      toast.success('Resume renamed');
     } catch (err) {
-      console.error('Error duplicating resume:', err);
-      toast.error('Failed to duplicate resume');
+      console.error('Error renaming resume:', err);
+      toast.error(`Failed to rename resume: ${err.message}`);
     }
   };
 
@@ -277,77 +338,38 @@ export const ResumeProvider = ({ children }) => {
 
     setSaveState('Saving...');
     try {
-      const { data, error } = await supabase
-        .from('resumes')
-        .update({
-          template: activeTemplate,
-          personal_info: resumeData.personalInfo,
-          education: resumeData.education,
-          experience: resumeData.experience,
-          projects: resumeData.projects,
-          skills: resumeData.skills,
-          certifications: resumeData.certifications,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', activeResumeId)
-        .select()
-        .single();
+      const updatedData = {
+        template: activeTemplate,
+        personalInfo: resumeData.personalInfo || {},
+        education: resumeData.education || [],
+        experience: resumeData.experience || [],
+        projects: resumeData.projects || [],
+        skills: resumeData.skills || [],
+        certifications: resumeData.certifications || [],
+        workshops: resumeData.workshops || [],
+        updatedAt: new Date().toISOString()
+      };
 
-      if (error) throw error;
+      await updateDoc(doc(db, 'resumes', activeResumeId), updatedData);
       
-      // Auto-sync with Match Engine (Persistent Resume Storage)
+      const dataForState = { ...resumes.find(r => r.id === activeResumeId || r.resumeId === activeResumeId), ...updatedData };
+      
+      // Keep match_resumes sync for legacy purposes if needed (Supabase)
+      // NOTE: Supabase sync has been fully removed in favor of Firestore as the single source of truth.
+
       try {
-        let text = `Name: ${resumeData.personalInfo?.fullName || ''}\n`;
-        text += `Email: ${resumeData.personalInfo?.email || ''}\n\n`;
-
-        if (resumeData.education?.length) {
-          text += `Education:\n`;
-          resumeData.education.forEach(e => {
-            text += `- ${e.degree} at ${e.school} (${e.startDate} - ${e.endDate})\n`;
-          });
-          text += `\n`;
-        }
-
-        if (resumeData.experience?.length) {
-          text += `Experience:\n`;
-          resumeData.experience.forEach(e => {
-            text += `- ${e.title} at ${e.company} (${e.startDate} - ${e.endDate})\n  ${e.description}\n`;
-          });
-          text += `\n`;
-        }
-
-        if (resumeData.projects?.length) {
-          text += `Projects:\n`;
-          resumeData.projects.forEach(p => {
-            text += `- ${p.title}\n  ${p.description}\n`;
-          });
-          text += `\n`;
-        }
-
-        if (resumeData.skills?.length) {
-          text += `Skills:\n${resumeData.skills.join(', ')}\n`;
-        }
-
-        const payload = {
-          user_id: user.id,
-          resume_file_name: 'Resume Builder Profile',
-          resume_text: text,
-          extracted_skills: resumeData.skills || [],
-          upload_date: new Date().toISOString(),
-          last_updated: new Date().toISOString()
-        };
-
-        await supabase
-          .from('match_resumes')
-          .upsert(payload, { onConflict: 'user_id' });
-          
-      } catch (syncErr) {
-        console.error('Error syncing resume builder with match engine:', syncErr);
+        const key = `resume_snapshots_${activeResumeId}`;
+        const snapshots = JSON.parse(localStorage.getItem(key) || '[]');
+        snapshots.push({ timestamp: Date.now(), data: resumeData });
+        if (snapshots.length > 10) snapshots.shift(); // Keep last 10 versions
+        localStorage.setItem(key, JSON.stringify(snapshots));
+      } catch (e) {
+        console.error('Failed to save snapshot', e);
       }
 
       setLastUpdated(Date.now());
       setSaveState('Saved');
-      setResumes(resumes.map(r => r.id === data.id ? data : r));
+      setResumes(resumes.map(r => (r.id === activeResumeId || r.resumeId === activeResumeId) ? dataForState : r));
 
       // Clear 'Saved' indicator after 2s
       setTimeout(() => {
@@ -365,7 +387,7 @@ export const ResumeProvider = ({ children }) => {
     } catch (err) {
       console.error('Error saving resume:', err);
       setSaveState('');
-      toast.error('Failed to save resume automatically');
+      toast.error(`Failed to save resume: ${err.message}`);
     }
   };
 
@@ -374,42 +396,149 @@ export const ResumeProvider = ({ children }) => {
 
   const getResumeStrength = () => {
     let score = 0;
-    const pi = resumeData.personalInfo;
-    if (pi.fullName) score += 5;
-    if (pi.email) score += 5;
-    if (pi.phone) score += 5;
-    if (pi.location) score += 5;
-    if (pi.linkedin) score += 5;
-    if (pi.github || pi.portfolio) score += 5;
-    if (resumeData.education?.length > 0) score += 20;
-    if (resumeData.skills?.length > 3) score += 15;
-    else if (resumeData.skills?.length > 0) score += 5;
-    if (resumeData.projects?.length > 1) score += 15;
-    else if (resumeData.projects?.length > 0) score += 10;
-    if (resumeData.experience?.length > 0) score += 15;
-    if (resumeData.certifications?.length > 0) score += 5;
+    const isValidString = (val) => typeof val === 'string' && val.trim().length > 0;
+    const pi = resumeData.personalInfo || {};
+    
+    if (isValidString(pi.fullName)) score += 5;
+    if (isValidString(pi.email)) score += 5;
+    if (isValidString(pi.phone)) score += 5;
+    if (isValidString(pi.location)) score += 5;
+    if (isValidString(pi.linkedin)) score += 5;
+    if (isValidString(pi.github) || isValidString(pi.portfolio)) score += 5;
+    
+    const validEdu = (resumeData.education || []).filter(item => isValidString(item.degree) && isValidString(item.school));
+    if (validEdu.length > 0) score += 20;
+
+    const validSkills = (resumeData.skills || []).filter(isValidString);
+    if (validSkills.length > 3) score += 15;
+    else if (validSkills.length > 0) score += 5;
+
+    const validProjects = (resumeData.projects || []).filter(item => isValidString(item.title) && isValidString(item.description) && isValidString(item.techStack));
+    if (validProjects.length > 1) score += 15;
+    else if (validProjects.length > 0) score += 10;
+
+    const validExp = (resumeData.experience || []).filter(item => isValidString(item.company) && isValidString(item.role) && isValidString(item.responsibilities));
+    if (validExp.length > 0) score += 15;
+
+    const validCerts = (resumeData.certifications || []).filter(item => isValidString(item.title) && isValidString(item.issuer));
+    if (validCerts.length > 0) score += 5;
+
     return Math.min(score, 100);
+  };
+
+  const validateSection = (section) => {
+    let required = [];
+    let filled = [];
+    let isComplete = false;
+
+    const isValidString = (val) => typeof val === 'string' && val.trim().length > 0;
+
+    if (section === 'Personal Info') {
+      const pi = resumeData.personalInfo || {};
+      required = ['fullName', 'email', 'phone', 'location'];
+      filled = required.filter(field => isValidString(pi[field]));
+      isComplete = filled.length === required.length;
+    }
+    else if (section === 'Summary') {
+      const pi = resumeData.personalInfo || {};
+      required = ['summary'];
+      filled = required.filter(field => isValidString(pi[field]));
+      isComplete = filled.length === required.length;
+    }
+    else if (section === 'Education') {
+      const items = resumeData.education || [];
+      required = ['degree', 'school'];
+      if (items.length === 0) {
+        isComplete = false;
+      } else {
+        // All items must have required fields
+        isComplete = items.every(item => isValidString(item.degree) && isValidString(item.school));
+        if (items.length > 0) {
+          // Just for logging, we count the first item's fields
+          filled = required.filter(field => isValidString(items[0][field]));
+        }
+      }
+    }
+    else if (section === 'Skills') {
+      const items = resumeData.skills || [];
+      required = ['skills'];
+      if (items.length > 0 && items.some(isValidString)) {
+        filled = ['skills'];
+        isComplete = true;
+      }
+    }
+    else if (section === 'Projects') {
+      const items = resumeData.projects || [];
+      required = ['title', 'description', 'techStack'];
+      if (items.length === 0) {
+        isComplete = false;
+      } else {
+        isComplete = items.every(item => isValidString(item.title) && isValidString(item.description) && isValidString(item.techStack));
+        if (items.length > 0) {
+          filled = required.filter(field => isValidString(items[0][field]));
+        }
+      }
+    }
+    else if (section === 'Experience') {
+      const items = resumeData.experience || [];
+      required = ['company', 'role', 'responsibilities'];
+      if (items.length === 0) {
+        isComplete = false;
+      } else {
+        isComplete = items.every(item => isValidString(item.company) && isValidString(item.role) && isValidString(item.responsibilities));
+        if (items.length > 0) {
+          filled = required.filter(field => isValidString(items[0][field]));
+        }
+      }
+    }
+    else if (section === 'Certifications') {
+      const items = resumeData.certifications || [];
+      required = ['title', 'issuer'];
+      if (items.length === 0) {
+        isComplete = false;
+      } else {
+        isComplete = items.every(item => isValidString(item.title) && isValidString(item.issuer));
+        if (items.length > 0) {
+          filled = required.filter(field => isValidString(items[0][field]));
+        }
+      }
+    }
+    else if (section === 'Workshops') {
+      const items = resumeData.workshops || [];
+      required = ['title', 'issuer'];
+      if (items.length === 0) {
+        isComplete = false;
+      } else {
+        isComplete = items.every(item => isValidString(item.title) && isValidString(item.issuer));
+        if (items.length > 0) {
+          filled = required.filter(field => isValidString(items[0][field]));
+        }
+      }
+    }
+
+    const percentage = required.length > 0 ? Math.round((filled.length / required.length) * 100) : 0;
+    
+    // Log output as requested
+    console.log(`[Resume Builder] Section: ${section} | Required: ${required.join(', ')} | Filled: ${filled.join(', ')} | Completion: ${percentage}%`);
+
+    return isComplete;
   };
 
   const getSectionsCompleted = () => {
     let completed = 0;
-    const pi = resumeData.personalInfo;
-    if (pi.fullName && pi.email) completed++;
-    if (resumeData.education?.length > 0) completed++;
-    if (resumeData.skills?.length > 0) completed++;
-    if (resumeData.projects?.length > 0) completed++;
-    if (resumeData.experience?.length > 0) completed++;
-    if (resumeData.certifications?.length > 0) completed++;
+    if (validateSection('Personal Info')) completed++;
+    if (validateSection('Summary')) completed++;
+    if (validateSection('Education')) completed++;
+    if (validateSection('Skills')) completed++;
+    if (validateSection('Projects')) completed++;
+    if (validateSection('Experience')) completed++;
+    if (validateSection('Certifications')) completed++;
+    if (validateSection('Workshops')) completed++;
     return completed;
   };
 
   const isSectionComplete = (section) => {
-    if (section === 'Personal Info') {
-      const pi = resumeData.personalInfo;
-      return !!(pi.fullName && pi.email && pi.phone);
-    }
-    const key = section.toLowerCase();
-    return resumeData[key] && resumeData[key].length > 0;
+    return validateSection(section);
   };
 
   // Mutable functions trigger state update + auto-save
@@ -429,6 +558,10 @@ export const ResumeProvider = ({ children }) => {
       ...prev,
       personalInfo: { ...prev.personalInfo, ...updates }
     }));
+  };
+
+  const restoreSnapshot = (snapshotData) => {
+    setResumeData(snapshotData);
   };
 
   const addArrayItem = (section, item) => {
@@ -473,7 +606,7 @@ export const ResumeProvider = ({ children }) => {
       saveResume,
       createResume,
       deleteResume,
-      duplicateResume,
+      renameResume,
       switchResume,
       migrateLocalResume,
       getResumeStrength,
@@ -483,7 +616,9 @@ export const ResumeProvider = ({ children }) => {
       addArrayItem,
       updateArrayItem,
       removeArrayItem,
-      updateSkills
+      updateSkills,
+      restoreSnapshot,
+      setResumeData
     }}>
       {children}
     </ResumeContext.Provider>

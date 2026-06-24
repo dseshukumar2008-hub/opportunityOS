@@ -1,4 +1,4 @@
-import { collection, getDocs, writeBatch, doc } from 'firebase/firestore';
+import { collection, getDocs, writeBatch, doc, query, limit } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { ingestionService } from './OpportunityIngestionService';
 
@@ -18,14 +18,18 @@ function readSessionCache() {
     const { ts, data } = JSON.parse(raw);
     if (Date.now() - ts < SESSION_CACHE_TTL_MS) return data;
     sessionStorage.removeItem(SESSION_CACHE_KEY);
-  } catch {}
+  } catch (err) {
+    console.warn('Failed to read/parse session cache for opportunities:', err);
+  }
   return null;
 }
 
 function writeSessionCache(data) {
   try {
     sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
-  } catch {}
+  } catch (err) {
+    console.warn('Failed to write session cache for opportunities:', err);
+  }
 }
 
 export const opportunityAggregator = {
@@ -44,65 +48,57 @@ export const opportunityAggregator = {
     }
 
     // Level 3: Firestore + Ingestion Service Sync
+    let opportunities = [];
     try {
-      const oppsRef = collection(db, 'opportunities');
+      const oppsQuery = query(collection(db, 'opportunities'), limit(50));
       let snapshot = { forEach: () => {} };
       try {
         snapshot = await Promise.race([
-          getDocs(oppsRef),
+          getDocs(oppsQuery),
           new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore timeout')), 5000))
         ]);
       } catch (fbError) {
         console.warn('Aggregator: Firestore fetch failed or timed out, bypassing to live sync.', fbError);
       }
 
-      let opportunities = [];
       snapshot.forEach(d => {
         opportunities.push({ id: d.id, ...d.data() });
       });
-
-      // One-time cleanup of MockSeeder data has been disabled
-      // so the app retains fallback data if live APIs fail.
-      /*
-      const mockIds = opportunities.filter(o => o.source === 'MockSeeder').map(o => o.id);
-      if (mockIds.length > 0) {
-        console.log(`Cleaning up ${mockIds.length} MockSeeder opportunities from Firestore...`);
-        const cleanupBatch = writeBatch(db);
-        mockIds.forEach(id => {
-          cleanupBatch.delete(doc(db, 'opportunities', id));
-        });
-        cleanupBatch.commit().catch(e => console.error("Aggregator: Failed to cleanup mocks:", e));
-        opportunities = opportunities.filter(o => o.source !== 'MockSeeder');
-      }
-      */
 
       const lastSync = localStorage.getItem(CACHE_KEY);
       const isStale = !lastSync || (Date.now() - parseInt(lastSync, 10) > SYNC_INTERVAL_MS);
 
       // We no longer rely on mock data counting.
-      // If data is stale or completely empty, we run full ingestion.
+      // If data is stale or completely empty, we trigger full ingestion asynchronously.
       if ((opportunities || []).length === 0 || isStale) {
-        try {
-          const syncedOpps = await ingestionService.ingestAll({ preferredLocations });
-          if (syncedOpps.length > 0) {
-            const newIds = new Set(syncedOpps.map(j => j.id));
-            opportunities = [...syncedOpps, ...opportunities.filter(o => !newIds.has(o.id))];
-            localStorage.setItem(CACHE_KEY, Date.now().toString());
+        setTimeout(async () => {
+          try {
+            const syncedOpps = await ingestionService.ingestAll({ preferredLocations });
+            if (syncedOpps.length > 0) {
+              const newIds = new Set(syncedOpps.map(j => j.id));
+              const updatedOpps = [...syncedOpps, ...opportunities.filter(o => !newIds.has(o.id))];
+              localStorage.setItem(CACHE_KEY, Date.now().toString());
 
-            // Write new records to Firestore
-            const batch = writeBatch(db);
-            syncedOpps.forEach(opp => {
-              const oppRef = doc(collection(db, 'opportunities'), opp.id);
-              batch.set(oppRef, opp, { merge: true });
-            });
-            batch.commit().catch(err => console.error("Aggregator: Failed to commit batch to Firestore:", err));
+              // Populate both cache layers with the refreshed data
+              _memoryCache = updatedOpps;
+              _memoryCacheTime = Date.now();
+              writeSessionCache(updatedOpps);
+
+              // Write new records to Firestore
+              const batch = writeBatch(db);
+              syncedOpps.forEach(opp => {
+                const oppRef = doc(collection(db, 'opportunities'), opp.id);
+                batch.set(oppRef, opp, { merge: true });
+              });
+              batch.commit().catch(err => console.error("Aggregator: Failed to commit batch to Firestore:", err));
+            }
+          } catch (syncError) {
+            console.error('Aggregator: Ingestion Service Sync Failed:', syncError);
           }
-        } catch (syncError) {
-          console.error('Aggregator: Ingestion Service Sync Failed:', syncError);
-        }
+        }, 0);
       }
 
-      // Populate both cache layers
+      // Populate caches with whatever we have so far
       _memoryCache = opportunities;
       _memoryCacheTime = Date.now();
       writeSessionCache(opportunities);
@@ -119,6 +115,7 @@ export const opportunityAggregator = {
   invalidateCache() {
     _memoryCache = null;
     _memoryCacheTime = 0;
-    try { sessionStorage.removeItem(SESSION_CACHE_KEY); } catch {}
+    try { sessionStorage.removeItem(SESSION_CACHE_KEY); } catch (err) { console.warn('Failed to clear session cache for opportunities:', err); }
+    try { localStorage.removeItem(CACHE_KEY); } catch (err) { console.warn('Failed to clear local cache for opportunities:', err); }
   }
 };

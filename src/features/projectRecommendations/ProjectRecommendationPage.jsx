@@ -1,34 +1,66 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Sparkles, Compass } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
+import { useCareer } from '../../contexts/CareerContext';
 import { generateProjectRecommendations } from '../../services/projectRecommendationEngine';
 import { saveRecommendation, getSavedRecommendations } from '../../services/recommendationRepository';
 import { toast } from 'react-hot-toast';
 
+import ContextualBackButton from '../../components/navigation/ContextualBackButton';
 import ProjectRecommendationCard from './ProjectRecommendationCard';
 import LoadingState from './LoadingState';
 import EmptyState from './EmptyState';
+import HowItWorksModal from './HowItWorksModal';
 
 export default function ProjectRecommendationPage() {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { careerContext } = useCareer();
   
   const [recommendations, setRecommendations] = useState([]);
   const [savedProjectIds, setSavedProjectIds] = useState(new Set());
   const [loading, setLoading] = useState(false);
   const [specialization, setSpecialization] = useState('');
   const [targetRole, setTargetRole] = useState('');
+  const [missingSkills, setMissingSkills] = useState([]);
   const [apiError, setApiError] = useState(null);
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
 
-  // Initialize from profile when available
+  const location = useLocation();
+  const isContextMode = !!location.state?.sourceName;
+
+  // Stringify missingSkills to prevent duplicate hook execution due to array reference changes
+  const missingSkillsStr = careerContext?.missingSkills?.join(',') || '';
+
+  // Initialize from profile and careerContext when available
   useEffect(() => {
-    if (profile) {
-      if (profile.specialization) setSpecialization(profile.specialization);
-      if (profile.careerGoal) setTargetRole(profile.careerGoal);
+    if (!isContextMode) {
+      return;
     }
-  }, [profile]);
+
+    let contextRole = '';
+    let parsedMissingSkills = missingSkillsStr ? missingSkillsStr.split(',') : [];
+    
+    if (careerContext?.targetRole) {
+      contextRole = careerContext.targetRole;
+      setTargetRole(contextRole);
+      
+      if (parsedMissingSkills.length > 0) {
+        setMissingSkills(parsedMissingSkills);
+      }
+    } else if (profile?.careerGoal) {
+      setTargetRole(profile.careerGoal);
+    }
+    
+    if (profile?.specialization) {
+      setSpecialization(profile.specialization);
+    }
+    
+    // We intentionally DO NOT auto-generate here. The user must click "Generate".
+  }, [profile, careerContext?.targetRole, missingSkillsStr, isContextMode]);
 
   useEffect(() => {
     if (user) {
@@ -46,32 +78,35 @@ export default function ProjectRecommendationPage() {
   };
 
   const handleGenerate = async () => {
+    handleGenerateWithData(targetRole, specialization, missingSkills, true);
+  };
+
+  const handleGenerateWithData = async (role, spec, skills, forceRefresh = false) => {
     if (!user) {
       toast.error("Please log in to generate recommendations");
       return;
     }
+    
+    if (loading) return; // Prevent duplicate requests
 
     setApiError(null);
     setLoading(true);
     try {
       const newRecs = await generateProjectRecommendations({
-        specialization,
-        targetRole
-      });
+        specialization: spec,
+        targetRole: role,
+        missingSkills: skills
+      }, forceRefresh);
       setRecommendations(newRecs);
-      toast.success("Generated personalized project recommendations!");
+      
+      // Check if it's the fallback data (has isMock true)
+      if (!(newRecs.length > 0 && newRecs[0].isMock)) {
+        toast.success("Generated personalized project recommendations!");
+      }
     } catch (error) {
       console.error("Recommendation Generation Error:", error);
-      
-      const isQuotaError = error.status === 429 || 
-        error.message?.toLowerCase().includes('quota') || 
-        error.message?.toLowerCase().includes('rate limit');
+      // Fallback handled silently
 
-      if (isQuotaError) {
-        setApiError('quota');
-      } else {
-        toast.error(`Failed to generate recommendations: ${error.message || error}`);
-      }
     } finally {
       setLoading(false);
     }
@@ -86,13 +121,17 @@ export default function ProjectRecommendationPage() {
       setSavedProjectIds(prev => new Set(prev).add(project.id));
       toast.success("Project saved to your workspace!");
     } catch (error) {
-      console.error("Failed to save project:", error);
-      toast.error("Failed to save project.");
+      console.log("Current User:", user);
+      console.log("UID:", user?.uid);
+      console.log("Project Data:", project);
+      console.error("Save Error:", error);
+      toast.error(`Failed to save project: ${error.message || error}`);
     }
   };
 
   return (
     <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
+      <ContextualBackButton />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-slate-100">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-[#6D4AFF] text-white flex items-center justify-center shadow-sm">
@@ -108,7 +147,10 @@ export default function ProjectRecommendationPage() {
             <p className="text-sm text-slate-500">AI-curated portfolio projects tailored to your career goals.</p>
           </div>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors">
+        <button 
+          onClick={() => setShowHowItWorks(true)}
+          className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+        >
           <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -116,7 +158,12 @@ export default function ProjectRecommendationPage() {
         </button>
       </div>
 
-      {!loading && recommendations.length > 0 && (
+      <HowItWorksModal 
+        isOpen={showHowItWorks} 
+        onClose={() => setShowHowItWorks(false)} 
+      />
+
+      {recommendations.length > 0 && (
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-bold text-slate-900">Top Recommendations for You</h2>
@@ -126,35 +173,32 @@ export default function ProjectRecommendationPage() {
               </span>
             )}
           </div>
-          <button 
-            onClick={handleGenerate}
-            className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 transition-colors w-full sm:w-auto"
-          >
-            <Sparkles size={16} className="text-[#6D4AFF]" />
-            Refresh Ideas
-          </button>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <button 
+              onClick={() => {
+                setSpecialization('');
+                setTargetRole('');
+                setRecommendations([]);
+              }}
+              className="flex-1 sm:flex-none items-center justify-center px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              Start Over
+            </button>
+            <button 
+              onClick={handleGenerate}
+              disabled={loading}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-[#6D4AFF] text-white text-sm font-bold rounded-lg hover:bg-[#5B3DE6] shadow-sm transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              <Sparkles size={16} className="text-white" />
+              {loading ? "Generating..." : "Refresh Ideas"}
+            </button>
+          </div>
         </div>
       )}
 
       <div className="space-y-6">
         {loading ? (
           <LoadingState />
-        ) : apiError === 'quota' ? (
-          <div className="w-full max-w-[1100px] mx-auto bg-white border border-[#EAEAEA] rounded-[20px] p-8 md:p-12 text-center shadow-sm flex flex-col items-center">
-            <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mb-6">
-              <svg className="w-8 h-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Project generation is temporarily busy.</h2>
-            <p className="text-slate-500 max-w-md mb-8">Please wait a minute and try again.</p>
-            <button
-              onClick={handleGenerate}
-              className="px-8 py-3.5 bg-[#6D4AFF] text-white font-bold rounded-[14px] hover:bg-[#5B3DE6] transition-colors shadow-sm"
-            >
-              Retry
-            </button>
-          </div>
         ) : recommendations.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {recommendations.map((project, idx) => (

@@ -53,9 +53,8 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      const data = await login(email, password);
-      const isEmployer = data?.user?.user_metadata?.user_type === 'employer';
-      navigate(isEmployer ? '/employer/dashboard' : '/dashboard');
+      await login(email, password);
+      navigate('/dashboard');
     } catch (err) {
       console.error("Login error:", err);
       // Clean up Supabase error message

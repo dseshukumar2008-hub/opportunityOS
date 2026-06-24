@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Bot, X, Send, Sparkles, Loader2 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { db } from '../../config/firebase';
+import { collection, query, orderBy, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../contexts/AuthContext';
 import { geminiService } from '../../services/geminiService';
 import ReactMarkdown from 'react-markdown';
@@ -39,20 +40,12 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
 
   const loadHistory = async () => {
     try {
-      const { data, error } = await supabase
-        .from('copilot_messages')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        // Table might not exist, fallback to empty array but don't crash
-        if (error.code === '42P01') {
-          console.warn('copilot_messages table missing, using local session state.');
-          return;
-        }
-        throw error;
-      }
+      const q = query(
+        collection(db, 'users', user.id, 'copilot_messages'),
+        orderBy('createdAt', 'asc')
+      );
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
       if (data && data.length > 0) {
         setMessages(data);
@@ -72,17 +65,12 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
 
   const saveMessage = async (role, content) => {
     try {
-      const { data, error } = await supabase
-        .from('copilot_messages')
-        .insert([{ user_id: user.id, role, content }])
-        .select()
-        .single();
-        
-      if (error) {
-        if (error.code === '42P01') return { id: Date.now().toString(), role, content }; // Fallback
-        throw error;
-      }
-      return data;
+      const docRef = await addDoc(collection(db, 'users', user.id, 'copilot_messages'), {
+        role,
+        content,
+        createdAt: serverTimestamp()
+      });
+      return { id: docRef.id, role, content };
     } catch (err) {
       console.error('Failed to save message', err);
       return { id: Date.now().toString(), role, content };
@@ -146,18 +134,11 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
       });
 
     } catch (err) {
-      console.error(err);
+      console.error("Copilot Error:", err);
       
-      let errorMessage = "Sorry, I'm having trouble connecting right now.";
-      
-      if (err.message && err.message.includes('VITE_GEMINI_API_KEY')) {
-        errorMessage = "Configuration Error: Gemini API Key is missing. Please configure VITE_GEMINI_API_KEY in your .env.local file.";
-      } else if (err.message) {
-        errorMessage = `Error: ${err.message}`;
-      }
+      const fallbackMessage = "I'm temporarily busy right now and cannot process your request. Please try again shortly.";
 
-      toast.error(errorMessage);
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: errorMessage }]);
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'assistant', content: fallbackMessage }]);
     } finally {
       setIsTyping(false);
     }

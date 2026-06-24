@@ -14,7 +14,7 @@ export function ApplicationProvider({ children }) {
   const { addNotification } = useNotifications();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Real-time listener for applications
   useEffect(() => {
     if (!user) {
@@ -104,7 +104,7 @@ export function ApplicationProvider({ children }) {
       };
 
       await addDoc(collection(db, 'applications'), newApp);
-      
+
       addActivity({
         category: 'Opportunities',
         type: 'applied',
@@ -130,7 +130,7 @@ export function ApplicationProvider({ children }) {
 
   const updateApplication = async (id, updates) => {
     if (!user) return;
-    
+
     try {
       const ref = doc(db, 'applications', id);
       await updateDoc(ref, {
@@ -165,7 +165,7 @@ export function ApplicationProvider({ children }) {
       addApplication,
       updateApplication,
       deleteApplication,
-      migrateLocalApplications: () => {}
+      migrateLocalApplications: () => { }
     }}>
       {children}
     </ApplicationContext.Provider>

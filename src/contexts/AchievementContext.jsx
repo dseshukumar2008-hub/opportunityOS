@@ -1,7 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react-hooks/set-state-in-effect */
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { db } from '../config/firebase';
+import { collection, doc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
 import { useApplications } from './ApplicationContext';
 import { useConnections } from './ConnectionContext';
@@ -18,24 +19,24 @@ export const BADGE_DEFINITIONS = [
   { id: 'app-1', title: 'First Application', description: 'Apply to first opportunity', category: 'Applications' },
   { id: 'app-25', title: 'Opportunity Hunter', description: 'Apply to 25 opportunities', category: 'Applications' },
   { id: 'app-50', title: 'Career Explorer', description: 'Apply to 50 opportunities', category: 'Applications' },
-  
+
   // Networking
   { id: 'net-1', title: 'First Connection', description: 'Make first connection', category: 'Networking' },
   { id: 'net-25', title: 'Network Builder', description: 'Reach 25 connections', category: 'Networking' },
   { id: 'net-100', title: 'Networking Pro', description: 'Reach 100 connections', category: 'Networking' },
-  
+
   // Resume
   { id: 'res-1', title: 'Resume Builder', description: 'Create first resume', category: 'Resume' },
   { id: 'res-90', title: 'ATS Expert', description: 'Reach ATS Score 90+', category: 'Resume' },
-  
+
   // Teams
   { id: 'team-1', title: 'Team Player', description: 'Join first team', category: 'Teams' },
   { id: 'team-lead', title: 'Team Leader', description: 'Create first team', category: 'Teams' },
-  
+
   // Learning
   { id: 'skill-5', title: 'Skill Builder', description: 'Add 5 skills', category: 'Learning' },
   { id: 'cert-1', title: 'Certified Learner', description: 'Earn first certification', category: 'Learning' },
-  
+
   // Career Growth
   { id: 'ready-80', title: 'Career Ready', description: 'Reach Career Readiness Score 80+', category: 'Career Growth' },
   { id: 'champ-10', title: 'OpportunityOS Champion', description: 'Unlock 10 badges', category: 'Career Growth' }
@@ -55,67 +56,36 @@ export const AchievementProvider = ({ children }) => {
   const [unlockedBadges, setUnlockedBadges] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchAchievements = useCallback(async () => {
+  useEffect(() => {
     if (!currentUserId) {
       setUnlockedBadges([]);
       setLoading(false);
       return;
     }
 
-    try {
-      const { data, error } = await supabase
-        .from('achievements')
-        .select('*')
-        .eq('user_id', currentUserId);
-
-      if (error) {
-        if (error.code === '42P01') {
-          setUnlockedBadges([]);
-        } else {
-          throw error;
-        }
-      } else {
-        const mapped = data.map(row => {
-          const badgeDef = BADGE_DEFINITIONS.find(b => b.id === row.badge_id);
-          return {
+    const achievementsRef = collection(db, 'users', currentUserId, 'achievements');
+    const unsubscribe = onSnapshot(achievementsRef, (snapshot) => {
+      const badges = [];
+      snapshot.docs.forEach(docSnap => {
+        const data = docSnap.data();
+        const badgeDef = BADGE_DEFINITIONS.find(b => b.id === data.badgeId);
+        if (badgeDef) {
+          badges.push({
             ...badgeDef,
             unlocked: true,
-            unlockedDate: row.unlocked_date
-          };
-        });
-        setUnlockedBadges(mapped.filter(b => b.id)); // filter out undefined if defs change
-      }
-    } catch (err) {
-      console.error('Error fetching achievements:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentUserId]);
-
-  useEffect(() => {
-    fetchAchievements();
-
-    if (!currentUserId) return;
-
-    const channel = supabase
-      .channel('public:achievements')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'achievements', filter: `user_id=eq.${currentUserId}` },
-        (payload) => {
-          fetchAchievements();
-          const badgeDef = BADGE_DEFINITIONS.find(b => b.id === payload.new.badge_id);
-          if (badgeDef) {
-            toast.success(`Achievement Unlocked: ${badgeDef.title} 🎉`);
-          }
+            unlockedDate: data.unlockedDate?.toDate?.()?.toISOString() || new Date().toISOString()
+          });
         }
-      )
-      .subscribe();
+      });
+      setUnlockedBadges(badges);
+      setLoading(false);
+    }, (error) => {
+      console.error('Error fetching achievements:', error);
+      setLoading(false);
+    });
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [fetchAchievements, currentUserId]);
+    return () => unsubscribe();
+  }, [currentUserId]);
 
   const checkAndUnlock = async (badgeId) => {
     if (!currentUserId) return;
@@ -127,7 +97,7 @@ export const AchievementProvider = ({ children }) => {
     if (!badgeDef) return;
 
     const newBadge = { ...badgeDef, unlocked: true, unlockedDate: new Date().toISOString() };
-    
+
     // Optimistic update
     setUnlockedBadges(prev => {
       if (prev.some(b => b.id === badgeId)) return prev;
@@ -135,26 +105,21 @@ export const AchievementProvider = ({ children }) => {
     });
 
     try {
-      const { error } = await supabase
-        .from('achievements')
-        .insert([{
-          user_id: currentUserId,
-          badge_id: badgeId
-        }]);
+      const badgeRef = doc(db, 'users', currentUserId, 'achievements', badgeId);
+      await setDoc(badgeRef, {
+        badgeId: badgeId,
+        unlockedDate: serverTimestamp()
+      }, { merge: true });
 
-      if (error && error.code !== '23505') { // Ignore unique violation if parallel reqs
-        if (error.code !== '42P01') throw error;
-      } else if (!error) {
-        // Trigger Notification on actual success
-        addNotification({
-          category: 'Achievements',
-          title: '🎉 Badge Unlocked',
-          message: `${badgeDef.title}\n${badgeDef.description}`
-        });
-      }
+      // Trigger Notification and Toast on actual success
+      addNotification({
+        category: 'Achievements',
+        title: '🎉 Badge Unlocked',
+        message: `${badgeDef.title}\n${badgeDef.description}`
+      });
+      toast.success(`Achievement Unlocked: ${badgeDef.title} 🎉`);
     } catch (err) {
       console.error('Failed to save achievement:', err);
-      // Optional: rollback optimistic state
     }
   };
 
@@ -163,18 +128,18 @@ export const AchievementProvider = ({ children }) => {
     if (!currentUserId) return;
 
     const appsCount = applications?.length || 0;
-    const connectionsArray = Array.isArray(connectionsData?.connections) 
-      ? connectionsData.connections 
+    const connectionsArray = Array.isArray(connectionsData?.connections)
+      ? connectionsData.connections
       : (Array.isArray(connectionsData) ? connectionsData : []);
     const connCount = connectionsArray.length;
-    
+
     const atsScore = getResumeStrength();
     const skillsCount = resumeData?.skills?.length || 0;
     const certsCount = resumeData?.certifications?.length || 0;
-    
+
     const myTeams = teams?.filter(t => t.members.includes(currentUserId)) || [];
     const amLeader = myTeams.some(t => t.leaderId === currentUserId);
-    
+
     const hasResumeContent = resumeData?.personalInfo?.fullName || resumeData?.experience?.length > 0 || skillsCount > 0;
 
     // Evaluate Applications
@@ -202,7 +167,7 @@ export const AchievementProvider = ({ children }) => {
     // Evaluate Career Growth
     if (readinessScore >= 80) checkAndUnlock('ready-80');
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applications, connectionsData, resumeData, getResumeStrength, teams, readinessScore, currentUserId]);
 
   // Champion Badge check
@@ -211,13 +176,13 @@ export const AchievementProvider = ({ children }) => {
     if (unlockedBadges.length >= 10 && !unlockedBadges.some(b => b.id === 'champ-10')) {
       checkAndUnlock('champ-10');
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unlockedBadges.length, currentUserId]);
 
   const getBadgeProgress = (badgeId) => {
     const appsCount = applications?.length || 0;
-    const connectionsArray = Array.isArray(connectionsData?.connections) 
-      ? connectionsData.connections 
+    const connectionsArray = Array.isArray(connectionsData?.connections)
+      ? connectionsData.connections
       : (Array.isArray(connectionsData) ? connectionsData : []);
     const connCount = connectionsArray.length;
     const atsScore = getResumeStrength();

@@ -61,12 +61,15 @@ export default function OnboardingModal() {
         if (userDoc.exists()) {
           const data = userDoc.data();
           
-          if (data.onboardingCompleted === true || data.onboardingCompleted === 'true' || data.onboarding_completed === true || data.onboarding_completed === 'true') {
-            localStorage.setItem(`onboarding_${user.uid}`, 'completed');
-            setIsVisible(false);
-          } else {
+          if (data.onboardingCompleted === false) {
             setFormData(prev => ({ ...prev, ...data }));
             setIsVisible(true);
+          } else {
+            localStorage.setItem(`onboarding_${user.uid}`, 'completed');
+            if (data.onboardingCompleted !== true) {
+              await updateDoc(userDocRef, { onboardingCompleted: true });
+            }
+            setIsVisible(false);
           }
         } else {
           // New user -> Document does not exist

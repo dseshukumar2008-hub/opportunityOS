@@ -9,6 +9,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import Skeleton from '../../components/ui/Skeleton';
 import PaginationControls from '../../components/ui/PaginationControls';
 
+
 export default function TeamFinderPage() {
   const { teams, getDiscoverTeams, getMyTeams, getMyPendingRequests, currentUserId, fetchTeams, teamsTotal, loading, error } = useTeam();
   const [activeTab, setActiveTab] = useState('discover');

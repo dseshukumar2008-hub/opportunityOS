@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useApplications } from '../contexts/ApplicationContext';
 import { useSavedOpportunities } from '../contexts/SavedOpportunitiesContext';
 import { useLiveOpportunities } from './useLiveOpportunities';
@@ -13,54 +13,59 @@ export function useRecommendations() {
   const { applications } = useApplications();
   const { savedOpportunities } = useSavedOpportunities();
   const { addSnapshot } = useRecommendationHistory();
-  const { opportunities: liveOpportunities, isLoading } = useLiveOpportunities();
+  const { opportunities: liveOpportunities, isLoading: isLiveOppsLoading } = useLiveOpportunities();
   const { profile } = useUserProfile();
   const { user } = useAuth();
 
+  const [recommendations, setRecommendations] = useState([]);
+  const [isCalculating, setIsCalculating] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
-  console.log("DEBUG_RECOMMENDATIONS:", {
-    userId: user?.id,
-    profile: profile,
-    skills: profile?.skills || [],
-    interests: profile?.interests || [],
-    careerGoals: profile?.careerGoals || profile?.goals || [],
-    liveOpportunitiesLength: liveOpportunities?.length || 0
-  });
+  useEffect(() => {
+    if (!liveOpportunities || liveOpportunities.length === 0) {
+      setIsCalculating(false);
+      return;
+    }
 
-  const recommendations = useMemo(() => {
-    // Exclude opportunities we've already applied to
-    const unappliedOpportunities = liveOpportunities.filter(opp => {
-      const hasApplied = applications.some(
-        app => app.title === opp.title && app.company === opp.company
-      );
-      return !hasApplied;
-    });
+    setIsCalculating(true);
 
-    const evaluated = unappliedOpportunities.map(opp => {
-      const matchData = calculateMatchScore(opp, profile);
+    const timerId = setTimeout(() => {
+      // Exclude opportunities we've already applied to
+      const unappliedOpportunities = liveOpportunities.filter(opp => {
+        const hasApplied = applications.some(
+          app => app.title === opp.title && app.company === opp.company
+        );
+        return !hasApplied;
+      });
 
-      let bonusScore = matchData ? matchData.score : 0;
+      const evaluated = unappliedOpportunities.map(opp => {
+        const matchData = calculateMatchScore(opp, profile);
 
-      // Saved company/category bonus
-      if (savedOpportunities?.length > 0) {
-        const hasSavedCompany = savedOpportunities.some(s => s.company === opp.company);
-        const hasSavedCategory = savedOpportunities.some(s => s.type === opp.type);
-        if (hasSavedCompany) bonusScore += 2;
-        if (hasSavedCategory) bonusScore += 1;
-      }
+        let bonusScore = matchData ? matchData.score : 0;
 
-      return {
-        ...opp,
-        matchData: {
-          ...matchData,
-          finalSortScore: bonusScore
+        // Saved company/category bonus
+        if (savedOpportunities?.length > 0) {
+          const hasSavedCompany = savedOpportunities.some(s => s.company === opp.company);
+          const hasSavedCategory = savedOpportunities.some(s => s.type === opp.type);
+          if (hasSavedCompany) bonusScore += 2;
+          if (hasSavedCategory) bonusScore += 1;
         }
-      };
-    });
 
-    evaluated.sort((a, b) => b.matchData.finalSortScore - a.matchData.finalSortScore);
-    return evaluated;
+        return {
+          ...opp,
+          matchData: {
+            ...matchData,
+            finalSortScore: bonusScore
+          }
+        };
+      });
+
+      evaluated.sort((a, b) => b.matchData.finalSortScore - a.matchData.finalSortScore);
+      setRecommendations(evaluated);
+      setIsCalculating(false);
+    }, 0);
+
+    return () => clearTimeout(timerId);
   }, [profile, applications, savedOpportunities, liveOpportunities]);
 
   // Save top recommendations to Firebase
@@ -98,16 +103,16 @@ export function useRecommendations() {
 
   // Snapshot history and Firebase save when recommendations are generated
   useEffect(() => {
-    if (recommendations && (recommendations || []).length > 0) {
-      const totalScore = (recommendations || []).reduce((sum, opp) => sum + (opp.matchData?.score || 0), 0);
-      const averageMatchScore = Math.round(totalScore / (recommendations || []).length);
+    if (recommendations && recommendations.length > 0) {
+      const totalScore = recommendations.reduce((sum, opp) => sum + (opp.matchData?.score || 0), 0);
+      const averageMatchScore = Math.round(totalScore / recommendations.length);
       const topRecommendation = recommendations[0];
 
-      addSnapshot(averageMatchScore, topRecommendation, (recommendations || []).length);
+      addSnapshot(averageMatchScore, topRecommendation, recommendations.length);
       persistToFirebase(recommendations);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recommendations]);
 
-  return { recommendations, isLoading };
+  return { recommendations, isLoading: isLiveOppsLoading || isCalculating };
 }

@@ -111,7 +111,7 @@ export default function Step1CreateProfile() {
               <h4 className="text-xs font-bold tracking-widest uppercase text-indigo-100">AI Coach</h4>
             </div>
             <p className="text-sm leading-relaxed font-medium">
-              Adding a link to your GitHub repository will increase your profile visibility to technical recruiters by 40%. Want me to help you write a professional bio?
+              Adding a link to your GitHub repository will increase your profile search visibility by 40%. Want me to help you write a professional bio?
             </p>
             <button className="mt-4 w-full bg-white text-indigo-700 py-2 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-colors">
               Draft Bio with AI

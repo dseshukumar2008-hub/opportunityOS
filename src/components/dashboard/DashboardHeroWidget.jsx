@@ -96,8 +96,8 @@ export default function DashboardHeroWidget() {
             <Link to="/resume-review" className="flex items-center gap-1.5 px-4 py-2 bg-[#6C4CF1] text-white rounded-xl text-[12px] font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
               <Zap size={13} /> Improve Resume
             </Link>
-            <Link to="/opportunities" className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[12px] font-bold hover:bg-slate-50 transition-colors">
-              <Target size={13} className="text-indigo-500" /> Browse Matches
+            <Link to="/skill-gap" className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[12px] font-bold hover:bg-slate-50 transition-colors">
+              <Target size={13} className="text-indigo-500" /> Identify Skill Gaps
             </Link>
           </div>
         </div>

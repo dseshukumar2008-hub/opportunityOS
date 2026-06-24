@@ -262,6 +262,16 @@ service cloud.firestore {
       allow read: if isAuthed();
       // Only the user can update their own profile
       allow write: if isAuthed() && request.auth.uid == userId;
+      
+      // Allow users to manage their project recommendations
+      match /projectRecommendations/{docId} {
+        allow read, write: if isAuthed() && request.auth.uid == userId;
+      }
+
+      // Allow users to manage their interview sessions
+      match /interviewSessions/{docId} {
+        allow read, write: if isAuthed() && request.auth.uid == userId;
+      }
     }
 
     match /user_settings/{userId} {
@@ -286,6 +296,12 @@ service cloud.firestore {
 
     match /dashboard_stats/{userId} {
       allow read, write: if isAuthed() && request.auth.uid == userId;
+    }
+
+    match /resumes/{resumeId} {
+      allow read: if isAuthed() && request.auth.uid == resource.data.userId;
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if isAuthed() && request.auth.uid == resource.data.userId;
     }
 
     // ═════════════════════════════════════════════════════════════════════════

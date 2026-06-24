@@ -16,9 +16,10 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
-import { storage, db } from '../../config/firebase';
+import { auth, storage, db } from '../../config/firebase';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { verifyBeforeUpdateEmail } from 'firebase/auth';
 
 import toast from 'react-hot-toast';
 
@@ -445,11 +446,17 @@ export default function SettingsPage() {
                 onClick={async () => {
                   setIsSaving(true);
                   try {
-                    // 1. Check if email changed
                     if (editForm.email !== user?.email) {
-                      const { error } = await supabase.auth.updateUser({ email: editForm.email });
-                      if (error) throw error;
-                      toast.success('Email updated. Please check both inboxes for verification links.');
+                      try {
+                        await verifyBeforeUpdateEmail(auth.currentUser, editForm.email);
+                        toast.success('Verification email sent to the new address. Please check your inbox.');
+                      } catch (authErr) {
+                        if (authErr.code === 'auth/requires-recent-login') {
+                          toast.error('For security reasons, please log out and log back in to change your email.');
+                          throw authErr;
+                        }
+                        throw authErr;
+                      }
                     }
 
                     // 2. Update Profile

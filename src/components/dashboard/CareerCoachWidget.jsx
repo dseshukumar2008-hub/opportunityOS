@@ -7,7 +7,8 @@ import { Link } from 'react-router-dom';
 function formatTime(iso) {
   try {
     return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  } catch {
+  } catch (err) {
+    console.warn('Failed to parse date string:', err);
     return '';
   }
 }

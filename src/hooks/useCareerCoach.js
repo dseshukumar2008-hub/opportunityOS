@@ -131,7 +131,7 @@ export function useCareerCoach() {
         // Silently ignore offline errors — start fresh
         const local = sessionStorage.getItem(`${CACHE_SESSION_KEY}_${user.id}`);
         if (local) {
-          try { setMessages(JSON.parse(local)); } catch {}
+          try { setMessages(JSON.parse(local)); } catch (err) { console.warn('Failed to parse career coach session from storage', err); }
         }
       }
     };
@@ -197,7 +197,7 @@ export function useCareerCoach() {
           messages: [],
           updatedAt: serverTimestamp(),
         }, { merge: true });
-      } catch {}
+      } catch (err) { console.warn('Failed to clear chat in Firebase', err); }
     }
   }, [user]);
 

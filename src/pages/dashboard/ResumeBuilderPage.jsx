@@ -12,16 +12,29 @@ import {
   Copy,
   Trash2,
   Loader2,
-  ChevronDown
+  ChevronDown,
+  History,
+  Plus,
+  Edit2,
+  Check,
+  ArrowLeft
 } from 'lucide-react';
-import { useResume } from '../../contexts/ResumeContext';
 import ResumeFormPanel from '../../components/resume/ResumeFormPanel';
 import ResumePreviewPanel from '../../components/resume/ResumePreviewPanel';
+import ResumeHealthPanel from '../../components/resume/ResumeHealthPanel';
+import ResumeImportModal from '../../components/resume/ResumeImportModal';
+import ResumeHistoryModal from '../../components/resume/ResumeHistoryModal';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
+import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useResume } from '../../contexts/ResumeContext';
+
 export default function ResumeBuilderPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const { 
     resumes,
     activeResumeId,
@@ -36,18 +49,85 @@ export default function ResumeBuilderPage() {
     saveResume,
     createResume,
     deleteResume,
-    duplicateResume,
     switchResume,
-    migrateLocalResume
+    migrateLocalResume,
+    renameResume
   } = useResume();
   
+  
   const resumeRef = useRef(null);
-  const pdfExportRef = useRef(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [isResumeDropdownOpen, setIsResumeDropdownOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('builder'); // 'builder' or 'health'
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const switcherRef = useRef(null);
 
+  const currentResume = resumes.find(r => r.id === activeResumeId);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (switcherRef.current && !switcherRef.current.contains(event.target)) {
+        setSwitcherOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleRenameStart = () => {
+    setEditTitle(currentResume?.title || 'Untitled Resume');
+    setIsRenaming(true);
+  };
+
+  const handleRenameSubmit = async () => {
+    setIsRenaming(false);
+    const currentName = currentResume?.title || currentResume?.resumeName;
+    if (editTitle.trim() && editTitle !== currentName) {
+      await renameResume(activeResumeId, editTitle.trim());
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    setShowDeleteConfirm(false);
+    await deleteResume(activeResumeId);
+  };
+
+  const handleCreateNew = async () => {
+    setSwitcherOpen(false);
+    const newId = await createResume();
+    if (newId) navigate(`/resume-builder/${newId}`);
+  };
+
+  useEffect(() => {
+    // Route synchronization
+    if (id && activeResumeId && id !== activeResumeId) {
+      const exists = resumes.some(r => r.id === id);
+      if (exists) {
+        // User manually navigated to a valid resume via URL
+        switchResume(id);
+      } else {
+        // The URL ID doesn't exist (e.g. was deleted), but we have a valid active resume. Sync URL.
+        navigate(`/resume-builder/${activeResumeId}`, { replace: true });
+      }
+    } else if (id && !activeResumeId && !loading) {
+      const exists = resumes.some(r => r.id === id);
+      if (exists) {
+        switchResume(id);
+      } else if (resumes.length === 0) {
+        // Invalid URL and no resumes exist
+        navigate('/resume-builder', { replace: true });
+      } else {
+        // Invalid URL (resume deleted or invalid), always go to dashboard
+        navigate(`/resume-builder`, { replace: true });
+      }
+    }
+  }, [id, activeResumeId, resumes, loading, switchResume, navigate]);
   const handleSave = () => {
     saveResume();
   };
@@ -55,12 +135,12 @@ export default function ResumeBuilderPage() {
   const handleDownloadPDF = async () => {
     if (isGeneratingPDF) return;
     
-    if (!pdfExportRef.current) {
-      toast.error('PDF export engine not ready');
+    if (!resumeRef.current) {
+      toast.error('Resume preview not ready');
       return;
     }
     
-    const element = pdfExportRef.current;
+    const element = resumeRef.current;
 
     
     if (!element.textContent || element.textContent.trim() === '') {
@@ -166,210 +246,202 @@ export default function ResumeBuilderPage() {
       )}
 
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-        <div className="relative">
-          <div 
-            className="flex items-center gap-2 cursor-pointer group"
-            onClick={() => setIsResumeDropdownOpen(!isResumeDropdownOpen)}
+      <div className="flex items-center justify-between bg-white border border-slate-200 px-5 py-3 rounded-xl shadow-sm mb-8">
+        
+        {/* LEFT: Title & Date */}
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => navigate('/resume-builder')}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-colors shrink-0 border border-transparent hover:border-slate-200"
+            title="Back to My Resumes"
           >
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">
-              {resumes.find(r => r.id === activeResumeId)?.title || 'Create Resume'}
-            </h1>
-            <ChevronDown size={20} className="text-slate-400 group-hover:text-indigo-600 transition-colors" />
-          </div>
-          <div className="text-[13px] font-medium text-slate-500 mt-1 flex items-center gap-2">
-            <Calendar size={14} />
-            <span>Last updated: {formatDate(lastUpdated)}</span>
-            {saveState && (
-              <>
-                <span className="text-slate-300">•</span>
-                <span className={`flex items-center gap-1 ${saveState === 'Saving...' ? 'text-indigo-500' : 'text-emerald-500'}`}>
-                  {saveState === 'Saving...' && <Loader2 size={12} className="animate-spin" />}
-                  {saveState === 'Saved' && <Cloud size={12} />}
-                  {saveState}
-                </span>
-              </>
-            )}
-          </div>
-
-          {/* Multiple Resumes Dropdown */}
-          {isResumeDropdownOpen && (
-            <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
-              <div className="p-2 border-b border-slate-100">
-                <button
-                  onClick={() => { createResume(); setIsResumeDropdownOpen(false); }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-[13px] font-bold text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            <ArrowLeft size={16} />
+            <span className="hidden sm:inline text-[13px] font-bold">Back to My Resumes</span>
+          </button>
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-1" ref={switcherRef}>
+              {isRenaming ? (
+                <input 
+                  value={editTitle}
+                  onChange={e => setEditTitle(e.target.value)}
+                  onBlur={handleRenameSubmit}
+                  onKeyDown={e => e.key === 'Enter' && e.target.blur()}
+                  className="text-[15px] font-bold text-slate-900 tracking-tight leading-none px-1 py-0.5 border border-indigo-500 rounded outline-none w-48"
+                  autoFocus
+                />
+              ) : (
+                <h1 
+                  onClick={handleRenameStart}
+                  className="text-[15px] font-bold text-slate-900 tracking-tight leading-none cursor-text hover:bg-slate-100 px-1 py-0.5 rounded -ml-1 transition-colors"
+                  title="Click to rename"
                 >
-                  <FilePlus2 size={16} />
-                  Create New Resume
+                  {currentResume?.title || 'Untitled Resume'}
+                </h1>
+              )}
+
+              <div className="relative">
+                <button 
+                  onClick={() => setSwitcherOpen(!switcherOpen)} 
+                  className={`p-1 rounded text-slate-500 hover:text-slate-900 transition-colors ${switcherOpen ? 'bg-slate-100 text-slate-900' : 'hover:bg-slate-100'}`}
+                >
+                  <ChevronDown size={14} />
                 </button>
-              </div>
-              <div className="max-h-60 overflow-y-auto p-2 flex flex-col gap-1">
-                {resumes.map(r => (
-                  <div key={r.id} className={`flex items-center justify-between p-2 rounded-lg group transition-colors ${activeResumeId === r.id ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-slate-50 border border-transparent'}`}>
-                    <div 
-                      className="flex-1 cursor-pointer truncate mr-2"
-                      onClick={() => { switchResume(r.id); setIsResumeDropdownOpen(false); }}
-                    >
-                      <p className={`text-[13px] font-bold truncate ${activeResumeId === r.id ? 'text-indigo-700' : 'text-slate-700'}`}>
-                        {r.title}
-                      </p>
-                      <p className="text-[11px] font-medium text-slate-500 truncate">
-                        {formatDate(r.updated_at)}
-                      </p>
-                    </div>
-                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity gap-1 shrink-0">
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); duplicateResume(r.id); setIsResumeDropdownOpen(false); }}
-                        className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
-                        title="Duplicate"
-                      >
-                        <Copy size={14} />
+
+                {switcherOpen && (
+                  <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-slate-200 shadow-xl rounded-xl py-2 z-50 overflow-hidden">
+                    <div className="px-3 pb-2 mb-2 border-b border-slate-100">
+                      <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Current</p>
+                      <button onClick={() => { handleRenameStart(); setSwitcherOpen(false); }} className="w-full text-left px-2 py-1.5 text-[13px] font-medium text-slate-700 hover:bg-slate-50 rounded-lg flex items-center gap-2">
+                        <Edit2 size={14} className="text-slate-400" /> Rename
                       </button>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); deleteResume(r.id); }}
-                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                        title="Delete"
-                      >
-                        <Trash2 size={14} />
+                      <button onClick={() => { setShowDeleteConfirm(true); setSwitcherOpen(false); }} className="w-full text-left px-2 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2 mt-0.5">
+                        <Trash2 size={14} className="text-red-400" /> Delete
+                      </button>
+                    </div>
+                    
+                    <div className="px-3">
+                      <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">My Resumes</p>
+                      <div className="max-h-40 overflow-y-auto space-y-0.5 pr-1">
+                        {resumes.map(r => (
+                          <button
+                            key={r.id}
+                            onClick={() => { switchResume(r.id); setSwitcherOpen(false); }}
+                            className={`w-full text-left px-2 py-1.5 text-[13px] font-medium rounded-lg flex items-center gap-2 ${r.id === activeResumeId ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700 hover:bg-slate-50'}`}
+                          >
+                            <span className="truncate flex-1">{r.title || 'Untitled Resume'}</span>
+                            {r.id === activeResumeId && <Check size={14} className="text-indigo-600 shrink-0" />}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="px-3 pt-2 mt-2 border-t border-slate-100">
+                      <button onClick={handleCreateNew} className="w-full text-left px-2 py-1.5 text-[13px] font-bold text-indigo-600 hover:bg-indigo-50 rounded-lg flex items-center gap-2">
+                        <Plus size={14} /> Create New Resume
                       </button>
                     </div>
                   </div>
-                ))}
-                {resumes.length === 0 && (
-                  <p className="text-[12px] font-medium text-slate-500 text-center py-4">No resumes found</p>
                 )}
               </div>
             </div>
-          )}
+            <div className="text-[11px] font-medium text-slate-500 flex items-center gap-1.5 mt-1">
+              <span>Last edited {getRelativeTime(lastUpdated)}</span>
+              {saveState && (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <span className={`flex items-center gap-1 ${saveState === 'Saving...' ? 'text-indigo-500' : 'text-emerald-500'}`}>
+                    {saveState === 'Saving...' && <Loader2 size={10} className="animate-spin" />}
+                    {saveState === 'Saved' && <Cloud size={10} />}
+                    {saveState}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* CENTER: Compact Indicators */}
+        <div className="hidden lg:flex items-center gap-4 px-3 py-1.5 bg-slate-50/50 rounded-lg border border-slate-200/50">
+          <div className="flex items-center gap-1.5 text-[12px] font-medium text-slate-600">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+            <span className="font-semibold text-slate-900">{strength}%</span> Strength
+          </div>
+          <div className="w-px h-3 bg-slate-300"></div>
+          <div className="flex items-center gap-1.5 text-[12px] font-medium text-slate-600">
+            <ListChecks size={14} className="text-indigo-500" />
+            <span className="font-semibold text-slate-900">{completed}/6</span> Sections
+          </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3">
-          <button 
-            onClick={() => setIsPreviewModalOpen(true)}
-            className="h-10 px-4 rounded-xl border border-slate-200 text-slate-700 font-bold text-[13px] hover:bg-slate-50 transition-colors flex items-center gap-2"
-          >
-            <Eye size={16} />
-            Preview
-          </button>
-          <button 
-            onClick={handleDownloadPDF}
-            disabled={isGeneratingPDF}
-            className={`h-10 px-5 rounded-xl text-white font-bold text-[13px] transition-colors flex items-center gap-2 shadow-sm ${
-              isGeneratingPDF ? 'bg-indigo-400 cursor-not-allowed opacity-80' : 'bg-[#6C4CF1] hover:bg-indigo-700'
-            }`}
-          >
-            <Download size={16} />
-            {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
-          </button>
+        {/* RIGHT: Actions */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {saveState === 'Unsaved Changes' && (
+            <button 
+              onClick={handleSave}
+              className="hidden sm:block text-[12px] font-bold text-indigo-600 px-2 hover:text-indigo-700 transition-colors"
+            >
+              Save Now
+            </button>
+          )}
+
+          {/* Compact Toolbar */}
+          <div className="flex items-center bg-slate-50 rounded-lg p-0.5 border border-slate-200/60 hidden sm:flex">
+            <button 
+              onClick={() => setIsImportModalOpen(true)}
+              className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-white rounded shadow-sm transition-all"
+              title="Import Data"
+            >
+              <FilePlus2 size={16} />
+            </button>
+            <button 
+              onClick={() => setIsHistoryModalOpen(true)}
+              className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-white rounded shadow-sm transition-all"
+              title="Version History"
+            >
+              <History size={16} />
+            </button>
+            <button 
+              onClick={() => setIsPreviewModalOpen(true)}
+              className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-white rounded shadow-sm transition-all"
+              title="Preview Mode"
+            >
+              <Eye size={16} />
+            </button>
+          </div>
+
+          <div className="w-px h-4 bg-slate-200 mx-1 hidden sm:block"></div>
+
           <button 
             onClick={handleSave}
             disabled={saveState === 'Saving...'}
-            className="h-10 px-4 rounded-xl border border-slate-200 text-slate-700 font-bold text-[13px] hover:bg-slate-50 transition-colors flex items-center gap-2"
+            className="h-8 px-3 rounded-lg border border-slate-200 bg-white text-slate-700 font-bold text-[12px] hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-sm"
           >
-            {saveState === 'Saving...' ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-            {saveState === 'Saving...' ? 'Saving...' : 'Save'}
+            {saveState === 'Saving...' ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+            <span className="hidden sm:inline">{saveState === 'Saving...' ? 'Saving...' : 'Save'}</span>
+          </button>
+
+          <button 
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPDF}
+            className={`h-8 px-4 rounded-lg text-white font-bold text-[12px] transition-colors flex items-center gap-1.5 shadow-sm ${
+              isGeneratingPDF ? 'bg-slate-400 cursor-not-allowed opacity-80' : 'bg-slate-900 hover:bg-slate-800'
+            }`}
+          >
+            <Download size={14} />
+            <span className="hidden sm:inline">{isGeneratingPDF ? 'Exporting...' : 'Export PDF'}</span>
+            <span className="inline sm:hidden">Export</span>
           </button>
         </div>
       </div>
 
-      {/* Top Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Card 1: Resume Strength */}
-        <div className="bg-white p-5 rounded-[20px] border border-slate-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-transform">
-          <div className="relative w-16 h-16 shrink-0">
-            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-              <path
-                className="text-slate-100"
-                strokeWidth="3"
-                stroke="currentColor"
-                fill="none"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-              <path
-                className="text-[#6C4CF1]"
-                strokeWidth="3"
-                strokeDasharray={`${strength}, 100`}
-                strokeLinecap="round"
-                stroke="currentColor"
-                fill="none"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-[14px] font-extrabold text-slate-900 leading-none">{strength}%</span>
-              <span className="text-[8px] font-bold text-slate-500 uppercase mt-0.5">Complete</span>
-            </div>
-          </div>
-          <div className="flex flex-col justify-center">
-            <span className="text-[12px] font-bold text-slate-500 mb-1">Resume Strength</span>
-            <span className="text-[20px] font-extrabold text-slate-900 leading-none mb-1.5">{strength}%</span>
-            <span className="text-[11px] font-medium text-slate-500 leading-tight">Excellent! Your resume is looking strong.</span>
-          </div>
-        </div>
-
-        {/* Card 2: Last Updated */}
-        <div className="bg-white p-5 rounded-[20px] border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-transform">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
-              <Calendar size={16} strokeWidth={2.5} />
-            </div>
-            <span className="text-[13px] font-bold text-slate-500">Last Updated</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-[20px] font-extrabold text-slate-900 leading-none tracking-tight">{formatDate(lastUpdated)}</span>
-            <span className="text-[12px] font-medium text-slate-400">{getRelativeTime(lastUpdated)}</span>
-          </div>
-        </div>
-
-        {/* Card 3: Active Template */}
-        <div className="bg-white p-5 rounded-[20px] border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-transform">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-500 shrink-0">
-              <LayoutTemplate size={16} strokeWidth={2.5} />
-            </div>
-            <span className="text-[13px] font-bold text-slate-500">Active Template</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-[20px] font-extrabold text-slate-900 leading-none tracking-tight">{activeTemplate}</span>
-            <span className="text-[12px] font-medium text-slate-400">Clean & Professional</span>
-          </div>
-        </div>
-
-        {/* Card 4: Sections Completed */}
-        <div className="bg-white p-5 rounded-[20px] border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-transform">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500 shrink-0">
-              <ListChecks size={16} strokeWidth={2.5} />
-            </div>
-            <span className="text-[13px] font-bold text-slate-500">Sections Completed</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-[20px] font-extrabold text-slate-900 leading-none tracking-tight">{completed} / 6</span>
-            <span className="text-[12px] font-medium text-slate-400">{completed === 6 ? 'All sections completed' : `${6 - completed} sections remaining`}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Area (50/50 Split) */}
-      <div className="flex flex-col xl:flex-row gap-6 items-start">
-        {/* Left Panel: Form Builder */}
-        <div className="w-full xl:w-1/2 flex flex-col gap-4">
-          <ResumeFormPanel />
-        </div>
-
-        {/* Right Panel: Live Preview */}
-        <div className="w-full xl:w-1/2 sticky top-24 overflow-x-auto pb-4">
-          <ResumePreviewPanel ref={resumeRef} isPdfMode={false} />
+      {/* Main Content Area */}
+      <div className="flex flex-col xl:flex-row gap-8 items-start">
+        {/* Left Panel: Tabs & Content (Fixed width to give more space to preview) */}
+        <div className="w-full xl:w-[450px] shrink-0 flex flex-col gap-4">
           
-          {/* Hidden PDF Export Clone Container */}
-          <div 
-            style={{ position: 'absolute', top: '-9999px', left: '-9999px' }} 
-            className="opacity-0 pointer-events-none w-[800px]" 
-            aria-hidden="true"
-          >
-            <ResumePreviewPanel ref={pdfExportRef} isPdfMode={true} />
+          {/* Panel Tabs */}
+          <div className="flex items-center gap-2 p-1.5 bg-slate-200/50 rounded-xl">
+            <button 
+              onClick={() => setActiveTab('builder')}
+              className={`flex-1 py-2 text-[13px] font-bold rounded-lg transition-all ${activeTab === 'builder' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+            >
+              Resume Builder
+            </button>
+            <button 
+              onClick={() => setActiveTab('health')}
+              className={`flex-1 py-2 text-[13px] font-bold rounded-lg transition-all ${activeTab === 'health' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+            >
+              Live ATS Health
+            </button>
           </div>
+
+          <div className="h-[800px]">
+            {activeTab === 'builder' ? <ResumeFormPanel /> : <ResumeHealthPanel />}
+          </div>
+        </div>
+
+        <div className="flex-1 w-full sticky top-24 overflow-x-auto pb-4">
+          <ResumePreviewPanel ref={resumeRef} isPdfMode={false} />
         </div>
       </div>
       </div>
@@ -400,6 +472,47 @@ export default function ResumeBuilderPage() {
             <div className="flex-1 overflow-y-auto p-6 md:p-10 flex justify-center bg-slate-100/50">
               <div className="w-full max-w-[850px]">
                 <ResumePreviewPanel />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <ResumeImportModal 
+        isOpen={isImportModalOpen} 
+        onClose={() => setIsImportModalOpen(false)} 
+      />
+      
+      <ResumeHistoryModal 
+        isOpen={isHistoryModalOpen} 
+        onClose={() => setIsHistoryModalOpen(false)} 
+      />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
+                <Trash2 size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Delete Resume</h3>
+              <p className="text-[14px] text-slate-600 mb-6">
+                Are you sure you want to delete "{currentResume?.title || 'Untitled Resume'}"? This action cannot be undone.
+              </p>
+              <div className="flex items-center gap-3 justify-end">
+                <button 
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-4 py-2 text-[13px] font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleDeleteConfirm}
+                  className="px-4 py-2 text-[13px] font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors"
+                >
+                  Yes, Delete
+                </button>
               </div>
             </div>
           </div>

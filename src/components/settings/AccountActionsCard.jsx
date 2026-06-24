@@ -1,10 +1,23 @@
+import { useState } from 'react';
 import { Trash2, ChevronRight } from 'lucide-react';
+import ConfirmationModal from '../common/ConfirmationModal';
 
 export default function AccountActionsCard() {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleDeleteClick = () => {
-    if (window.confirm("Are you sure you want to permanently delete your account? This action cannot be undone.")) {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    // Simulate deletion API call
+    setTimeout(() => {
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
       alert("Account deletion simulated.");
-    }
+    }, 1500);
   };
 
   return (
@@ -41,6 +54,21 @@ export default function AccountActionsCard() {
           <ChevronRight size={18} className="text-slate-400 group-hover:text-red-600 transition-colors" />
         </button>
       </div>
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => !isDeleting && setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Account"
+        message={
+          <>
+            Are you sure you want to permanently delete your account?
+            {'\n\n'}This action cannot be undone and you will lose all your data.
+          </>
+        }
+        confirmText="Delete Account"
+        isDestructive={true}
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

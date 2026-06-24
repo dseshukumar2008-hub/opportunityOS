@@ -2,6 +2,7 @@ import { useCareerRoadmap } from '../../hooks/useCareerRoadmap';
 import RoadmapWizard    from '../../components/roadmap/RoadmapWizard';
 import RoadmapDashboard from '../../components/roadmap/RoadmapDashboard';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import ContextualBackButton from '../../components/navigation/ContextualBackButton';
 
 export default function CareerRoadmapPage() {
   const { state, generate, toggleTask, reset } = useCareerRoadmap();
@@ -52,6 +53,7 @@ export default function CareerRoadmapPage() {
   if (status === 'wizard' || status === 'generating') {
     return (
       <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <ContextualBackButton />
         <RoadmapWizard
           onGenerate={generate}
           isGenerating={status === 'generating'}
@@ -65,6 +67,7 @@ export default function CareerRoadmapPage() {
   if (status === 'ready' && roadmap) {
     return (
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <ContextualBackButton />
         <RoadmapDashboard
           roadmap={roadmap}
           toggleTask={toggleTask}

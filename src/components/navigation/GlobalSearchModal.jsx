@@ -1,12 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Briefcase, Users, User, Target, Award, MessageSquare, X } from 'lucide-react';
-import { useUserDirectory } from '../../hooks/useUserDirectory';
-import { useTeam } from '../../contexts/TeamContext';
 import { useGoals } from '../../contexts/GoalContext';
 import { useResume } from '../../contexts/ResumeContext';
-import { useMessages } from '../../contexts/MessageContext';
-import { useLiveOpportunities } from '../../hooks/useLiveOpportunities';
 
 export default function GlobalSearchModal({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
@@ -15,13 +11,9 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
   const inputRef = useRef(null);
   const navigate = useNavigate();
   
-  const { teams } = useTeam();
   const { goals } = useGoals();
   const { resumeData } = useResume();
-  const { conversations } = useMessages();
   const certs = resumeData?.certifications || [];
-  const { opportunities: liveOpportunities } = useLiveOpportunities();
-  const { users: allUsers } = useUserDirectory();
 
   // Focus input when opened
   useEffect(() => {
@@ -94,24 +86,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
         return score > 0 ? { item, type, score, title: item[titleField], desc: item[descField] } : null;
       };
 
-      // 1. Opportunities
-      liveOpportunities.forEach(opp => {
-        const match = calculateScore(opp, 'opportunity', 'title', 'description', 'tags');
-        if (match) matches.push({ ...match, icon: Briefcase, color: 'text-indigo-500', bg: 'bg-indigo-50', path: `/opportunity/${opp.id}` });
-      });
-
-      // 2. Teams
-      teams.forEach(team => {
-        const match = calculateScore(team, 'team', 'name', 'description', 'requiredSkills');
-        if (match) matches.push({ ...match, icon: Users, color: 'text-emerald-500', bg: 'bg-emerald-50', path: `/team/${team.id}` });
-      });
-
-      // 3. Users
-      allUsers.forEach(user => {
-        const match = calculateScore(user, 'user', 'name', 'headline', 'skills');
-        if (match) matches.push({ ...match, icon: User, color: 'text-blue-500', bg: 'bg-blue-50', path: `/user/${user.id}` });
-      });
-
       // 4. Goals
       goals.forEach(goal => {
         const match = calculateScore(goal, 'goal', 'title', 'category', null);
@@ -124,23 +98,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
         if (match) matches.push({ ...match, icon: Award, color: 'text-purple-500', bg: 'bg-purple-50', path: `/resume-builder` });
       });
 
-      // 6. Messages
-      conversations.forEach(conv => {
-        const match = calculateScore(conv, 'message', 'lastMessage', 'participantName', null);
-        // Note: participant.name is nested, so we map it out for search
-        const title = conv.participant?.name || '';
-        const desc = conv.lastMessage || '';
-        
-        let score = 0;
-        if (title.toLowerCase().includes(q) || desc.toLowerCase().includes(q)) score = 50;
-
-        if (score > 0) {
-          matches.push({
-            item: conv, type: 'message', score, title: `Chat with ${title}`, desc, icon: MessageSquare, color: 'text-pink-500', bg: 'bg-pink-50', path: `/messages`
-          });
-        }
-      });
-
       // Sort by score
       matches.sort((a, b) => b.score - a.score);
       
@@ -149,7 +106,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
     }, 200);
 
     return () => clearTimeout(timer);
-  }, [query, teams, goals, certs, conversations, liveOpportunities]);
+  }, [query, goals, certs]);
 
   const handleSelect = (result) => {
     onClose();
@@ -178,7 +135,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search opportunities, teams, people, goals..."
+            placeholder="Search goals, certifications..."
             aria-label="Global Search Query"
             className="w-full px-4 py-4 text-[15px] focus:outline-none bg-transparent placeholder-slate-400 font-medium text-slate-800"
           />

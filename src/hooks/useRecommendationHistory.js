@@ -15,14 +15,19 @@ export function useRecommendationHistory() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_MOCK_HISTORY));
         return INITIAL_MOCK_HISTORY;
       }
-    } catch {
+    } catch (err) {
+      console.warn('Failed to parse recommendation history from local storage:', err);
       return INITIAL_MOCK_HISTORY;
     }
   });
 
   const saveHistory = useCallback((newHistory) => {
     setHistory(newHistory);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
+    } catch (err) {
+      console.warn('Failed to save recommendation history to local storage:', err);
+    }
   }, []);
 
   const addSnapshot = useCallback((averageMatchScore, topRecommendation, recommendationCount) => {

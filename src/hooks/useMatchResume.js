@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { db } from '../config/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { geminiService } from '../services/geminiService';
 import { toast } from 'react-hot-toast';
@@ -20,17 +21,14 @@ export function useMatchResume() {
 
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from('match_resumes')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const docRef = doc(db, 'users', user.id, 'match_resume', 'current');
+      const docSnap = await getDoc(docRef);
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      if (docSnap.exists()) {
+        setMatchResume(docSnap.data());
+      } else {
+        setMatchResume(null);
       }
-
-      setMatchResume(data || null);
     } catch (err) {
       console.error('[Match Resume] Fetch Error:', err);
     } finally {
@@ -73,7 +71,7 @@ export function useMatchResume() {
       
       const resumeText = analysisResult?.summary || "Resume parsed successfully.";
 
-      // Upsert to match_resumes
+      // Save to Firestore
       const payload = {
         user_id: user.id,
         resume_file_name: file.name,
@@ -83,21 +81,15 @@ export function useMatchResume() {
         last_updated: new Date().toISOString()
       };
 
-      const { data, error } = await supabase
-        .from('match_resumes')
-        .upsert(payload, { onConflict: 'user_id' })
-        .select()
-        .single();
-
-      if (error) throw error;
+      const docRef = doc(db, 'users', user.id, 'match_resume', 'current');
+      await setDoc(docRef, payload);
       
-      // Attempting to replicate "Profile updated" log context
       console.log('[Resume Pipeline] Profile updated');
 
-      setMatchResume(data);
+      setMatchResume(payload);
       console.log('[Resume Pipeline] Upload completed');
       toast.success('Resume successfully processed and saved.');
-      return data;
+      return payload;
     } catch (err) {
       console.error('[Match Resume] Upload Error:', err);
       toast.error('Error: ' + (err.message || 'Failed to parse and save resume'));
@@ -157,16 +149,11 @@ export function useMatchResume() {
         last_updated: new Date().toISOString()
       };
 
-      const { data, error } = await supabase
-        .from('match_resumes')
-        .upsert(payload, { onConflict: 'user_id' })
-        .select()
-        .single();
+      const docRef = doc(db, 'users', user.id, 'match_resume', 'current');
+      await setDoc(docRef, payload);
 
-      if (error) throw error;
-
-      setMatchResume(data);
-      return data;
+      setMatchResume(payload);
+      return payload;
     } catch (err) {
       console.error('[Match Resume] Sync Builder Error:', err);
       return null;

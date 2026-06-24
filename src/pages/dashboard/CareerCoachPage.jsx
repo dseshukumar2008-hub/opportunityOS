@@ -3,6 +3,8 @@ import { Sparkles, Send, RefreshCw, Zap, Target, FileText, TrendingUp, Briefcase
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { useCareerRoadmap } from '../../hooks/useCareerRoadmap';
+import { useCopilotMemory } from '../../hooks/useCopilotMemory';
+import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 import { geminiService } from '../../services/geminiService';
 
 const QUICK_PROMPTS = [
@@ -94,7 +96,14 @@ export default function CareerCoachPage() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { state: roadmapState } = useCareerRoadmap();
-  const [messages, setMessages] = useState([WELCOME_MESSAGE]);
+  
+  // V2 Context
+  const { careerReadiness, profileCompletion } = useDashboardInsights();
+  
+  // Memory Hook
+  const { messages: historyMessages, addMessage, clearMemory, loading: isMemoryLoading } = useCopilotMemory();
+
+  // Local state purely for typing indicator and UI driving
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showPrompts, setShowPrompts] = useState(true);
@@ -103,36 +112,51 @@ export default function CareerCoachPage() {
 
   const firstName = profile?.name?.split(' ')[0] || user?.displayName?.split(' ')[0] || 'there';
 
+  // Derive visible messages
+  const messages = historyMessages.length > 0 ? historyMessages : [WELCOME_MESSAGE];
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const sendMessage = async (text) => {
-    if (!text.trim()) return;
+  const sendMessage = async (text, isGoalGeneration = false) => {
+    if (!text.trim() && !isGoalGeneration) return;
 
-    const userMessage = { role: 'user', content: text, timestamp: new Date().toISOString() };
-    setMessages(prev => [...prev, userMessage]);
+    if (!isGoalGeneration) {
+      await addMessage({ role: 'user', content: text });
+    }
     setInput('');
     setIsTyping(true);
     setShowPrompts(false);
 
     try {
-      const history = messages.slice(-10).map(m => ({ role: m.role, content: m.content }));
-      
+      // Build V2 heavy context
+      const contextData = {
+        profile,
+        roadmap: roadmapState?.roadmap,
+        careerReadiness: careerReadiness?.score,
+        readinessBreakdown: careerReadiness?.breakdown,
+        profileMissing: profileCompletion?.missing
+      };
+
       const result = await geminiService.chatWithCopilot({
         mode: 'career_coach',
-        contextData: { profile },
-        history: history,
-        message: text
+        contextData,
+        history: historyMessages.slice(-10),
+        message: text,
+        generateGoals: isGoalGeneration
       });
 
-      const responseText = result.response || "I'm sorry, I couldn't process that.";
-      const aiMessage = { role: 'assistant', content: responseText, timestamp: new Date().toISOString() };
-      setMessages(prev => [...prev, aiMessage]);
+      let responseText = result.response || result.personalizedAdvice || "I'm sorry, I couldn't process that.";
+      
+      if (isGoalGeneration && result.weeklyGoals) {
+        responseText = `**🎯 Your Weekly Goals:**\n${result.weeklyGoals.map(g => `- ${g}`).join('\n')}\n\n**⚡ Daily Actions:**\n${result.dailyActions.map(a => `- ${a}`).join('\n')}\n\n${responseText}`;
+      }
+
+      await addMessage({ role: 'assistant', content: responseText });
     } catch (err) {
       console.error("AI Coach Error:", err);
-      const aiMessage = { role: 'assistant', content: "Sorry, I am having trouble connecting to the network right now.", timestamp: new Date().toISOString() };
-      setMessages(prev => [...prev, aiMessage]);
+      await addMessage({ role: 'assistant', content: "Sorry, I am having trouble connecting to the network right now." });
     } finally {
       setIsTyping(false);
     }
@@ -144,7 +168,7 @@ export default function CareerCoachPage() {
   };
 
   const clearChat = () => {
-    setMessages([WELCOME_MESSAGE]);
+    clearMemory();
     setShowPrompts(true);
   };
 
@@ -174,9 +198,9 @@ export default function CareerCoachPage() {
       </div>
 
       {/* ── Context Bar ── */}
-      <div className="shrink-0 bg-indigo-50/50 border-b border-indigo-100/50 px-6 py-2.5 flex items-center gap-4 lg:gap-6 overflow-x-auto hide-scrollbar">
-        <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest shrink-0">Profile Context:</span>
+      <div className="shrink-0 bg-indigo-50/50 border-b border-indigo-100/50 px-6 py-2.5 flex items-center justify-between overflow-x-auto hide-scrollbar">
         <div className="flex items-center gap-4 lg:gap-6">
+          <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest shrink-0">Profile Context:</span>
           <div className="flex items-center gap-1.5 shrink-0 text-slate-600">
             <Target size={14} className="text-indigo-500" />
             <span className="text-[12px] font-bold">{profile?.targetRole || profile?.title || 'Target Role Not Set'}</span>
@@ -196,6 +220,15 @@ export default function CareerCoachPage() {
             </span>
           </div>
         </div>
+
+        <button
+          onClick={() => sendMessage("Generate my Weekly Goals and Daily Actions based on my current readiness and skill gaps.", true)}
+          disabled={isTyping || isMemoryLoading}
+          className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-[#6C4CF1] hover:from-indigo-600 hover:to-[#5B3DE0] text-white rounded-lg shadow-sm shadow-indigo-200 text-[12px] font-bold transition-all disabled:opacity-50 shrink-0"
+        >
+          <Sparkles size={14} />
+          Generate Weekly Goals
+        </button>
       </div>
 
       {/* ── Messages Area ── */}

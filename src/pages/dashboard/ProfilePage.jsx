@@ -68,10 +68,10 @@ export default function ProfilePage() {
   const skillsList = profileData.skills.split(',').map(s => s.trim()).filter(Boolean);
   
   const stats = [
-    { label: 'Applications Applied', value: '16', icon: FileText, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
-    { label: 'Interviews Upcoming', value: '5', icon: Calendar, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
-    { label: 'Offers Received', value: '2', icon: Trophy, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
-    { label: 'Saved Opportunities', value: '24', icon: Bookmark, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
+    { label: 'Resume Score', value: '85%', icon: FileText, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
+    { label: 'Profile Completion', value: '100%', icon: Trophy, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
+    { label: 'AI Readiness', value: '80%', icon: BarChart3, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
+    { label: 'Goals Completed', value: '12', icon: Bookmark, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
   ];
 
   return (

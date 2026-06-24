@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }) => {
         name: user.displayName || additionalData.name || 'User',
         photoURL: user.photoURL || null,
         user_type: additionalData.userType || 'student',
+        onboardingCompleted: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -109,7 +110,7 @@ export const AuthProvider = ({ children }) => {
       user: mappedUser, 
       session: null, // Removed supabase session
       isAuthenticated: !!mappedUser,
-      loading, 
+      loading: loading, 
       isEmployer,
       login, 
       signup, 

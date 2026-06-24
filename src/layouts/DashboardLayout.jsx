@@ -2,10 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../contexts/ProfileContext';
 import { useNotifications } from '../contexts/NotificationContext';
-import { useMessageNotifications } from '../hooks/useMessageNotifications';
 import { useDeadlineReminders } from '../hooks/useDeadlineReminders';
 import { useOnlineStatus } from '../contexts/OnlineStatusContext';
-import { useConnections } from '../contexts/ConnectionContext';
 import StatusDot from '../components/ui/StatusDot';
 import GlobalSearchModal from '../components/navigation/GlobalSearchModal';
 import { useNavigate, useLocation, Outlet, Link } from 'react-router-dom';
@@ -13,14 +11,12 @@ import {
   LayoutDashboard, Briefcase, FileText, FileEdit, Users,
   BarChart3, User, Settings, LogOut, Bell, Search, Menu,
   Bookmark, MessageSquare, ChevronDown, Home, Clock,
-  CheckCircle, Trash2, AlertCircle, CalendarClock, Link2, UserCheck, Globe, Bot, Map, Target, Sparkles, BookOpen
+  CheckCircle, Trash2, AlertCircle, CalendarClock, Link2, UserCheck, Globe, Bot, Map, Target, Sparkles, BookOpen, Code, Compass
 } from 'lucide-react';
 import EmptyState from '../components/ui/EmptyState';
 import OpportunityOSCopilot from '../components/copilot/OpportunityOSCopilot';
 import { useResume } from '../contexts/ResumeContext';
-import { useApplications } from '../contexts/ApplicationContext';
 import { useGoals } from '../contexts/GoalContext';
-import { useTeam } from '../contexts/TeamContext';
 import OnboardingModal from '../components/onboarding/OnboardingModal';
 import LocationMigrationModal from '../components/onboarding/LocationMigrationModal';
 import { getUserFullName, getUserFirstName } from '../utils/userUtils';
@@ -55,10 +51,7 @@ export default function DashboardLayout() {
   const { profile } = useProfile();
   const { notifications, getUnreadCount, markAsRead, deleteNotification } = useNotifications();
   const { myStatus, setOffline } = useOnlineStatus();
-  const { getIncomingRequests } = useConnections();
   const unreadCount = getUnreadCount();
-  const incomingRequestCount = getIncomingRequests().length;
-  useMessageNotifications();
   useDeadlineReminders();
   
   const navigate = useNavigate();
@@ -71,9 +64,7 @@ export default function DashboardLayout() {
   const notificationDropdownRef = useRef(null);
 
   const { resumeData, getResumeStrength } = useResume();
-  const { applications } = useApplications();
   const { goals } = useGoals();
-  const { teams } = useTeam();
 
   const studentContext = {
     user: {
@@ -84,9 +75,7 @@ export default function DashboardLayout() {
     resume: resumeData,
     atsScore: getResumeStrength ? getResumeStrength() : 0,
     skillGapResults: [], // Mocking missing function
-    applications,
-    goals,
-    teams
+    goals
   };
 
   useEffect(() => {
@@ -161,14 +150,7 @@ export default function DashboardLayout() {
 
           {/* Main */}
           {[
-            { name: 'Dashboard',     path: '/dashboard',      icon: LayoutDashboard },
-            { name: 'Opportunities', path: '/opportunities',  icon: Briefcase },
-            { name: 'Applications',  path: '/applications',   icon: FileText },
-            { name: 'Create Resume',path: '/resume-builder', icon: FileEdit },
-            { name: 'Analyze Resume',path: '/resume-review',icon: Bot },
-            { name: 'Team Finder',   path: '/team-finder',    icon: Users },
-            { name: 'Messages',      path: '/messages',       icon: MessageSquare, badge: 3 },
-            { name: 'Saved',         path: '/saved',          icon: Bookmark },
+            { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
           ].map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
@@ -182,38 +164,19 @@ export default function DashboardLayout() {
               >
                 <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
                 <span className="flex-1 text-left">{item.name}</span>
-                {item.badge && (
-                  <span className="min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-[10px] font-extrabold rounded-full px-1">
-                    {item.badge}
-                  </span>
-                )}
               </button>
             );
           })}
 
-          {/* Network Section */}
+          {/* Career Development Section */}
           <div className="mt-3 mb-1 px-4">
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Network</p>
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Career Development</p>
           </div>
           {[
-            {
-              name: 'Directory',
-              path: '/network',
-              icon: Globe,
-              badge: null,
-            },
-            {
-              name: 'Connections',
-              path: '/network/connections',
-              icon: Link2,
-              badge: null,
-            },
-            {
-              name: 'Requests',
-              path: '/network/requests',
-              icon: UserCheck,
-              badge: incomingRequestCount > 0 ? incomingRequestCount : null,
-            },
+            { name: 'Resume Builder', path: '/resume-builder', icon: FileEdit },
+            { name: 'Resume Analyzer', path: '/resume-review', icon: Bot },
+            { name: 'LinkedIn Analyzer', path: '/linkedin-analyzer', icon: Sparkles },
+            { name: 'GitHub Analyzer', path: '/github-analyzer', icon: Sparkles },
           ].map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -227,28 +190,45 @@ export default function DashboardLayout() {
               >
                 <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
                 <span className="flex-1 text-left">{item.name}</span>
-                {item.badge && (
-                  <span className="min-w-[18px] h-[18px] flex items-center justify-center bg-[#6D5DF6] text-white text-[10px] font-extrabold rounded-full px-1">
-                    {item.badge}
-                  </span>
-                )}
               </button>
             );
           })}
 
-          {/* Tools Section */}
+          {/* Growth & Planning Section */}
           <div className="mt-3 mb-1 px-4">
-            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Tools</p>
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Growth & Planning</p>
           </div>
           {[
+            { name: 'Career Explorer', path: '/career-explorer', icon: Target },
+            { name: 'Hidden Potential', path: '/hidden-potential', icon: Compass },
+            { name: 'Skill Gap Analysis', path: '/skill-gap', icon: Target },
+            { name: 'Career Roadmap', path: '/career-roadmap', icon: Map },
+            { name: 'Project Recommendations', path: '/project-recommendations', icon: Code },
+            { name: 'Interview Prep', path: '/interview-prep', icon: Sparkles },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <button
+                key={item.name}
+                onClick={() => { navigate(item.path); setIsSidebarOpen(false); }}
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
+                  isActive ? 'bg-[#6D5DF6]/10 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
+                <span className="flex-1 text-left">{item.name}</span>
+              </button>
+            );
+          })}
+
+          {/* AI Guidance Section */}
+          <div className="mt-3 mb-1 px-4">
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">AI Guidance</p>
+          </div>
+          {[
+            { name: 'Career Coach', path: '/career-coach', icon: Bot },
             { name: 'Analytics',  path: '/analytics',  icon: BarChart3 },
-            { name: 'AI Copilot', path: '/copilot', icon: Bot, badgeText: 'New' },
-            { name: 'Match Engine', path: '/match-engine', icon: Sparkles, badgeText: 'New' },
-            { name: 'Career Roadmap', path: '/career-roadmap', icon: Map, badgeText: 'Hot' },
-            { name: 'Skill Gap Analysis', path: '/skill-gap', icon: Sparkles },
-            { name: 'Project Recommendations', path: '/project-recommendations', icon: Sparkles, badgeText: 'New' },
-            { name: 'Career Coach', path: '/career-coach', icon: Target },
-            { name: 'Resources', path: '/resources', icon: BookOpen },
           ].map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -262,11 +242,6 @@ export default function DashboardLayout() {
               >
                 <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
                 <span className="flex-1 text-left">{item.name}</span>
-                {item.badgeText && (
-                  <span className="bg-[#6D5DF6]/10 text-[#6D5DF6] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    {item.badgeText}
-                  </span>
-                )}
               </button>
             );
           })}
@@ -455,12 +430,6 @@ export default function DashboardLayout() {
                 </div>
               )}
             </div>
-            <button 
-              className="text-slate-400 hover:text-slate-600 transition-colors focus-visible:ring-2 focus-visible:ring-[#6C4CF1] focus-visible:outline-none rounded-lg p-1"
-              aria-label="Messages"
-            >
-              <MessageSquare size={20} />
-            </button>
 
             <div className="relative" ref={profileDropdownRef}>
               <div

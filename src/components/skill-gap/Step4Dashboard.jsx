@@ -56,9 +56,12 @@ function DonutChart({ strong, moderate, missing }) {
 
 export default function Step4Dashboard({ data, onReset }) {
   const { 
-    targetRole, readinessScore, skillGapPercentage, currentSkills, 
-    skillBreakdown, nextSkill, missingSkills, learningPath 
-  } = data;
+    targetRole = "Unknown Role", readinessScore = 0, skillGapPercentage = 0, currentSkills = [], 
+    skillBreakdown = { strong: 0, moderate: 0, missing: 0 }, 
+    nextSkill = { name: "Unknown", priority: "Low", time: "N/A", impact: "Low", reason: "" }, 
+    missingSkills = { high: [], medium: [], low: [] }, 
+    learningPath = [] 
+  } = data || {};
 
   return (
     <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -73,7 +76,7 @@ export default function Step4Dashboard({ data, onReset }) {
           onClick={onReset}
           className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-[#6C4CF1] hover:bg-indigo-50 hover:text-[#6C4CF1] text-slate-700 rounded-xl font-bold transition-all shadow-sm shrink-0"
         >
-          <RefreshCw size={16} /> Analyze Again
+          <RefreshCw size={16} /> Start New Analysis
         </button>
       </div>
 
@@ -135,10 +138,10 @@ export default function Step4Dashboard({ data, onReset }) {
                   <CheckCircle2Icon className="text-emerald-500 w-5 h-5" />
                   <h3 className="font-bold text-slate-900 text-[15px]">Current Skills</h3>
                 </div>
-                <span className="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">{currentSkills.length} Total</span>
+                <span className="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">{currentSkills?.length || 0} Total</span>
               </div>
               <div className="flex flex-wrap gap-1.5 mb-4 flex-1 content-start overflow-y-auto max-h-[190px] pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-                {currentSkills.map(s => (
+                {(currentSkills || []).map(s => (
                   <span key={s} className="px-2.5 py-1 bg-slate-50 border border-slate-200 text-slate-700 text-[11px] font-semibold rounded-md transition-colors hover:border-slate-300">
                     {s}
                   </span>
@@ -214,10 +217,10 @@ export default function Step4Dashboard({ data, onReset }) {
               <div className="bg-[#FFF5F5] rounded-[24px] p-6 relative overflow-hidden w-full h-full flex flex-col shadow-sm hover:shadow-md transition-shadow duration-300">
                 <div className="flex items-center justify-between mb-5">
                   <h4 className="font-bold text-red-600 text-[15px]">High Priority</h4>
-                  <span className="w-7 h-7 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-[12px] font-black">{missingSkills.high.length}</span>
+                  <span className="w-7 h-7 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-[12px] font-black">{missingSkills?.high?.length || 0}</span>
                 </div>
                 <ul className="space-y-3 relative z-10 flex-1">
-                  {missingSkills.high.map(s => (
+                  {(missingSkills?.high || []).map(s => (
                     <li key={s} className="text-[13px] font-semibold text-slate-700 flex items-start gap-2.5 leading-relaxed">
                       <span className="text-red-400 mt-1 shrink-0">•</span> <span>{s}</span>
                     </li>
@@ -230,10 +233,10 @@ export default function Step4Dashboard({ data, onReset }) {
               <div className="bg-[#FFFBEB] rounded-[24px] p-6 relative overflow-hidden w-full h-full flex flex-col shadow-sm hover:shadow-md transition-shadow duration-300">
                 <div className="flex items-center justify-between mb-5">
                   <h4 className="font-bold text-amber-600 text-[15px]">Medium Priority</h4>
-                  <span className="w-7 h-7 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-[12px] font-black">{missingSkills.medium.length}</span>
+                  <span className="w-7 h-7 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-[12px] font-black">{missingSkills?.medium?.length || 0}</span>
                 </div>
                 <ul className="space-y-3 relative z-10 flex-1">
-                  {missingSkills.medium.map(s => (
+                  {(missingSkills?.medium || []).map(s => (
                     <li key={s} className="text-[13px] font-semibold text-slate-700 flex items-start gap-2.5 leading-relaxed">
                       <span className="text-amber-400 mt-1 shrink-0">•</span> <span>{s}</span>
                     </li>
@@ -246,10 +249,10 @@ export default function Step4Dashboard({ data, onReset }) {
               <div className="bg-[#F0FDF4] rounded-[24px] p-6 relative overflow-hidden w-full h-full flex flex-col shadow-sm hover:shadow-md transition-shadow duration-300">
                 <div className="flex items-center justify-between mb-5">
                   <h4 className="font-bold text-emerald-600 text-[15px]">Low Priority</h4>
-                  <span className="w-7 h-7 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-[12px] font-black">{missingSkills.low.length}</span>
+                  <span className="w-7 h-7 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-[12px] font-black">{missingSkills?.low?.length || 0}</span>
                 </div>
                 <ul className="space-y-3 relative z-10 flex-1">
-                  {missingSkills.low.map(s => (
+                  {(missingSkills?.low || []).map(s => (
                     <li key={s} className="text-[13px] font-semibold text-slate-700 flex items-start gap-2.5 leading-relaxed">
                       <span className="text-emerald-400 mt-1 shrink-0">•</span> <span>{s}</span>
                     </li>
@@ -270,7 +273,7 @@ export default function Step4Dashboard({ data, onReset }) {
                 {/* Connecting Line */}
                 <div className="absolute top-[22px] left-16 right-16 h-1 bg-slate-100 rounded-full" />
                 
-                {learningPath.map((step, idx) => (
+                {(learningPath || []).map((step, idx) => (
                   <div key={idx} className="flex flex-col items-center w-36 relative z-10 group shrink-0">
                     <div className="w-8 h-8 rounded-full bg-indigo-50 text-[#6C4CF1] flex items-center justify-center text-[12px] font-black mb-4 border-2 border-white ring-4 ring-white shadow-sm transition-transform group-hover:scale-110">
                       {idx + 1}

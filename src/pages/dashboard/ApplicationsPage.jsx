@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import EmptyState from '../../components/ui/EmptyState';
 import PaginationControls from '../../components/ui/PaginationControls';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
 
 const typeStyles = {
   'Internship': 'bg-purple-50 text-[#6C4CF1]',
@@ -50,6 +51,10 @@ export default function ApplicationsPage() {
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [editingApp, setEditingApp] = useState(null);
+  
+  // Confirmation Modal State
+  const [appToDelete, setAppToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const limit = 10;
   const totalPages = Math.ceil(totalCount / limit) || 1;
@@ -76,10 +81,21 @@ export default function ApplicationsPage() {
     }
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this application?')) {
-      deleteApplication(id);
+  const handleDeleteClick = (app) => {
+    setAppToDelete(app);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!appToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteApplication(appToDelete.id);
       toast.success('Application deleted');
+    } catch (error) {
+      toast.error('Failed to delete application');
+    } finally {
+      setIsDeleting(false);
+      setAppToDelete(null);
     }
   };
 
@@ -303,7 +319,7 @@ export default function ApplicationsPage() {
                           <Pencil size={16} />
                         </button>
                         <button 
-                          onClick={() => handleDelete(app.id)}
+                          onClick={() => handleDeleteClick(app)}
                           className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                           title="Delete"
                         >
@@ -406,6 +422,24 @@ export default function ApplicationsPage() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={!!appToDelete}
+        onClose={() => !isDeleting && setAppToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Application"
+        message={
+          <>
+            Are you sure you want to delete your application for{' '}
+            <span className="font-bold text-slate-900">{appToDelete?.role}</span> at{' '}
+            <span className="font-bold text-slate-900">{appToDelete?.company}</span>?
+            {'\n\n'}This action cannot be undone.
+          </>
+        }
+        confirmText="Delete Application"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }

@@ -41,7 +41,7 @@ export default function StatisticsSection() {
           <h4 className="text-2xl font-bold text-slate-900 leading-tight">2K+</h4>
           <p className="text-xs text-slate-500 font-medium">Teams Formed</p>
         </div>
-      </div>
+      </div>  
 
       <div className="bg-white border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-2xl p-6 flex items-center gap-4 min-w-[220px] flex-1">
         <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">

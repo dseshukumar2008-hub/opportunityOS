@@ -64,7 +64,7 @@ export default function FeaturesSection() {
       )
     },
     {
-      title: 'AI Recruiter',
+      title: 'AI Analyzer',
       desc: 'For employers: instantly rank candidates based on precise match scores analyzing skills, experience, and project quality.',
       mockup: (
         <div className="absolute inset-0 p-8 flex items-center justify-center bg-gradient-to-br from-purple-50 to-fuchsia-50/50">

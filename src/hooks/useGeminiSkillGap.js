@@ -118,11 +118,7 @@ export function useGeminiSkillGap(opportunity) {
     }
   }, [opportunity, resumeData, bestVersion, applications, teams, user]);
 
-  useEffect(() => {
-    if (opportunity && !gapData && !isLoading && !error) {
-      generateGapAnalysis();
-    }
-  }, [opportunity, gapData, isLoading, error, generateGapAnalysis]);
+  // Removed automatic execution on load. Call generateGapAnalysis manually.
 
   return {
     isLoading,

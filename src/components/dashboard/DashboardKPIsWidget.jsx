@@ -1,10 +1,8 @@
 import { Link } from 'react-router-dom';
-import { FileText, Briefcase, BookmarkCheck, Users2, Sparkles, TrendingUp, Target } from 'lucide-react';
+import { FileText, Sparkles, TrendingUp, Target } from 'lucide-react';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 import { useResumeInsights } from '../../hooks/useResumeInsights';
-import { useSavedOpportunities } from '../../contexts/SavedOpportunitiesContext';
-import { useTeam } from '../../contexts/TeamContext';
 
 function getScoreColor(score) {
   if (score >= 80) return { text: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', ring: 'bg-emerald-500', label: 'Excellent' };
@@ -44,51 +42,36 @@ function StatPill({ icon: Icon, label, value, subtext, color = 'indigo', to }) {
 export default function DashboardKPIsWidget() {
   const { profile, isLoading: profileLoading } = useUserProfile();
   const {
-    applicationInsights,
     careerReadiness,
     profileCompletion,
     isLoading: insightsLoading,
   } = useDashboardInsights();
   const { atsScore, hasInsights } = useResumeInsights();
-  const { savedOpportunities } = useSavedOpportunities();
-  const { getMyTeams } = useTeam();
 
   const isLoading = profileLoading || insightsLoading;
 
   const resumeScore = hasInsights ? atsScore : 0;
-  const totalApplications = applicationInsights?.submitted ?? 0;
-  const matchesCount = 0; // Replace with actual matches count logic when available
-  const savedCount = savedOpportunities?.length ?? 0;
-  const activeTeams = getMyTeams()?.length ?? 0;
   const aiScore = careerReadiness?.score ?? 0;
+  const completion = profileCompletion?.score ?? 0;
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {[...Array(6)].map((_, i) => <div key={i} className="h-28 bg-white border border-slate-100 rounded-[16px] animate-pulse" />)}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {[...Array(3)].map((_, i) => <div key={i} className="h-28 bg-white border border-slate-100 rounded-[16px] animate-pulse" />)}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {/* Profile Completion */}
+      <StatPill icon={Target} label="Profile Completion" value={`${completion}%`} subtext={completion >= 80 ? "Great" : "Complete profile"} color="indigo" to="/profile" />
+
       {/* Resume Score */}
       <StatPill icon={FileText} label="Resume Score" value={`${resumeScore}%`} subtext={resumeScore >= 70 ? "Good" : "Needs work"} color="violet" to="/resume-review" />
       
-      {/* Applications */}
-      <StatPill icon={Briefcase} label="Applications" value={totalApplications} subtext="2 this week" color="indigo" to="/applications" />
-      
-      {/* Matches */}
-      <StatPill icon={Target} label="Matches" value={matchesCount} subtext="High quality" color="emerald" to="/opportunities" />
-      
-      {/* Saved Jobs */}
-      <StatPill icon={BookmarkCheck} label="Saved Jobs" value={savedCount} color="amber" to="/saved" />
-      
-      {/* Teams */}
-      <StatPill icon={Users2} label="Teams" value={activeTeams} subtext={activeTeams > 0 ? "Active" : "Join a team"} color="emerald" to="/team-finder" />
-      
       {/* AI Score */}
-      <StatPill icon={Sparkles} label="AI Score" value={`${aiScore}%`} subtext={aiScore >= 70 ? "Good" : "Needs work"} color="violet" />
+      <StatPill icon={Sparkles} label="Career Readiness" value={`${aiScore}%`} subtext={aiScore >= 70 ? "Ready" : "Needs work"} color="emerald" />
     </div>
   );
 }

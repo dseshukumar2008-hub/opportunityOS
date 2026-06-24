@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
-import { Award, CheckCircle2, Circle, ChevronRight, FileText, Briefcase } from 'lucide-react';
+import { Award, CheckCircle2, Circle, ChevronRight, FileText, Briefcase, Sparkles, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 import { useResumeInsights } from '../../hooks/useResumeInsights';
 import { useCareerRoadmap } from '../../hooks/useCareerRoadmap';
+import { usePersistentReadiness } from '../../hooks/usePersistentReadiness';
 
 function StatPill({ label, value, color }) {
   return (
@@ -15,13 +16,15 @@ function StatPill({ label, value, color }) {
 }
 
 export default function CareerHealthWidget() {
-  const { careerReadiness, profileCompletion, applicationInsights, isLoading: isDashboardLoading } = useDashboardInsights();
+  const { profileCompletion, applicationInsights, isLoading: isDashboardLoading } = useDashboardInsights();
+  const { persistentData, isLoading: isPersistentLoading, isRecalculating, recalculateAndSave, dynamicReadiness } = usePersistentReadiness();
   const { atsScore, hasInsights } = useResumeInsights();
   const { state: roadmapState } = useCareerRoadmap();
+  
   const isRoadmapLoading = roadmapState.status === 'idle' || roadmapState.status === 'loading';
   const roadmapData      = roadmapState.roadmap;
-  
-  const isLoading = isDashboardLoading || isRoadmapLoading;
+
+  const isLoading = isDashboardLoading || isRoadmapLoading || isPersistentLoading;
 
   if (isLoading) {
     return (
@@ -38,9 +41,12 @@ export default function CareerHealthWidget() {
     );
   }
 
-  const { score: readiness = 0, breakdown } = careerReadiness ?? {};
+  // Use persistent data first, fallback to dynamic if never calculated before
+  const activeData = persistentData || dynamicReadiness;
+  const { score: readiness = 0, breakdown } = activeData ?? {};
   const { score: profilePct = 0, missing = [] } = profileCompletion ?? {};
   const activeApps = applicationInsights?.active ?? 0;
+  const aiAnalysis = persistentData?.aiAnalysis;
 
   const getReadinessColor = (s) => {
     if (s >= 80) return '#10B981';
@@ -56,7 +62,8 @@ export default function CareerHealthWidget() {
   const checklist = [
     { label: 'Profile', done: breakdown?.profile?.done },
     { label: 'Resume', done: breakdown?.resume?.done },
-    { label: 'Skills', done: breakdown?.skills?.done },
+    { label: 'GitHub', done: breakdown?.github?.done },
+    { label: 'LinkedIn', done: breakdown?.linkedin?.done },
     { label: 'Applied', done: breakdown?.applications?.done },
   ];
 
@@ -68,9 +75,21 @@ export default function CareerHealthWidget() {
           <Award size={14} className="text-indigo-600" />
         </div>
         <h3 className="text-[16px] font-black text-slate-900">Career Health</h3>
-        <Link to="/analytics" className="ml-auto text-[12px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5">
-          View details <ChevronRight size={14} />
-        </Link>
+        
+        <div className="ml-auto flex items-center gap-3">
+          <button 
+            onClick={recalculateAndSave}
+            disabled={isRecalculating}
+            className="text-[12px] font-bold text-slate-500 hover:text-indigo-600 flex items-center gap-1 transition-colors disabled:opacity-50"
+            title="Recalculate Score"
+          >
+            <RefreshCw size={12} className={isRecalculating ? 'animate-spin' : ''} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
+          <Link to="/analytics" className="text-[12px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5">
+            Details <ChevronRight size={14} />
+          </Link>
+        </div>
       </div>
 
       {/* Readiness Ring */}
@@ -167,6 +186,56 @@ export default function CareerHealthWidget() {
           }
         />
         <StatPill label="Active Apps" value={activeApps} color="text-indigo-600" />
+      </div>
+
+      {/* AI Analysis Section */}
+      <div className="mt-4 pt-4 border-t border-slate-100 flex-1 min-h-0 overflow-y-auto pr-1 custom-scrollbar">
+        {isRecalculating ? (
+          <div className="flex items-center gap-2 text-indigo-600 animate-pulse">
+            <Sparkles size={14} />
+            <span className="text-[12px] font-bold">AI is calculating your readiness...</span>
+          </div>
+        ) : aiAnalysis ? (
+          <div className="flex flex-col gap-3">
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                <Sparkles size={10} className="text-emerald-500" /> Key Strengths
+              </p>
+              <ul className="space-y-1">
+                {aiAnalysis.strengths?.slice(0, 2).map((s, i) => (
+                  <li key={i} className="text-[11px] font-semibold text-slate-700 flex items-start gap-1.5">
+                    <span className="text-emerald-500 mt-0.5">•</span> 
+                    <span className="leading-tight">{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                <Sparkles size={10} className="text-indigo-500" /> Recommendations
+              </p>
+              <ul className="space-y-1">
+                {aiAnalysis.recommendations?.slice(0, 2).map((a, i) => (
+                  <li key={i} className="text-[11px] font-semibold text-slate-700 flex items-start gap-1.5">
+                    <span className="text-indigo-500 mt-0.5">•</span> 
+                    <span className="leading-tight">{a}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-2">
+             <p className="text-[11px] font-medium text-slate-500 mb-2">Sync your profile to get AI insights.</p>
+             <button 
+               onClick={recalculateAndSave}
+               className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors"
+             >
+               Generate Insights
+             </button>
+          </div>
+        )}
       </div>
 
       {/* Quick Actions */}

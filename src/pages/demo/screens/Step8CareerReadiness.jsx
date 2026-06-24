@@ -117,7 +117,7 @@ export default function Step8CareerReadiness() {
               <h3 className="text-sm font-bold text-slate-900 mb-4">Improvement Areas</h3>
               <div className="space-y-3">
                 <div className="flex items-start gap-2"><AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" /><span className="text-sm font-medium text-slate-700">Lacking Behavioral Interview Prep</span></div>
-                <div className="flex items-start gap-2"><AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" /><span className="text-sm font-medium text-slate-700">Low Recruiter Response Rate</span></div>
+                <div className="flex items-start gap-2"><AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" /><span className="text-sm font-medium text-slate-700">Low Profile Visibility</span></div>
                 <div className="flex items-start gap-2"><AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" /><span className="text-sm font-medium text-slate-700">Missing Portfolio Link</span></div>
               </div>
             </div>

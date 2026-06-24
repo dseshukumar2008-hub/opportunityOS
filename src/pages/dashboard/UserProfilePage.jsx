@@ -597,7 +597,7 @@ export default function UserProfilePage() {
                     {resumeScore >= 80 ? 'Excellent' : resumeScore >= 60 ? 'Good' : resumeScore >= 40 ? 'Fair' : 'Needs Work'}
                   </p>
                   <p className="text-[12px] font-medium text-slate-500 leading-relaxed">
-                    {resumeScore < 80 ? 'Complete more sections in Create Resume to improve your score.' : 'Your profile is strong and ready to impress recruiters!'}
+                    {resumeScore < 80 ? 'Complete more sections in Create Resume to improve your score.' : 'Your profile is strong and ready to impress!'}
                   </p>
                 </div>
               </div>

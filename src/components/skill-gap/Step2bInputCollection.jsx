@@ -104,7 +104,7 @@ export default function Step2bInputCollection({ sources, onSubmit, onBack, initi
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-6 lg:p-8 animate-in fade-in slide-in-from-right-8 duration-500">
+    <div className="w-full max-w-[900px] mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-6 lg:p-8 animate-in fade-in slide-in-from-right-8 duration-500">
       <div className="flex flex-col items-center text-center mb-10">
         <h1 className="text-2xl lg:text-3xl font-black text-slate-900 mb-2">Provide Your Details</h1>
         <p className="text-slate-500 font-medium">We need a bit more information based on the sources you selected.</p>
