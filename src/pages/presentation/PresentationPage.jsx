@@ -12,7 +12,7 @@ import PresentationCharts from './PresentationCharts';
 const FEATURES = [
   { title: 'Analyze Resume', icon: BrainCircuit, color: 'text-indigo-500', bg: 'bg-indigo-50', desc: 'Instant feedback on resume quality and structure' },
   { title: 'ATS Score Engine', icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-50', desc: 'Beat applicant tracking systems with smart optimization' },
-  { title: 'Opportunity Matching', icon: Target, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'AI-ranked opportunities personalized to your profile' },
+  { title: 'Role Matching', icon: Target, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'AI-ranked career paths personalized to your profile' },
   { title: 'Skill Gap Analysis', icon: Zap, color: 'text-pink-500', bg: 'bg-pink-50', desc: 'Know exactly what to learn next for your target role' },
   { title: 'Team Finder', icon: Users, color: 'text-blue-500', bg: 'bg-blue-50', desc: 'Discover and form teams for hackathons and projects' },
   { title: 'Networking Hub', icon: UserPlus, color: 'text-teal-500', bg: 'bg-teal-50', desc: 'Connect with peers across colleges and disciplines' },
@@ -34,7 +34,7 @@ const JOURNEY_STEPS = [
 
 const WHY_ITEMS = [
   'End-to-end career ecosystem — not fragmented tools.',
-  'AI-driven, personalized opportunity discovery.',
+  'AI-driven, personalized career path discovery.',
   'Built-in Resume Intelligence to bypass ATS filters.',
   'Organic team collaboration for hackathons and projects.',
   'Measurable, gamified career growth tracking.',
@@ -272,7 +272,7 @@ export default function PresentationPage() {
               </div>
               <div className="space-y-3">
                 {[
-                  { label: 'Top Opportunity', value: 'Google SWE Internship', color: 'text-indigo-300' },
+                  { label: 'Top Project', value: 'Google SWE Internship', color: 'text-indigo-300' },
                   { label: 'Most Active Team', value: 'Cloud Computing Club', color: 'text-emerald-400' },
                   { label: 'Top Skill Demanded', value: 'React.js', color: 'text-blue-400' },
                   { label: 'Highest ATS Score', value: '98 / 100', color: 'text-amber-400' },
@@ -321,7 +321,7 @@ export default function PresentationPage() {
         <div className="text-center py-12 border-t border-slate-200">
           <p className="text-[13px] font-bold text-slate-400 uppercase tracking-widest mb-2">Opportunity OS</p>
           <h3 className="text-[28px] font-black text-slate-900 mb-4">
-            One platform. Every opportunity.
+            One platform. Every career milestone.
           </h3>
           <p className="text-slate-500 font-medium mb-6 max-w-md mx-auto">
             Your entire career journey — from resume to offer letter — in one intelligent workspace.

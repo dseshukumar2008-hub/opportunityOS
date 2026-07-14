@@ -53,7 +53,7 @@ export default function GithubResults({ results, onReset }) {
           onClick={onReset}
           className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-colors shadow-sm"
         >
-          <RefreshCw size={16} /> Analyze Another Profile
+          <RefreshCw size={16} /> Analyze Another Profile   
         </button>
       </div>
 

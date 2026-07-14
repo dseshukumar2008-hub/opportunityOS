@@ -35,3 +35,4 @@ CREATE POLICY "Users can update their own resumes."
 CREATE POLICY "Users can delete their own resumes." 
   ON public.resumes FOR DELETE 
   USING (auth.uid() = user_id);
+

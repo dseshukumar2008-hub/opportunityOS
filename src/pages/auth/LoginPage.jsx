@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  
+
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
@@ -57,7 +57,7 @@ export default function LoginPage() {
       navigate('/dashboard');
     } catch (err) {
       console.error("Login error:", err);
-      // Clean up Supabase error message
+      // Clean up error message
       if (err.message === 'Invalid login credentials') {
         setError('Invalid email or password.');
       } else {

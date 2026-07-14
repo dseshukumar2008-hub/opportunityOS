@@ -41,8 +41,6 @@ export const TeamProvider = ({ children }) => {
   const unsubRequests = useRef(null);
   const unsubMessages = useRef(null);
 
-
-
   // ─── Real-time Firestore listeners ─────────────────────────────────────────
   useEffect(() => {
     // Clean up previous listeners
@@ -289,7 +287,7 @@ export const TeamProvider = ({ children }) => {
 
   // fetchTeams is a no-op stub kept for backward API compatibility with consuming components
   // Real data now flows via onSnapshot — no manual fetch needed.
-  const fetchTeams = useCallback(() => {}, []);
+  const fetchTeams = useCallback(() => { }, []);
 
   return (
     <TeamContext.Provider

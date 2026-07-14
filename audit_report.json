@@ -90,7 +90,7 @@
     "rootCause": "Unprotected array operation potentially causing undefined error",
     "fixApplied": "const totalApps = (applications || []).length;"
   },
-  {
+  { 
     "file": "src\\components\\dashboard\\DashboardWidgets.jsx",
     "line": 17,
     "variable": "applications",

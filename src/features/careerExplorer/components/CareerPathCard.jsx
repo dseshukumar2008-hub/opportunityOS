@@ -24,7 +24,8 @@ export default function CareerPathCard({ path, simulatedSkills, toggleSimulatedS
   };
 
   const handleCreateRoadmap = () => {
-    navigate(`/career-roadmap?targetRole=${encodeURIComponent(path.title)}`);
+    console.log("Selected Career:", path.title);
+    navigate(`/career-roadmap`, { state: { targetRole: path.title, source: 'careerExplorer' } });
   };
 
   const hasSimulation = simulatedSkills.some(s => path.skillsNeeded.includes(s));

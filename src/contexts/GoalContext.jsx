@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { db } from '../config/firebase';
 import { collection, query, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
-import { useApplications } from './ApplicationContext';
+
 import { useResume } from './ResumeContext';
 import { useTeam } from './TeamContext';
 import { useConnections } from './ConnectionContext';
@@ -22,7 +22,7 @@ export const useGoals = () => {
 
 export const GoalProvider = ({ children }) => {
   const { user } = useAuth();
-  const { applications } = useApplications();
+
   const { resumeData, getResumeStrength } = useResume();
   const { teams } = useTeam();
   const connectionsData = useConnections(); 
@@ -143,7 +143,7 @@ export const GoalProvider = ({ children }) => {
       // 1. Calculate true current value based on category
       switch (goal.category) {
         case 'Applications':
-          newCurrentValue = (applications || []).length;
+          newCurrentValue = 0;
           break;
         case 'Skills':
           newCurrentValue = resumeData?.skills?.length || 0;
@@ -158,7 +158,7 @@ export const GoalProvider = ({ children }) => {
           newCurrentValue = (teams || []).length;
           break;
         case 'Certifications':
-          newCurrentValue = resumeData?.certifications?.length || 0;
+          newCurrentValue = 0;
           break;
         default:
           break;
@@ -233,7 +233,7 @@ export const GoalProvider = ({ children }) => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    (applications || []).length, 
+
     resumeData, 
     (teams || []).length, 
     connectionsLength, 

@@ -1,274 +1,42 @@
 rules_version = '2';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// OpportunityOS — Firestore Security Rules
-// Teams Module: teams | team_requests | team_messages
-// ─────────────────────────────────────────────────────────────────────────────
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ═════════════════════════════════════════════════════════════════════════
-    // SHARED HELPER FUNCTIONS
-    // ═════════════════════════════════════════════════════════════════════════
-
-    // Is the requesting user authenticated?
     function isAuthed() {
       return request.auth != null;
     }
 
-    // Is the requesting user the owner of a team document?
-    function isTeamOwner(teamData) {
-      return isAuthed() && request.auth.uid == teamData.ownerId;
-    }
-
-    // Is the requesting user a member of a team document?
-    function isTeamMember(teamData) {
-      return isAuthed() && request.auth.uid in teamData.members;
-    }
-
-    // Look up a team document by ID and check if the caller is the owner.
-    // Used inside team_requests and team_messages rules.
-    function isOwnerOfTeam(teamId) {
-      return isAuthed()
-        && exists(/databases/$(database)/documents/teams/$(teamId))
-        && request.auth.uid
-            == get(/databases/$(database)/documents/teams/$(teamId)).data.ownerId;
-    }
-
-    // Look up a team document by ID and check if the caller is a member.
-    function isMemberOfTeam(teamId) {
-      return isAuthed()
-        && exists(/databases/$(database)/documents/teams/$(teamId))
-        && request.auth.uid
-            in get(/databases/$(database)/documents/teams/$(teamId)).data.members;
-    }
-
-    // Prevent clients from altering immutable server-controlled fields.
-    function ownerIdUnchanged() {
-      return request.resource.data.ownerId == resource.data.ownerId;
-    }
-
-    function createdAtUnchanged() {
-      return request.resource.data.createdAt == resource.data.createdAt;
-    }
-
-    // Ensure members array never grows past maxMembers (DoS guard).
-    function membersNotExceeded() {
-      return request.resource.data.members.size()
-          <= request.resource.data.maxMembers;
-    }
-
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // COLLECTION: teams
-    // ═════════════════════════════════════════════════════════════════════════
+    // Teams collection
     match /teams/{teamId} {
-
-      // ── READ ──────────────────────────────────────────────────────────────
-      // Public teams:  any authenticated user may read.
-      // Private teams: only members (includes owner) may read.
-      allow read: if isAuthed()
-        && (
-          resource.data.visibility == 'public'
-          || isTeamMember(resource.data)
-        );
-
-      // ── CREATE ────────────────────────────────────────────────────────────
-      // 1. ownerId must equal caller's uid (no impersonation).
-      // 2. Owner must include themselves in the initial members array.
-      // 3. members array must not already exceed maxMembers.
-      // 4. Required fields must be present and within length limits.
-      allow create: if isAuthed()
-        && request.resource.data.ownerId == request.auth.uid
-        && request.auth.uid in request.resource.data.members
-        && membersNotExceeded()
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() <= 80
-        && request.resource.data.description is string
-        && request.resource.data.maxMembers is int
-        && request.resource.data.maxMembers >= 2
-        && request.resource.data.maxMembers <= 20;
-
-      // ── UPDATE ────────────────────────────────────────────────────────────
-      // Only the team owner may update team metadata.
-      // ownerId and createdAt are immutable.
-      // members array must never exceed maxMembers.
-      allow update: if isTeamOwner(resource.data)
-        && ownerIdUnchanged()
-        && createdAtUnchanged()
-        && membersNotExceeded();
-
-      // ── DELETE ────────────────────────────────────────────────────────────
-      // Only the team owner may delete their team.
-      allow delete: if isTeamOwner(resource.data);
-    }
-
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // COLLECTION: team_requests
-    // ═════════════════════════════════════════════════════════════════════════
-    match /team_requests/{requestId} {
-
-      // ── READ ──────────────────────────────────────────────────────────────
-      // The applicant can track their own request.
-      // The team owner can review all incoming requests.
-      allow read: if isAuthed()
-        && (
-          request.auth.uid == resource.data.userId
-          || isOwnerOfTeam(resource.data.teamId)
-        );
-
-      // ── CREATE ────────────────────────────────────────────────────────────
-      // 1. userId must equal caller's uid (cannot submit on behalf of others).
-      // 2. Status must start as 'pending' — only the owner can change it.
-      // 3. Caller must NOT already be a member of the target team.
-      // 4. Target team document must exist.
-      // 5. Message must be non-empty and within 300 chars.
-      allow create: if isAuthed()
-        && request.resource.data.userId == request.auth.uid
-        && request.resource.data.status == 'pending'
-        && !isMemberOfTeam(request.resource.data.teamId)
-        && exists(/databases/$(database)/documents/teams/$(request.resource.data.teamId))
-        && request.resource.data.message is string
-        && request.resource.data.message.size() > 0
-        && request.resource.data.message.size() <= 300;
-
-      // ── UPDATE ────────────────────────────────────────────────────────────
-      // Only the team owner may accept or reject a request.
-      // userId and teamId are immutable once set.
-      allow update: if isOwnerOfTeam(resource.data.teamId)
-        && request.resource.data.userId == resource.data.userId
-        && request.resource.data.teamId == resource.data.teamId
-        && request.resource.data.status in ['pending', 'accepted', 'rejected'];
-
-      // ── DELETE ────────────────────────────────────────────────────────────
-      // The applicant may withdraw their own request.
-      // The team owner may reject (delete) a request.
-      allow delete: if isAuthed()
-        && (
-          request.auth.uid == resource.data.userId
-          || isOwnerOfTeam(resource.data.teamId)
-        );
-    }
-
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // COLLECTION: team_messages
-    // ═════════════════════════════════════════════════════════════════════════
-    match /team_messages/{messageId} {
-
-      // ── READ ──────────────────────────────────────────────────────────────
-      // Only members of the team may read its chat history.
-      allow read: if isMemberOfTeam(resource.data.teamId);
-
-      // ── CREATE ────────────────────────────────────────────────────────────
-      // 1. Caller must be a member of the target team.
-      // 2. senderId must equal caller's uid (no spoofing).
-      // 3. Content must be non-empty and within 1000 chars.
-      // 4. Only 'text' and 'system' message types are permitted.
-      allow create: if isMemberOfTeam(request.resource.data.teamId)
-        && request.resource.data.senderId == request.auth.uid
-        && request.resource.data.content is string
-        && request.resource.data.content.size() > 0
-        && request.resource.data.content.size() <= 1000
-        && request.resource.data.type in ['text', 'system'];
-
-      // ── UPDATE / DELETE ───────────────────────────────────────────────────
-      // Messages are append-only. No editing or deletion allowed.
-      allow update, delete: if false;
-    }
-
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // SAVED OPPORTUNITIES
-    // ═════════════════════════════════════════════════════════════════════════
-    match /saved_opportunities/{docId} {
-      allow read, write: if isAuthed()
-        && request.auth.uid == resource.data.uid;
-
-      allow create: if isAuthed()
-        && request.auth.uid == request.resource.data.uid;
-    }
-
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // CONNECTIONS
-    // ═════════════════════════════════════════════════════════════════════════
-    match /connections/{connId} {
-      // Only participants can read their own connections.
-      allow read: if isAuthed()
-        && (request.auth.uid == resource.data.userId1
-            || request.auth.uid == resource.data.userId2);
-
-      // Only created via a batch after accepting a request (system-level).
-      // To keep it simple: any authenticated user can create (enforced by the
-      // acceptConnectionRequest flow which uses a batch with the request doc).
-      allow create: if isAuthed()
-        && (request.auth.uid == request.resource.data.userId1
-            || request.auth.uid == request.resource.data.userId2);
-
-      // Connections are immutable — deletion only (removing a connection).
-      allow update: if false;
-
-      // Either participant can remove the connection.
-      allow delete: if isAuthed()
-        && (request.auth.uid == resource.data.userId1
-            || request.auth.uid == resource.data.userId2);
-    }
-
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // CONNECTION REQUESTS
-    // ═════════════════════════════════════════════════════════════════════════
-    match /connection_requests/{reqId} {
-      // Sender or recipient can read the request.
-      allow read: if isAuthed()
-        && (request.auth.uid == resource.data.fromUserId
-            || request.auth.uid == resource.data.toUserId);
-
-      // Only the sender can create; must set their own fromUserId.
-      allow create: if isAuthed()
-        && request.auth.uid == request.resource.data.fromUserId
-        && request.resource.data.status == 'pending';
-
-      // Only the recipient can accept/reject (update status).
-      allow update: if isAuthed()
-        && request.auth.uid == resource.data.toUserId
-        && request.resource.data.fromUserId == resource.data.fromUserId
-        && request.resource.data.toUserId == resource.data.toUserId
-        && request.resource.data.status in ['accepted', 'rejected'];
-
-      // Sender can withdraw; recipient can decline (delete).
-      allow delete: if isAuthed()
-        && (request.auth.uid == resource.data.fromUserId
-            || request.auth.uid == resource.data.toUserId);
-    }
-
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // CAREER ROADMAPS
-    // ═════════════════════════════════════════════════════════════════════════
-    match /career_roadmaps/{userId} {
-      allow read, write: if isAuthed() && request.auth.uid == userId;
-    }
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // CORE USER COLLECTIONS
-    // ═════════════════════════════════════════════════════════════════════════
-    match /users/{userId} {
-      // Anyone authenticated can read user profiles (needed for team members and connections)
       allow read: if isAuthed();
-      // Only the user can update their own profile
+      allow create: if isAuthed();
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.ownerId || request.auth.uid in resource.data.members);
+    }
+
+    match /team_requests/{requestId} {
+      allow read, write: if isAuthed();
+    }
+
+    match /team_messages/{messageId} {
+      allow read, write: if isAuthed();
+    }
+
+    match /messages/{msgId} {
+      allow read, write: if isAuthed();
+    }
+
+    match /requests/{reqId} {
+      allow read, write: if isAuthed();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthed();
       allow write: if isAuthed() && request.auth.uid == userId;
       
-      // Allow users to manage their project recommendations
       match /projectRecommendations/{docId} {
         allow read, write: if isAuthed() && request.auth.uid == userId;
       }
-
-      // Allow users to manage their interview sessions
       match /interviewSessions/{docId} {
         allow read, write: if isAuthed() && request.auth.uid == userId;
       }
@@ -278,39 +46,74 @@ service cloud.firestore {
       allow read, write: if isAuthed() && request.auth.uid == userId;
     }
 
+    match /career_roadmaps/{userId} {
+      allow read, write: if isAuthed() && request.auth.uid == userId;
+    }
+
     match /career_coach_chats/{userId} {
       allow read, write: if isAuthed() && request.auth.uid == userId;
     }
 
     match /resume_history/{docId} {
-      allow read: if isAuthed() && request.auth.uid == resource.data.uid;
-      allow create: if isAuthed() && request.auth.uid == request.resource.data.uid;
-      allow update, delete: if isAuthed() && request.auth.uid == resource.data.uid;
+      allow read: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.uid || request.auth.uid == request.resource.data.userId);
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+    }
+
+    match /resumes/{resumeId} {
+      allow read: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.uid || request.auth.uid == request.resource.data.userId);
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+    }
+
+    match /resume_reviews/{docId} {
+      allow read: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.uid || request.auth.uid == request.resource.data.userId);
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
     }
 
     match /skill_gap_analysis/{docId} {
-      allow read: if isAuthed() && request.auth.uid == resource.data.userId;
-      allow create: if isAuthed() && request.auth.uid == request.resource.data.userId;
-      allow update, delete: if isAuthed() && request.auth.uid == resource.data.userId;
+      allow read: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.uid || request.auth.uid == request.resource.data.userId);
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+    }
+
+    match /achievements/{docId} {
+      allow read: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.uid || request.auth.uid == request.resource.data.userId);
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+    }
+
+    match /goals/{docId} {
+      allow read: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.uid || request.auth.uid == request.resource.data.userId);
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+    }
+
+    match /analytics/{docId} {
+      allow read: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.uid || request.auth.uid == request.resource.data.userId);
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+    }
+
+    match /activities/{actId} {
+      allow read: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.uid || request.auth.uid == request.resource.data.userId);
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+    }
+
+    match /notifications/{notifId} {
+      allow read: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.uid || request.auth.uid == request.resource.data.userId);
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
     }
 
     match /dashboard_stats/{userId} {
       allow read, write: if isAuthed() && request.auth.uid == userId;
     }
 
-    match /resumes/{resumeId} {
-      allow read: if isAuthed() && request.auth.uid == resource.data.userId;
-      allow create: if isAuthed() && request.auth.uid == request.resource.data.userId;
-      allow update, delete: if isAuthed() && request.auth.uid == resource.data.userId;
-    }
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // OPPORTUNITIES & APPLICATIONS
-    // ═════════════════════════════════════════════════════════════════════════
     match /opportunities/{oppId} {
-      // Anyone authenticated can view active opportunities
       allow read: if isAuthed();
-      // Only employers/admins can write (enforced by application logic/custom claims, keeping broad for demo)
       allow write: if isAuthed();
     }
 
@@ -318,10 +121,15 @@ service cloud.firestore {
       allow read, write: if isAuthed();
     }
 
+    match /saved_opportunities/{docId} {
+      allow read, write: if isAuthed() && request.auth.uid == resource.data.uid;
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.uid;
+    }
+
     match /applications/{appId} {
-      allow read: if isAuthed() && request.auth.uid == resource.data.userId;
-      allow create: if isAuthed() && request.auth.uid == request.resource.data.userId;
-      allow update, delete: if isAuthed() && request.auth.uid == resource.data.userId;
+      allow read: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.uid || request.auth.uid == request.resource.data.userId);
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
     }
 
     match /recommendations/{recId} {
@@ -330,32 +138,23 @@ service cloud.firestore {
       allow update, delete: if isAuthed() && (request.auth.uid == resource.data.userId || request.auth.uid == resource.data.uid);
     }
 
-    // ═════════════════════════════════════════════════════════════════════════
-    // ACTIVITY & NOTIFICATIONS
-    // ═════════════════════════════════════════════════════════════════════════
-    match /activities/{actId} {
-      allow read: if isAuthed() && request.auth.uid == resource.data.userId;
-      allow create: if isAuthed() && request.auth.uid == request.resource.data.userId;
-      allow update, delete: if isAuthed() && request.auth.uid == resource.data.userId;
+    match /connections/{connId} {
+      allow read: if isAuthed() && (request.auth.uid == resource.data.userId1 || request.auth.uid == resource.data.userId2);
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.userId1 || request.auth.uid == request.resource.data.userId2);
+      allow update: if false;
+      allow delete: if isAuthed() && (request.auth.uid == resource.data.userId1 || request.auth.uid == resource.data.userId2);
     }
 
-    match /notifications/{notifId} {
-      allow read: if isAuthed() && request.auth.uid == resource.data.userId;
-      allow create: if isAuthed() && request.auth.uid == request.resource.data.userId;
-      allow update, delete: if isAuthed() && request.auth.uid == resource.data.userId;
+    match /connection_requests/{reqId} {
+      allow read: if isAuthed() && (request.auth.uid == resource.data.fromUserId || request.auth.uid == resource.data.toUserId);
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.fromUserId;
+      allow update: if isAuthed() && request.auth.uid == resource.data.toUserId;
+      allow delete: if isAuthed() && (request.auth.uid == resource.data.fromUserId || request.auth.uid == resource.data.toUserId);
     }
 
-    match /messages/{msgId} {
-      // Direct messaging between users
-      allow read, write: if isAuthed();
-    }
-
-    // ═════════════════════════════════════════════════════════════════════════
-    // DENY ALL OTHER PATHS (explicit, Firestore denies by default anyway)
-    // ═════════════════════════════════════════════════════════════════════════
+    // Default deny for anything not matched above
     match /{document=**} {
       allow read, write: if false;
     }
-
   }
 }

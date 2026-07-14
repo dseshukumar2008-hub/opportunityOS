@@ -44,6 +44,7 @@ export default function ResumeBuilderPage() {
     resumeData,
     lastUpdated, 
     activeTemplate, 
+    isDirty,
     getResumeStrength, 
     getSectionsCompleted,
     saveResume,
@@ -128,6 +129,19 @@ export default function ResumeBuilderPage() {
       }
     }
   }, [id, activeResumeId, resumes, loading, switchResume, navigate]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
   const handleSave = () => {
     saveResume();
   };

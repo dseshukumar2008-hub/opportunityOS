@@ -5,11 +5,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotificationContext';
 import { fileToBase64 } from '../utils/fileUtils';
 
+const ENABLE_AI_NOTIFICATIONS = false;
+
 export function useResumeAnalysis() {
   const { user } = useAuth();
   const { addNotification } = useNotifications();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [progressText, setProgressText] = useState('');
   const [analysisResults, setAnalysisResults] = useState(null);
   const [storedResumeUrl, setStoredResumeUrl] = useState(null);
   const [storedResumeName, setStoredResumeName] = useState(null);
@@ -44,42 +47,72 @@ export function useResumeAnalysis() {
     setIsAnalyzing(true);
     setError(null);
     setUploadProgress(0);
+    setProgressText('Uploading...');
 
     try {
       let payloadForGemini = dataOrFile;
       let extractedText = '';
 
       if (dataOrFile instanceof File) {
+        if (dataOrFile.size > 10 * 1024 * 1024) {
+          throw new Error('Your resume exceeds the 10 MB upload limit. Please compress your PDF or remove unnecessary images before uploading.');
+        }
+        
+        setProgressText('Extracting Resume...');
         console.log(`[Resume Analysis] Processing file: ${dataOrFile.name} (${dataOrFile.size} bytes)`);
         
         // Extract text locally first
         try {
-          const { extractTextFromFile } = await import('../utils/fileUtils');
+          const { extractTextFromFile, optimizeLargeResumeText } = await import('../utils/fileUtils');
           console.log('[Resume Analyzer] Text extraction started');
           extractedText = await extractTextFromFile(dataOrFile);
-          console.log(`[Resume Analyzer] Text extraction success: ${extractedText.length} characters`);
+          console.log(`[Resume Analyzer] Text extraction success: ${extractedText?.length} characters`);
           
+          if (!extractedText || extractedText.trim().length === 0) {
+            throw new Error('No readable text was found in this resume.');
+          }
           if (extractedText.length < 100) {
             throw new Error(`Extracted text is too short (${extractedText.length} chars). Please upload a valid resume with selectable text.`);
+          }
+          
+          // Smart Text Truncation
+          const originalLength = extractedText.length;
+          extractedText = optimizeLargeResumeText(extractedText, 25000);
+          if (extractedText.length < originalLength) {
+             console.log(`[Resume Analyzer] Text optimized from ${originalLength} to ${extractedText.length} chars`);
           }
         } catch (extractionError) {
           console.error('[Resume Analyzer] Local extraction failed:', extractionError);
           console.log('[Resume Analyzer] Text extraction failure');
           setIsAnalyzing(false);
           setUploadProgress(0);
+          setProgressText('');
           
-          let errMsg = 'Unexpected error occurred.';
-          if (extractionError.type === 'PDF_EXTRACTION_FAILURE') errMsg = 'Unable to read this PDF file.';
-          else if (extractionError.type === 'DOCX_EXTRACTION_FAILURE') errMsg = 'Unable to process this DOCX file.';
+          let errMsg = extractionError.message || 'Unexpected error occurred.';
+          if (extractionError.type === 'PDF_EXTRACTION_FAILURE') errMsg = "We couldn't read this resume. Please upload a valid PDF or DOCX document.";
+          else if (extractionError.type === 'DOCX_EXTRACTION_FAILURE') errMsg = "We couldn't read this resume. Please upload a valid PDF or DOCX document.";
           else if (extractionError.type === 'UNSUPPORTED_FILE') errMsg = 'Unsupported file format.';
           
           setError(errMsg);
           return { _error: true, message: errMsg };
         }
 
-        payloadForGemini = await fileToBase64(dataOrFile);
-        console.log('[Resume Analysis] Base64 Generated');
+        // Avoid base64 payload if file is too large (> 4MB) to protect AI limits
+        if (dataOrFile.size > 4 * 1024 * 1024) {
+          console.log('[Resume Analysis] Skipping Base64 conversion for large file');
+          payloadForGemini = extractedText;
+        } else {
+          setProgressText('Preparing AI Analysis...');
+          payloadForGemini = await fileToBase64(dataOrFile);
+          console.log('[Resume Analysis] Base64 Generated');
+        }
+      } else if (typeof dataOrFile === 'string') {
+        const { optimizeLargeResumeText } = await import('../utils/fileUtils');
+        extractedText = optimizeLargeResumeText(dataOrFile, 25000);
+        payloadForGemini = extractedText;
       }
+
+      setProgressText('Analyzing Resume...');
 
       let results = null;
       let localMetrics = null;
@@ -116,16 +149,96 @@ export function useResumeAnalysis() {
             throw new Error('Invalid AI insight schema.');
           }
           
+          // Generate Smart Suggestions dynamically based on the analysis
+          const smartSuggestions = [];
+
+          // 1. Local ATS Deductions (Losses)
+          if (localMetrics.explanation) {
+            localMetrics.explanation.forEach(exp => {
+              if (exp.type === 'loss') {
+                smartSuggestions.push({
+                  area: 'ATS Formatting',
+                  priority: 'HIGH',
+                  title: exp.label,
+                  description: `This caused an ATS deduction of ${exp.points} points. Add or improve this section to increase your parsing score.`
+                });
+              }
+            });
+          }
+
+          // 2. Missing Keywords
+          if (localMetrics.missingKeywords && localMetrics.missingKeywords.length > 0) {
+            smartSuggestions.push({
+              area: 'Keywords',
+              priority: 'MEDIUM',
+              title: 'Missing Crucial Keywords',
+              description: `Your resume is missing important industry keywords. Consider adding: ${localMetrics.missingKeywords.slice(0, 5).join(', ')}.`
+            });
+          }
+
+          // 3. AI Areas for Growth
+          if (aiInsights.areasForGrowth && Array.isArray(aiInsights.areasForGrowth)) {
+            aiInsights.areasForGrowth.forEach(area => {
+              const desc = area.includes('. ') ? area : `${area}. Ensure you incorporate this feedback into your next revision.`;
+              smartSuggestions.push({
+                area: 'Content Strategy',
+                priority: 'MEDIUM',
+                title: 'Area for Growth',
+                description: desc
+              });
+            });
+          }
+
+          // 4. AI Action Plan - Immediate Fixes
+          if (aiInsights.actionPlan?.immediateFixes && Array.isArray(aiInsights.actionPlan.immediateFixes)) {
+            aiInsights.actionPlan.immediateFixes.forEach(fix => {
+              const desc = fix.includes('. ') ? fix : `${fix}. Apply this fix immediately.`;
+              smartSuggestions.push({
+                area: 'Priority Fix',
+                priority: 'HIGH',
+                title: 'Immediate Action Needed',
+                description: desc
+              });
+            });
+          }
+
+          // 5. AI Action Plan - Skills
+          if (aiInsights.actionPlan?.skillsToLearn && Array.isArray(aiInsights.actionPlan.skillsToLearn)) {
+            aiInsights.actionPlan.skillsToLearn.forEach(skill => {
+              smartSuggestions.push({
+                area: 'Skill Development',
+                priority: 'LOW',
+                title: `Learn ${skill}`,
+                description: `You are missing this skill for target roles. Acquire this skill and add it to your resume to boost your match rate.`
+              });
+            });
+          }
+
+          // Enforce ATS Score Rule: If score is < 90 but no suggestions exist, add a fallback.
+          if (localMetrics.atsScore < 90 && smartSuggestions.length === 0) {
+            smartSuggestions.push({
+              area: 'Optimization',
+              priority: 'LOW',
+              title: 'Minor Polish Needed',
+              description: 'Your resume is good but not perfect. Try quantifying more achievements to push your score above 90.'
+            });
+          }
+          
           // Merge
           results = {
             ...aiInsights,
             ...localMetrics, // override any hallucinations if they sneaked in
             extractedSkills: localMetrics.extractedSkills,
-            missingKeywords: localMetrics.missingKeywords,
+            missingKeywords: aiInsights.missingKeywords || localMetrics.missingKeywords, // use AI's keyword explanation first
             atsScore: localMetrics.atsScore,
             scoreBreakdown: localMetrics.scoreBreakdown,
             explanation: localMetrics.explanation,
-            qualityRating: aiInsights.qualityRating || localMetrics.rating || 'Good'
+            qualityRating: aiInsights.qualityRating || localMetrics.rating || 'Good',
+            smartSuggestions,
+            contentSuggestions: aiInsights.contentSuggestions,
+            recommendedSkills: aiInsights.recommendedSkills,
+            recommendedCertifications: aiInsights.recommendedCertifications,
+            recommendedProjects: aiInsights.recommendedProjects
           };
           
         } catch (geminiError) {
@@ -191,7 +304,7 @@ export function useResumeAnalysis() {
           }
 
           // 7. Sync to match_resumes for Match Engine integration
-          // NOTE: Supabase sync has been fully removed. Match Engine now reads from Firestore.
+          // Match Engine now reads from Firestore.
         } catch (persistErr) {
           console.error('[Resume Analyzer] Failed to persist analysis to Firestore:', persistErr);
           // Non-fatal
@@ -201,15 +314,18 @@ export function useResumeAnalysis() {
       console.log(`[Resume Analyzer] ATS score calculated: ${results.atsScore}`);
       console.log('[Resume Analyzer] Adding notification and finalizing...');
 
-      addNotification({
-        title: 'Resume Analysis Ready',
-        message: `Your resume scored ${results.atsScore}%. Click to view details.`,
-        type: 'System',
-        targetUrl: '/resume-review'
-      });
+      if (ENABLE_AI_NOTIFICATIONS) {
+        addNotification({
+          title: 'Resume Analysis Ready',
+          message: `Your resume scored ${results.atsScore}%. Click to view details.`,
+          type: 'System',
+          targetUrl: '/resume-review'
+        });
+      }
 
       setIsAnalyzing(false);
       setUploadProgress(100);
+      setProgressText('Complete ✓');
       console.log('[Resume Analyzer] Analysis completed');
       return results;
 
@@ -232,6 +348,7 @@ export function useResumeAnalysis() {
       setAnalysisResults(fallbackResults);
       setIsAnalyzing(false);
       setUploadProgress(100);
+      setProgressText('');
       return fallbackResults;
     }
   }, [user?.id]);
@@ -253,6 +370,7 @@ export function useResumeAnalysis() {
     setError(null);
     setIsAnalyzing(false);
     setUploadProgress(0);
+    setProgressText('');
   }, []);
 
   return {
@@ -262,6 +380,7 @@ export function useResumeAnalysis() {
     loadSavedAnalysis,
     isAnalyzing,
     uploadProgress,
+    progressText,
     analysisResults,
     storedResumeUrl,
     storedResumeName,

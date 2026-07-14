@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../contexts/ProfileContext';
 import { useNotifications } from '../contexts/NotificationContext';
-import { useDeadlineReminders } from '../hooks/useDeadlineReminders';
+
 import { useOnlineStatus } from '../contexts/OnlineStatusContext';
 import StatusDot from '../components/ui/StatusDot';
 import GlobalSearchModal from '../components/navigation/GlobalSearchModal';
@@ -17,7 +17,7 @@ import EmptyState from '../components/ui/EmptyState';
 import OpportunityOSCopilot from '../components/copilot/OpportunityOSCopilot';
 import { useResume } from '../contexts/ResumeContext';
 import { useGoals } from '../contexts/GoalContext';
-import OnboardingModal from '../components/onboarding/OnboardingModal';
+import FloatingOnboarding from '../components/onboarding/FloatingOnboarding';
 import LocationMigrationModal from '../components/onboarding/LocationMigrationModal';
 import { getUserFullName, getUserFirstName } from '../utils/userUtils';
 
@@ -52,7 +52,7 @@ export default function DashboardLayout() {
   const { notifications, getUnreadCount, markAsRead, deleteNotification } = useNotifications();
   const { myStatus, setOffline } = useOnlineStatus();
   const unreadCount = getUnreadCount();
-  useDeadlineReminders();
+
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -338,9 +338,14 @@ export default function DashboardLayout() {
                 )}
               </button>
 
-              {isNotificationDropdownOpen && (
-                <div className="absolute right-0 top-full mt-4 w-[340px] sm:w-[380px] bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-slate-100 py-3 z-50">
-                  <div className="flex items-center justify-between px-5 mb-2 pb-3 border-b border-slate-100">
+              <div 
+                className={`absolute right-0 top-full mt-4 w-[340px] sm:w-[380px] bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-slate-100 py-3 z-50 transition-all duration-200 origin-top-right ${
+                  isNotificationDropdownOpen 
+                    ? 'opacity-100 scale-100 translate-y-0 visible pointer-events-auto' 
+                    : 'opacity-0 scale-95 -translate-y-2 invisible pointer-events-none'
+                }`}
+              >
+                <div className="flex items-center justify-between px-5 mb-2 pb-3 border-b border-slate-100">
                     <h3 className="font-bold text-slate-900">Notifications</h3>
                     <span className="bg-indigo-50 text-[#6C4CF1] text-[11px] font-bold px-2 py-0.5 rounded-full">
                       {unreadCount} New
@@ -428,7 +433,6 @@ export default function DashboardLayout() {
                     </div>
                   )}
                 </div>
-              )}
             </div>
 
             <div className="relative" ref={profileDropdownRef}>
@@ -515,7 +519,7 @@ export default function DashboardLayout() {
         <OpportunityOSCopilot mode="student" contextData={studentContext} />
 
         {/* First Time User Onboarding */}
-        <OnboardingModal />
+        <FloatingOnboarding />
         
         {/* Existing User Location Migration */}
         <LocationMigrationModal />

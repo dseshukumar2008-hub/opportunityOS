@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useUserProfile } from './useUserProfile';
 import { useResumeInsights } from './useResumeInsights';
-import { useRecommendations } from './useRecommendations';
-import { useApplications } from '../contexts/ApplicationContext';
+
+
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../config/firebase';
 import { collection, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -26,22 +26,13 @@ function buildContext({ profile, atsScore, topStrength, topWeakness, recommendat
       topStrength: topStrength || 'N/A',
       topWeakness: topWeakness || 'N/A',
     },
-    topRecommendations: (recommendations || []).slice(0, 3).map(r => ({
-      title: r.title,
-      company: r.company,
-      matchScore: r.matchData?.score,
-    })),
-    applicationsSubmitted: applications?.length || 0,
+    applicationsSubmitted: 0,
   };
 }
 
-/**
- * Calls the Gemini API with a full message history for true conversation memory.
- */
-async function callGeminiChat(contextData, history, userMessage) {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  if (!apiKey) throw new Error('VITE_GEMINI_API_KEY is not configured.');
+import { generate as aiGenerate } from '../services/ai/aiProvider';
 
+async function callGeminiChat(contextData, history, userMessage) {
   const systemPrompt = `You are an expert AI Career Coach inside OpportunityOS. Your role is to give highly personalized, actionable career advice to students and professionals.
 
 Always ground your answers in the user's specific context below. Be concise, encouraging, and specific — avoid generic platitudes.
@@ -73,25 +64,26 @@ Instructions:
   // Add the current user message
   contents.push({ role: 'user', parts: [{ text: userMessage }] });
 
-  const requestBody = {
-    contents,
-    generationConfig: { temperature: 0.4, maxOutputTokens: 600 }
+  const request = {
+    feature: 'Career Coach Chat',
+    prompt: userMessage,
+    responseType: 'text',
+    options: {
+      contents: contents,
+      temperature: 0.4
+    }
   };
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) }
-  );
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `Gemini API Error: ${response.status}`);
+  try {
+    const response = await aiGenerate(request);
+    if (!response.success) {
+      throw response.error;
+    }
+    return response.data;
+  } catch (err) {
+    console.error('EXACT EXCEPTION IN callGeminiChat:', err.message, '\nStack:', err.stack);
+    throw err;
   }
-
-  const data = await response.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!rawText) throw new Error('Empty response from Gemini.');
-  return rawText.trim();
 }
 
 export const SUGGESTED_PROMPTS = [
@@ -104,8 +96,8 @@ export const SUGGESTED_PROMPTS = [
 export function useCareerCoach() {
   const { profile } = useUserProfile();
   const { atsScore, topStrength, topWeakness } = useResumeInsights();
-  const { recommendations } = useRecommendations();
-  const { applications } = useApplications();
+
+
   const { user } = useAuth();
 
   const [messages, setMessages] = useState([]);
@@ -140,8 +132,8 @@ export function useCareerCoach() {
 
   // Keep context fresh
   useEffect(() => {
-    contextRef.current = buildContext({ profile, atsScore, topStrength, topWeakness, recommendations, applications });
-  }, [profile, atsScore, topStrength, topWeakness, recommendations, applications]);
+    contextRef.current = buildContext({ profile, atsScore, topStrength, topWeakness });
+  }, [profile, atsScore, topStrength, topWeakness]);
 
   const persistMessages = useCallback(async (updatedMessages) => {
     if (!user) return;
@@ -178,7 +170,7 @@ export function useCareerCoach() {
       await persistMessages(finalMessages);
     } catch (err) {
       console.error('Career Coach Error:', err);
-      setError('Career Coach is temporarily unavailable. Please try again.');
+      setError(`Error: ${err.message}`);
       // Remove the user message we optimistically added so the user can retry
       setMessages(messages);
     } finally {

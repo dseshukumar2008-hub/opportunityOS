@@ -84,3 +84,29 @@ export const extractTextFromFile = async (file) => {
     }
   });
 };
+
+export const optimizeLargeResumeText = (text, maxLength = 25000) => {
+  if (!text) return '';
+  
+  // Clean whitespace and repeated newlines
+  let cleanText = text.replace(/\n\s*\n/g, '\n\n').replace(/[ \t]{2,}/g, ' ').trim();
+  
+  if (cleanText.length <= maxLength) return cleanText;
+
+  // Split by double newlines to keep sections intact
+  const chunks = cleanText.split('\n\n');
+  let optimizedText = '';
+  
+  for (const chunk of chunks) {
+    // Ignore purely decorative chunks
+    if (/^[=_\-*\| ]+$/.test(chunk.trim())) continue;
+    
+    if (optimizedText.length + chunk.length + 2 > maxLength) {
+      optimizedText += '\n\n...[Content truncated to optimize AI processing]';
+      break;
+    }
+    optimizedText += chunk + '\n\n';
+  }
+  
+  return optimizedText.trim();
+};

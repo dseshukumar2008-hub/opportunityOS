@@ -1,157 +1,28 @@
 import { calculateATSScore } from '../utils/atsScoringEngine';
 import { analyticsService } from './analyticsService';
 
-const getApiKey = () => {
-  const key = import.meta.env.VITE_GEMINI_API_KEY;
-  if (!key) throw new Error('VITE_GEMINI_API_KEY is not configured.');
-  return key;
-};
+import { generate } from './ai/aiProvider';
 
-const callGemini = async (prompt, systemInstruction = null, inlineDataItems = [], temperature = 0.3, featureName = 'Unknown', timeoutMs = 30000) => {
-  const apiKey = getApiKey();
-  
-  const parts = [{ text: prompt }];
-  if (inlineDataItems && inlineDataItems.length > 0) {
-    inlineDataItems.forEach(item => {
-      parts.push({
-        inline_data: {
-          mime_type: item.mimeType,
-          data: item.data
-        }
-      });
-    });
-  }
-
-  const requestBody = {
-    contents: [{ parts }],
-    generationConfig: { 
-      temperature: temperature, 
-      responseMimeType: 'application/json' 
+async function callGemini(prompt, systemInstruction = '', inlineDataItems = [], temperature = 0.3, featureName = 'Unknown', timeout = 30000) {
+  const request = {
+    providerName: 'gemini',
+    feature: featureName,
+    prompt: prompt,
+    responseType: 'json', // geminiService always expects JSON
+    options: {
+      systemInstruction,
+      temperature,
+      inlineData: inlineDataItems,
+      timeout
     }
   };
-
-  if (systemInstruction) {
-    requestBody.systemInstruction = {
-      parts: [{ text: systemInstruction }]
-    };
-  }
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-  // Fast hash function for the prompt to use as cache key
-  let hash = 0;
-  for (let i = 0; i < prompt.length; i++) {
-    hash = ((hash << 5) - hash) + prompt.charCodeAt(i);
-    hash |= 0;
-  }
-  const cacheKey = `gemini_cache_${hash}_${featureName.replace(/\s+/g, '')}`;
   
-  const cachedResponse = localStorage.getItem(cacheKey);
-  if (cachedResponse) {
-    try {
-      const parsedCache = JSON.parse(cachedResponse);
-      console.log(`[Gemini API] Returned CACHED result for ${featureName}`);
-      return parsedCache;
-    } catch(e) {
-      // Ignored
-    }
+  const response = await generate(request);
+  if (response.error) {
+    throw response.error;
   }
-
-  let response;
-  const startTime = Date.now();
-  try {
-    response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify(requestBody),
-        signal: controller.signal
-      }
-    );
-  } catch (err) {
-    if (err.name === 'AbortError') {
-      analyticsService.trackError('Gemini API Timeout', err);
-      analyticsService.trackAIOperation(featureName, 0, Date.now() - startTime, false, 'Timeout');
-      const timeoutErr = new Error(`Gemini API request timed out after ${timeoutMs / 1000} seconds.`);
-      timeoutErr.type = 'NETWORK_ERROR';
-      throw timeoutErr;
-    }
-    const networkErr = new Error('Network connection issue detected.');
-    networkErr.type = 'NETWORK_ERROR';
-    networkErr.original = err;
-    analyticsService.trackError('Gemini API Error', err);
-    analyticsService.trackAIOperation(featureName, 0, Date.now() - startTime, false, err.message);
-    throw networkErr;
-  }
-
-  if (response.status === 429 || response.status >= 500) {
-    clearTimeout(timeoutId);
-    console.warn(`[Gemini Service] AI Service Unavailable (${response.status}).`);
-    analyticsService.trackAIOperation(featureName, 0, Date.now() - startTime, false, `Rate Limit or Server Error: ${response.status}`);
-    const error = new Error('AI analysis temporarily unavailable.');
-    error.type = response.status === 429 ? 'GEMINI_QUOTA_EXCEEDED' : 'GEMINI_SERVER_ERROR';
-    throw error;
-  }
-
-  if (!response.ok) {
-    clearTimeout(timeoutId);
-    const rawErrorText = await response.text();
-    console.error('[Gemini Service] HTTP Error response body:', rawErrorText);
-    let errorMsg = `Gemini API Error: ${response.status}`;
-    try {
-      const errJson = JSON.parse(rawErrorText);
-      if (errJson?.error?.message) errorMsg = errJson.error.message;
-    } catch (e) {
-      // Ignored
-    }
-    const error = new Error(errorMsg);
-    error.status = response.status;
-    error.body = rawErrorText;
-    analyticsService.trackError('Gemini API HTTP Error', error);
-    analyticsService.trackAIOperation(featureName, 0, Date.now() - startTime, false, errorMsg);
-    throw error;
-  }
-
-  const data = await response.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  
-  const responseTime = Date.now() - startTime;
-  const tokenUsage = data.usageMetadata?.totalTokenCount || 'N/A';
-  console.log(`[Gemini API] Request completed. Time: ${responseTime}ms | Tokens: ${tokenUsage} | Prompt length: ${prompt.length} chars`);
-
-  if (!rawText) {
-    console.error('[Gemini Service] Missing rawText in response body:', JSON.stringify(data));
-    analyticsService.trackError('Gemini Empty Response', new Error('Empty response'));
-    analyticsService.trackAIOperation(featureName, tokenUsage, responseTime, false, 'Empty response');
-    throw new Error('Empty response from Gemini.');
-  }
-
-  const cleaned = rawText.replace(/^```json\s*/m, '').replace(/```\s*$/m, '').trim();
-  
-  try {
-    const parsed = JSON.parse(cleaned);
-    analyticsService.trackAIOperation(featureName, tokenUsage, responseTime, true, null);
-    
-    // Save to cache on success
-    try {
-      localStorage.setItem(cacheKey, JSON.stringify(parsed));
-    } catch(e) {
-      console.warn("Could not cache Gemini result (maybe too large):", e);
-    }
-    
-    return parsed;
-  } catch (parseError) {
-    console.error('[Resume Analysis Error] Failed to parse Gemini JSON response.', parseError);
-    console.error('Raw text received:', rawText);
-    analyticsService.trackError('Gemini Parse Error', parseError);
-    analyticsService.trackAIOperation(featureName, tokenUsage, responseTime, false, 'JSON Parse Error');
-    throw new Error('Failed to parse Gemini JSON response.');
-  } finally {
-    clearTimeout(timeoutId);
-  }
-};
+  return response.data;
+}
 
 export const geminiService = {
   /**

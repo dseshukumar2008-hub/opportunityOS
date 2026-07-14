@@ -8,6 +8,7 @@ import Step7ConnectStudents from './screens/Step7ConnectStudents';
 import Step8CareerReadiness from './screens/Step8CareerReadiness';
 import Step9CompleteOnboarding from './screens/Step9CompleteOnboarding';
 
+
 export default function DemoPreviewCard({ step }) {
   const getPreviewContent = () => {
     switch (step) {

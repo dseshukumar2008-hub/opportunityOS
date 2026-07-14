@@ -1,7 +1,12 @@
+// @ts-ignore
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// @ts-ignore
 import { corsHeaders } from "../_shared/cors.ts";
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+
+// @ts-ignore
+declare const Deno: any;
 
 serve(async (req: Request) => {
   // Handle CORS preflight requests
@@ -164,7 +169,7 @@ Return ONLY a valid JSON object matching exactly this schema, and nothing else (
       throw new Error(`Unsupported action: ${action}`);
     }
 
-    let requestBody: Record<string, unknown> = {
+    let requestBody: Record<string, any> = {
       contents: [],
       generationConfig: { temperature: 0.2, responseMimeType: "application/json" }
     };

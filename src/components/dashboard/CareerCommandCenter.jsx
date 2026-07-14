@@ -9,7 +9,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 import { useResumeInsights } from '../../hooks/useResumeInsights';
-import { useSavedOpportunities } from '../../contexts/SavedOpportunitiesContext';
 import { useTeam } from '../../contexts/TeamContext';
 import { getUserFirstName } from '../../utils/userUtils';
 
@@ -100,13 +99,11 @@ export default function CareerCommandCenter() {
   const { user } = useAuth();
   const { profile, isLoading: profileLoading } = useUserProfile();
   const {
-    applicationInsights,
     careerReadiness,
     profileCompletion,
     isLoading: insightsLoading,
   } = useDashboardInsights();
   const { atsScore, hasInsights } = useResumeInsights();
-  const { savedOpportunities } = useSavedOpportunities();
   const { getMyTeams } = useTeam();
 
   const greeting = useMemo(() => getGreeting(), []);
@@ -123,8 +120,6 @@ export default function CareerCommandCenter() {
 
   const profilePct = profileCompletion?.score ?? 0;
   const resumeScore = hasInsights ? atsScore : null;
-  const totalApplications = applicationInsights?.submitted ?? 0;
-  const savedCount = savedOpportunities?.length ?? 0;
   const activeTeams = getMyTeams()?.length ?? 0;
   const aiScore = careerReadiness?.score ?? 0;
   const profileColor = getScoreColor(profilePct);
@@ -255,11 +250,7 @@ export default function CareerCommandCenter() {
             </div>
           </Link>
 
-          {/* Applications */}
-          <StatPill icon={Briefcase} label="Applications" value={totalApplications} color="indigo" to="/applications" />
 
-          {/* Saved */}
-          <StatPill icon={BookmarkCheck} label="Saved" value={savedCount} color="violet" to="/saved" />
 
           {/* Teams */}
           <StatPill icon={Users2} label="Teams" value={activeTeams} color="emerald" to="/team-finder" />
@@ -292,10 +283,10 @@ export default function CareerCommandCenter() {
           <div className="flex flex-wrap items-center gap-2">
             <QuickAction icon={User} label="Complete Profile" to="/profile" primary />
             <QuickAction icon={FileText} label="Improve Resume" to="/resume-review" />
-            <QuickAction icon={Target} label="Find Opportunities" to="/opportunities" />
+            <QuickAction icon={Target} label="Explore Career Paths" to="/career-explorer" />
             <QuickAction icon={Users2} label="Create Team" to="/team-finder" />
             <Link
-              to="/opportunities"
+              to="/career-explorer"
               className="flex items-center gap-1 text-[11px] font-bold text-[#6C4CF1] hover:text-indigo-800 transition-colors ml-1"
             >
               Explore all <ChevronRight size={12} />

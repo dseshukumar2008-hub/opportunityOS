@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{ 
       user: mappedUser, 
-      session: null, // Removed supabase session
+      session: null,
       isAuthenticated: !!mappedUser,
       loading: loading, 
       isEmployer,

@@ -23,7 +23,7 @@ export default function DashboardSkeleton() {
           </Skeleton.Card>
           
           <Skeleton.Card className="flex-1 min-h-[300px]">
-            <Skeleton.Line w="w-32" className="mb-6" />
+            <Skeleton.Line w="w-32" className="mb -6" />
             <div className="space-y-6">
               {[1, 2, 3].map(i => (
                 <div key={i} className="flex gap-4">

@@ -327,19 +327,10 @@ export default function RoadmapWizard({ onGenerate, isGenerating, genError }) {
                 ))}
               </div>
 
-              {/* Error from previous failed attempt */}
-              {genError && (
-                <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-xl mb-4">
-                  <AlertTriangle size={16} className="text-red-500 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-sm font-bold text-red-700">Generation failed — please try again</p>
-                    <p className="text-xs text-red-600 mt-0.5">{genError}</p>
-                  </div>
-                </div>
-              )}
+
 
               <p className="text-xs text-center text-slate-400 font-medium">
-                ✨ Powered by Gemini 2.5 Flash · Takes 15–30 seconds
+                ✨ Powered by OpportunityOS Intelligence · Takes 15–30 seconds
               </p>
             </>
           )}

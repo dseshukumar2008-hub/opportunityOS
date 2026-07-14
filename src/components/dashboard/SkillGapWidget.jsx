@@ -21,11 +21,12 @@ export default function SkillGapWidget() {
   // Mocking skills based on reference image
   const skillsToLearn = skillGap?.missing?.length > 0 ? skillGap.missing.slice(0, 3).map((s, i) => ({
     name: s,
-    priority: i < 2 ? 'High Priority' : 'Medium Priority'
+    priority: i < 2 ? 'High Priority' : 'Medium Priority',
+    progress: skillGap.progress?.[s] || null
   })) : [
-    { name: 'React.js', priority: 'High Priority' },
-    { name: 'System Design', priority: 'High Priority' },
-    { name: 'PostgreSQL', priority: 'Medium Priority' }
+    { name: 'React.js', priority: 'High Priority', progress: null },
+    { name: 'System Design', priority: 'High Priority', progress: null },
+    { name: 'PostgreSQL', priority: 'Medium Priority', progress: null }
   ];
 
   const getPriorityColor = (priority) => {
@@ -52,9 +53,13 @@ export default function SkillGapWidget() {
           <div key={idx} className="flex items-center justify-between pb-3 border-b border-slate-100 last:border-0 last:pb-0">
             <span className="text-[13px] font-bold text-slate-700 capitalize">{skill.name}</span>
             <div className="flex items-center gap-4 w-[120px] justify-between">
-              <div className="h-1 flex-1 bg-slate-100 rounded-full overflow-hidden">
-                <div className={`h-full rounded-full ${skill.priority === 'High Priority' ? 'bg-indigo-500' : 'bg-emerald-500'}`} style={{ width: skill.priority === 'High Priority' ? '80%' : '50%' }}></div>
-              </div>
+              {skill.progress !== null ? (
+                <div className="h-1 flex-1 bg-slate-100 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full ${skill.priority === 'High Priority' ? 'bg-indigo-500' : 'bg-emerald-500'}`} style={{ width: `${skill.progress}%` }}></div>
+                </div>
+              ) : (
+                <span className="text-[10px] font-bold text-slate-400 italic w-full text-center">Not Started</span>
+              )}
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 border w-20 text-center ${getPriorityColor(skill.priority)}`}>
                 {skill.priority}
               </span>
@@ -64,9 +69,9 @@ export default function SkillGapWidget() {
       </div>
 
       <div className="mt-6 flex justify-center">
-        <button className="px-6 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-[12px] font-bold transition-colors">
+        <Link to="/skill-gap" className="px-6 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-[12px] font-bold transition-colors">
           Start Learning
-        </button>
+        </Link>
       </div>
     </div>
   );

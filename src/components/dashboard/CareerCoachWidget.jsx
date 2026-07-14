@@ -54,7 +54,7 @@ export default function CareerCoachWidget() {
             </div>
             <div>
               <h3 className="text-[15px] font-bold text-slate-900 leading-tight">AI Career Copilot</h3>
-              <p className="text-[11px] text-slate-400 font-medium">Powered by Gemini</p>
+              <p className="text-[11px] text-slate-400 font-medium">Powered by OpportunityOS Intelligence</p>
             </div>
           </div>
           {(messages || []).length > 0 && (

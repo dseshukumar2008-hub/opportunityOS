@@ -2,7 +2,7 @@ import { Map, CheckCircle2, Circle, Briefcase, FileText, Code, User, MessageSqua
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 
 export default function CareerJourneyWidget() {
-  const { careerReadiness, applicationInsights, isLoading } = useDashboardInsights();
+  const { careerReadiness, isLoading } = useDashboardInsights();
 
   if (isLoading) {
     return (
@@ -18,15 +18,11 @@ export default function CareerJourneyWidget() {
   }
 
   const { breakdown } = careerReadiness;
-  const { submitted, interviews, offers } = applicationInsights;
 
   const steps = [
     { id: 'profile', label: 'Profile Complete', icon: User, done: breakdown?.profile?.done },
     { id: 'resume', label: 'Resume Uploaded', icon: FileText, done: breakdown?.resume?.done },
     { id: 'skills', label: 'Core Skills Added', icon: Code, done: breakdown?.skills?.done },
-    { id: 'apps', label: `${submitted} Applications Submitted`, icon: Briefcase, done: submitted > 0 },
-    { id: 'interviews', label: `${interviews} Interviews`, icon: MessageSquare, done: interviews > 0 },
-    { id: 'offers', label: `${offers} Offers`, icon: Award, done: offers > 0 },
   ];
 
   return (

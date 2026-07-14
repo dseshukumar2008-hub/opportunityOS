@@ -3,12 +3,12 @@ import { Mail, ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react';
 import AuthLayout from './AuthLayout';
 import { Link } from 'react-router-dom';
 
+
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
 
   const handleSubmit = (e) => {
     e.preventDefault();

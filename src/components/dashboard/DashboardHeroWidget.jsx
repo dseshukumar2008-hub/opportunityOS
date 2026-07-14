@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
-import { TrendingUp, Zap, Target } from 'lucide-react';
+import { TrendingUp, Zap, Target, Rocket } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getUserFirstName } from '../../utils/userUtils';
 
@@ -106,11 +106,7 @@ export default function DashboardHeroWidget() {
         <div className="hidden lg:flex items-center justify-center shrink-0 w-[220px]">
           <div className="relative w-full h-[160px] bg-gradient-to-br from-indigo-50 to-violet-50 rounded-2xl border border-indigo-100 flex items-center justify-center overflow-hidden">
             <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-indigo-100/40 blur-xl" />
-            <img
-              src="https://api.dicebear.com/7.x/notionists/svg?seed=career&backgroundColor=transparent"
-              alt="Career Illustration"
-              className="w-[120px] h-[120px] object-contain opacity-90"
-            />
+            <Rocket size={72} className="text-[#6C4CF1] opacity-90 mb-2 mr-2" strokeWidth={1.5} />
           </div>
         </div>
 

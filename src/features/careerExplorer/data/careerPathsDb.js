@@ -153,18 +153,35 @@ export const careerPaths = [
 
 export const onboardingOptions = {
   interests: [
-    "Coding & Software", "UI/UX Design", "Data & Analytics", 
-    "Artificial Intelligence", "Business Strategy", "Marketing & Growth", 
-    "Cloud & Infrastructure", "Cybersecurity", "Product Management"
+    { id: "Coding & Software", title: "Coding & Software", desc: "Build apps, solve problems and create products.", icon: "Code", color: "indigo" },
+    { id: "UI/UX Design", title: "UI/UX Design", desc: "Design beautiful, intuitive experiences users love.", icon: "PenTool", color: "pink" },
+    { id: "Data & Analytics", title: "Data & Analytics", desc: "Analyze data and turn insights into decisions.", icon: "BarChart3", color: "blue" },
+    { id: "Artificial Intelligence", title: "Artificial Intelligence", desc: "Build intelligent systems and AI solutions.", icon: "Cpu", color: "orange" },
+    { id: "Business Strategy", title: "Business Strategy", desc: "Solve business problems and drive growth.", icon: "Briefcase", color: "emerald" },
+    { id: "Marketing & Growth", title: "Marketing & Growth", desc: "Build brands and grow audiences.", icon: "Megaphone", color: "purple" },
+    { id: "Cloud & Infrastructure", title: "Cloud & Infrastructure", desc: "Design scalable systems and cloud solutions.", icon: "Cloud", color: "sky" },
+    { id: "Cybersecurity", title: "Cybersecurity", desc: "Protect systems, networks and critical data.", icon: "Shield", color: "red" },
+    { id: "Product Management", title: "Product Management", desc: "Build products people need and love.", icon: "Package", color: "amber" }
   ],
   strengths: [
-    "Problem Solving", "Creativity", "Analytical Thinking", 
-    "Communication", "Leadership", "Technical Aptitude", 
-    "Attention to Detail", "Empathy & User Focus"
+    { id: "Problem Solving", title: "Problem Solving", desc: "Tackling complex issues with logical solutions.", icon: "Lightbulb" },
+    { id: "Creativity", title: "Creativity", desc: "Thinking outside the box and innovating.", icon: "Palette" },
+    { id: "Analytical Thinking", title: "Analytical Thinking", desc: "Evaluating data to find meaningful patterns.", icon: "BarChart3" },
+    { id: "Communication", title: "Communication", desc: "Conveying ideas clearly and effectively.", icon: "MessageSquare" },
+    { id: "Leadership", title: "Leadership", desc: "Guiding and inspiring teams to succeed.", icon: "Flag" },
+    { id: "Technical Aptitude", title: "Technical Aptitude", desc: "Quickly learning and applying new technologies.", icon: "Cpu" },
+    { id: "Attention to Detail", title: "Attention to Detail", desc: "Ensuring accuracy and high quality in work.", icon: "Search" },
+    { id: "Empathy & User Focus", title: "Empathy & User Focus", desc: "Understanding and advocating for user needs.", icon: "Heart" },
+    { id: "Adaptability", title: "Adaptability", desc: "Thriving in changing and fast-paced environments.", icon: "Zap" }
   ],
   workPreferences: [
-    "Remote Work", "Office / Hybrid", "Fast-paced Startup", 
-    "Stable Enterprise", "Independent Contributor", "Team Collaboration",
-    "Client Facing", "Behind the Scenes"
+    { id: "Remote Work", title: "Remote", desc: "Work from anywhere in the world.", icon: "Globe" },
+    { id: "Office / Hybrid", title: "Office / Hybrid", desc: "Collaborate in-person with the team.", icon: "Building" },
+    { id: "Fast-paced Startup", title: "Startup", desc: "Fast-paced, dynamic, high-growth.", icon: "Rocket" },
+    { id: "Stable Enterprise", title: "Enterprise", desc: "Structured, stable, large-scale impact.", icon: "Briefcase" },
+    { id: "Independent Contributor", title: "Independent", desc: "Deep focus on individual tasks.", icon: "User" },
+    { id: "Team Collaboration", title: "Collaborative", desc: "Work closely within a team.", icon: "Users" },
+    { id: "Client Facing", title: "Client Facing", desc: "Interact directly with customers.", icon: "MessageCircle" },
+    { id: "Behind the Scenes", title: "Behind the Scenes", desc: "Drive results from the background.", icon: "Settings" }
   ]
 };

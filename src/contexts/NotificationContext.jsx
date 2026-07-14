@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { db } from '../config/firebase';
 import { collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, doc, deleteDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
@@ -14,6 +14,7 @@ export function NotificationProvider({ children }) {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const initialLoadRef = useRef(true);
 
   // Real-time listener for Notifications
   useEffect(() => {
@@ -34,7 +35,7 @@ export function NotificationProvider({ children }) {
     const unsubscribe = onSnapshot(qWithOrder, (snapshot) => {
       // Show toast for newly added ones if it's not the initial load
       snapshot.docChanges().forEach((change) => {
-        if (change.type === 'added' && !loading && !change.doc.data().read) {
+        if (change.type === 'added' && !initialLoadRef.current && !change.doc.data().read) {
           toast(change.doc.data().title, { icon: '🔔' });
         }
       });
@@ -46,6 +47,7 @@ export function NotificationProvider({ children }) {
       }));
       setNotifications(fetched);
       setLoading(false);
+      initialLoadRef.current = false;
     }, (error) => {
       console.error('Error fetching notifications:', error);
       // Fallback if index missing
@@ -69,7 +71,7 @@ export function NotificationProvider({ children }) {
       unsubscribe();
       if (fallbackUnsubscribe) fallbackUnsubscribe();
     };
-  }, [user, loading]);
+  }, [user]);
 
   const getUnreadCount = () => notifications.filter(n => !n.read).length;
 

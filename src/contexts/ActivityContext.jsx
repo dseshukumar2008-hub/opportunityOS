@@ -55,6 +55,7 @@ export function ActivityProvider({ children }) {
       // Fallback if index is missing: just fetch without orderBy
       if (error.code === 'failed-precondition') {
         const fallbackQ = query(collection(db, 'activities'), where('userId', '==', currentUserId));
+        let fallbackUnsubscribe;
         fallbackUnsubscribe = onSnapshot(fallbackQ, (fallbackSnapshot) => {
             const fetched = fallbackSnapshot.docs.map(doc => ({
                 id: doc.id,

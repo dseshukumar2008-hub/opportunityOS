@@ -16,7 +16,7 @@ function StatPill({ label, value, color }) {
 }
 
 export default function CareerHealthWidget() {
-  const { profileCompletion, applicationInsights, isLoading: isDashboardLoading } = useDashboardInsights();
+  const { profileCompletion, isLoading: isDashboardLoading } = useDashboardInsights();
   const { persistentData, isLoading: isPersistentLoading, isRecalculating, recalculateAndSave, dynamicReadiness } = usePersistentReadiness();
   const { atsScore, hasInsights } = useResumeInsights();
   const { state: roadmapState } = useCareerRoadmap();
@@ -45,7 +45,6 @@ export default function CareerHealthWidget() {
   const activeData = persistentData || dynamicReadiness;
   const { score: readiness = 0, breakdown } = activeData ?? {};
   const { score: profilePct = 0, missing = [] } = profileCompletion ?? {};
-  const activeApps = applicationInsights?.active ?? 0;
   const aiAnalysis = persistentData?.aiAnalysis;
 
   const getReadinessColor = (s) => {
@@ -185,7 +184,6 @@ export default function CareerHealthWidget() {
               : 'text-slate-400'
           }
         />
-        <StatPill label="Active Apps" value={activeApps} color="text-indigo-600" />
       </div>
 
       {/* AI Analysis Section */}

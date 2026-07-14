@@ -4,11 +4,11 @@ import SettingsSidebar from '../../components/settings/SettingsSidebar';
 import AccountTab from '../../components/settings/AccountTab';
 import NotificationsSettings from '../../components/settings/NotificationsSettings';
 import PrivacySettings from '../../components/settings/PrivacySettings';
-import PasswordSecuritySettings from '../../components/settings/PasswordSecuritySettings';
-import AppearanceSettings from '../../components/settings/AppearanceSettings';
-import EmailPreferencesSettings from '../../components/settings/EmailPreferencesSettings';
+import PasswordSecuritySettings from '../../components/settings/passwordSecuritySettings';
+import AppearanceSettings from '../../components/settings/AppearnceSettings'
+import EmailPrefernceSettings from '../../components/settings/EmailPreferncesSettings'
 import DataStorageSettings from '../../components/settings/DataStorageSettings';
-import IntegrationsSettings from '../../components/settings/IntegrationsSettings';
+import IntegrationsSettings from '../../components/settings/IntegrationsSettings'
 
 import { 
   User, FileText, Code, Settings, Camera,
@@ -20,6 +20,7 @@ import { auth, storage, db } from '../../config/firebase';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { verifyBeforeUpdateEmail } from 'firebase/auth';
+
 
 import toast from 'react-hot-toast';
 

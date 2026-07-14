@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { db } from '../config/firebase';
 import { collection, doc, setDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
-import { useApplications } from './ApplicationContext';
+
 import { useConnections } from './ConnectionContext';
 import { useResume } from './ResumeContext';
 import { useTeam } from './TeamContext';
@@ -44,7 +44,7 @@ export const BADGE_DEFINITIONS = [
 
 export const AchievementProvider = ({ children }) => {
   const { user } = useAuth();
-  const { applications } = useApplications();
+
   const connectionsData = useConnections();
   const { resumeData, getResumeStrength } = useResume();
   const { teams } = useTeam();
@@ -127,7 +127,7 @@ export const AchievementProvider = ({ children }) => {
   useEffect(() => {
     if (!currentUserId) return;
 
-    const appsCount = applications?.length || 0;
+    const appsCount = 0;
     const connectionsArray = Array.isArray(connectionsData?.connections)
       ? connectionsData.connections
       : (Array.isArray(connectionsData) ? connectionsData : []);
@@ -168,7 +168,7 @@ export const AchievementProvider = ({ children }) => {
     if (readinessScore >= 80) checkAndUnlock('ready-80');
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applications, connectionsData, resumeData, getResumeStrength, teams, readinessScore, currentUserId]);
+  }, [connectionsData, resumeData, getResumeStrength, teams, readinessScore, currentUserId]);
 
   // Champion Badge check
   useEffect(() => {
@@ -180,7 +180,7 @@ export const AchievementProvider = ({ children }) => {
   }, [unlockedBadges.length, currentUserId]);
 
   const getBadgeProgress = (badgeId) => {
-    const appsCount = applications?.length || 0;
+    const appsCount = 0;
     const connectionsArray = Array.isArray(connectionsData?.connections)
       ? connectionsData.connections
       : (Array.isArray(connectionsData) ? connectionsData : []);

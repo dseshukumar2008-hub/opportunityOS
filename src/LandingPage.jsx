@@ -23,13 +23,13 @@ export default function LandingPage() {
       <FeaturesSection />
       <HowItWorksSection />
       <TestimonialsSection />
-      
+
       {/* FAQ and CTA side by side block */}
       <section className="w-full max-w-[1400px] mx-auto px-6 py-24 flex flex-col lg:flex-row gap-12 items-start">
         <div className="flex-1 w-full">
           <FAQSection />
         </div>
-        <div className= "flex-1 w-full mt-10 lg:mt-0">
+        <div className="flex-1 w-full mt-10 lg:mt-0">
           <CTASection />
         </div>
       </section>

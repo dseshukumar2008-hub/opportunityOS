@@ -50,7 +50,7 @@ export const generateProjectRecommendations = async (profileData, forceRefresh =
   const specialization = profileData?.specialization || "Computer Science / Software Engineering";
   const targetRole = profileData?.targetRole || profileData?.careerGoal || "Software Engineer";
   const missingSkills = profileData?.missingSkills || [];
-  
+
   // Create a unique cache key based on inputs
   const skillsKey = Array.isArray(missingSkills) ? missingSkills.join(',') : '';
   const cacheKey = `gemini_proj_recs_${specialization}_${targetRole}_${skillsKey}`;
@@ -96,14 +96,14 @@ export const generateProjectRecommendations = async (profileData, forceRefresh =
 
     // Save successful generation to cache
     sessionStorage.setItem(cacheKey, JSON.stringify(formattedProjects));
-    
+
     // Also save a fallback copy in case another request fails
     sessionStorage.setItem('gemini_proj_recs_fallback', JSON.stringify(formattedProjects));
 
     return formattedProjects;
   } catch (error) {
     console.error("Gemini Project Recommendations Error:", error);
-    
+
     // Attempt to use ANY previously cached recommendations as a fallback
     const fallbackData = sessionStorage.getItem('gemini_proj_recs_fallback');
     if (fallbackData) {

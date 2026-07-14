@@ -1,6 +1,9 @@
 import { Sparkles, ArrowRight, Target, Briefcase, GraduationCap, Code, Trophy, HelpCircle } from 'lucide-react';
-import OpportunityMatchBadge from '../../../components/opportunities/OpportunityMatchBadge';
-
+const OpportunityMatchBadge = ({ score }) => (
+  <div className={`px-2 py-1 rounded-lg text-xs font-bold ${score >= 90 ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+    {score}% Match
+  </div>
+);
 export default function Step4ViewMatches() {
   return (
     <div className="w-full bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-200/60 overflow-hidden flex flex-col">

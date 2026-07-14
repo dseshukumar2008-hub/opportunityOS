@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
-import { useApplications } from '../../contexts/ApplicationContext';
-import { useSavedOpportunities } from '../../contexts/SavedOpportunitiesContext';
+import { useActivity } from '../../contexts/ActivityContext';
 import { 
   Send, 
   Calendar, 
@@ -8,99 +7,33 @@ import {
   XCircle, 
   Bookmark, 
   Clock,
-  ArrowRight
+  ArrowRight,
+  Activity
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function RecentActivityTimeline() {
-  const { applications } = useApplications();
-  const { savedOpportunities } = useSavedOpportunities();
+  const { activities: rawActivities } = useActivity();
 
   const activities = useMemo(() => {
     let feed = [];
-    // eslint-disable-next-line react-hooks/purity
     const now = Date.now();
 
-    applications.forEach((app) => {
-      // Mocking relative times to look like the reference design
-      // Applied: 3 days ago, Saved: 2 days ago, Interview: 1 day ago, Offer: 2 hours ago
-      // We will assign stable mock offsets based on status for demonstration purposes
-      let offset = 3 * 24 * 60 * 60 * 1000; // 3 days
-      let timeString = '3 days ago';
-
-      if (app.status === 'Interview') {
-        offset = 1 * 24 * 60 * 60 * 1000; // 1 day
-        timeString = '1 day ago';
-      } else if (app.status === 'Offer') {
-        offset = 2 * 60 * 60 * 1000; // 2 hours
-        timeString = '2 hours ago';
-      } else if (app.status === 'Rejected') {
-        offset = 5 * 60 * 60 * 1000; // 5 hours
-        timeString = '5 hours ago';
-      }
-
+    rawActivities.forEach((act) => {
       feed.push({
-        id: `apply-${app.id}`,
-        type: 'apply',
-        text: `Applied to ${app.company} ${app.role}`,
-        date: now - (3 * 24 * 60 * 60 * 1000), // always put apply at 3 days ago
-        timeString: '3 days ago',
-        icon: Send,
-        iconColor: 'text-[#6C4CF1]', // using purple for all to match reference style
+        id: act.id,
+        type: act.type,
+        text: act.description || act.action || 'Performed an action',
+        date: new Date(act.timestamp).getTime(),
+        timeString: new Date(act.timestamp).toLocaleDateString(),
+        icon: Activity,
+        iconColor: 'text-[#6C4CF1]',
         bgColor: 'bg-indigo-50'
       });
-
-      if (app.status === 'Interview') {
-        feed.push({
-          id: `status-${app.id}`,
-          type: 'interview',
-          text: `Interview scheduled with ${app.company} ${app.role}`,
-          date: now - offset,
-          timeString,
-          icon: Calendar,
-          iconColor: 'text-[#6C4CF1]',
-          bgColor: 'bg-indigo-50'
-        });
-      } else if (app.status === 'Offer') {
-        feed.push({
-          id: `status-${app.id}`,
-          type: 'offer',
-          text: `Offer received from ${app.company} ${app.role}`,
-          date: now - offset,
-          timeString,
-          icon: Award,
-          iconColor: 'text-[#10B981]', // Green for offer
-          bgColor: 'bg-emerald-50'
-        });
-      } else if (app.status === 'Rejected') {
-        feed.push({
-          id: `status-${app.id}`,
-          type: 'rejected',
-          text: `Application rejected by ${app.company} ${app.role}`,
-          date: now - offset,
-          timeString,
-          icon: XCircle,
-          iconColor: 'text-rose-500',
-          bgColor: 'bg-rose-50'
-        });
-      }
     });
 
-    savedOpportunities.forEach((opp, index) => {
-      feed.push({
-        id: `saved-${opp.id || index}`,
-        type: 'saved',
-        text: `Saved ${opp.company ? opp.company + ' ' : ''}${opp.title || opp.role || 'Opportunity'}`,
-        date: now - (2 * 24 * 60 * 60 * 1000) - index * 1000, 
-        timeString: '2 days ago',
-        icon: Bookmark,
-        iconColor: 'text-[#3B82F6]',
-        bgColor: 'bg-blue-50'
-      });
-    });
-
-    return feed.sort((a, b) => b.date - a.date).slice(0, 5); // Show top 5
-  }, [applications, savedOpportunities]);
+    return feed.sort((a, b) => b.date - a.date).slice(0, 5); 
+  }, [rawActivities]);
 
   if (activities.length === 0) {
     return (

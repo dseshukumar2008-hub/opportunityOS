@@ -1,14 +1,15 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useUserProfile } from './useUserProfile';
 import { useResumeInsights } from './useResumeInsights';
-import { useRecommendations } from './useRecommendations';
-import { useApplications } from '../contexts/ApplicationContext';
+
+
 import { useAuth } from '../contexts/AuthContext';
+import { generate as aiGenerate } from '../services/ai/aiProvider';
 
 const CACHE_KEY_PREFIX = 'ai_copilot_plan_';
 const CACHE_EXPIRY_MS = 6 * 60 * 60 * 1000; // 6 hours
 
-function buildContext({ profile, atsScore, topStrength, topWeakness, missingSkills, nextAction, recommendations, applications }) {
+function buildContext({ profile, atsScore, topStrength, topWeakness, missingSkills, nextAction }) {
   return {
     profile: {
       name: profile?.name || 'Student',
@@ -24,19 +25,6 @@ function buildContext({ profile, atsScore, topStrength, topWeakness, missingSkil
       topWeakness: topWeakness || 'N/A',
       missingSkills: missingSkills || [],
       nextAction: nextAction || '',
-    },
-    opportunities: {
-      topMatches: (recommendations || []).slice(0, 3).map(r => ({
-        title: r.title,
-        company: r.company,
-        matchScore: r.matchData?.score,
-        skills: r.skills?.slice(0, 3),
-      })),
-    },
-    applications: {
-      total: applications?.length || 0,
-      active: applications?.filter(a => ['Applied', 'In Review', 'Assessment'].includes(a.status)).length || 0,
-      interviews: applications?.filter(a => a.status === 'Interview').length || 0,
     },
   };
 }
@@ -81,36 +69,31 @@ Return ONLY valid JSON matching this exact schema:
 Rules:
 - actions: 4 items exactly, covering Resume, Opportunities, Skills, and Teams
 - priority must be one of: "high", "medium", "low"
-- All links must be valid internal routes: /resume-review, /opportunities, /profile, /team-finder, /applications
+- All links must be valid internal routes: /resume-review, /career-explorer, /profile, /team-finder
 - Be specific — reference the user's actual skills, ATS score (${contextData.resume.atsScore}), and top matches`;
 
-  const requestBody = {
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.4, responseMimeType: 'application/json' },
+  const request = {
+    feature: 'AI Copilot Action Plan',
+    prompt: prompt,
+    responseType: 'json',
+    options: {
+      temperature: 0.4
+    }
   };
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestBody) }
-  );
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `Gemini API Error: ${response.status}`);
+  const response = await aiGenerate(request);
+  if (!response.success) {
+    throw response.error;
   }
-
-  const data = await response.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!rawText) throw new Error('Empty response from Gemini.');
-  const cleaned = rawText.replace(/^```json\s*/m, '').replace(/```\s*$/m, '').trim();
-  return JSON.parse(cleaned);
+  
+  return response.data;
 }
 
 export function useAICopilot() {
   const { profile } = useUserProfile();
   const { atsScore, topStrength, topWeakness, missingSkills, nextAction } = useResumeInsights();
-  const { recommendations } = useRecommendations();
-  const { applications } = useApplications();
+
+
   const { user } = useAuth();
 
   const [plan, setPlan] = useState(null);
@@ -119,8 +102,8 @@ export function useAICopilot() {
   const contextRef = useRef(null);
 
   useEffect(() => {
-    contextRef.current = buildContext({ profile, atsScore, topStrength, topWeakness, missingSkills, nextAction, recommendations, applications });
-  }, [profile, atsScore, topStrength, topWeakness, missingSkills, nextAction, recommendations, applications]);
+    contextRef.current = buildContext({ profile, atsScore, topStrength, topWeakness, missingSkills, nextAction });
+  }, [profile, atsScore, topStrength, topWeakness, missingSkills, nextAction]);
 
   const loadPlan = useCallback(async (forceRefresh = false) => {
     if (!user) return;

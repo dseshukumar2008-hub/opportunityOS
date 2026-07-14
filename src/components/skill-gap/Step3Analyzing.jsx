@@ -84,37 +84,9 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
       } catch (error) {
         console.error("Skill Gap Analysis Error:", error);
         if (isMounted) {
-          // Fallback report handled silently
-          const fallbackReport = {
-            targetRole: targetRole || "Unknown Role",
-            readinessScore: 50,
-            skillGapPercentage: 50,
-            currentSkills: ["Profile initialized"],
-            skillBreakdown: { strong: 1, moderate: 0, missing: 1 },
-            nextSkill: {
-              name: "System Design",
-              priority: "High",
-              time: "2 Weeks",
-              impact: "High",
-              reason: "AI detailed analysis is currently unavailable. Please retry later."
-            },
-            missingSkills: {
-              high: ["AI Analysis Retry"],
-              medium: [],
-              low: []
-            },
-            learningPath: [
-              {
-                title: "Retry Analysis",
-                time: "N/A"
-              }
-            ],
-            aiAdvice: "The AI service was temporarily busy. Please try generating your report again later.",
-            consistencyTip: "Stay consistent and try again!"
-          };
           setCurrentStepIndex(4);
           setTimeout(() => {
-            if (isMounted) onComplete(fallbackReport);
+            if (isMounted) onComplete({ _error: true, message: `Analysis Failed: ${error.message || "The AI service was temporarily busy or encountered an error."}` });
           }, 1000);
         }
       }

@@ -8,7 +8,7 @@ export default function CapabilitiesSection() {
     { icon: Building, title: "Employer Portal", desc: "Direct access to top talent" },
     { icon: Bot, title: "AI Analyzer", desc: "Automated candidate screening" },
     { icon: Wand2, title: "Opportunity Copilot", desc: "Your personal career assistant" },
-    { icon: Database, title: "Supabase Backend", desc: "Scalable & reliable database" },
+    { icon: Database, title: "Firebase Backend", desc: "Scalable & reliable database" },
     { icon: MonitorSmartphone, title: "Responsive UI", desc: "Flawless experience on any device" },
   ];
 

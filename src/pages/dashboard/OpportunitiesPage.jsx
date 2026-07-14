@@ -33,8 +33,6 @@ export default function OpportunitiesPage() {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
 
-
-  
   // Accordion open states
   const [openFilterSections, setOpenFilterSections] = useState({
     type: true,

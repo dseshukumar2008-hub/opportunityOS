@@ -5,6 +5,8 @@ import { auth, db } from '../config/firebase';
 import { useNotifications } from '../contexts/NotificationContext';
 import { useProfile } from '../contexts/ProfileContext';
 import { analyticsService } from '../services/analyticsService';
+import { getTemplateRoadmap } from '../data/roadmapTemplates';
+import { generate as aiGenerate } from '../services/ai/aiProvider';
 
 const INITIAL = {
   status: 'idle',
@@ -166,6 +168,8 @@ RULES:
 - Return ONLY the JSON object.`;
 }
 
+const ENABLE_AI_NOTIFICATIONS = false;
+
 export function useCareerRoadmap() {
   const [state, dispatch] = useReducer(reducer, INITIAL);
   const { addNotification } = useNotifications();
@@ -210,64 +214,59 @@ export function useCareerRoadmap() {
     if (!uid) return dispatch$.current({ type: 'GEN_ERROR', error: 'Not authenticated.' });
 
     dispatch$.current({ type: 'GEN_START' });
-    // Local fallback timeout to ensure UI unblocks
-    const localTimeoutId = setTimeout(() => dispatch$.current({ type: 'GEN_TIMEOUT' }), 60000);
+
+    const maxRetries = 3;
+    const retryDelays = [3000, 6000, 9000];
+    let attempt = 0;
+    let parsed = null;
+    let fallbackUsed = false;
+
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    console.log("[STEP 1] Wizard data loaded");
+    const wizardWithProfile = { ...wizardData, missingSkills: profile?.missingSkills || [] };
+    const promptText = buildPrompt(wizardWithProfile);
+    
+    const request = {
+      feature: 'Career Roadmap',
+      prompt: promptText,
+      responseType: 'json',
+      options: {
+        temperature: 0.2,
+        timeoutMs: 60000
+      }
+    };
+
+    while (attempt <= maxRetries && !parsed) {
+      try {
+        console.log(`[Roadmap Gen] Attempt ${attempt + 1}`);
+        console.log("[STEP 2] AIProvider request starting");
+        
+        const response = await aiGenerate(request);
+        if (!response.success) {
+          throw response.error;
+        }
+        
+        console.log("[STEP 3] AIProvider response received");
+        parsed = response.data;
+        console.log("[STEP 4] Roadmap parsed");
+      } catch (err) {
+        console.error(`[Roadmap Gen] Attempt ${attempt + 1} failed:`, err);
+        if (attempt < maxRetries) {
+          const delay = retryDelays[attempt];
+          console.log(`[Roadmap Gen] Retrying in ${delay}ms...`);
+          await new Promise(res => setTimeout(res, delay));
+        }
+        attempt++;
+      }
+    }
+
+    if (!parsed) {
+      console.log('[Roadmap Gen] All attempts failed. Using fallback template.');
+      parsed = getTemplateRoadmap(wizardData.targetCareer);
+      fallbackUsed = true;
+    }
 
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      if (!apiKey) throw new Error('API Key missing');
-
-      const wizardWithProfile = { ...wizardData, missingSkills: profile?.missingSkills || [] };
-      const promptText = buildPrompt(wizardWithProfile);
-      
-      const modelUsed = 'gemini-2.5-flash';
-      const promptSize = new Blob([promptText]).size;
-      const promptLength = promptText.length;
-      
-      console.log(`[Roadmap Gen] Model: ${modelUsed} | Prompt Length: ${promptLength} chars | Prompt Size: ${promptSize} bytes`);
-
-      const startTime = Date.now();
-      
-      const controller = new AbortController();
-      const fetchTimeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for Roadmap
-      
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${modelUsed}:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }],
-            generationConfig: { temperature: 0.2, responseMimeType: 'application/json' },
-          }),
-          signal: controller.signal
-        }
-      );
-
-      clearTimeout(fetchTimeoutId);
-
-      if (!res.ok) throw new Error(`API error: ${res.status}`);
-      
-      const json = await res.json();
-      
-      const responseTime = Date.now() - startTime;
-      const tokenUsage = json.usageMetadata?.totalTokenCount || 'N/A';
-      console.log(`[Roadmap Gen] Completed | Time: ${responseTime}ms | Tokens: ${tokenUsage}`);
-
-      const rawText = json.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!rawText) throw new Error('Empty response');
-
-      const cleanText = rawText.replace(/^s*```json/i, '').replace(/```s*$/i, '').trim();
-      let parsed;
-      try {
-        parsed = JSON.parse(cleanText);
-        analyticsService.trackAIOperation('Career Roadmap', tokenUsage, responseTime, true, null);
-      } catch (parseError) {
-        analyticsService.trackError('Career Roadmap Parse Error', parseError);
-        analyticsService.trackAIOperation('Career Roadmap', tokenUsage, responseTime, false, 'JSON Parse Error');
-        throw parseError;
-      }
-
       // Ensure IDs
       (parsed.phases || []).forEach((p, i) => {
         if (!p.id) p.id = `phase_${i + 1}`;
@@ -283,34 +282,49 @@ export function useCareerRoadmap() {
         completedTasks: [],
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        isFallback: fallbackUsed
       };
 
+      console.log("[STEP 5] Firestore save starting");
       await setDoc(doc(db, 'career_roadmaps', uid), docData);
+      console.log("[STEP 6] Firestore save successful");
       dispatch$.current({ type: 'GEN_OK', data: { ...docData, createdAt: new Date() } });
+      console.log("[STEP 10] Local state updated");
       
-      // Also save roadmap progress to profile so AI Coach knows about it
       await mergeProfileData({ 
         targetRole: wizardData.targetCareer,
         hasRoadmap: true,
         roadmapProgress: { totalTasks: 25, completedTasks: 0 } 
       });
 
-      addNotification({
-        title: 'Career Roadmap Created',
-        message: `Your new roadmap for ${wizardData.targetCareer} is ready.`,
-        type: 'System',
-        targetUrl: '/career-roadmap'
-      });
-
-      analyticsService.trackEvent('Roadmap Generated', { targetCareer: wizardData.targetCareer });
-
-    } catch (err) {
-      analyticsService.trackError('Career Roadmap Generation Error', err);
-      dispatch$.current({ type: 'GEN_ERROR', error: err.message });
-    } finally {
-      clearTimeout(localTimeoutId);
+      if (ENABLE_AI_NOTIFICATIONS) {
+        if (fallbackUsed) {
+          addNotification({
+            title: 'Template Generated',
+            message: 'AI generation is temporarily unavailable. A professional roadmap template has been generated.',
+            type: 'System',
+            targetUrl: '/career-roadmap'
+          });
+        } else {
+          addNotification({
+            title: 'Career Roadmap Created',
+            message: `Your new roadmap for ${wizardData.targetCareer} is ready.`,
+            type: 'System',
+            targetUrl: '/career-roadmap'
+          });
+        }
+        console.log("[STEP 9] Notification created");
+      }
+      if (!fallbackUsed) {
+        analyticsService.trackEvent('Roadmap Generated', { targetCareer: wizardData.targetCareer });
+        console.log("[STEP 8] Analytics tracking successful");
+      }
+      console.log("[STEP 11] Navigation successful");
+    } catch (saveErr) {
+      console.error('[Roadmap Gen] Save Error:', saveErr);
+      dispatch$.current({ type: 'GEN_ERROR', error: 'Failed to save roadmap to database.' });
     }
-  }, [profile]);
+  }, [profile, addNotification, mergeProfileData]);
 
   const toggleTask = useCallback(async (taskId, done) => {
     const uid = uidRef.current;

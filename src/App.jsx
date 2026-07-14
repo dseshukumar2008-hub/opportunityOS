@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { Toaster, ToastBar, toast } from 'react-hot-toast';
 import { X } from 'lucide-react';
 import { AuthProvider } from './contexts/AuthContext';
-import { ApplicationProvider } from './contexts/ApplicationContext';
 import LandingPage from './LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
@@ -20,21 +19,16 @@ import TeamFinderSkeleton from './components/loaders/TeamFinderSkeleton';
 import NetworkingSkeleton from './components/loaders/NetworkingSkeleton';
 import MessagesSkeleton from './components/loaders/MessagesSkeleton';
 import AnalyticsSkeleton from './components/loaders/AnalyticsSkeleton';
-import ApplicationsSkeleton from './components/loaders/ApplicationsSkeleton';
+
 import ResumeBuilderSkeleton from './components/loaders/ResumeBuilderSkeleton';
 import PresentationSkeleton from './components/loaders/PresentationSkeleton';
-
 
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
 const DemoPage = lazy(() => import('./pages/demo/DemoPage'));
 const PresentationPage = lazy(() => import('./pages/presentation/PresentationPage'));
 const ProfilePage = lazy(() => import('./pages/dashboard/ProfilePage'));
 const SettingsPage = lazy(() => import('./pages/dashboard/SettingsPage'));
-const OpportunitiesPage = lazy(() => import('./pages/dashboard/OpportunitiesPage'));
-const SavedPage = lazy(() => import('./pages/dashboard/SavedPage'));
-const ApplicationsPage = lazy(() => import('./pages/dashboard/ApplicationsPage'));
 const AnalyticsPage = lazy(() => import('./pages/dashboard/AnalyticsPage'));
-import { SavedOpportunitiesProvider } from './contexts/SavedOpportunitiesContext';
 import { ResumeProvider } from './contexts/ResumeContext';
 import { TeamProvider } from './contexts/TeamContext';
 import { NotificationProvider } from './contexts/NotificationContext';
@@ -48,14 +42,13 @@ import { ConnectionProvider } from './contexts/ConnectionContext';
 import { ProfileProvider } from './contexts/ProfileContext';
 import { CareerProvider } from './contexts/CareerContext';
 
-
 const ResumeDashboardPage = lazy(() => import('./pages/dashboard/ResumeDashboardPage'));
 const ResumeBuilderPage = lazy(() => import('./pages/dashboard/ResumeBuilderPage'));
 const ResumeReviewPage = lazy(() => import('./pages/dashboard/ResumeReviewPage'));
 const NotificationsPage = lazy(() => import('./pages/dashboard/NotificationsPage'));
 const AdminDashboardPage = lazy(() => import('./pages/dashboard/AdminDashboardPage'));
 const UserProfilePage = lazy(() => import('./pages/dashboard/UserProfilePage'));
-const DeadlinesPage = lazy(() => import('./pages/dashboard/DeadlinesPage'));
+
 const RecommendationHistoryPage = lazy(() => import('./pages/dashboard/RecommendationHistoryPage'));
 const CareerRoadmapPage = lazy(() => import('./pages/dashboard/CareerRoadmapPage'));
 const GoalsPage = lazy(() => import('./pages/dashboard/GoalsPage'));
@@ -141,29 +134,25 @@ export default function App() {
               <Route element={
                 <ActivityProvider>
                   <NotificationProvider>
-                    <ApplicationProvider>
-                      <SavedOpportunitiesProvider>
-                        <TeamProvider>
-                          <MessageProvider>
-                            <ConnectionProvider>
-                              <ResumeProvider>
-                                <OnlineStatusProvider>
-                                  <ProfileProvider>
-                                    <GoalProvider>
-                                      <AchievementProvider>
-                                        <CareerProvider>
-                                          <DashboardLayout />
-                                        </CareerProvider>
-                                      </AchievementProvider>
-                                    </GoalProvider>
-                                  </ProfileProvider>
-                                </OnlineStatusProvider>
-                              </ResumeProvider>
-                            </ConnectionProvider>
-                          </MessageProvider>
-                        </TeamProvider>
-                      </SavedOpportunitiesProvider>
-                    </ApplicationProvider>
+                    <TeamProvider>
+                      <MessageProvider>
+                        <ConnectionProvider>
+                          <ResumeProvider>
+                            <OnlineStatusProvider>
+                              <ProfileProvider>
+                                <GoalProvider>
+                                  <AchievementProvider>
+                                    <CareerProvider>
+                                      <DashboardLayout />
+                                    </CareerProvider>
+                                  </AchievementProvider>
+                                </GoalProvider>
+                              </ProfileProvider>
+                            </OnlineStatusProvider>
+                          </ResumeProvider>
+                        </ConnectionProvider>
+                      </MessageProvider>
+                    </TeamProvider>
                   </NotificationProvider>
                 </ActivityProvider>
               }>
@@ -186,7 +175,7 @@ export default function App() {
                   <Route path="/resume-builder/:id" element={<Suspense fallback={<ResumeBuilderSkeleton />}><ResumeBuilderPage /></Suspense>} />
                   <Route path="/resume-review" element={<Suspense fallback={<ResumeReviewSkeleton />}><ResumeReviewPage /></Suspense>} />
                   <Route path="/notifications" element={<NotificationsPage />} />
-                  <Route path="/deadlines" element={<DeadlinesPage />} />
+
                   <Route path="/user/:userId" element={<UserProfilePage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/settings" element={<SettingsPage />} />

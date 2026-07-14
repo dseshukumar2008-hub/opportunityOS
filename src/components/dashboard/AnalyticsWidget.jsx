@@ -64,6 +64,7 @@ export default function AnalyticsWidget() {
               </LineChart>
             </ResponsiveContainer>
           </div>
+          
         </div>
       </div>
 

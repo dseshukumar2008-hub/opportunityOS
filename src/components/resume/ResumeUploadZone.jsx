@@ -3,7 +3,7 @@ import { UploadCloud, FileText, X, File as FileIcon, CheckCircle2, RefreshCw } f
 import { toast } from 'react-hot-toast';
 import { analyticsService } from '../../services/analyticsService';
 
-export default function ResumeUploadZone({ onAnalyze, uploadProgress = 0, storedResumeName = null, onDeleteResume }) {
+export default function ResumeUploadZone({ onAnalyze, uploadProgress = 0, progressText = '', storedResumeName = null, onDeleteResume }) {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const inputRef = useRef(null);
@@ -18,15 +18,14 @@ export default function ResumeUploadZone({ onAnalyze, uploadProgress = 0, stored
   const validateFile = (file) => {
     const validTypes = [
       'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/msword'
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ];
     if (!validTypes.includes(file.type)) {
       toast.error('Only PDF and DOCX files are allowed.');
       return false;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('File is too large. Maximum size is 5MB.');
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Your resume exceeds the 10 MB upload limit. Please compress your PDF or remove unnecessary images before uploading.');
       return false;
     }
     return true;
@@ -86,7 +85,7 @@ export default function ResumeUploadZone({ onAnalyze, uploadProgress = 0, stored
             <label className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-emerald-200 text-emerald-700 rounded-lg text-xs font-bold cursor-pointer hover:bg-emerald-50 transition-colors">
               <RefreshCw size={12} />
               Replace
-              <input type="file" accept=".pdf,.doc,.docx" onChange={handleChange} className="hidden" />
+              <input type="file" accept=".pdf,.docx" onChange={handleChange} className="hidden" />
             </label>
             {onDeleteResume && (
               <button
@@ -115,7 +114,7 @@ export default function ResumeUploadZone({ onAnalyze, uploadProgress = 0, stored
           <input
             ref={inputRef}
             type="file"
-            accept=".pdf,.doc,.docx"
+            accept=".pdf,.docx"
             onChange={handleChange}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
@@ -133,7 +132,7 @@ export default function ResumeUploadZone({ onAnalyze, uploadProgress = 0, stored
             <button className="bg-[#111827] hover:bg-[#374151] text-white font-medium text-[12px] px-5 py-2 rounded-lg pointer-events-auto transition-colors shadow-sm mb-3">
               Select Resume File
             </button>
-            <p className="text-[10px] text-[#94A3B8] font-bold tracking-wide uppercase">PDF or DOCX up to 5MB</p>
+            <p className="text-[10px] text-[#94A3B8] font-bold tracking-wide uppercase">PDF or DOCX up to 10MB</p>
           </div>
         ) : (
           <div className="flex flex-col items-center w-full z-10">
@@ -161,7 +160,7 @@ export default function ResumeUploadZone({ onAnalyze, uploadProgress = 0, stored
             {isUploading && (
               <div className="w-full max-w-sm mb-4">
                 <div className="flex justify-between text-xs font-bold text-slate-500 mb-1">
-                  <span>Uploading to cloud...</span>
+                  <span>{progressText || 'Uploading to cloud...'}</span>
                   <span>{uploadProgress}%</span>
                 </div>
                 <div className="h-2 bg-slate-100 rounded-full overflow-hidden">

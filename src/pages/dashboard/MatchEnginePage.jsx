@@ -37,7 +37,7 @@ export default function MatchEnginePage() {
             Match Report
           </h1>
           <p className="text-slate-500 font-medium">
-            Analyze your fit for any opportunity in seconds.
+            Analyze your fit for any role or project in seconds.
           </p>
         </div>
       </div>
@@ -104,7 +104,7 @@ export default function MatchEnginePage() {
             )}
 
             <h3 className="font-bold text-slate-900 flex items-center gap-2 mt-6 mb-3 text-sm uppercase tracking-wider">
-              <Target size={16} className="text-[#6C4CF1]" /> Opportunity
+              <Target size={16} className="text-[#6C4CF1]" /> Role / Project Description
             </h3>
             <textarea
               value={opportunityText}
@@ -281,7 +281,7 @@ export default function MatchEnginePage() {
                       </div>
                       <div className="grid grid-cols-2 gap-4 text-xs font-medium">
                         <div className="bg-slate-50 p-2.5 rounded border border-slate-100">
-                          <span className="text-slate-400 uppercase tracking-wider block mb-1">Opportunity</span>
+                          <span className="text-slate-400 uppercase tracking-wider block mb-1">Role/Project</span>
                           <span className="text-slate-700">{item.evidence?.opportunity || 'N/A'}</span>
                         </div>
                         <div className="bg-slate-50 p-2.5 rounded border border-slate-100">

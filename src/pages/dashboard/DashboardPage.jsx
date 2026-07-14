@@ -1,6 +1,8 @@
 import React, { Suspense } from 'react';
 import { WidgetErrorBoundary } from '../../components/common/GlobalErrorBoundary';
 import { useAuth } from '../../contexts/AuthContext';
+import { useUserProfile } from '../../hooks/useUserProfile';
+import NewUserDashboard from '../../components/dashboard/NewUserDashboard';
 
 import DashboardHeroWidget from '../../components/dashboard/DashboardHeroWidget';
 import DashboardKPIsWidget from '../../components/dashboard/DashboardKPIsWidget';
@@ -10,12 +12,38 @@ import { HeroSkeleton, KPISkeleton, OpportunitySkeleton, AnalyticsWidgetSkeleton
 // Lazy loaded non-critical widgets
 const AICopilotSection = React.lazy(() => import('../../components/dashboard/AICopilotSection'));
 const CareerHealthWidget = React.lazy(() => import('../../components/dashboard/CareerHealthWidget'));
-const RecentActivityWidget = React.lazy(() => import('../../components/dashboard/RecentActivityWidget'));
+const RecentActivityTimeline = React.lazy(() => import('../../components/dashboard/RecentActivityTimeline'));
 const SkillGapWidget = React.lazy(() => import('../../components/dashboard/SkillGapWidget'));
 const ResumeInsightsWidget = React.lazy(() => import('../../components/dashboard/ResumeInsightsWidget'));
+const CareerJourneyWidget = React.lazy(() => import('../../components/dashboard/CareerJourneyWidget'));
+const RecommendedConnectionsWidget = React.lazy(() => import('../../components/network/RecommendedConnectionsWidget'));
+const CareerCoachWidget = React.lazy(() => import('../../components/dashboard/CareerCoachWidget'));
+
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { profile, isLoading } = useUserProfile();
+
+  // If loading, show skeletons
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-[1600px] mx-auto p-4 lg:p-8 bg-[#F8FAFC]">
+        <div className="flex flex-col gap-6">
+          <HeroSkeleton />
+          <KPISkeleton />
+          <AnalyticsWidgetSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  // Determine if onboarding is completed
+  const isLocallyCompleted = user ? localStorage.getItem(`onboarding_${user.uid}`) === 'completed' : false;
+  const isOnboardingComplete = isLocallyCompleted || profile?.onboardingCompleted;
+
+  if (!isOnboardingComplete) {
+    return <NewUserDashboard />;
+  }
 
   return (
     <div className="w-full max-w-[1600px] mx-auto p-4 lg:p-8 bg-[#F8FAFC]">
@@ -48,7 +76,7 @@ export default function DashboardPage() {
           </WidgetErrorBoundary>
           <WidgetErrorBoundary>
             <Suspense fallback={<AnalyticsWidgetSkeleton />}>
-              <RecentActivityWidget />
+              <RecentActivityTimeline />
             </Suspense>
           </WidgetErrorBoundary>
         </div>
@@ -71,6 +99,33 @@ export default function DashboardPage() {
         <WidgetErrorBoundary>
           <DashboardQuickActions />
         </WidgetErrorBoundary>
+
+        {/* ── Zone 8: Discovery & Coach Row ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            <WidgetErrorBoundary>
+              <Suspense fallback={<AnalyticsWidgetSkeleton />}>
+                <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm">
+                  <CareerJourneyWidget />
+                </div>
+              </Suspense>
+            </WidgetErrorBoundary>
+            <WidgetErrorBoundary>
+              <Suspense fallback={<AnalyticsWidgetSkeleton />}>
+                <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
+                  <RecommendedConnectionsWidget limit={4} />
+                </div>
+              </Suspense>
+            </WidgetErrorBoundary>
+          </div>
+          <div className="lg:col-span-1">
+            <WidgetErrorBoundary>
+              <Suspense fallback={<AnalyticsWidgetSkeleton />}>
+                <CareerCoachWidget />
+              </Suspense>
+            </WidgetErrorBoundary>
+          </div>
+        </div>
 
       </div>
     </div>

@@ -6,13 +6,14 @@ import { useMatchResume } from '../../hooks/useMatchResume';
 import ResumeUploadZone from '../../components/resume/ResumeUploadZone';
 import ResumeAnalysisResults from '../../components/resume/ResumeAnalysisResults';
 import ResumeSmartSuggestions from '../../components/resume/ResumeSmartSuggestions';
+import ResumeContentSuggestions from '../../components/resume/ResumeContentSuggestions';
 import ResumeHistory from '../../components/resume/ResumeHistory';
 import { Bot, Sparkles, FileText, Activity, CheckCircle2, History, User, BarChart2, Check, Target, TrendingUp, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ResumeReviewPage() {
   const [activeTab, setActiveTab] = useState('Review');
-  const { analyzeResume, resetAnalysis, isAnalyzing, analysisResults, error } = useResumeAnalysis();
+  const { analyzeResume, resetAnalysis, isAnalyzing, uploadProgress, progressText, analysisResults, error } = useResumeAnalysis();
   const { history, addHistory, getBestVersion, compareVersions } = useResumeHistory();
   const { resumeData, activeResumeId } = useResume();
   const { matchResume } = useMatchResume();
@@ -67,7 +68,8 @@ export default function ResumeReviewPage() {
   const tabs = [
     { id: 'Review', label: 'Review', icon: FileText },
     { id: 'ATS Score', label: 'ATS Score', icon: Activity, disabled: !analysisResults },
-    { id: 'Suggestions', label: 'Suggestions', icon: CheckCircle2, disabled: !analysisResults },
+    { id: 'Suggestions', label: 'Suggestions', icon: Sparkles, disabled: !analysisResults },
+    { id: 'Action Plan', label: 'Action Plan', icon: CheckCircle2, disabled: !analysisResults },
     { id: 'History', label: 'History', icon: History }
   ];
 
@@ -125,7 +127,7 @@ export default function ResumeReviewPage() {
                 <div className="w-full flex flex-col items-center max-w-[1000px]">
                   {/* Upload Zone Wrapper */}
                   <div className="w-full bg-white rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[#E5E7EB] p-5 flex flex-col">
-                    <ResumeUploadZone onAnalyze={handleAnalyzeFile} />
+                    <ResumeUploadZone onAnalyze={handleAnalyzeFile} uploadProgress={uploadProgress} progressText={progressText} />
                     
                     <div className="flex justify-center w-full mt-4">
                       <div className="flex items-center gap-1.5 text-[11px] text-[#64748B] font-medium px-3 py-1.5 bg-[#F8FAFC] rounded-md border border-[#F1F5F9]">
@@ -178,6 +180,10 @@ export default function ResumeReviewPage() {
           )}
 
           {activeTab === 'Suggestions' && analysisResults && (
+            <ResumeContentSuggestions results={analysisResults} />
+          )}
+
+          {activeTab === 'Action Plan' && analysisResults && (
             <ResumeSmartSuggestions
               suggestions={analysisResults.improvements || analysisResults.smartSuggestions || []}
               currentScore={analysisResults.atsScore || analysisResults.overallScore || 0}

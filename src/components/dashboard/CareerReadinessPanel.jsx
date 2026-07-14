@@ -44,7 +44,7 @@ export default function CareerReadinessPanel() {
     { id: 'teams', label: 'Team Participation', icon: Users, data: breakdown.teams }, // reused Users for now
     { id: 'certifications', label: 'Certifications', icon: Medal, data: breakdown.certifications },
     { id: 'goals', label: 'Goal Progress', icon: Target, data: breakdown.goals }
-  ];
+  ].filter(cat => cat.data !== undefined);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">

@@ -1,7 +1,7 @@
 import { useCareerRoadmap } from '../../hooks/useCareerRoadmap';
 import RoadmapWizard    from '../../components/roadmap/RoadmapWizard';
 import RoadmapDashboard from '../../components/roadmap/RoadmapDashboard';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, CheckCircle } from 'lucide-react';
 import ContextualBackButton from '../../components/navigation/ContextualBackButton';
 
 export default function CareerRoadmapPage() {
@@ -68,6 +68,18 @@ export default function CareerRoadmapPage() {
     return (
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <ContextualBackButton />
+        
+        {roadmap.isFallback && (
+          <div className="mb-6 flex items-start gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+            <CheckCircle size={18} className="text-emerald-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-emerald-800">
+                AI generation is temporarily unavailable. A professional roadmap template has been generated successfully.
+              </p>
+            </div>
+          </div>
+        )}
+
         <RoadmapDashboard
           roadmap={roadmap}
           toggleTask={toggleTask}

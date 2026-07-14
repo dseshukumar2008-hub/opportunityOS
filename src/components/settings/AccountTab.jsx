@@ -4,6 +4,7 @@ import PreferencesCard from './PreferencesCard';
 import SecurityCard from './SecurityCard';
 import AccountActionsCard from './AccountActionsCard';
 
+
 export default function AccountTab({ settings, updateSetting, setIsEditModalOpen }) {
   return (
     <motion.div

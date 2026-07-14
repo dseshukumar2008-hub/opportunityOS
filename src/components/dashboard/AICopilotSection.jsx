@@ -94,14 +94,14 @@ export default function AICopilotSection() {
             <span className="text-[12px] font-extrabold text-white uppercase tracking-wider">Next Best Action</span>
           </div>
           <h3 className="text-[15px] font-bold text-white mb-2 leading-snug">
-            Apply to 5 new matches
+            Plan your next steps
           </h3>
           <p className="text-[12px] font-medium text-white/70 mb-4 leading-relaxed">
-            High match opportunities waiting for you
+            Generate an AI-powered career roadmap
           </p>
           <div className="mt-auto pt-2">
-            <Link to="/opportunities" className="inline-block px-4 py-2 bg-white/20 border border-white/10 text-white rounded-xl text-[12px] font-bold hover:bg-white/30 transition-colors">
-              View Matches
+            <Link to="/career-roadmap" className="inline-block px-4 py-2 bg-white/20 border border-white/10 text-white rounded-xl text-[12px] font-bold hover:bg-white/30 transition-colors">
+              Generate Roadmap
             </Link>
           </div>
         </div>
@@ -112,26 +112,24 @@ export default function AICopilotSection() {
             <span className="text-[12px] font-extrabold text-white uppercase tracking-wider">Weekly Progress</span>
           </div>
           
-          {/* Simple SVG Graph Placeholder matching the design */}
-          <div className="flex-1 w-full flex items-end justify-between relative mt-2">
-             <div className="absolute left-0 bottom-0 top-0 w-full flex flex-col justify-between text-[8px] font-bold text-white/40 pb-5">
-                <span>100%</span>
-                <span>50%</span>
-                <span>0%</span>
-             </div>
-             <div className="pl-6 w-full h-full relative">
-               <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="w-full h-[60px] overflow-visible">
-                 <path d="M 0 30 Q 15 10 30 20 T 60 10 T 100 15" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2" strokeLinecap="round" />
-                 <circle cx="0" cy="30" r="3" fill="#fff" />
-                 <circle cx="30" cy="20" r="3" fill="#fff" />
-                 <circle cx="60" cy="10" r="3" fill="#fff" />
-                 <circle cx="100" cy="15" r="3" fill="#fff" />
-               </svg>
-               <div className="flex justify-between text-[9px] font-bold text-white/60 mt-2">
-                 <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-               </div>
-             </div>
-          </div>
+          {plan?.weekly_progress?.length > 0 ? (
+            <div className="flex-1 w-full flex items-end justify-between relative mt-2">
+              <div className="absolute left-0 bottom-0 top-0 w-full flex flex-col justify-between text-[8px] font-bold text-white/40 pb-5">
+                 <span>100%</span>
+                 <span>50%</span>
+                 <span>0%</span>
+              </div>
+              <div className="pl-6 w-full h-full relative">
+                {/* Dynamic SVG implementation would go here, currently using empty state logic if not enough data */}
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1 w-full flex flex-col items-center justify-center text-center mt-2 opacity-80">
+               <TrendingUp size={20} className="text-white/40 mb-2" />
+               <p className="text-[11px] font-semibold text-white/60 leading-tight">No activity tracked yet this week.</p>
+               <p className="text-[9px] text-white/40 mt-1">Complete tasks to see your progress here.</p>
+            </div>
+          )}
         </div>
 
       </div>

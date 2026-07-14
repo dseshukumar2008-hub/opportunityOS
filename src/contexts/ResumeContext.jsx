@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { useActivity } from './ActivityContext';
 import { auth, db } from '../config/firebase';
@@ -43,9 +43,12 @@ export const ResumeProvider = ({ children }) => {
   });
 
   const [activeTemplate, setActiveTemplate] = useState('Modern');
-  const [saveState, setSaveState] = useState(''); // 'Saving...', 'Saved', ''
+  const [saveState, setSaveState] = useState(''); // 'Saving...', 'Saved ✓', 'Save failed', 'Last saved just now', ''
   const [lastUpdated, setLastUpdated] = useState(() => Date.now());
   const [hasLocalMigration, setHasLocalMigration] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const isSavingRef = useRef(false);
+  const saveQueueRef = useRef(false);
 
   // Fetch resumes from Firestore
   const fetchResumes = useCallback(async () => {
@@ -327,6 +330,7 @@ export const ResumeProvider = ({ children }) => {
       // Fallback local persistence if not logged in
       localStorage.setItem('resumeData', JSON.stringify(resumeData));
       setLastUpdated(Date.now());
+      setIsDirty(false);
       return;
     }
 
@@ -336,26 +340,30 @@ export const ResumeProvider = ({ children }) => {
       return;
     }
 
-    setSaveState('Saving...');
-    try {
-      const updatedData = {
-        template: activeTemplate,
-        personalInfo: resumeData.personalInfo || {},
-        education: resumeData.education || [],
-        experience: resumeData.experience || [],
-        projects: resumeData.projects || [],
-        skills: resumeData.skills || [],
-        certifications: resumeData.certifications || [],
-        workshops: resumeData.workshops || [],
-        updatedAt: new Date().toISOString()
-      };
+    if (isSavingRef.current) {
+      saveQueueRef.current = true;
+      return;
+    }
 
+    isSavingRef.current = true;
+    setSaveState('Saving...');
+
+    const updatedData = {
+      template: activeTemplate,
+      personalInfo: resumeData.personalInfo || {},
+      education: resumeData.education || [],
+      experience: resumeData.experience || [],
+      projects: resumeData.projects || [],
+      skills: resumeData.skills || [],
+      certifications: resumeData.certifications || [],
+      workshops: resumeData.workshops || [],
+      updatedAt: new Date().toISOString()
+    };
+
+    const attemptSave = async () => {
       await updateDoc(doc(db, 'resumes', activeResumeId), updatedData);
       
       const dataForState = { ...resumes.find(r => r.id === activeResumeId || r.resumeId === activeResumeId), ...updatedData };
-      
-      // Keep match_resumes sync for legacy purposes if needed (Supabase)
-      // NOTE: Supabase sync has been fully removed in favor of Firestore as the single source of truth.
 
       try {
         const key = `resume_snapshots_${activeResumeId}`;
@@ -368,12 +376,13 @@ export const ResumeProvider = ({ children }) => {
       }
 
       setLastUpdated(Date.now());
-      setSaveState('Saved');
+      setIsDirty(false);
+      setSaveState('Saved ✓');
       setResumes(resumes.map(r => (r.id === activeResumeId || r.resumeId === activeResumeId) ? dataForState : r));
 
       // Clear 'Saved' indicator after 2s
       setTimeout(() => {
-        setSaveState('');
+        setSaveState(prev => prev === 'Saved ✓' ? 'Last saved just now' : prev);
       }, 2000);
 
       addActivity({
@@ -384,10 +393,27 @@ export const ResumeProvider = ({ children }) => {
         iconType: 'FileText',
         color: 'bg-emerald-50 text-emerald-500'
       });
+    };
+
+    try {
+      await attemptSave();
     } catch (err) {
       console.error('Error saving resume:', err);
-      setSaveState('');
-      toast.error(`Failed to save resume: ${err.message}`);
+      // Auto retry once after 1 second
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await attemptSave();
+      } catch (retryErr) {
+        console.error('Retry failed:', retryErr);
+        setSaveState('Save failed');
+        setIsDirty(true);
+      }
+    } finally {
+      isSavingRef.current = false;
+      if (saveQueueRef.current) {
+        saveQueueRef.current = false;
+        saveResume();
+      }
     }
   };
 
@@ -544,16 +570,24 @@ export const ResumeProvider = ({ children }) => {
   // Mutable functions trigger state update + auto-save
   useEffect(() => {
     // Implement an auto-save effect that triggers whenever resumeData changes, debounced
+    if (!isDirty) return;
+
     const timeout = setTimeout(() => {
       // Only auto-save if we have an active cloud resume
       if (activeResumeId) {
         saveResume();
       }
-    }, 2000);
+    }, 1500);
     return () => clearTimeout(timeout);
-  }, [resumeData, activeTemplate]);
+  }, [resumeData, activeTemplate, isDirty, activeResumeId]);
+
+  const handleSetActiveTemplate = (tmpl) => {
+    setIsDirty(true);
+    setActiveTemplate(tmpl);
+  };
 
   const updatePersonalInfo = (updates) => {
+    setIsDirty(true);
     setResumeData(prev => ({
       ...prev,
       personalInfo: { ...prev.personalInfo, ...updates }
@@ -561,10 +595,12 @@ export const ResumeProvider = ({ children }) => {
   };
 
   const restoreSnapshot = (snapshotData) => {
+    setIsDirty(true);
     setResumeData(snapshotData);
   };
 
   const addArrayItem = (section, item) => {
+    setIsDirty(true);
     setResumeData(prev => ({
       ...prev,
       [section]: [...(prev[section] || []), { ...item, id: Date.now().toString() }]
@@ -572,6 +608,7 @@ export const ResumeProvider = ({ children }) => {
   };
 
   const updateArrayItem = (section, id, updates) => {
+    setIsDirty(true);
     setResumeData(prev => ({
       ...prev,
       [section]: prev[section].map(item => item.id === id ? { ...item, ...updates } : item)
@@ -579,6 +616,7 @@ export const ResumeProvider = ({ children }) => {
   };
 
   const removeArrayItem = (section, id) => {
+    setIsDirty(true);
     setResumeData(prev => ({
       ...prev,
       [section]: prev[section].filter(item => item.id !== id)
@@ -586,6 +624,7 @@ export const ResumeProvider = ({ children }) => {
   };
 
   const updateSkills = (skillsArray) => {
+    setIsDirty(true);
     setResumeData(prev => ({
       ...prev,
       skills: skillsArray
@@ -601,8 +640,10 @@ export const ResumeProvider = ({ children }) => {
       hasLocalMigration,
       resumeData,
       activeTemplate,
-      setActiveTemplate,
+      setActiveTemplate: handleSetActiveTemplate,
       lastUpdated,
+      isDirty,
+      setIsDirty,
       saveResume,
       createResume,
       deleteResume,

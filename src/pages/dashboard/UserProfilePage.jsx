@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { useResume } from '../../contexts/ResumeContext';
-import { useApplications } from '../../contexts/ApplicationContext';
+
 import { useTeam } from '../../contexts/TeamContext';
 import StatusDot from '../../components/ui/StatusDot';
 import { useOnlineStatus } from '../../contexts/OnlineStatusContext';
@@ -16,7 +16,7 @@ import {
   GitBranch, UserCheck, UserX, Link2, CheckCircle
 } from 'lucide-react';
 import RecommendedConnectionsWidget from '../../components/network/RecommendedConnectionsWidget';
-import RecommendedForYouSection from '../../components/opportunities/RecommendedForYouSection';
+
 import { useActivity } from '../../contexts/ActivityContext';
 import { useEffect } from 'react';
 import { useUserDirectory } from '../../hooks/useUserDirectory';
@@ -80,7 +80,7 @@ export default function UserProfilePage() {
   const { user } = useAuth();
   const { profile: ownProfile, fetchUserProfile } = useProfile();
   const { resumeData, getResumeStrength } = useResume();
-  const { applications } = useApplications();
+
   const { teams, currentUserId } = useTeam();
   const { myStatus } = useOnlineStatus();
   const {
@@ -106,7 +106,7 @@ export default function UserProfilePage() {
     if (isOwnProfile) {
       setViewedProfile(ownProfile);
     } else {
-      // User lookup first, if not found then Supabase fetch
+      // User lookup first
       const directoryUser = allUsers.find(u => u.id === userId);
       if (directoryUser) {
         setViewedProfile(directoryUser);
@@ -376,7 +376,7 @@ export default function UserProfilePage() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <StatCard icon={Briefcase} label="Opportunities Applied" value={(applications || []).length} color="bg-blue-50 text-blue-600" />
+
               <StatCard icon={Users} label="Teams Joined" value={myTeams.length} color="bg-emerald-50 text-emerald-600" />
               <StatCard icon={Link2} label="Connections" value={isOwnProfile ? myConnectionCount : viewedUserConnectionCount} color="bg-amber-50 text-amber-600" />
               <StatCard icon={Star} label="Resume Score" value={`${resumeScore}%`} color="bg-purple-50 text-purple-600" />
@@ -473,8 +473,8 @@ export default function UserProfilePage() {
                       key={filter}
                       onClick={() => setActivityFilter(filter)}
                       className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors ${activityFilter === filter
-                          ? 'bg-[#6C4CF1] text-white'
-                          : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                        ? 'bg-[#6C4CF1] text-white'
+                        : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
                         }`}
                     >
                       {filter}
@@ -609,9 +609,7 @@ export default function UserProfilePage() {
               </button>
             </Card>
 
-            <div className="bg-white rounded-[20px] border border-slate-100 p-5 shadow-sm">
-              <RecommendedForYouSection limit={3} layout="list" />
-            </div>
+
 
             {!isOwnProfile && (
               <RecommendedConnectionsWidget />

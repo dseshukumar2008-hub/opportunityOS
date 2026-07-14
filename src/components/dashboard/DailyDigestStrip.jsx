@@ -5,12 +5,11 @@ import { getUserFirstName } from '../../utils/userUtils';
 
 export default function DailyDigestStrip() {
   const { user } = useAuth();
-  const { recommendedOpportunities, applicationInsights, isLoading } = useDashboardInsights();
+  const { recommendedOpportunities, isLoading } = useDashboardInsights();
 
   const firstName = getUserFirstName(user, null);
   
   const newMatches = recommendedOpportunities?.length ?? 0;
-  const activeApps = applicationInsights?.active ?? 0;
 
   return (
     <div className="w-full bg-white rounded-2xl border border-slate-100 shadow-sm px-6 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -40,11 +39,7 @@ export default function DailyDigestStrip() {
 
       {/* Quick Stats Summary */}
       <div className="flex items-center gap-4 bg-slate-50 px-5 py-2.5 rounded-xl border border-slate-100">
-        <div className="flex flex-col items-center">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Active Apps</span>
-          <span className="text-[18px] font-black text-slate-800 leading-none">{activeApps}</span>
-        </div>
-        <div className="h-8 w-px bg-slate-200"></div>
+
         <div className="flex flex-col items-center">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Pending Invites</span>
           <span className="text-[18px] font-black text-slate-800 leading-none">2</span>

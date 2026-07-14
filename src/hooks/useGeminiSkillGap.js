@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useResume } from '../contexts/ResumeContext';
 import { useResumeHistory } from './useResumeHistory';
-import { useApplications } from '../contexts/ApplicationContext';
+
 import { useTeam } from '../contexts/TeamContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../contexts/ProfileContext';
@@ -11,11 +11,12 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useNotifications } from '../contexts/NotificationContext';
 
 const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000;
+const ENABLE_AI_NOTIFICATIONS = false;
 
 export function useGeminiSkillGap(opportunity) {
   const { resumeData } = useResume();
   const { getBestVersion } = useResumeHistory();
-  const { applications } = useApplications();
+
   const { teams } = useTeam();
   const { user } = useAuth();
   const { profile, mergeProfileData } = useProfile();
@@ -71,7 +72,7 @@ export function useGeminiSkillGap(opportunity) {
         certifications: resumeData?.certifications || [],
       },
       atsScore: bestVersion?.results?.overallScore || 0,
-      applicationsCount: applications?.length || 0,
+      applicationsCount: 0,
       teamsCount: teams?.length || 0,
     };
 
@@ -101,7 +102,7 @@ export function useGeminiSkillGap(opportunity) {
           await mergeProfileData({ missingSkills: results.missingSkills });
         }
 
-        if (!cachedString) {
+        if (!cachedString && ENABLE_AI_NOTIFICATIONS) {
           addNotification({
             title: 'Skill Gap Analysis Ready',
             message: `Analysis completed for ${opportunity.title} at ${opportunity.company}.`,
@@ -116,7 +117,7 @@ export function useGeminiSkillGap(opportunity) {
     } finally {
       setIsLoading(false);
     }
-  }, [opportunity, resumeData, bestVersion, applications, teams, user]);
+  }, [opportunity, resumeData, bestVersion, teams, user]);
 
   // Removed automatic execution on load. Call generateGapAnalysis manually.
 

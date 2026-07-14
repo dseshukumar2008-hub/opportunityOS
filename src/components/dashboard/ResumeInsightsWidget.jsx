@@ -97,12 +97,9 @@ export default function ResumeInsightsWidget() {
       </div>
 
       {/* CTA */}
-      <div className="mt-auto flex gap-2">
-        <Link to="/resume-review" className="flex-1 flex items-center justify-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-[12px] px-3 py-2.5 rounded-xl transition-colors">
-          <Zap size={13} /> Improve Score
-        </Link>
-        <Link to="/resume-review" className="flex-1 flex items-center justify-center gap-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-[12px] px-3 py-2.5 rounded-xl transition-colors">
-          <FileText size={13} /> View Resume
+      <div className="mt-auto flex">
+        <Link to="/resume-review" className="w-full flex items-center justify-center gap-1.5 bg-[#6C4CF1] hover:bg-indigo-700 text-white font-bold text-[13px] px-4 py-2.5 rounded-xl transition-all shadow-md shadow-indigo-300">
+          <Zap size={14} /> View Full Resume Analysis
         </Link>
       </div>
     </div>

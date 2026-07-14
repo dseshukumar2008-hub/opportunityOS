@@ -21,6 +21,7 @@ import CareerGrowthTimeline from '../../components/analytics/CareerGrowthTimelin
 import ImprovementTrackerWidget from '../../components/analytics/ImprovementTrackerWidget';
 import CareerGrowthForecastWidget from '../../components/analytics/CareerGrowthForecastWidget';
 
+
 export default function AnalyticsPage() {
   const readinessData = useCareerReadiness();
   const { atsScore, hasInsights } = useResumeInsights();

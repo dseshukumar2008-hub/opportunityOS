@@ -486,17 +486,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
             />
           ))}
           
-          <div className="pt-8 pb-4 text-center border-t border-slate-200 mt-8">
-            <h3 className="text-[18px] font-black text-slate-900 mb-2">Ready to apply?</h3>
-            <p className="text-[14px] text-slate-500 mb-6">Discover roles that match your new career goals.</p>
-            <Link to="/opportunities" className="inline-flex items-center gap-2 px-8 py-3 bg-[#6C4CF1] hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-md">
-              Find Matching Opportunities <ArrowRight size={18} />
-            </Link>
-          </div>
-          
-          <p className="text-[11px] font-bold text-slate-400 text-center pt-4 flex items-center justify-center gap-2">
-            <Sparkles size={12}/> Roadmap generated with AI based on your profile and goals.
-          </p>
+
         </div>
 
         {/* ── RIGHT COLUMN: SIDEBAR ── */}
@@ -552,31 +542,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp size={16} className="text-emerald-500"/>
-              <h3 className="text-[14px] font-extrabold text-slate-900">Quick Stats</h3>
-            </div>
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                <span className="text-[13px] font-bold text-slate-500">Skills Acquired</span>
-                <span className="text-[15px] font-black text-slate-900">{sidebar.quickStats?.skillsAcquired || 0}</span>
-              </div>
-              <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                <span className="text-[13px] font-bold text-slate-500">Projects Built</span>
-                <span className="text-[15px] font-black text-slate-900">{sidebar.quickStats?.projectsBuilt || 0}</span>
-              </div>
-              <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-                <span className="text-[13px] font-bold text-slate-500">Certifications</span>
-                <span className="text-[15px] font-black text-slate-900">{sidebar.quickStats?.certifications || 0}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[13px] font-bold text-slate-500">Streak</span>
-                <span className="text-[15px] font-black text-slate-900 flex items-center gap-1">{sidebar.quickStats?.streak || 1} Days <span>🔥</span></span>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>

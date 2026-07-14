@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useProfile } from '../../contexts/ProfileContext';
 import { 
   User, Mail, BookOpen, GraduationCap, Calendar, 
   MapPin, Edit, FileText, Award, Bookmark, X, Camera,
@@ -13,24 +14,25 @@ import { getUserFullName } from '../../utils/userUtils';
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
+  const { profile, updateProfile } = useProfile();
   
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   
-  const [profileData, setProfileData] = useState({
-    name: getUserFullName(user, null),
+  const profileData = {
+    name: profile?.profile?.fullName || user?.name || getUserFullName(user, null),
     email: user?.email || '',
-    phone: user?.phone || '+91 98765 43210',
-    college: user?.college || 'NIAT',
-    branch: user?.branch || 'Computer Science Engineering',
-    year: user?.year || '1st Year',
-    expectedGraduation: user?.expectedGraduation || '2029',
+    phone: profile?.profile?.phone || user?.phone || '+91 98765 43210',
+    college: profile?.education?.university || user?.college || 'NIAT',
+    branch: profile?.education?.branch || user?.branch || 'Computer Science Engineering',
+    year: profile?.education?.currentYear || user?.year || '1st Year',
+    expectedGraduation: profile?.education?.graduationYear || user?.expectedGraduation || '2029',
     country: user?.country || user?.profile?.country || 'India',
     state: user?.state || user?.profile?.state || '',
     city: user?.city || user?.profile?.city || '',
     location: user?.location || '',
-    bio: user?.bio || 'Passionate first year Computer Science student who loves building web applications and solving real-world problems. I enjoy learning new technologies and working on innovative projects that create impact. Always excited to collaborate and grow together!',
-    skills: user?.skills || 'React, JavaScript, Python, HTML, CSS, Git, GitHub, C++, Node.js, Tailwind CSS, Figma, MongoDB, Firebase'
-  });
+    bio: profile?.about?.bio || user?.bio || 'Passionate first year Computer Science student who loves building web applications and solving real-world problems. I enjoy learning new technologies and working on innovative projects that create impact. Always excited to collaborate and grow together!',
+    skills: profile?.skills?.join(', ') || user?.skills || 'React, JavaScript, Python, HTML, CSS, Git, GitHub, C++, Node.js, Tailwind CSS, Figma, MongoDB, Firebase'
+  };
 
   const [editForm, setEditForm] = useState(profileData);
   const [skillInput, setSkillInput] = useState('');
@@ -559,9 +561,29 @@ export default function ProfilePage() {
                 Cancel
               </button>
               <button 
-                onClick={() => {
-                  setProfileData(editForm);
-                  updateUser(editForm);
+                onClick={async () => {
+                  const skillsArray = editForm.skills ? editForm.skills.split(',').map(s => s.trim()).filter(Boolean) : [];
+                  
+                  await updateProfile({
+                    profile: {
+                      ...profile?.profile,
+                      fullName: editForm.name,
+                      phone: editForm.phone,
+                    },
+                    education: {
+                      ...profile?.education,
+                      university: editForm.college,
+                      branch: editForm.branch,
+                      currentYear: editForm.year,
+                      graduationYear: editForm.expectedGraduation
+                    },
+                    skills: skillsArray,
+                    about: {
+                      ...profile?.about,
+                      bio: editForm.bio
+                    }
+                  });
+                  updateUser({ name: editForm.name });
                   setIsEditModalOpen(false);
                   toast.success('Profile updated successfully');
                 }}

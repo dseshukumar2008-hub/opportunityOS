@@ -69,9 +69,8 @@ export default function DashboardKPIsWidget() {
 
       {/* Resume Score */}
       <StatPill icon={FileText} label="Resume Score" value={`${resumeScore}%`} subtext={resumeScore >= 70 ? "Good" : "Needs work"} color="violet" to="/resume-review" />
-      
-      {/* AI Score */}
-      <StatPill icon={Sparkles} label="Career Readiness" value={`${aiScore}%`} subtext={aiScore >= 70 ? "Ready" : "Needs work"} color="emerald" />
+      {/* Career Readiness Score */}
+      <StatPill icon={Sparkles} label="Career Readiness" value={`${aiScore}%`} subtext={aiScore >= 70 ? "Ready" : "Needs work"} color="emerald" to="/career-coach" />
     </div>
   );
 }

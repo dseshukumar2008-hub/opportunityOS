@@ -155,7 +155,7 @@ export default function TeamFinderPage() {
               <button onClick={() => setIsCreateModalOpen(false)} className="text-slate-400 hover:text-slate-600">✕</button>
             </div>
             
-            <form onSubmit={handleCreateSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleCreateSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
               <div>
                 <label className="block text-[12px] font-bold text-slate-700 mb-1">Team Name</label>
                 <input 

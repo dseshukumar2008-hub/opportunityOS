@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Target, Calendar } from 'lucide-react';
 import { useGoals } from '../../contexts/GoalContext';
 
+
 const CATEGORIES = [
   'Applications',
   'Skills',

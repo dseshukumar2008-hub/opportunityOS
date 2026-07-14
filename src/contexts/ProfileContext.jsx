@@ -22,7 +22,7 @@ export const ProfileProvider = ({ children }) => {
 
     setLoading(true);
     const docRef = doc(db, 'users', user.uid);
-    
+
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         setProfile(docSnap.data());
@@ -40,7 +40,7 @@ export const ProfileProvider = ({ children }) => {
 
   const updateProfile = async (updates) => {
     if (!user) return { error: 'No user logged in' };
-    
+
     try {
       // Optimistic update handled locally if needed, but snapshot triggers quickly
       const docRef = doc(db, 'users', user.uid);
@@ -48,7 +48,7 @@ export const ProfileProvider = ({ children }) => {
         ...updates,
         updatedAt: new Date().toISOString()
       }, { merge: true });
-      
+
       return { data: { ...profile, ...updates }, error: null };
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -62,7 +62,7 @@ export const ProfileProvider = ({ children }) => {
     try {
       const docRef = doc(db, 'users', user.uid);
       const parsedUpdates = { ...updates, updatedAt: new Date().toISOString() };
-      
+
       // Handle array merging (e.g. appending new missing skills or extracted skills)
       if (updates.extractedSkills && Array.isArray(updates.extractedSkills)) {
         parsedUpdates.extractedSkills = arrayUnion(...updates.extractedSkills);
@@ -70,7 +70,7 @@ export const ProfileProvider = ({ children }) => {
       if (updates.missingSkills && Array.isArray(updates.missingSkills)) {
         parsedUpdates.missingSkills = arrayUnion(...updates.missingSkills);
       }
-      
+
       await setDoc(docRef, parsedUpdates, { merge: true });
       return { error: null };
     } catch (error) {
@@ -84,7 +84,7 @@ export const ProfileProvider = ({ children }) => {
     try {
       const docRef = doc(db, 'users', userId);
       const docSnap = await getDoc(docRef);
-      
+
       if (docSnap.exists()) {
         return { data: docSnap.data(), error: null };
       } else {
@@ -96,12 +96,12 @@ export const ProfileProvider = ({ children }) => {
   };
 
   return (
-    <ProfileContext.Provider value={{ 
-      profile, 
-      loading, 
+    <ProfileContext.Provider value={{
+      profile,
+      loading,
       updateProfile,
       mergeProfileData,
-      fetchUserProfile 
+      fetchUserProfile
     }}>
       {children}
     </ProfileContext.Provider>

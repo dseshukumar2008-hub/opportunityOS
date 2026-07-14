@@ -18,7 +18,7 @@ const QUICK_PROMPTS = [
 
 const WELCOME_MESSAGE = {
   role: 'assistant',
-  content: `👋 Hi! I'm your **AI Career Copilot**, powered by Gemini.
+  content: `👋 Hi! I'm your **AI Career Copilot**, powered by OpportunityOS Intelligence.
 
 I can help you with:
 - 📄 **Resume optimization** and ATS improvements
@@ -155,8 +155,8 @@ export default function CareerCoachPage() {
 
       await addMessage({ role: 'assistant', content: responseText });
     } catch (err) {
-      console.error("AI Coach Error:", err);
-      await addMessage({ role: 'assistant', content: "Sorry, I am having trouble connecting to the network right now." });
+      console.error("AI Coach EXACT Error:", err.message, '\nStack:', err.stack);
+      await addMessage({ role: 'assistant', content: `**Audit Error Trace:**\n- Exception: ${err.message}\n- File: geminiService.js (via CareerCoachPage.jsx)` });
     } finally {
       setIsTyping(false);
     }
@@ -185,7 +185,7 @@ export default function CareerCoachPage() {
             <h1 className="text-[18px] font-black text-slate-900 leading-tight">AI Career Copilot</h1>
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-              <p className="text-[12px] font-bold text-slate-500">Powered by Gemini · Always available</p>
+              <p className="text-[12px] font-bold text-slate-500">Powered by OpportunityOS Intelligence</p>
             </div>
           </div>
         </div>

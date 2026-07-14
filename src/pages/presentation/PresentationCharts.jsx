@@ -63,7 +63,7 @@ export default function PresentationCharts() {
       {/* Chart 1: Applications */}
       <div className="card-standard p-6">
         <h3 className="text-[15px] font-bold text-slate-900 mb-0.5">Platform Adoption</h3>
-        <p className="text-[12px] text-slate-400 font-medium mb-5">Monthly applications submitted</p>
+        <p className="text-[12px] text-slate-400 font-medium mb-5">Monthly profile views</p>
         <div className="h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={applicationData}>
@@ -161,7 +161,7 @@ export default function PresentationCharts() {
 
       {/* Chart 6: Opportunity Breakdown */}
       <div className="card-standard p-6">
-        <h3 className="text-[15px] font-bold text-slate-900 mb-0.5">Opportunity Breakdown</h3>
+        <h3 className="text-[15px] font-bold text-slate-900 mb-0.5">Project Breakdown</h3>
         <p className="text-[12px] text-slate-400 font-medium mb-5">Listings by category</p>
         <div className="h-[220px]">
           <ResponsiveContainer width="100%" height="100%">

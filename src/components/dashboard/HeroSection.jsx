@@ -29,7 +29,7 @@ function StatPill({ icon: Icon, label, value, colorClass, href }) {
 export default function HeroSection() {
   const { user } = useAuth();
   const { profile } = useUserProfile();
-  const { recommendedOpportunities, applicationInsights, careerReadiness, bestOpportunity, isLoading } =
+  const { recommendedOpportunities, careerReadiness, bestOpportunity, isLoading } =
     useDashboardInsights();
   const { atsScore, hasInsights } = useResumeInsights();
 
@@ -43,9 +43,6 @@ export default function HeroSection() {
     .toUpperCase();
 
   const readiness = careerReadiness?.score ?? 0;
-  const activeApps = applicationInsights?.active ?? 0;
-  const newMatches = recommendedOpportunities?.length ?? 0;
-  const bestMatchScore = bestOpportunity?.matchData?.score ?? null;
 
   const readinessColor =
     readiness >= 80
@@ -76,31 +73,6 @@ export default function HeroSection() {
       colorClass: atsColor,
       href: '/resume-review',
     },
-    {
-      icon: Briefcase,
-      label: 'Active Apps',
-      value: activeApps,
-      colorClass: 'text-indigo-600 bg-indigo-50 border-indigo-200',
-      href: '/applications',
-    },
-    {
-      icon: Clock,
-      label: 'New Matches',
-      value: newMatches,
-      colorClass: 'text-blue-600 bg-blue-50 border-blue-200',
-      href: '/opportunities',
-    },
-    ...(bestMatchScore != null
-      ? [
-          {
-            icon: Users,
-            label: 'Best Fit',
-            value: `${bestMatchScore}%`,
-            colorClass: 'text-purple-600 bg-purple-50 border-purple-200',
-            href: '/opportunities',
-          },
-        ]
-      : []),
   ];
 
   return (
@@ -163,7 +135,7 @@ export default function HeroSection() {
           <div className="shrink-0">
             <span className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-200 text-indigo-700 text-[12px] font-bold">
               <Sparkles size={13} className="text-indigo-500" />
-              Powered by Gemini
+              Powered by OpportunityOS Intelligence
             </span>
           </div>
         </div>
