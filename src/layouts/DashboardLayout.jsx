@@ -115,8 +115,12 @@ export default function DashboardLayout() {
 
 
   return (
-    <div className="h-screen bg-[#F8FAFC] font-sans flex overflow-hidden">
-      {/* Mobile Sidebar Overlay */}
+    <div className="min-h-screen bg-[#FAFAFA] flex overflow-hidden font-sans">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-indigo-600 focus:font-bold focus:shadow-md focus:rounded-br-lg">
+        Skip to main content
+      </a>
+
+      {/* Sidebar Overlay (Mobile) */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden"
@@ -124,14 +128,15 @@ export default function DashboardLayout() {
         />
       )}
 
-      <aside 
-        role="navigation"
-        aria-label="Main Navigation"
-        className={`
-        fixed lg:sticky top-0 left-0 z-50
-        w-64 bg-white border-r border-slate-200 
-        flex flex-col h-screen transition-transform duration-300 ease-in-out
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      <aside className={`
+        fixed inset-y-0 left-0 z-40
+        w-64 bg-[#FDFDFD]
+        border-r border-slate-200/60
+        transform transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
+        lg:translate-x-0 lg:static lg:flex-shrink-0
+        flex flex-col
+        shadow-[4px_0_24px_rgba(0,0,0,0.02)]
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Sidebar Header */}
         <div className="h-16 flex items-center px-6 border-b border-slate-100">
@@ -248,44 +253,24 @@ export default function DashboardLayout() {
 
         </div>
 
-        {/* Sidebar Footer / Profile */}
-        <div className="p-4 border-t border-slate-100 flex flex-col gap-4">
-          
-          {/* Profile Card */}
-          <div 
-            className="flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors rounded-[12px] p-2 -mx-2"
-            onClick={() => { navigate('/user/me'); setIsSidebarOpen(false); }}
-          >
-            <div className="flex items-center gap-3">
-              <img src={profile?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${getUserFullName(user, profile)}&backgroundColor=e2e8f0`} alt="Avatar" className="w-10 h-10 rounded-full bg-slate-200 object-cover" />
-              <div>
-                <p className="text-[13px] font-extrabold text-slate-900 leading-none">{getUserFullName(user, profile)}</p>
-                <p className="text-[11px] font-semibold text-slate-500 mt-1.5 leading-none">{profile?.headline || 'Student'}</p>
-              </div>
+        {/* Upgrade / Footer Area */}
+        <div className="p-4 border-t border-slate-200/60 mt-auto bg-slate-50/50">
+          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100/50 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-2 opacity-10">
+              <Sparkles size={40} />
             </div>
-            <ChevronDown size={14} className="text-slate-400" />
-          </div>
-
-          {/* Upgrade to Pro Card */}
-          <div className="bg-[#F3F0FF] border border-[#6D5DF6]/10 rounded-[16px] p-4 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#6D5DF6]/10 rounded-full blur-xl -translate-y-1/2 translate-x-1/2"></div>
-            <h4 className="text-[13px] font-extrabold text-[#6D5DF6] flex items-center gap-1.5 mb-1.5">
-              Upgrade to Pro <Sparkles size={12} className="text-[#6D5DF6]" />
-            </h4>
-            <p className="text-[11px] font-semibold text-slate-600 leading-snug mb-3 max-w-[90%]">
-              Get AI-powered insights, unlimited reviews & more.
-            </p>
-            <button className="w-full bg-[#6D5DF6] hover:bg-[#5a4add] text-white text-[12px] font-bold py-2 rounded-[10px] transition-colors shadow-sm">
+            <h4 className="text-sm font-bold text-indigo-900 mb-1">OpportunityOS Pro</h4>
+            <p className="text-xs text-indigo-600/80 mb-3 leading-relaxed">Unlock advanced AI resume parsing & unlimited mock interviews.</p>
+            <button className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">
               Upgrade Now
             </button>
           </div>
-
         </div>
       </aside>
 
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Top Navbar */}
         <header className="h-[70px] bg-white border-b border-slate-100 flex items-center justify-between px-6 lg:px-8 shrink-0">
           <div className="flex items-center gap-4">
@@ -509,21 +494,21 @@ export default function DashboardLayout() {
         </header>
 
         {/* Dashboard Content */}
-        <div className="flex-1 overflow-y-auto">
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto focus:outline-none">
           <Outlet />
-        </div>
+        </main>
+        
         {/* Global Search Modal */}
         <GlobalSearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
         
         {/* OpportunityOS Copilot (Student) */}
         <OpportunityOSCopilot mode="student" contextData={studentContext} />
 
-        {/* First Time User Onboarding */}
         <FloatingOnboarding />
         
         {/* Existing User Location Migration */}
         <LocationMigrationModal />
-      </main>
+      </div>
     </div>
   );
 }

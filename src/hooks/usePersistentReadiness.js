@@ -12,17 +12,35 @@ export function usePersistentReadiness() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRecalculating, setIsRecalculating] = useState(false);
 
+let readinessCache = new Map();
+let pendingReadinessFetches = new Map();
+
   const fetchPersistentData = useCallback(async () => {
     if (!user?.uid) return;
+    
     try {
+      if (readinessCache.has(user.uid)) {
+        setPersistentData(readinessCache.get(user.uid));
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
-      const data = await careerReadinessService.getReadiness(user.uid);
+      let fetchPromise = pendingReadinessFetches.get(user.uid);
+      if (!fetchPromise) {
+        fetchPromise = careerReadinessService.getReadiness(user.uid);
+        pendingReadinessFetches.set(user.uid, fetchPromise);
+      }
+
+      const data = await fetchPromise;
       if (data) {
+        readinessCache.set(user.uid, data);
         setPersistentData(data);
       }
     } catch (err) {
       console.error('Failed to fetch persistent readiness data:', err);
     } finally {
+      pendingReadinessFetches.delete(user.uid);
       setIsLoading(false);
     }
   }, [user]);
@@ -51,7 +69,8 @@ export function usePersistentReadiness() {
         aiAnalysis
       );
       
-      // 4. Update local state
+      // 4. Update local state and cache
+      readinessCache.set(user.uid, savedPayload);
       setPersistentData(savedPayload);
       return savedPayload;
     } catch (err) {

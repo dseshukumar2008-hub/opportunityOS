@@ -69,7 +69,7 @@ export function useHiddenPotential() {
     } catch (err) {
       console.error('Error generating hidden potential:', err);
       setError('Failed to run the AI detection engine. Please try again.');
-      throw err;
+      return { _error: true, message: 'AI detection failed' };
     } finally {
       setIsGenerating(false);
     }

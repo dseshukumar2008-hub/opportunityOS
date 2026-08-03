@@ -36,7 +36,7 @@ export default function SkillGapWidget() {
   };
 
   return (
-    <div className="card-standard p-6 h-full flex flex-col bg-white border border-slate-100 rounded-[24px] shadow-sm">
+    <div className="card-standard p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[16px] font-black text-slate-900">Skill Gap Analysis</h3>
         <Link to="/analytics" className="text-[12px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-1">
@@ -69,7 +69,7 @@ export default function SkillGapWidget() {
       </div>
 
       <div className="mt-6 flex justify-center">
-        <Link to="/skill-gap" className="px-6 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-[12px] font-bold transition-colors">
+        <Link to="/skill-gap" className="px-6 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-[12px] font-bold transition-all shadow-sm hover:shadow hover:-translate-y-0.5">
           Start Learning
         </Link>
       </div>

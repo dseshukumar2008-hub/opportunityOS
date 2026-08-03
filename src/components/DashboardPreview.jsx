@@ -1,6 +1,6 @@
 import { 
   LayoutDashboard, Search, Bell, Briefcase, FileText, 
-  Users, Clock, BarChart3, Settings, ArrowRight,
+  Users, Clock, BarChart3, Settings,
   Circle, Sparkles
 } from 'lucide-react';
 

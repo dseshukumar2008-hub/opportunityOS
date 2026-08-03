@@ -241,7 +241,11 @@ export function useCareerRoadmap() {
         console.log(`[Roadmap Gen] Attempt ${attempt + 1}`);
         console.log("[STEP 2] AIProvider request starting");
         
-        const response = await aiGenerate(request);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Generation timeout')), 65000)
+        );
+        const response = await Promise.race([aiGenerate(request), timeoutPromise]);
+        
         if (!response.success) {
           throw response.error;
         }

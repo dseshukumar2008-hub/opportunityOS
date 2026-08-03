@@ -21,7 +21,7 @@ function StatPill({ icon: Icon, label, value, subtext, color = 'indigo', to }) {
   const c = colorMap[color] || colorMap.indigo;
 
   const inner = (
-    <div className="flex flex-col p-5 rounded-[16px] border border-slate-100 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer h-full">
+    <div className="flex flex-col p-5 rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer h-full">
       <div className={`w-8 h-8 rounded-xl ${c.bg} flex items-center justify-center mb-4`}>
         <Icon size={16} className={c.icon} />
       </div>
@@ -57,7 +57,7 @@ export default function DashboardKPIsWidget() {
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {[...Array(3)].map((_, i) => <div key={i} className="h-28 bg-white border border-slate-100 rounded-[16px] animate-pulse" />)}
+        {[...Array(3)].map((_, i) => <div key={i} className="card-standard h-28 animate-pulse" />)}
       </div>
     );
   }

@@ -24,14 +24,14 @@ export default function DashboardQuickActions() {
       <div className="flex items-center justify-between mb-4 px-1">
         <h3 className="text-[16px] font-black text-slate-900">Quick Actions</h3>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         {actions.map((action, idx) => {
           const c = colorMap[action.color] || colorMap.indigo;
           return (
             <Link
               key={idx}
               to={action.path}
-              className={`group flex flex-col p-4 bg-white border ${c.border} ${c.hover} rounded-[16px] shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200`}
+              className={`group flex flex-col p-4 bg-white border ${c.border} ${c.hover} rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200`}
             >
               <div className={`w-9 h-9 rounded-xl ${c.bg} flex items-center justify-center mb-3`}>
                 <action.icon size={17} className={c.icon} />

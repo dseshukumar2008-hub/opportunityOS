@@ -82,7 +82,7 @@ export default function ResumeSmartSuggestions({ suggestions, currentScore, pote
           let fix = parts.slice(1).join('. ') || `Update your ${suggestion.area.toLowerCase()} section to resolve this.`;
 
           return (
-            <div key={idx} className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:border-indigo-300 transition-colors flex flex-col h-full relative group">
+            <div key={idx} className="card-standard card-hover p-5 flex flex-col h-full relative group">
               
               {/* Top Row: Category Label & ATS Badge */}
               <div className="flex items-center justify-between mb-3">

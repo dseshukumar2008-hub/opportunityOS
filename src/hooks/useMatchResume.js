@@ -5,33 +5,79 @@ import { useAuth } from '../contexts/AuthContext';
 import { geminiService } from '../services/geminiService';
 import { toast } from 'react-hot-toast';
 
+let cachedMatchResume = null;
+let fetchPromise = null;
+let lastUserId = null;
+let lastFetchTime = 0;
+const CACHE_TTL = 30000; // 30 seconds
+
 export function useMatchResume() {
   const { user, session } = useAuth();
   
-  const [matchResume, setMatchResume] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [matchResume, setMatchResume] = useState(cachedMatchResume);
+  const [isLoading, setIsLoading] = useState(!cachedMatchResume);
   const [isUploading, setIsUploading] = useState(false);
 
-  const fetchMatchResume = useCallback(async () => {
+  const fetchMatchResume = useCallback(async (force = false) => {
     if (!user) {
       setMatchResume(null);
+      cachedMatchResume = null;
       setIsLoading(false);
       return;
     }
 
-    try {
-      setIsLoading(true);
-      const docRef = doc(db, 'users', user.id, 'match_resume', 'current');
-      const docSnap = await getDoc(docRef);
+    const now = Date.now();
+    // Use cache if not forced, user is same, and within TTL
+    if (!force && lastUserId === user.id && cachedMatchResume !== undefined && (now - lastFetchTime < CACHE_TTL)) {
+      setMatchResume(cachedMatchResume);
+      setIsLoading(false);
+      return;
+    }
 
-      if (docSnap.exists()) {
-        setMatchResume(docSnap.data());
-      } else {
-        setMatchResume(null);
+    if (!force && fetchPromise) {
+      setIsLoading(true);
+      try {
+        const result = await fetchPromise;
+        setMatchResume(result);
+      } catch (e) {
+        // Error handled in original promise
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error('[Match Resume] Fetch Error:', err);
+      return;
+    }
+
+    setIsLoading(true);
+    
+    fetchPromise = (async () => {
+      try {
+        const docRef = doc(db, 'users', user.id, 'match_resume', 'current');
+        const docSnap = await getDoc(docRef);
+
+        let data = null;
+        if (docSnap.exists()) {
+          data = docSnap.data();
+        }
+        
+        cachedMatchResume = data;
+        lastUserId = user.id;
+        lastFetchTime = Date.now();
+        
+        return data;
+      } catch (err) {
+        console.error('[Match Resume] Fetch Error:', err);
+        cachedMatchResume = null; // Don't cache errors aggressively
+        throw err;
+      }
+    })();
+
+    try {
+      const result = await fetchPromise;
+      setMatchResume(result);
+    } catch (e) {
+      setMatchResume(null);
     } finally {
+      fetchPromise = null;
       setIsLoading(false);
     }
   }, [user]);
@@ -86,6 +132,11 @@ export function useMatchResume() {
       
       console.log('[Resume Pipeline] Profile updated');
 
+      // Update cache
+      cachedMatchResume = payload;
+      lastUserId = user.id;
+      lastFetchTime = Date.now();
+      
       setMatchResume(payload);
       console.log('[Resume Pipeline] Upload completed');
       toast.success('Resume successfully processed and saved.');
@@ -152,6 +203,11 @@ export function useMatchResume() {
       const docRef = doc(db, 'users', user.id, 'match_resume', 'current');
       await setDoc(docRef, payload);
 
+      // Update cache
+      cachedMatchResume = payload;
+      lastUserId = user.id;
+      lastFetchTime = Date.now();
+      
       setMatchResume(payload);
       return payload;
     } catch (err) {

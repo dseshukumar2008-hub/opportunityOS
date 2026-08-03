@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { Mail, Lock, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, AlertCircle, Loader2, Sparkles, Check } from 'lucide-react';
 import AuthLayout from './AuthLayout';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import { fetchSignInMethodsForEmail } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
+  const [showNoAccountModal, setShowNoAccountModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
@@ -17,7 +20,7 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     if (isGoogleLoading || isLoading) return;
-    setError('');
+    setError(null);
     
     try {
       await loginWithGoogle(() => setIsGoogleLoading(true));
@@ -39,14 +42,14 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(null);
     
     if (!email || !email.includes('@')) {
-      setError('Please enter a valid email address.');
+      setError({ message: 'Please enter a valid email address.' });
       return;
     }
     if (!password) {
-      setError('Please enter your password.');
+      setError({ message: 'Please enter your password.' });
       return;
     }
 
@@ -57,11 +60,34 @@ export default function LoginPage() {
       navigate('/dashboard');
     } catch (err) {
       console.error("Login error:", err);
-      // Clean up error message
-      if (err.message === 'Invalid login credentials') {
-        setError('Invalid email or password.');
+      const errorCode = err.code || '';
+      
+      if (
+        errorCode === 'auth/invalid-credential' || 
+        errorCode === 'auth/user-not-found' || 
+        errorCode === 'auth/wrong-password' ||
+        err.message === 'Invalid login credentials'
+      ) {
+        try {
+          const methods = await fetchSignInMethodsForEmail(auth, email);
+          if (methods.length > 0) {
+            setError({
+              title: "Incorrect Password",
+              message: "The password you entered is incorrect. Please try again."
+            });
+          } else {
+            setShowNoAccountModal(true);
+          }
+        } catch (fetchErr) {
+          console.error("Fetch methods error:", fetchErr);
+          // Fallback if fetch fails (e.g. email enumeration protection enabled)
+          setError({
+            title: "Login Failed",
+            message: "Invalid email or password."
+          });
+        }
       } else {
-        setError(err.message || 'Failed to sign in.');
+        setError({ message: err.message || 'Failed to sign in.' });
       }
     } finally {
       setIsLoading(false);
@@ -88,7 +114,10 @@ export default function LoginPage() {
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
               <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={16} />
-              <p className="text-sm text-red-600 font-medium">{error}</p>
+              <div className="flex flex-col">
+                {error.title && <span className="text-sm text-red-800 font-bold">{error.title}</span>}
+                <span className="text-sm text-red-600 font-medium">{error.message}</span>
+              </div>
             </div>
           )}
 
@@ -184,6 +213,61 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      {showNoAccountModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+          <div className="bg-white/90 backdrop-blur-xl rounded-[24px] shadow-[0_32px_64px_rgba(108,76,241,0.15)] border border-white/50 w-full max-w-md overflow-hidden relative animate-in fade-in zoom-in-95 duration-300">
+            {/* Ambient glow */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-purple-400/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-400/20 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="p-8 relative z-10 flex flex-col items-center text-center">
+              {/* Illustration */}
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#8168f8] to-[#5136db] flex items-center justify-center shadow-[0_8px_16px_rgba(108,76,241,0.3)] mb-6">
+                <Sparkles className="text-white w-8 h-8" />
+              </div>
+              
+              <h3 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">You're almost there! ✨</h3>
+              <p className="text-slate-600 mb-8 leading-relaxed">
+                Create your OpportunityOS account to personalize your dashboard, organize your career journey, and unlock AI-powered career tools.
+              </p>
+              
+              {/* Benefits */}
+              <div className="w-full bg-slate-50/80 rounded-2xl p-4 mb-8 space-y-3 text-left">
+                {[
+                  "Personalized Dashboard",
+                  "AI-Powered Career Tools",
+                  "Organized Career Journey"
+                ].map((benefit, i) => (
+                  <div key={i} className="flex items-center gap-3 group">
+                    <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-200 transition-transform">
+                      <Check className="w-3.5 h-3.5 text-[#6C4CF1]" />
+                    </div>
+                    <span className="text-sm font-medium text-slate-700">{benefit}</span>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex flex-col gap-3 w-full">
+                <button
+                  type="button"
+                  onClick={() => navigate('/signup', { state: { email } })}
+                  className="w-full py-3.5 px-4 text-sm font-bold text-white bg-gradient-to-r from-[#6C4CF1] to-[#8168f8] rounded-xl shadow-[0_8px_16px_rgba(108,76,241,0.25)] hover:shadow-[0_12px_20px_rgba(108,76,241,0.3)] hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  Create Free Account
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowNoAccountModal(false)}
+                  className="w-full py-3 px-4 text-sm font-medium text-slate-500 hover:text-slate-800 hover:underline transition-colors bg-transparent"
+                >
+                  Use Another Email
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthLayout>
   );
 }

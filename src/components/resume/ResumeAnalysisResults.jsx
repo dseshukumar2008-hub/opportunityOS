@@ -36,7 +36,7 @@ function CircularScore({ score }) {
 
 function StatCard({ icon: Icon, label, value, color, bg }) {
   return (
-    <div className="bg-[#FAFBFF] border border-[#E5E7EB] rounded-xl p-4 flex flex-col items-center text-center justify-center h-full hover:shadow-sm transition-all duration-200">
+    <div className="card-standard card-hover p-4 flex flex-col items-center text-center justify-center h-full">
       <div className={`w-10 h-10 rounded-xl ${bg} ${color} flex items-center justify-center mb-3 shadow-sm`}>
         <Icon size={18} strokeWidth={2.5} />
       </div>
@@ -81,7 +81,7 @@ export default function ResumeAnalysisResults({ results, onReset }) {
       </div>
 
       {/* Hero Section: ATS Score + Quick Stats */}
-      <div className="bg-white rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[#E5E7EB] p-8 flex flex-col md:flex-row items-center md:items-start gap-8">
+      <div className="card-standard p-8 flex flex-col md:flex-row items-center md:items-start gap-8">
         <div className="flex flex-col shrink-0 w-full md:w-[320px] md:border-r border-[#E5E7EB] md:pr-8">
           <div className="flex items-center gap-6">
             <CircularScore score={score} />
@@ -111,7 +111,7 @@ export default function ResumeAnalysisResults({ results, onReset }) {
       </div>
 
       {/* AI Summary Card with Profile Snapshot */}
-      <div className="bg-gradient-to-br from-indigo-50 to-blue-50/50 rounded-2xl shadow-sm border border-indigo-100 p-6 md:p-8">
+      <div className="card-standard bg-gradient-to-br from-indigo-50 to-blue-50/50 border-indigo-100 p-6 md:p-8">
          <div className="flex items-center gap-2 mb-6">
            <Sparkles size={20} className="text-indigo-600" />
            <h3 className="text-base font-bold text-indigo-900">AI Profile Snapshot & Summary</h3>
@@ -141,7 +141,7 @@ export default function ResumeAnalysisResults({ results, onReset }) {
 
       {/* Strengths & Areas for Growth */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col h-full">
+         <div className="card-standard p-6 flex flex-col h-full">
            <div className="flex items-center gap-3 mb-6">
              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                <CheckCircle2 size={16} />
@@ -158,7 +158,7 @@ export default function ResumeAnalysisResults({ results, onReset }) {
            </ul>
          </div>
          
-         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col h-full">
+         <div className="card-standard p-6 flex flex-col h-full">
            <div className="flex items-center gap-3 mb-6">
              <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
                <AlertCircle size={16} />
@@ -181,7 +181,7 @@ export default function ResumeAnalysisResults({ results, onReset }) {
 
       {/* ATS Scoring Breakdown */}
       {explanation && explanation.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div className="card-standard p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
               <Activity size={16} />
@@ -213,7 +213,7 @@ export default function ResumeAnalysisResults({ results, onReset }) {
       )}
 
       {/* Action Plan */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="card-standard overflow-hidden">
         <div className="border-b border-slate-100 bg-slate-50/50 p-5 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
             <Target size={16} />

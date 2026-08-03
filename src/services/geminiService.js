@@ -346,6 +346,15 @@ Return JSON only in this format:
 
   async detectHiddenPotential(contextData) {
     analyticsService.trackEvent('Hidden Potential Detection Started');
+    
+    // Check Cache
+    const cacheKey = `hp_cache_${JSON.stringify(contextData).length}_${contextData.targetRole?.replace(/[^a-zA-Z0-9]/g, '')}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      console.log('[Hidden Potential] Using cached result');
+      return JSON.parse(cached);
+    }
+    
     try {
       const prompt = `You are an expert tech recruiter and career strategist.
       Analyze this user's entire digital footprint:
@@ -387,6 +396,8 @@ Return JSON only in this format:
       
       // Use longer timeout as this is a heavy reasoning task
       const result = await callGemini(prompt, "You are a top-tier Career Strategist AI. Output valid JSON only.", [], 0.4, 'Hidden Potential Detection', 60000);
+      
+      sessionStorage.setItem(cacheKey, JSON.stringify(result));
       analyticsService.trackEvent('Hidden Potential Detection Completed');
       return result;
     } catch (error) {
@@ -591,6 +602,15 @@ JSON FORMAT:
 
   async generateDynamicSkillGapReport(payload) {
     analyticsService.trackEvent('Dynamic Skill Gap Started');
+    
+    // Check cache based on payload length and target role
+    const cacheKey = `sg_cache_${JSON.stringify(payload).length}_${payload.targetRole?.replace(/[^a-zA-Z0-9]/g, '')}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      console.log('[Skill Gap] Using cached result');
+      return JSON.parse(cached);
+    }
+    
     try {
       const { targetRole, manualSkills, githubData, linkedinData, resumeData } = payload;
       
@@ -672,6 +692,8 @@ Generate a highly personalized Skill Gap Analysis for the user targeting the rol
 }`;
 
       const result = await callGemini(prompt, "You are a master career AI. Output only valid JSON.", inlineDataItems, 0.3, 'Dynamic Skill Gap', 60000);
+      
+      sessionStorage.setItem(cacheKey, JSON.stringify(result));
       analyticsService.trackEvent('Dynamic Skill Gap Completed');
       return result;
     } catch (error) {

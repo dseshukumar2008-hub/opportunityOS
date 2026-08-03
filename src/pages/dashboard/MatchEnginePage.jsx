@@ -96,7 +96,7 @@ export default function MatchEnginePage() {
                     ? `Using ${profileContext.skills.length} skills from your profile. Upload a resume for better accuracy.` 
                     : 'Upload your resume or add skills to start matching opportunities.'}
                 </p>
-                <label className="cursor-pointer bg-[#6C4CF1] hover:bg-[#5a3dd9] text-white rounded-lg px-4 py-2 text-sm font-bold transition-colors">
+                <label className="cursor-pointer bg-[#6C4CF1] hover:bg-[#5a3dd9] text-white rounded-lg px-6 py-2.5 text-sm font-bold transition-all shadow-sm shadow-indigo-200">
                   Upload Resume
                   <input type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={handleFileChange} />
                 </label>
@@ -110,7 +110,7 @@ export default function MatchEnginePage() {
               value={opportunityText}
               onChange={(e) => setOpportunityText(e.target.value)}
               placeholder="Paste job description..."
-              className={`w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm resize-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-slate-400 ${matchResult ? 'h-40' : 'h-64'}`}
+              className={`w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm resize-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all duration-300 ease-in-out placeholder:text-slate-400 ${matchResult ? 'h-40' : 'h-64'}`}
             />
 
             <button

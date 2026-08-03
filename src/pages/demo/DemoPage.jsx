@@ -1,19 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowLeft, X, Rocket, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, X, Rocket, CheckCircle2, Home } from 'lucide-react';
 import DemoTimeline from './DemoTimeline';
 import DemoPreviewCard from './DemoPreviewCard';
 
 const DEMO_STEPS = [
-  { id: 1, title: 'Create Profile', description: 'Setup your basic student profile, education, and skills.' },
-  { id: 2, title: 'Build Resume', description: 'Automatically generate a professional ATS-friendly resume.' },
-  { id: 3, title: 'Analyze Resume', description: 'Get real-time feedback and an ATS score for your resume.' },
-  { id: 4, title: 'View Match Scores', description: 'See how well your profile matches top opportunities.' },
-  { id: 5, title: 'Explore Recommendations', description: 'Get AI-driven internship and job recommendations.' },
-  { id: 6, title: 'Join a Team', description: 'Find hackathon teams and startup collaborators.' },
-  { id: 7, title: 'Connect with Students', description: 'Expand your network with peers and alumni.' },
-  { id: 8, title: 'Track Career Readiness', description: 'Monitor your holistic career readiness score.' },
-  { id: 9, title: 'Unlock Achievements', description: 'Earn badges and reach the highest tier of readiness.' }
+  { id: 1, title: 'Create Profile', description: 'Set up your personal details, education, skills, and career interests.' },
+  { id: 2, title: 'Personalized Dashboard', description: 'Get a personalized dashboard based on your profile, skills, and career goals.' },
+  { id: 3, title: 'AI Resume Analysis', description: 'Upload your resume and receive AI-powered insights, ATS score, and improvement suggestions.' },
+  { id: 4, title: 'Smart Opportunity Matching', description: 'Discover opportunities that match your skills, education, and interests.' },
+  { id: 5, title: 'AI Career Coach', description: 'Receive personalized career guidance, ask questions, and get actionable recommendations.' },
+  { id: 6, title: 'Career Roadmap', description: 'Generate a personalized learning roadmap to achieve your target career.' },
+  { id: 7, title: 'Skill Gap Analysis', description: 'Identify missing skills and receive recommendations to improve your profile.' },
+  { id: 8, title: 'Welcome to OpportunityOS', description: 'Your AI-powered career workspace is now ready. Launch your personalized dashboard.' }
 ];
 
 export default function DemoPage() {
@@ -108,13 +107,22 @@ export default function DemoPage() {
 
         {/* Footer Controls */}
         <div className="px-8 py-6 bg-white border-t border-slate-200 flex items-center justify-between shrink-0">
-          <button 
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-colors ${currentStep === 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:bg-slate-100'}`}
-          >
-            <ArrowLeft size={16} /> Previous
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-[#6C4CF1] hover:bg-slate-50 transition-colors"
+            >
+              <ArrowLeft size={16} /> Return to Homepage
+            </button>
+            {currentStep > 1 && (
+              <button 
+                onClick={handlePrevious}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                <ArrowLeft size={16} /> Previous
+              </button>
+            )}
+          </div>
           
           <button 
             onClick={handleNext}

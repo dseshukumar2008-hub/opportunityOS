@@ -19,7 +19,7 @@ export default function ResumeInsightsWidget() {
   // No Resume Uploaded State
   if (!hasInsights) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 h-full flex flex-col shadow-sm">
+      <div className="card-standard p-6 h-full flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-[16px] font-black text-slate-900">Resume Insights</h3>
         </div>
@@ -33,7 +33,7 @@ export default function ResumeInsightsWidget() {
           </p>
           <Link
             to="/resume-review"
-            className="inline-flex items-center gap-2 bg-[#6C4CF1] text-white font-bold text-[13px] px-5 py-2.5 rounded-xl transition-all hover:bg-indigo-700 shadow-md shadow-indigo-300"
+            className="inline-flex items-center gap-2 bg-[#6C4CF1] text-white font-bold text-[13px] px-5 py-2.5 rounded-xl transition-all hover:bg-indigo-700 shadow-md shadow-indigo-300 hover:-translate-y-0.5"
           >
             Upload Resume <ArrowRight size={14} />
           </Link>
@@ -55,7 +55,7 @@ export default function ResumeInsightsWidget() {
     : [{ text: 'High ATS compatibility — looking great!', type: 'good' }];
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 h-full flex flex-col shadow-sm">
+    <div className="card-standard p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-[16px] font-black text-slate-900">Resume Insights</h3>
         <Link to="/resume-review" className="text-[12px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">

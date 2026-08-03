@@ -51,7 +51,12 @@ export default function ResumeHistoryModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+      <div 
+        role="dialog" 
+        aria-modal="true" 
+        aria-labelledby="history-modal-title"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200"
+      >
         
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-slate-100">
@@ -60,12 +65,13 @@ export default function ResumeHistoryModal({ isOpen, onClose }) {
               <History size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Version History</h2>
+              <h2 id="history-modal-title" className="text-lg font-bold text-slate-900">Version History</h2>
               <p className="text-xs text-slate-500 font-medium">Restore a previous version of this resume</p>
             </div>
           </div>
           <button 
             onClick={onClose}
+            aria-label="Close modal"
             className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
           >
             <X size={18} />

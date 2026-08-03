@@ -97,26 +97,25 @@ export default function UserProfilePage() {
   const { addNotification } = useNotifications();
   const { getUserActivities } = useActivity();
 
-  const [viewedProfile, setViewedProfile] = useState(null);
+  const [fetchedProfile, setFetchedProfile] = useState(null);
 
   // Resolve which user we're viewing
   const isOwnProfile = !userId || userId === 'me' || userId === user?.id || userId === user?.email;
 
   useEffect(() => {
-    if (isOwnProfile) {
-      setViewedProfile(ownProfile);
-    } else {
-      // User lookup first
+    if (!isOwnProfile) {
       const directoryUser = allUsers.find(u => u.id === userId);
-      if (directoryUser) {
-        setViewedProfile(directoryUser);
-      } else {
+      if (!directoryUser) {
+        let isMounted = true;
         fetchUserProfile(userId).then(res => {
-          if (res.data) setViewedProfile(res.data);
+          if (isMounted && res?.data) setFetchedProfile(res.data);
         });
+        return () => { isMounted = false; };
       }
     }
-  }, [isOwnProfile, ownProfile, userId]);
+  }, [isOwnProfile, userId, allUsers, fetchUserProfile]);
+
+  const viewedProfile = isOwnProfile ? ownProfile : (allUsers.find(u => u.id === userId) || fetchedProfile);
 
   // For other users, look them up; for own profile use auth user
   const viewedDirectoryUser = !isOwnProfile ? allUsers.find(u => u.id === userId) : null;

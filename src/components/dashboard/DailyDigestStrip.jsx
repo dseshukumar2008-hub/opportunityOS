@@ -12,7 +12,7 @@ export default function DailyDigestStrip() {
   const newMatches = recommendedOpportunities?.length ?? 0;
 
   return (
-    <div className="w-full bg-white rounded-2xl border border-slate-100 shadow-sm px-6 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div className="card-standard w-full px-6 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       {/* Profile & Greeting */}
       <div className="flex items-center gap-4 min-w-0">
         <div className="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 border-[3px] border-white shadow-md overflow-hidden">

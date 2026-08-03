@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, Send, RefreshCw, Zap, Target, FileText, TrendingUp, Briefcase, Code2, Users2, ArrowRight, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
@@ -8,30 +8,17 @@ import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 import { geminiService } from '../../services/geminiService';
 
 const QUICK_PROMPTS = [
-  { icon: FileText,   label: 'Resume Tips',           prompt: 'Give me 5 actionable tips to improve my resume for tech roles.' },
-  { icon: Target,     label: 'Interview Prep',        prompt: 'Help me prepare for a technical software engineering interview.' },
-  { icon: TrendingUp, label: 'Career Path',           prompt: 'What career path should I take to become a Senior Software Engineer?' },
-  { icon: Briefcase,  label: 'Salary Negotiation',   prompt: 'How do I negotiate a better salary for a software engineering offer?' },
-  { icon: Code2,      label: 'Skill Gaps',            prompt: 'What skills should I learn to become more competitive in today\'s job market?' },
-  { icon: Users2,     label: 'Networking',            prompt: 'Give me a strategy for building my professional network effectively.' },
+  { icon: FileText, label: 'Resume Tips', prompt: 'Give me 5 actionable tips to improve my resume for tech roles.' },
+  { icon: Target, label: 'Interview Prep', prompt: 'Help me prepare for a technical software engineering interview.' },
+  { icon: TrendingUp, label: 'Career Path', prompt: 'What career path should I take to become a Senior Software Engineer?' },
+  { icon: Briefcase, label: 'Salary Negotiation', prompt: 'How do I negotiate a better salary for a software engineering offer?' },
+  { icon: Code2, label: 'Skill Gaps', prompt: 'What skills should I learn to become more competitive in today\'s job market?' },
+  { icon: Users2, label: 'Networking', prompt: 'Give me a strategy for building my professional network effectively.' },
 ];
 
-const WELCOME_MESSAGE = {
-  role: 'assistant',
-  content: `👋 Hi! I'm your **AI Career Copilot**, powered by OpportunityOS Intelligence.
 
-I can help you with:
-- 📄 **Resume optimization** and ATS improvements
-- 🎯 **Interview preparation** and mock Q&As
-- 📈 **Career planning** and skill gap analysis
-- 💼 **Job search strategies** and salary negotiation
-- 🤝 **Networking tips** and LinkedIn optimization
 
-What would you like to work on today?`,
-  timestamp: new Date().toISOString(),
-};
-
-function MessageBubble({ message }) {
+const MessageBubble = React.memo(function MessageBubble({ message }) {
   const isUser = message.role === 'user';
   return (
     <div className={`flex gap-3 mb-6 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -40,11 +27,10 @@ function MessageBubble({ message }) {
           <Sparkles size={16} className="text-white" />
         </div>
       )}
-      <div className={`max-w-[75%] rounded-[20px] px-5 py-4 shadow-sm ${
-        isUser
+      <div className={`max-w-[75%] rounded-[20px] px-5 py-4 shadow-sm ${isUser
           ? 'bg-gradient-to-br from-[#6C4CF1] to-indigo-500 text-white rounded-tr-sm'
           : 'bg-white border border-slate-100 text-slate-800 rounded-tl-sm'
-      }`}>
+        }`}>
         {message.content.split('\n').map((line, i) => {
           // Bold markdown
           const parts = line.split(/\*\*(.*?)\*\*/g);
@@ -69,7 +55,7 @@ function MessageBubble({ message }) {
       )}
     </div>
   );
-}
+});
 
 function TypingIndicator() {
   return (
@@ -96,10 +82,10 @@ export default function CareerCoachPage() {
   const { user } = useAuth();
   const { profile } = useProfile();
   const { state: roadmapState } = useCareerRoadmap();
-  
+
   // V2 Context
   const { careerReadiness, profileCompletion } = useDashboardInsights();
-  
+
   // Memory Hook
   const { messages: historyMessages, addMessage, clearMemory, loading: isMemoryLoading } = useCopilotMemory();
 
@@ -113,7 +99,13 @@ export default function CareerCoachPage() {
   const firstName = profile?.name?.split(' ')[0] || user?.displayName?.split(' ')[0] || 'there';
 
   // Derive visible messages
-  const messages = historyMessages.length > 0 ? historyMessages : [WELCOME_MESSAGE];
+  const initialMessage = {
+    role: 'assistant',
+    content: `👋 Hi ${firstName}! I'm your **AI Career Copilot**, powered by OpportunityOS Intelligence.\n\nI can help you with:\n- 📄 **Resume optimization** and ATS improvements\n- 🎯 **Interview preparation** and mock Q&As\n- 📈 **Career planning** and skill gap analysis\n- 💼 **Job search strategies** and salary negotiation\n- 🤝 **Networking tips** and LinkedIn optimization\n\nWhat would you like to work on today?`,
+    timestamp: new Date().toISOString(),
+  };
+
+  const messages = historyMessages.length > 0 ? historyMessages : [initialMessage];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -148,15 +140,15 @@ export default function CareerCoachPage() {
       });
 
       let responseText = result.response || result.personalizedAdvice || "I'm sorry, I couldn't process that.";
-      
+
       if (isGoalGeneration && result.weeklyGoals) {
         responseText = `**🎯 Your Weekly Goals:**\n${result.weeklyGoals.map(g => `- ${g}`).join('\n')}\n\n**⚡ Daily Actions:**\n${result.dailyActions.map(a => `- ${a}`).join('\n')}\n\n${responseText}`;
       }
 
       await addMessage({ role: 'assistant', content: responseText });
     } catch (err) {
-      console.error("AI Coach EXACT Error:", err.message, '\nStack:', err.stack);
-      await addMessage({ role: 'assistant', content: `**Audit Error Trace:**\n- Exception: ${err.message}\n- File: geminiService.js (via CareerCoachPage.jsx)` });
+      console.error("AI Coach Error:", err);
+      await addMessage({ role: 'assistant', content: "I'm having trouble connecting right now. Please try again in a moment!" });
     } finally {
       setIsTyping(false);
     }

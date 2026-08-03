@@ -44,7 +44,7 @@ export default function CareerCoachWidget() {
   };
 
   return (
-    <div className="card-standard w-full mb-6 flex flex-col" style={{ minHeight: '480px', maxHeight: '600px' }}>
+    <div className="card-standard w-full h-full flex flex-col" style={{ minHeight: '480px', maxHeight: '600px' }}>
       {/* Header with Up Next Actions */}
       <div className="p-5 pb-4 border-b border-slate-100 shrink-0 bg-slate-50/50">
         <div className="flex items-center justify-between mb-4">

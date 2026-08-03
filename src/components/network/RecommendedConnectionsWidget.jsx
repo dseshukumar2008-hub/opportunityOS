@@ -35,7 +35,7 @@ export default function RecommendedConnectionsWidget({ limit = 5, className = ''
 
   if (loading) {
     return (
-      <div className={`bg-white rounded-2xl border border-slate-100 p-5 shadow-sm ${className}`}>
+      <div className={`card-standard p-6 ${className}`}>
         <div className="h-4 w-40 bg-slate-100 rounded mb-3 animate-pulse" />
         <div className="h-3 w-56 bg-slate-100 rounded mb-5 animate-pulse" />
         <div className="space-y-4">
@@ -55,7 +55,7 @@ export default function RecommendedConnectionsWidget({ limit = 5, className = ''
 
   if (error) {
     return (
-      <div className={`bg-white rounded-2xl border border-red-100 p-5 shadow-sm ${className}`}>
+      <div className={`card-standard border-red-100 p-6 ${className}`}>
         <h3 className="text-[15px] font-bold text-slate-900 mb-1">People You May Know</h3>
         <p className="text-[12px] font-medium text-red-500">
           Unable to load connection recommendations right now.
@@ -66,7 +66,7 @@ export default function RecommendedConnectionsWidget({ limit = 5, className = ''
 
   if ((recommendations || []).length === 0) {
     return (
-      <div className={`bg-white rounded-2xl border border-slate-100 p-5 shadow-sm ${className}`}>
+      <div className={`card-standard p-6 ${className}`}>
         <h3 className="text-[15px] font-bold text-slate-900 mb-1">People You May Know</h3>
         <p className="text-[12px] font-medium text-slate-500 mb-6">
           Connect with students who share similar interests and goals.
@@ -85,7 +85,7 @@ export default function RecommendedConnectionsWidget({ limit = 5, className = ''
   }
 
   return (
-    <div className={`bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col ${className}`}>
+    <div className={`card-standard p-6 flex flex-col ${className}`}>
       <div className="flex items-center justify-between mb-1">
         <h3 className="text-[15px] font-bold text-slate-900 flex items-center gap-2">
           People You May Know

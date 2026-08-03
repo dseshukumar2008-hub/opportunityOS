@@ -14,14 +14,30 @@ export default function SkillGapAnalysisPage() {
   const location = useLocation();
   const isContextMode = !!location.state?.sourceName;
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(() => {
+    return parseInt(sessionStorage.getItem('sg_step') || '1', 10);
+  });
   const [targetRole, setTargetRole] = useState(() => {
     const params = new URLSearchParams(location.search);
-    return params.get('targetRole') || '';
+    return params.get('targetRole') || sessionStorage.getItem('sg_role') || '';
   });
-  const [selectedSources, setSelectedSources] = useState([]);
-  const [inputData, setInputData] = useState({});
-  const [analysisData, setAnalysisData] = useState(null);
+  const [selectedSources, setSelectedSources] = useState(() => {
+    return JSON.parse(sessionStorage.getItem('sg_sources') || '[]');
+  });
+  const [inputData, setInputData] = useState(() => {
+    return JSON.parse(sessionStorage.getItem('sg_input') || '{}');
+  });
+  const [analysisData, setAnalysisData] = useState(() => {
+    return JSON.parse(sessionStorage.getItem('sg_analysis') || 'null');
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('sg_step', currentStep);
+    sessionStorage.setItem('sg_role', targetRole);
+    sessionStorage.setItem('sg_sources', JSON.stringify(selectedSources));
+    sessionStorage.setItem('sg_input', JSON.stringify(inputData));
+    sessionStorage.setItem('sg_analysis', JSON.stringify(analysisData));
+  }, [currentStep, targetRole, selectedSources, inputData, analysisData]);
   const { profile } = useProfile();
   const { careerContext } = useCareer();
 
@@ -86,6 +102,11 @@ export default function SkillGapAnalysisPage() {
     setTargetRole('');
     setSelectedSources([]);
     setAnalysisData(null);
+    sessionStorage.removeItem('sg_step');
+    sessionStorage.removeItem('sg_role');
+    sessionStorage.removeItem('sg_sources');
+    sessionStorage.removeItem('sg_input');
+    sessionStorage.removeItem('sg_analysis');
   };
 
   return (

@@ -27,7 +27,7 @@ export default function DashboardPage() {
   // If loading, show skeletons
   if (isLoading) {
     return (
-      <div className="w-full max-w-[1600px] mx-auto p-4 lg:p-8 bg-[#F8FAFC]">
+      <div className="w-full max-w-[1440px] mx-auto p-4 lg:p-8 bg-[#F8FAFC]">
         <div className="flex flex-col gap-6">
           <HeroSkeleton />
           <KPISkeleton />
@@ -46,7 +46,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto p-4 lg:p-8 bg-[#F8FAFC]">
+    <div className="w-full max-w-[1440px] mx-auto p-4 lg:p-8 bg-[#F8FAFC]">
       <div className="flex flex-col gap-6">
 
         {/* ── Zone 1: Hero Section ── */}
@@ -105,16 +105,12 @@ export default function DashboardPage() {
           <div className="lg:col-span-2 flex flex-col gap-6">
             <WidgetErrorBoundary>
               <Suspense fallback={<AnalyticsWidgetSkeleton />}>
-                <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm">
-                  <CareerJourneyWidget />
-                </div>
+                <CareerJourneyWidget />
               </Suspense>
             </WidgetErrorBoundary>
             <WidgetErrorBoundary>
               <Suspense fallback={<AnalyticsWidgetSkeleton />}>
-                <div className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
-                  <RecommendedConnectionsWidget limit={4} />
-                </div>
+                <RecommendedConnectionsWidget limit={4} />
               </Suspense>
             </WidgetErrorBoundary>
           </div>

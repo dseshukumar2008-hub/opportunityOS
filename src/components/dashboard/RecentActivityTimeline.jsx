@@ -37,17 +37,23 @@ export default function RecentActivityTimeline() {
 
   if (activities.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center min-h-[320px] h-fit w-full">
-        <Clock className="text-[#6C4CF1] mb-3 opacity-40" size={32} />
-        <h3 className="text-[16px] font-bold text-slate-800 mb-1">Recent Activity</h3>
-        <p className="text-[13px] text-slate-500 font-medium mb-6 text-center">Your latest actions and updates.</p>
-        <p className="text-slate-400 text-sm">No recent activity available</p>
+      <div className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center min-h-[320px] h-fit w-full text-center">
+        <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
+          <Activity className="text-[#6C4CF1] opacity-60" size={32} />
+        </div>
+        <h3 className="text-[16px] font-bold text-slate-800 mb-2">No recent activity</h3>
+        <p className="text-[13px] text-slate-500 font-medium mb-6 max-w-[240px]">
+          Start building your profile or track jobs to see your timeline grow.
+        </p>
+        <Link to="/profile" className="px-5 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-[13px] font-bold transition-colors">
+          Complete Profile
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full w-full">
+    <div className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full w-full">
       <div className="mb-6 shrink-0">
         <h3 className="text-[16px] font-bold text-slate-800 mb-1">Recent Activity</h3>
         <p className="text-[13px] text-slate-500 font-medium">Your latest actions and updates.</p>

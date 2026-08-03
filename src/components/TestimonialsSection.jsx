@@ -38,7 +38,7 @@ export default function TestimonialsSection() {
           {testimonials.map((test, i) => (
             <div key={i} className="bg-white border border-slate-100 rounded-2xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col">
               <div className="flex items-center gap-4 mb-6">
-                <img src={test.avatar} alt={test.name} className="w-12 h-12 rounded-full border border-slate-200 bg-slate-100 object-cover" />
+                <img src={test.avatar} alt={test.name} loading="lazy" className="w-12 h-12 rounded-full border border-slate-200 bg-slate-100 object-cover" />
                 <div>
                   <h4 className="font-bold text-slate-900 text-sm">{test.name}</h4>
                   <p className="text-xs text-slate-500">{test.role}</p>

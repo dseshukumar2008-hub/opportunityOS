@@ -48,8 +48,8 @@ export default function ResumeReviewPage() {
       }
     }
 
-    if (!payload) {
-      toast.error('No existing resume found to analyze.');
+    if (!payload || payload.trim().length < 50) {
+      toast.error('Your profile needs more details to analyze. Please add more experience or skills, or upload a resume.');
       return;
     }
 
@@ -74,7 +74,7 @@ export default function ResumeReviewPage() {
   ];
 
   return (
-    <div className="bg-[#FAFBFF] min-h-[calc(100vh-64px)] font-sans py-6 px-4 lg:px-8 flex flex-col items-center">
+    <div className="bg-slate-50 min-h-[calc(100vh-64px)] font-sans py-6 px-4 lg:px-8 flex flex-col items-center">
       <div className="w-full max-w-[1000px] flex-1 flex flex-col">
         
         {/* Header */}
@@ -126,7 +126,7 @@ export default function ResumeReviewPage() {
               {!isAnalyzing && (
                 <div className="w-full flex flex-col items-center max-w-[1000px]">
                   {/* Upload Zone Wrapper */}
-                  <div className="w-full bg-white rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-[#E5E7EB] p-5 flex flex-col">
+                  <div className="card-standard p-5 flex flex-col w-full">
                     <ResumeUploadZone onAnalyze={handleAnalyzeFile} uploadProgress={uploadProgress} progressText={progressText} />
                     
                     <div className="flex justify-center w-full mt-4">
@@ -152,7 +152,7 @@ export default function ResumeReviewPage() {
               )}
 
               {isAnalyzing && (
-                <div className="max-w-2xl mx-auto bg-white rounded-[24px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#E5E7EB] p-16 flex flex-col items-center justify-center text-center">
+                <div className="max-w-2xl mx-auto card-standard p-16 flex flex-col items-center justify-center text-center">
                   <div className="relative w-24 h-24 mb-8">
                     <div className="absolute inset-0 border-4 border-indigo-50 rounded-full"></div>
                     <div className="absolute inset-0 border-4 border-[#6D5DF6] rounded-full border-t-transparent animate-spin"></div>

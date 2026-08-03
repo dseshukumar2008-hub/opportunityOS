@@ -47,29 +47,56 @@ export function createFallbackUserProfile(id) {
   }, id);
 }
 
+let globalUsersCache = [];
+let globalUsersError = null;
+let globalUsersLoading = true;
+let userDirectorySubscribers = new Set();
+let userDirectoryUnsubscribe = null;
+
 export function useUserDirectory() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [users, setUsers] = useState(globalUsersCache);
+  const [loading, setLoading] = useState(globalUsersLoading);
+  const [error, setError] = useState(globalUsersError);
 
   useEffect(() => {
-    setLoading(true);
-    const unsubscribe = onSnapshot(
-      collection(db, 'users'),
-      (snapshot) => {
-        setUsers(snapshot.docs.map((d) => normalizeUserProfile({ id: d.id, ...d.data() }, d.id)));
-        setError(null);
-        setLoading(false);
-      },
-      (err) => {
-        console.error('User directory listener error:', err);
-        setUsers([]);
-        setError(err);
-        setLoading(false);
-      }
-    );
+    const updateState = () => {
+      setUsers([...globalUsersCache]);
+      setLoading(globalUsersLoading);
+      setError(globalUsersError);
+    };
 
-    return () => unsubscribe();
+    userDirectorySubscribers.add(updateState);
+    updateState();
+
+    if (userDirectorySubscribers.size === 1 && !userDirectoryUnsubscribe) {
+      globalUsersLoading = true;
+      updateState();
+      
+      userDirectoryUnsubscribe = onSnapshot(
+        collection(db, 'users'),
+        (snapshot) => {
+          globalUsersCache = snapshot.docs.map((d) => normalizeUserProfile({ id: d.id, ...d.data() }, d.id));
+          globalUsersError = null;
+          globalUsersLoading = false;
+          userDirectorySubscribers.forEach(cb => cb());
+        },
+        (err) => {
+          console.error('User directory listener error:', err);
+          globalUsersCache = [];
+          globalUsersError = err;
+          globalUsersLoading = false;
+          userDirectorySubscribers.forEach(cb => cb());
+        }
+      );
+    }
+
+    return () => {
+      userDirectorySubscribers.delete(updateState);
+      if (userDirectorySubscribers.size === 0 && userDirectoryUnsubscribe) {
+        userDirectoryUnsubscribe();
+        userDirectoryUnsubscribe = null;
+      }
+    };
   }, []);
 
   const usersById = useMemo(() => {

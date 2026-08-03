@@ -1,26 +1,22 @@
 import Step1CreateProfile from './screens/Step1CreateProfile';
-import Step2BuildResume from './screens/Step2BuildResume';
-import Step3AnalyzeResume from './screens/Step3AnalyzeResume';
-import Step4ViewMatches from './screens/Step4ViewMatches';
-import Step5Recommendations from './screens/Step5Recommendations';
-import Step6JoinTeam from './screens/Step6JoinTeam';
-import Step7ConnectStudents from './screens/Step7ConnectStudents';
-import Step8CareerReadiness from './screens/Step8CareerReadiness';
-import Step9CompleteOnboarding from './screens/Step9CompleteOnboarding';
-
-
+import DashboardPreview from '../../components/DashboardPreview';
+import Step3AIResumeAnalysis from './screens/Step3AIResumeAnalysis';
+import Step4OpportunityMatching from './screens/Step4OpportunityMatching';
+import Step5AICoach from './screens/Step5AICoach';
+import Step6CareerRoadmap from './screens/Step6CareerRoadmap';
+import Step7SkillGapAnalysis from './screens/Step7SkillGapAnalysis';
+import Step8Welcome from './screens/Step8Welcome';
 export default function DemoPreviewCard({ step }) {
   const getPreviewContent = () => {
     switch (step) {
       case 1: return <Step1CreateProfile />;
-      case 2: return <Step2BuildResume />;
-      case 3: return <Step3AnalyzeResume />;
-      case 4: return <Step4ViewMatches />;
-      case 5: return <Step5Recommendations />;
-      case 6: return <Step6JoinTeam />;
-      case 7: return <Step7ConnectStudents />;
-      case 8: return <Step8CareerReadiness />;
-      case 9: return <Step9CompleteOnboarding />;
+      case 2: return <div className="h-[600px] w-[900px] max-w-full mx-auto"><DashboardPreview /></div>;
+      case 3: return <Step3AIResumeAnalysis />;
+      case 4: return <Step4OpportunityMatching />;
+      case 5: return <Step5AICoach />;
+      case 6: return <Step6CareerRoadmap />;
+      case 7: return <Step7SkillGapAnalysis />;
+      case 8: return <Step8Welcome />;
       default: return null;
     }
   };

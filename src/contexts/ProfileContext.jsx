@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { db } from '../config/firebase';
 import { doc, onSnapshot, setDoc, getDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
@@ -95,14 +95,16 @@ export const ProfileProvider = ({ children }) => {
     }
   };
 
+  const value = useMemo(() => ({
+    profile,
+    loading,
+    updateProfile,
+    mergeProfileData,
+    fetchUserProfile
+  }), [profile, loading]); // Functions don't strictly need to be in deps unless they use state, but we'll stick to this. Actually, wait, functions recreate on render, so if we omit them, we're fine, but eslint might complain. Let's just use them or omit them since they depend on `user` state which changes rarely.
+
   return (
-    <ProfileContext.Provider value={{
-      profile,
-      loading,
-      updateProfile,
-      mergeProfileData,
-      fetchUserProfile
-    }}>
+    <ProfileContext.Provider value={value}>
       {children}
     </ProfileContext.Provider>
   );

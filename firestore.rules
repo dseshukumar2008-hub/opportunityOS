@@ -96,6 +96,16 @@ service cloud.firestore {
       allow update, delete: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
     }
 
+    match /telemetry_events/{docId} {
+      allow create: if request.resource.data.userId == 'anonymous' || (isAuthed() && request.auth.uid == request.resource.data.userId);
+      allow read, update, delete: if false;
+    }
+
+    match /ai_telemetry/{docId} {
+      allow create: if request.resource.data.userId == 'anonymous' || (isAuthed() && request.auth.uid == request.resource.data.userId);
+      allow read, update, delete: if false;
+    }
+
     match /activities/{actId} {
       allow read: if isAuthed() && (request.auth.uid == resource.data.uid || request.auth.uid == resource.data.userId);
       allow create: if isAuthed() && (request.auth.uid == request.resource.data.uid || request.auth.uid == request.resource.data.userId);

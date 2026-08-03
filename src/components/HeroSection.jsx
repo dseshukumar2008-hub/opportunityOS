@@ -1,4 +1,4 @@
-import { Briefcase, Code, GraduationCap, Trophy, Play } from 'lucide-react';
+import { FileText, Brain, Target, LayoutDashboard, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import DashboardPreview from './DashboardPreview';
 import { analyticsService } from '../services/analyticsService';
@@ -22,26 +22,27 @@ export default function HeroSection() {
         </h1>
         
         <p className="text-base xl:text-lg text-slate-600 mb-6 leading-relaxed max-w-lg">
-          Discover internships, hackathons, scholarships and competitions. Track applications, build resumes, team up with others and accelerate your career.
+          Build your AI-powered career workspace.<br className="hidden md:block" />
+          Organize your profile, improve your resume, track your progress, and grow with personalized career insights.
         </p>
 
         {/* Opportunity Pills */}
-        <div className="flex flex-wrap items-center gap-2 mb-6 xl:mb-8">
-          <div className="flex items-center gap-2 bg-white border border-slate-200 shadow-sm px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-sm font-semibold text-slate-700">
-            <div className="w-5 h-5 xl:w-6 xl:h-6 bg-green-100 text-green-600 rounded flex items-center justify-center"><Briefcase size={12}/></div>
-            Internships
+        <div className="grid grid-cols-2 xl:flex xl:flex-nowrap gap-3 xl:gap-4 mb-6 xl:mb-8 w-full">
+          <div className="w-full xl:flex-1 flex items-center justify-start gap-2 bg-white border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-[13px] font-semibold text-slate-700 cursor-default overflow-hidden">
+            <div className="shrink-0 w-5 h-5 xl:w-6 xl:h-6 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center"><FileText size={12}/></div>
+            <span className="truncate">Resume Analysis</span>
           </div>  
-          <div className="flex items-center gap-2 bg-white border border-slate-200 shadow-sm px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-sm font-semibold text-slate-700">
-            <div className="w-5 h-5 xl:w-6 xl:h-6 bg-purple-100 text-purple-600 rounded flex items-center justify-center"><Code size={12}/></div>
-            Hackathons
+          <div className="w-full xl:flex-1 flex items-center justify-start gap-2 bg-white border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-[13px] font-semibold text-slate-700 cursor-default overflow-hidden">
+            <div className="shrink-0 w-5 h-5 xl:w-6 xl:h-6 bg-purple-100 text-purple-600 rounded flex items-center justify-center"><Brain size={12}/></div>
+            <span className="truncate">AI Career Coach</span>
           </div>
-          <div className="flex items-center gap-2 bg-white border border-slate-200 shadow-sm px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-sm font-semibold text-slate-700">
-            <div className="w-5 h-5 xl:w-6 xl:h-6 bg-blue-100 text-blue-600 rounded flex items-center justify-center"><GraduationCap size={12}/></div>
-            Scholarships
+          <div className="w-full xl:flex-1 flex items-center justify-start gap-2 bg-white border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-[13px] font-semibold text-slate-700 cursor-default overflow-hidden">
+            <div className="shrink-0 w-5 h-5 xl:w-6 xl:h-6 bg-emerald-100 text-emerald-600 rounded flex items-center justify-center"><Target size={12}/></div>
+            <span className="truncate">Smart Matching</span>
           </div>
-          <div className="flex items-center gap-2 bg-white border border-slate-200 shadow-sm px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-sm font-semibold text-slate-700">
-            <div className="w-5 h-5 xl:w-6 xl:h-6 bg-amber-100 text-amber-600 rounded flex items-center justify-center"><Trophy size={12}/></div>
-            Competitions
+          <div className="w-full xl:flex-1 flex items-center justify-start gap-2 bg-white border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-[13px] font-semibold text-slate-700 cursor-default overflow-hidden">
+            <div className="shrink-0 w-5 h-5 xl:w-6 xl:h-6 bg-blue-100 text-blue-600 rounded flex items-center justify-center"><LayoutDashboard size={12}/></div>
+            <span className="truncate">Career Dashboard</span>
           </div>
         </div>
 

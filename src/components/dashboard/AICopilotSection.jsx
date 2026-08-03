@@ -44,7 +44,7 @@ export default function AICopilotSection() {
       {/* 4 Cards Grid */}
       <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Today's Focus */}
-        <div className="bg-white/10 border border-white/20 rounded-2xl p-5 backdrop-blur-md flex flex-col h-full hover:bg-white/15 transition-colors">
+        <div className="bg-white/10 border border-white/20 rounded-2xl p-5 backdrop-blur-md flex flex-col h-full hover:bg-white/15 hover:-translate-y-1 hover:shadow-lg hover:shadow-white/5 transition-all duration-300">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-6 h-6 rounded-full bg-emerald-400 flex items-center justify-center shrink-0">
                <Target size={12} className="text-white" />
@@ -54,7 +54,7 @@ export default function AICopilotSection() {
           <h3 className="text-[15px] font-bold text-white mb-2 leading-snug">
             {plan?.focus_area || "Improve your ATS score"}
           </h3>
-          <p className="text-[12px] font-medium text-white/70 mb-4 leading-relaxed">
+          <p className="text-[12px] font-medium text-white/90 mb-4 leading-relaxed">
             Optimize your resume with missing keywords
           </p>
           <div className="mt-auto pt-2">
@@ -65,7 +65,7 @@ export default function AICopilotSection() {
         </div>
 
         {/* Card 2: Skill Gap */}
-        <div className="bg-white/10 border border-white/20 rounded-2xl p-5 backdrop-blur-md flex flex-col h-full hover:bg-white/15 transition-colors">
+        <div className="bg-white/10 border border-white/20 rounded-2xl p-5 backdrop-blur-md flex flex-col h-full hover:bg-white/15 hover:-translate-y-1 hover:shadow-lg hover:shadow-white/5 transition-all duration-300">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center shrink-0">
                <Code2 size={12} className="text-white" />
@@ -75,7 +75,7 @@ export default function AICopilotSection() {
           <h3 className="text-[15px] font-bold text-white mb-2 leading-snug">
             {missingSkillsCount} skills to learn
           </h3>
-          <p className="text-[12px] font-medium text-white/70 mb-4 leading-relaxed">
+          <p className="text-[12px] font-medium text-white/90 mb-4 leading-relaxed">
             React, System Design, PostgreSQL...
           </p>
           <div className="mt-auto pt-2">
@@ -86,7 +86,7 @@ export default function AICopilotSection() {
         </div>
 
         {/* Card 3: Next Best Action */}
-        <div className="bg-white/10 border border-white/20 rounded-2xl p-5 backdrop-blur-md flex flex-col h-full hover:bg-white/15 transition-colors">
+        <div className="bg-white/10 border border-white/20 rounded-2xl p-5 backdrop-blur-md flex flex-col h-full hover:bg-white/15 hover:-translate-y-1 hover:shadow-lg hover:shadow-white/5 transition-all duration-300">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-6 h-6 rounded-full bg-emerald-400 flex items-center justify-center shrink-0">
                <TrendingUp size={12} className="text-white" />
@@ -96,7 +96,7 @@ export default function AICopilotSection() {
           <h3 className="text-[15px] font-bold text-white mb-2 leading-snug">
             Plan your next steps
           </h3>
-          <p className="text-[12px] font-medium text-white/70 mb-4 leading-relaxed">
+          <p className="text-[12px] font-medium text-white/90 mb-4 leading-relaxed">
             Generate an AI-powered career roadmap
           </p>
           <div className="mt-auto pt-2">
@@ -107,7 +107,7 @@ export default function AICopilotSection() {
         </div>
 
         {/* Card 4: Weekly Progress */}
-        <div className="bg-white/10 border border-white/20 rounded-2xl p-5 backdrop-blur-md flex flex-col h-full hover:bg-white/15 transition-colors">
+        <div className="bg-white/10 border border-white/20 rounded-2xl p-5 backdrop-blur-md flex flex-col h-full hover:bg-white/15 hover:-translate-y-1 hover:shadow-lg hover:shadow-white/5 transition-all duration-300">
           <div className="mb-3">
             <span className="text-[12px] font-extrabold text-white uppercase tracking-wider">Weekly Progress</span>
           </div>

@@ -108,7 +108,25 @@ export function useOpportunityMatch() {
       
     } catch (err) {
       console.error('[Opportunity Match Error]', err);
-      setError(err.message || 'Failed to analyze match.');
+      setError(err.message || 'Failed to analyze match. Using approximation.');
+      
+      try {
+        const { calculateMatchScore } = await import('../utils/matchScoringEngine');
+        const fallbackReqs = { requiredSkills: opportunityText.split(/\s+/).slice(0, 50) };
+        const fallbackResult = calculateMatchScore(resumeData || contextToUse, fallbackReqs);
+        
+        setMatchResult({
+          currentMatchScore: fallbackResult.currentMatchScore || 50,
+          potentialMatchScore: fallbackResult.potentialMatchScore || 70,
+          strengths: fallbackResult.strengths || [],
+          missingSkills: [],
+          recommendations: ['AI analysis temporarily unavailable. Match score is an approximation.'],
+          sourcesUsed: contextToUse.sourcesUsed,
+          confidence: 'Low'
+        });
+      } catch (fallbackErr) {
+        setMatchResult(null);
+      }
     } finally {
       setIsAnalyzing(false);
     }

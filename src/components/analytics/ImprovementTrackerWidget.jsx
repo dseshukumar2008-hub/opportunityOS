@@ -20,7 +20,7 @@ export default function ImprovementTrackerWidget() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="bg-white rounded-[24px] border border-slate-100 shadow-sm p-6 hover:shadow-md transition-shadow flex flex-col h-full"
+      className="card-standard card-hover p-6 flex flex-col h-full"
     >
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">

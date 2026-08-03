@@ -1,7 +1,7 @@
 import { Rocket, CheckCircle2, Award, ArrowRight, User, FileText, Target, Network, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-export default function Step9CompleteOnboarding() {
+export default function Step8Welcome() {
   const navigate = useNavigate();
 
   return (

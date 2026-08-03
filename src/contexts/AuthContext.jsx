@@ -105,19 +105,21 @@ export const AuthProvider = ({ children }) => {
     return null;
   }, [firebaseUser]);
 
+  const contextValue = useMemo(() => ({
+    user: mappedUser, 
+    session: null,
+    isAuthenticated: !!mappedUser,
+    loading: loading, 
+    isEmployer,
+    login, 
+    signup, 
+    logout, 
+    updateUser,
+    loginWithGoogle
+  }), [mappedUser, loading]);
+
   return (
-    <AuthContext.Provider value={{ 
-      user: mappedUser, 
-      session: null,
-      isAuthenticated: !!mappedUser,
-      loading: loading, 
-      isEmployer,
-      login, 
-      signup, 
-      logout, 
-      updateUser,
-      loginWithGoogle
-    }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
