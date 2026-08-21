@@ -1,4 +1,3 @@
-import React from 'react';
 import { Milestone, FileText, Code2, BrainCircuit, Play, Briefcase, Map } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCareer } from '../../contexts/CareerContext';

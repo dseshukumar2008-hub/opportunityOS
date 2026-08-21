@@ -18,30 +18,53 @@ export default function LoginPage() {
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
+  const getFriendlyErrorMessage = (errorCode) => {
+    switch (errorCode) {
+      case 'auth/invalid-credential':
+        return 'Incorrect email or password.';
+      case 'auth/user-not-found':
+        return 'No account found with this email.';
+      case 'auth/wrong-password':
+        return 'Incorrect password.';
+      case 'auth/invalid-email':
+        return 'Please enter a valid email address.';
+      case 'auth/too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      case 'auth/network-request-failed':
+        return 'Network error. Please check your internet connection.';
+      default:
+        return 'Something went wrong. Please try again.';
+    }
+  };
+
   const handleGoogleLogin = async () => {
     if (isGoogleLoading || isLoading) return;
     setError(null);
+    setIsGoogleLoading(true);
     
     try {
-      await loginWithGoogle(() => setIsGoogleLoading(true));
+      await loginWithGoogle();
       toast.success('Successfully logged in with Google!');
-      navigate('/dashboard'); // Default redirect for Google Auth
+      navigate('/dashboard');
     } catch (err) {
       console.error("Google Login error:", err);
-      if (err.code === 'auth/popup-closed-by-user') {
-        toast.error('Sign-in popup was closed before completing.');
+      if (err.code === 'auth/popup-blocked') {
+        toast.error('Your browser blocked the Google sign-in popup. Please allow popups and try again.');
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        toast.error('Google sign-in was cancelled.');
       } else if (err.code === 'auth/network-request-failed') {
-        toast.error('Network error. Please check your connection.');
+        toast.error('Network connection lost. Please try again.');
       } else {
-        toast.error(err.message || 'Failed to sign in with Google.');
+        toast.error('Something went wrong while signing in with Google.');
       }
+    } finally {
       setIsGoogleLoading(false);
     }
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading || isGoogleLoading) return;
     setError(null);
     
     if (!email || !email.includes('@')) {
@@ -80,14 +103,12 @@ export default function LoginPage() {
           }
         } catch (fetchErr) {
           console.error("Fetch methods error:", fetchErr);
-          // Fallback if fetch fails (e.g. email enumeration protection enabled)
           setError({
-            title: "Login Failed",
-            message: "Invalid email or password."
+            message: getFriendlyErrorMessage(errorCode)
           });
         }
       } else {
-        setError({ message: err.message || 'Failed to sign in.' });
+        setError({ message: getFriendlyErrorMessage(errorCode) });
       }
     } finally {
       setIsLoading(false);
@@ -135,9 +156,10 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
+                disabled={isLoading || isGoogleLoading}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`block w-full pl-10 pr-3 py-2.5 border ${error && !email ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all`}
+                className={`block w-full pl-10 pr-3 py-2.5 border ${error && !email ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="you@university.edu"
               />
             </div>
@@ -164,9 +186,10 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
+                disabled={isLoading || isGoogleLoading}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`block w-full pl-10 pr-3 py-2.5 border ${error && !password ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all`}
+                className={`block w-full pl-10 pr-3 py-2.5 border ${error && !password ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="••••••••"
               />
             </div>
@@ -175,10 +198,10 @@ export default function LoginPage() {
           <div>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isGoogleLoading}
               className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#6C4CF1] hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? 'Signing In...' : 'Sign in'}
               {!isLoading && <ArrowRight size={16} />}
             </button>
           </div>

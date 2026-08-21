@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Rocket, CheckCircle2, User, FileText, Target, Code, MessageSquare, Briefcase, Lock, ArrowUpRight, Sparkles } from 'lucide-react';
+import  { useState, useEffect } from 'react';
+import { Rocket, CheckCircle2, User, FileText, Target,  MessageSquare, Briefcase, Lock, ArrowUpRight, Sparkles } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { db } from '../../config/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -294,22 +294,6 @@ export default function NewUserDashboard() {
                 <Lock size={20} className="text-slate-300" />
               </div>
               <p className="text-[13px] text-slate-500 max-w-[260px] mb-4">Complete your profile and add skills to get AI-powered project recommendations.</p>
-              <button onClick={triggerOnboarding} className="px-5 py-2 bg-[#F3F0FF] text-[#6C4CF1] font-bold rounded-xl text-[13px]">
-                Complete Profile
-              </button>
-            </div>
-            
-            <div className="bg-white rounded-[24px] border border-slate-100 p-8 shadow-sm flex flex-col items-center justify-center text-center min-h-[240px] relative">
-              <div className="flex items-center gap-2 absolute top-6 left-6">
-                <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center">
-                  <User size={14} className="text-[#6C4CF1]" />
-                </div>
-                <span className="font-bold text-[14px] text-slate-900">People You May Know</span>
-              </div>
-              <div className="w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center mb-4 mt-8">
-                <Lock size={20} className="text-slate-300" />
-              </div>
-              <p className="text-[13px] text-slate-500 max-w-[260px] mb-4">Build your profile to discover students and professionals with similar interests and goals.</p>
               <button onClick={triggerOnboarding} className="px-5 py-2 bg-[#F3F0FF] text-[#6C4CF1] font-bold rounded-xl text-[13px]">
                 Complete Profile
               </button>

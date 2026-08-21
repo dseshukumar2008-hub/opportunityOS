@@ -1,11 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { resumeStorageService } from '../services/resumeStorageService';
+import { db } from '../config/firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 
-/**
- * Reads the persisted resume analysis from Firestore and exposes
- * structured insights for the dashboard widget.
- */
 export function useResumeInsights() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
@@ -17,47 +14,11 @@ export function useResumeInsights() {
   const [storedResumeName, setStoredResumeName] = useState(null);
   const [hasInsights, setHasInsights] = useState(false);
 
-
-
-let analysisCache = new Map();
-let pendingAnalysisFetches = new Map();
-
-  const loadInsights = useCallback(async () => {
-    if (!user?.id) {
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      if (analysisCache.has(user.id)) {
-        applyAnalysisData(analysisCache.get(user.id));
-        return;
-      }
-
-      let fetchPromise = pendingAnalysisFetches.get(user.id);
-      if (!fetchPromise) {
-        fetchPromise = resumeStorageService.getAnalysisFromFirestore(user.id);
-        pendingAnalysisFetches.set(user.id, fetchPromise);
-      }
-
-      const saved = await fetchPromise;
-      analysisCache.set(user.id, saved);
-      applyAnalysisData(saved);
-      
-    } catch (err) {
-      console.error('useResumeInsights error:', err);
-      setHasInsights(false);
-    } finally {
-      pendingAnalysisFetches.delete(user.id);
-      setIsLoading(false);
-    }
-  }, [user?.id]);
-
-  const applyAnalysisData = (saved) => {
+  const applyAnalysisData = useCallback((saved) => {
     if (saved?.analysis) {
       const a = saved.analysis;
-      const score = typeof a.atsScore === 'number' ? a.atsScore : null;
+      const parsedScore = parseInt(a.atsScore, 10);
+      const score = !isNaN(parsedScore) ? parsedScore : null;
       setAtsScore(score);
       setTopStrength(a.strengths?.[0] || null);
       setTopWeakness(a.weaknesses?.[0] || null);
@@ -80,11 +41,45 @@ let pendingAnalysisFetches = new Map();
     if (saved?.resume?.fileName) {
       setStoredResumeName(saved.resume.fileName);
     }
-  };
-
+  }, []);
   useEffect(() => {
-    loadInsights();
-  }, [loadInsights]);
+    if (!user?.id) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
+      setHasInsights(false);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    const docRef = doc(db, 'users', user.id);
+    
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const saved = {
+          analysis: data.resumeAnalysis || null,
+          resume: data.resume || null
+        };
+        applyAnalysisData(saved);
+      } else {
+        setHasInsights(false);
+      }
+      setIsLoading(false);
+    }, (err) => {
+      console.error('useResumeInsights Real-time Fetch Error:', err);
+      setHasInsights(false);
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+// eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+
+
+  const loadInsights = useCallback(() => {
+    // No-op for backwards compatibility, handled by onSnapshot
+  }, []);
 
   return {
     isLoading,

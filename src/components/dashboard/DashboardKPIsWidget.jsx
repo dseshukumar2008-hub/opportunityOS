@@ -4,6 +4,7 @@ import { useUserProfile } from '../../hooks/useUserProfile';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 import { useResumeInsights } from '../../hooks/useResumeInsights';
 
+// eslint-disable-next-line no-unused-vars
 function getScoreColor(score) {
   if (score >= 80) return { text: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', ring: 'bg-emerald-500', label: 'Excellent' };
   if (score >= 60) return { text: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', ring: 'bg-amber-500', label: 'Good' };
@@ -39,7 +40,8 @@ function StatPill({ icon: Icon, label, value, subtext, color = 'indigo', to }) {
   return to ? <Link to={to} className="h-full block">{inner}</Link> : <div className="h-full">{inner}</div>;
 }
 
-export default function DashboardKPIsWidget() {
+export default function DashboardKPIsWidget({ userState }) {
+// eslint-disable-next-line no-unused-vars
   const { profile, isLoading: profileLoading } = useUserProfile();
   const {
     careerReadiness,
@@ -50,9 +52,11 @@ export default function DashboardKPIsWidget() {
 
   const isLoading = profileLoading || insightsLoading;
 
-  const resumeScore = hasInsights ? atsScore : 0;
-  const aiScore = careerReadiness?.score ?? 0;
-  const completion = profileCompletion?.score ?? 0;
+  const { hasProfile, hasResume, isNewUser } = userState || {};
+
+  const resumeScore = (hasResume && hasInsights) ? atsScore : 0;
+  const aiScore = isNewUser ? 0 : (careerReadiness?.score ?? 0);
+  const completion = hasProfile ? (profileCompletion?.score ?? 0) : 0;
 
   if (isLoading) {
     return (
@@ -62,15 +66,24 @@ export default function DashboardKPIsWidget() {
     );
   }
 
+  const profileDisplay = hasProfile ? `${completion}%` : 'Not started';
+  const resumeDisplay = hasResume ? `${resumeScore}%` : 'Not created';
+  const readinessDisplay = isNewUser ? 'Getting started' : `${aiScore}%`;
+
+  const profileSubtext = hasProfile ? (completion >= 80 ? "Great" : "Complete profile") : null;
+  const resumeSubtext = hasResume ? (resumeScore >= 70 ? "Good" : "Needs work") : null;
+  const readinessSubtext = isNewUser ? null : (aiScore >= 70 ? "Ready" : "Needs work");
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {/* Profile Completion */}
-      <StatPill icon={Target} label="Profile Completion" value={`${completion}%`} subtext={completion >= 80 ? "Great" : "Complete profile"} color="indigo" to="/profile" />
+      <StatPill icon={Target} label="Profile Completion" value={profileDisplay} subtext={profileSubtext} color="indigo" to="/profile" />
 
       {/* Resume Score */}
-      <StatPill icon={FileText} label="Resume Score" value={`${resumeScore}%`} subtext={resumeScore >= 70 ? "Good" : "Needs work"} color="violet" to="/resume-review" />
+      <StatPill icon={FileText} label="Resume Score (ATS)" value={resumeDisplay} subtext={resumeSubtext} color="violet" to="/resume-review" />
+      
       {/* Career Readiness Score */}
-      <StatPill icon={Sparkles} label="Career Readiness" value={`${aiScore}%`} subtext={aiScore >= 70 ? "Ready" : "Needs work"} color="emerald" to="/career-coach" />
+      <StatPill icon={Sparkles} label="Career Readiness" value={readinessDisplay} subtext={readinessSubtext} color="emerald" to="/career-coach" />
     </div>
   );
 }

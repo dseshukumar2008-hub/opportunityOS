@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertCircle, Sparkles, TrendingUp, Award } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Sparkles} from 'lucide-react';
 
 function CircularScore({ score }) {
   const r = 36;
@@ -50,11 +50,14 @@ export default function Step3AIResumeAnalysis() {
   const score = 88;
   const extractedSkills = ['React', 'Node.js', 'Python', 'AWS', 'Docker'];
   const missingKeywords = ['Kubernetes', 'GraphQL'];
+// eslint-disable-next-line no-unused-vars
   const suggestedRole = 'Full Stack Developer';
   const summary = 'Your resume demonstrates strong frontend and backend experience. To optimize for senior roles, consider adding metrics to your achievements.';
+// eslint-disable-next-line no-unused-vars
   const strengths = ['Clear impact statements', 'Strong technical skills section', 'Consistent formatting'];
+// eslint-disable-next-line no-unused-vars
   const areasForGrowth = ['Missing cloud infrastructure keywords', 'Action verbs could be stronger'];
-  const interviewReadiness = 'Ready';
+// eslint-disable-next-line no-unused-vars
   const qualityRating = 'Excellent';
 
   return (
@@ -83,11 +86,9 @@ export default function Step3AIResumeAnalysis() {
             Based on resume structure, keywords and content quality
           </p>
         </div>
-        <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4 w-full h-full">
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-full">
            <StatCard icon={CheckCircle2} label="Skills" value={extractedSkills.length} color="text-[#10B981]" bg="bg-[#ECFDF5]" />
            <StatCard icon={AlertCircle} label="Missing" value={missingKeywords.length} color="text-[#F97316]" bg="bg-[#FFF7ED]" />
-           <StatCard icon={TrendingUp} label="Readiness" value={interviewReadiness} color="text-[#6D5DF6]" bg="bg-[#F4F2FF]" />
-           <StatCard icon={Award} label="Quality" value={qualityRating} color="text-[#F59E0B]" bg="bg-[#FFFBEB]" />
         </div>
       </div>
 

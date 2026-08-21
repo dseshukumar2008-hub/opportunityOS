@@ -121,7 +121,7 @@ export const groqProvider = {
       try {
         const errJson = JSON.parse(rawErrorText);
         if (errJson?.error?.message) errorMsg = errJson.error.message;
-      } catch (e) {
+      } catch (_e) {
         // Ignored
       }
       analyticsService.trackError('Groq API HTTP Error', new Error(errorMsg));

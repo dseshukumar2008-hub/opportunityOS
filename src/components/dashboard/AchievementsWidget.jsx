@@ -1,4 +1,4 @@
-import { Trophy, Flame, Star, Users, ChevronRight } from 'lucide-react';
+import { Trophy, Flame, Star, Users} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function AchievementsWidget() {

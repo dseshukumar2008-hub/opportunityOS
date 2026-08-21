@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { 
-  Target, 
   CheckCircle2, 
   AlertCircle, 
   Activity, 
   Lightbulb,
-  Search,
   Zap,
   XCircle,
   AlertTriangle
@@ -14,6 +12,7 @@ import { useResume } from '../../contexts/ResumeContext';
 
 export default function ResumeHealthPanel() {
   const { resumeData, getResumeStrength } = useResume();
+// eslint-disable-next-line no-unused-vars
   const [targetRole, setTargetRole] = useState('');
   const [analysis, setAnalysis] = useState(null);
 
@@ -185,23 +184,7 @@ export default function ResumeHealthPanel() {
       </div>
 
       <div className="p-5 flex-1 overflow-y-auto flex flex-col gap-6">
-        {/* Job Target Optimization */}
-        <div>
-          <label className="flex items-center gap-2 text-[13px] font-bold text-slate-800 mb-2">
-            <Target size={16} className="text-indigo-500" />
-            Target Role Optimization
-          </label>
-          <div className="relative">
-            <input 
-              type="text" 
-              value={targetRole}
-              onChange={(e) => setTargetRole(e.target.value)}
-              placeholder="e.g., Frontend Developer"
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-[13px] focus:outline-none focus:border-indigo-500 transition-all bg-slate-50 focus:bg-white"
-            />
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          </div>
-        </div>
+
 
         {/* Actionable Insights Checklist */}
         <div>

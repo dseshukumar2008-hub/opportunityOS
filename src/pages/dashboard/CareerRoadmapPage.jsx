@@ -3,10 +3,13 @@ import RoadmapWizard    from '../../components/roadmap/RoadmapWizard';
 import RoadmapDashboard from '../../components/roadmap/RoadmapDashboard';
 import { AlertTriangle, RefreshCw, CheckCircle } from 'lucide-react';
 import ContextualBackButton from '../../components/navigation/ContextualBackButton';
+import CareerRoadmapHowItWorksModal from '../../components/roadmap/CareerRoadmapHowItWorksModal';
+import { useState } from 'react';
 
 export default function CareerRoadmapPage() {
   const { state, generate, toggleTask, reset } = useCareerRoadmap();
   const { status, roadmap, error, genError } = state;
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
 
   // ── 1. Auth resolving ────────────────────────────────────────────────────
   if (status === 'idle') {
@@ -53,7 +56,24 @@ export default function CareerRoadmapPage() {
   if (status === 'wizard' || status === 'generating') {
     return (
       <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <ContextualBackButton />
+        <div className="flex items-center justify-between mb-6">
+          <ContextualBackButton />
+          <button 
+            onClick={() => setShowHowItWorks(true)}
+            className="ml-auto flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors bg-white shadow-sm"
+          >
+            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            How it works
+          </button>
+        </div>
+        
+        <CareerRoadmapHowItWorksModal 
+          isOpen={showHowItWorks} 
+          onClose={() => setShowHowItWorks(false)} 
+        />
+        
         <RoadmapWizard
           onGenerate={generate}
           isGenerating={status === 'generating'}
@@ -67,18 +87,25 @@ export default function CareerRoadmapPage() {
   if (status === 'ready' && roadmap) {
     return (
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <ContextualBackButton />
+        <div className="flex items-center justify-between mb-6">
+          <ContextualBackButton />
+          <button 
+            onClick={() => setShowHowItWorks(true)}
+            className="ml-auto flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors bg-white shadow-sm"
+          >
+            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            How it works
+          </button>
+        </div>
         
-        {roadmap.isFallback && (
-          <div className="mb-6 flex items-start gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-            <CheckCircle size={18} className="text-emerald-600 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm font-bold text-emerald-800">
-                AI generation is temporarily unavailable. A professional roadmap template has been generated successfully.
-              </p>
-            </div>
-          </div>
-        )}
+        <CareerRoadmapHowItWorksModal 
+          isOpen={showHowItWorks} 
+          onClose={() => setShowHowItWorks(false)} 
+        />
+        
+
 
         <RoadmapDashboard
           roadmap={roadmap}

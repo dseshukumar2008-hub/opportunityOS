@@ -2,7 +2,7 @@ import { Sparkles, FileText, Target, TrendingUp, Briefcase, Code2, Users2, Send 
 
 const QUICK_PROMPTS = [
   { icon: FileText,   label: 'Resume Tips',           prompt: 'Give me 5 actionable tips to improve my resume for tech roles.' },
-  { icon: Target,     label: 'Interview Prep',        prompt: 'Help me prepare for a technical software engineering interview.' },
+  { icon: Target,     label: 'Skill Gaps',        prompt: 'What skills should I learn to become more competitive in today\'s job market?' },
   { icon: TrendingUp, label: 'Career Path',           prompt: 'What career path should I take to become a Senior Software Engineer?' },
   { icon: Briefcase,  label: 'Salary Negotiation',   prompt: 'How do I negotiate a better salary for a software engineering offer?' },
   { icon: Code2,      label: 'Skill Gaps',            prompt: 'What skills should I learn to become more competitive?' },
@@ -46,7 +46,7 @@ export default function Step5AICoach() {
       <div className="flex-1 overflow-y-auto p-6 scroll-smooth custom-scrollbar">
         <MessageBubble 
           isUser={false} 
-          content={"👋 Hi! I'm your AI Career Copilot, powered by OpportunityOS Intelligence.\n\nI can help you with:\n- 📄 Resume optimization and ATS improvements\n- 🎯 Interview preparation and mock Q&As\n- 📈 Career planning and skill gap analysis\n\nWhat would you like to work on today?"} 
+          content={"👋 Hi! I'm your AI Career Copilot, powered by OpportunityOS Intelligence.\n\nI can help you with:\n- 📄 Resume optimization and ATS improvements\n- 📈 Career planning and skill gap analysis\n\nWhat would you like to work on today?"} 
         />
         <MessageBubble 
           isUser={true} 

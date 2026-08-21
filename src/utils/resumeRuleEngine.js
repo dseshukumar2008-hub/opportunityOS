@@ -10,7 +10,7 @@ export const SKILL_DICTIONARY = {
 };
 
 export function extractTextMetrics(text) {
-  if (!text) return { extractedSkills: [], projectsCount: 0, educationCount: 0, hasGitHub: false, hasLinkedIn: false, hasPortfolio: false };
+  if (!text) return { extractedSkills: [], projectsCount: 0, educationCount: 0, hasGitHub: false, hasPortfolio: false };
 
   const lowerText = text.toLowerCase();
   
@@ -49,7 +49,7 @@ export function extractTextMetrics(text) {
 
   // 3. Link Detection
   const hasGitHub = /github\.com/i.test(lowerText);
-  const hasLinkedIn = /linkedin\.com/i.test(lowerText);
+
   const hasPortfolio = /(portfolio|website|linktr\.ee)/i.test(lowerText); // Rough check
 
   // 4. Quantified Achievements Check
@@ -96,7 +96,7 @@ export function extractTextMetrics(text) {
     educationCount,
     hasExperience,
     hasGitHub,
-    hasLinkedIn,
+
     hasPortfolio,
     hasEmail,
     hasPhone,
@@ -138,15 +138,6 @@ export function generateRuleBasedFallback(text) {
     });
   }
 
-  if (!metrics.hasLinkedIn) {
-    weaknesses.push("Missing LinkedIn profile link.");
-    improvements.push({
-      area: "Formatting",
-      priority: "HIGH",
-      title: "Add LinkedIn Profile",
-      description: "Add a professional LinkedIn URL to your contact section."
-    });
-  }
 
   if (metrics.quantifiedAchievements === 0) {
     weaknesses.push("Lack of quantified achievements.");

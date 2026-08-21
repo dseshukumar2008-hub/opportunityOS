@@ -8,14 +8,12 @@ import { useTeam } from '../../contexts/TeamContext';
 import StatusDot from '../../components/ui/StatusDot';
 import { useOnlineStatus } from '../../contexts/OnlineStatusContext';
 import { useConnections } from '../../contexts/ConnectionContext';
-import { useNotifications } from '../../contexts/NotificationContext';
 import {
   GraduationCap, BookOpen, Calendar, MapPin, MessageSquare,
   UserPlus, FileText, Code, Award, Globe, ExternalLink, Briefcase, Users,
   Star, BarChart3, Zap, Clock, ChevronRight, User,
   GitBranch, UserCheck, UserX, Link2, CheckCircle
 } from 'lucide-react';
-import RecommendedConnectionsWidget from '../../components/network/RecommendedConnectionsWidget';
 
 import { useActivity } from '../../contexts/ActivityContext';
 import { useEffect } from 'react';
@@ -94,8 +92,7 @@ export default function UserProfilePage() {
     connections,
   } = useConnections();
   const { users: allUsers } = useUserDirectory();
-  const { addNotification } = useNotifications();
-  const { getUserActivities } = useActivity();
+    const { getUserActivities } = useActivity();
 
   const [fetchedProfile, setFetchedProfile] = useState(null);
 
@@ -129,35 +126,22 @@ export default function UserProfilePage() {
 
   const handleConnect = () => {
     if (!targetUserId) return;
+// eslint-disable-next-line no-unused-vars
     const p = viewedDirectoryUser || viewedProfile || { name: userId };
     sendConnectionRequest(targetUserId);
-    addNotification({
-      category: 'Connections',
-      title: 'Connection Request Sent',
-      message: `Connection request sent to ${p.full_name || p.name}.`,
-    });
-  };
+      };
 
   const handleAccept = () => {
     if (!incomingRequestId) return;
+// eslint-disable-next-line no-unused-vars
     const p = viewedDirectoryUser || viewedProfile || { name: userId };
     acceptConnectionRequest(incomingRequestId);
-    addNotification({
-      category: 'Connections',
-      title: 'Connection Accepted',
-      message: `You and ${p.full_name || p.name} are now connected.`,
-    });
-  };
+      };
 
   const handleReject = () => {
     if (!incomingRequestId) return;
     rejectConnectionRequest(incomingRequestId);
-    addNotification({
-      category: 'Connections',
-      title: 'Connection Request Declined',
-      message: 'Connection request declined.',
-    });
-  };
+      };
 
   const handleDisconnect = () => {
     const conn = connections.find(
@@ -607,12 +591,6 @@ export default function UserProfilePage() {
                 <FileText size={14} /> Edit Resume
               </button>
             </Card>
-
-
-
-            {!isOwnProfile && (
-              <RecommendedConnectionsWidget />
-            )}
 
           </div>
         </div>

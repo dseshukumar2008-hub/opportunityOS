@@ -26,13 +26,13 @@ export default function OpportunityDetailsPage() {
   const location = useLocation();
 
   useEffect(() => {
-    // Scroll to top when route changes
-    window.scrollTo(0, 0);
+    // Scroll handling now managed by global ScrollToTop component
 
     if (isLoading) return; // Wait for data to load
 
     const opp = liveOpportunities.find(o => String(o.id) === String(id));
     if (opp) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setOpportunity(opp);
     } else {
       // Handle not found

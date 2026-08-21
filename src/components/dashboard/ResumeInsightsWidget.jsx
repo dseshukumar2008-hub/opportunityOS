@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FileText, AlertTriangle, Zap, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { FileText, AlertTriangle, Zap, ArrowRight,  CheckCircle2 } from 'lucide-react';
 import { useResumeInsights } from '../../hooks/useResumeInsights';
 
 export default function ResumeInsightsWidget() {
@@ -46,6 +46,7 @@ export default function ResumeInsightsWidget() {
   let scoreBg = 'bg-red-50';
   let scoreStroke = '#EF4444';
   if (atsScore >= 80) { scoreColor = 'text-emerald-500'; scoreBg = 'bg-emerald-50'; scoreStroke = '#10B981'; }
+// eslint-disable-next-line no-unused-vars
   else if (atsScore >= 60) { scoreColor = 'text-amber-500'; scoreBg = 'bg-amber-50'; scoreStroke = '#F59E0B'; }
 
   const strokeDash = `${atsScore} 100`;

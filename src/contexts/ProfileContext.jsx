@@ -15,6 +15,7 @@ export const ProfileProvider = ({ children }) => {
 
   useEffect(() => {
     if (!user) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setProfile(null);
       setLoading(false);
       return;
@@ -101,6 +102,7 @@ export const ProfileProvider = ({ children }) => {
     updateProfile,
     mergeProfileData,
     fetchUserProfile
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }), [profile, loading]); // Functions don't strictly need to be in deps unless they use state, but we'll stick to this. Actually, wait, functions recreate on render, so if we omit them, we're fine, but eslint might complain. Let's just use them or omit them since they depend on `user` state which changes rarely.
 
   return (

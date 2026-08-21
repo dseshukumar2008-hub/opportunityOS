@@ -5,14 +5,14 @@ import { generate } from '../aiProvider';
  */
 export const careerPlannerAgent = {
   /**
-   * Synthesizes overarching career strategies and identifies hidden potential.
+   * Synthesizes overarching career strategies and identifies alternative career paths.
    * @param {Object} aiContext - The unified AI context
    * @param {Object} payload - Additional context or specific user questions
    * @returns {Object} Standardized AIResponse
    */
   async execute(aiContext, payload = {}) {
     const prompt = `You are the Career Planner Agent.
-    Your specific responsibility is to act as a high-level strategist. Identify alternative career paths (hidden potential) and synthesize a macro-level career strategy.
+    Your specific responsibility is to act as a high-level strategist. Identify alternative career paths and synthesize a macro-level career strategy.
     
     Payload: ${JSON.stringify(payload)}
     

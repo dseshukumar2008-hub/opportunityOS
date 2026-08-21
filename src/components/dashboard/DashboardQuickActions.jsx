@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FileEdit, Search, Bot, Target, Users, BarChart3, ArrowRight } from 'lucide-react';
+import { FileEdit,  Bot, Target, Users, BarChart3, ArrowRight } from 'lucide-react';
 
 const actions = [
   { icon: FileEdit,   label: 'Create Resume',      sub: 'Build your profile',          path: '/resume-builder',  color: 'indigo' },

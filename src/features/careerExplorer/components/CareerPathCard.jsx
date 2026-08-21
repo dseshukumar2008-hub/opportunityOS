@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Target, Map, CheckCircle2, FolderDot, Clock, Code, Server, Layers, BarChart3, Bot, PenTool, Megaphone, Terminal, ShieldAlert, AlertCircle, X, Sparkles } from 'lucide-react';
 
@@ -171,6 +170,7 @@ export default function CareerPathCard({ path, simulatedSkills, toggleSimulatedS
   );
 }
 
+// eslint-disable-next-line no-unused-vars
 function SparklesIcon({ size = 16, className = "" }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>

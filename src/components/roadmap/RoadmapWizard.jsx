@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   ChevronRight, ChevronLeft, Sparkles, GraduationCap,
+// eslint-disable-next-line no-unused-vars
   GitBranch, CalendarDays, Target, CheckCircle2, AlertTriangle,
   Code, Bot, LineChart, Layers, ShieldCheck, Settings, Cloud, 
   Briefcase, Palette, Rocket, Microscope
@@ -189,6 +190,7 @@ function GeneratingScreen({ targetCareer }) {
 
 import { useLocation } from 'react-router-dom';
 
+// eslint-disable-next-line no-unused-vars
 export default function RoadmapWizard({ onGenerate, isGenerating, genError }) {
   const location = useLocation();
   const [step, setStep] = useState(1);

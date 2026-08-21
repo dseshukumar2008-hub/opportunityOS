@@ -10,6 +10,7 @@ export const templateProvider = {
     console.log(`FEATURE: ${feature}`);
     console.log(`Using Professional Templates offline fallback.`);
 
+// eslint-disable-next-line no-useless-assignment
     let responseData = {};
 
     // Generate basic offline templates based on the feature

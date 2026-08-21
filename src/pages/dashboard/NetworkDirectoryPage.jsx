@@ -1,14 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConnections } from '../../contexts/ConnectionContext';
-import { useNotifications } from '../../contexts/NotificationContext';
 import { 
   Search, Users, GraduationCap, 
   MessageSquare, UserPlus, Clock, Check, ChevronDown,
   Building, Code, X, Globe
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import RecommendedConnectionsWidget from '../../components/network/RecommendedConnectionsWidget';
 import EmptyState from '../../components/ui/EmptyState';
 import { useUserDirectory } from '../../hooks/useUserDirectory';
 
@@ -34,8 +32,7 @@ export default function NetworkDirectoryPage() {
     acceptConnectionRequest
   } = useConnections();
   const { users, loading: usersLoading, error: usersError } = useUserDirectory();
-  const { addNotification } = useNotifications();
-
+  
   const [searchQuery, setSearchQuery] = useState('');
   
   // Filters
@@ -88,24 +85,14 @@ export default function NetworkDirectoryPage() {
   // Action Handlers
   const handleConnect = (user) => {
     sendConnectionRequest(user.id);
-    addNotification({
-      category: 'Connections',
-      title: 'Request Sent',
-      message: `Connection request sent to ${user.name}.`,
-    });
-    toast.success('Connection request sent');
+        toast.success('Connection request sent');
   };
 
   const handleAccept = (user) => {
     const reqId = getIncomingRequestId(user.id);
     if (reqId) {
       acceptConnectionRequest(reqId);
-      addNotification({
-        category: 'Connections',
-        title: 'Connection Accepted',
-        message: `You are now connected with ${user.name}.`,
-      });
-      toast.success('Connection accepted');
+            toast.success('Connection accepted');
     }
   };
 
@@ -415,12 +402,6 @@ export default function NetworkDirectoryPage() {
         </div>
       )}
         </div>
-
-        {/* Sidebar */}
-        <div className="w-full lg:w-[320px] shrink-0">
-          <RecommendedConnectionsWidget />
-        </div>
-        
       </div>
     </div>
   );

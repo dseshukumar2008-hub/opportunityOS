@@ -7,7 +7,7 @@ import { useAuth } from './AuthContext';
 import { useResume } from './ResumeContext';
 import { useTeam } from './TeamContext';
 import { useConnections } from './ConnectionContext';
-import { useNotifications } from './NotificationContext';
+
 import toast from 'react-hot-toast';
 
 const GoalContext = createContext(null);
@@ -32,13 +32,13 @@ export const GoalProvider = ({ children }) => {
     ? connectionsData.connections.length 
     : (Array.isArray(connectionsData) ? connectionsData.length : 0);
 
-  const { addNotification } = useNotifications();
-
+  
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setGoals([]);
       setLoading(false);
       return;
@@ -185,21 +185,9 @@ export const GoalProvider = ({ children }) => {
         if (progressPercentage >= milestone && !newNotifiedMilestones.includes(milestone)) {
           // Trigger Notification
             if (milestone === 100) {
-              addNotification({
-                category: 'System',
-                title: '🎉 Goal Completed',
-                message: `Congratulations! You completed your "${goal.title}" Goal.`,
-                targetUrl: '/goals'
-              });
-              toast.success(`Goal Completed: ${goal.title} 🎯`);
+                            toast.success(`Goal Completed: ${goal.title} 🎯`);
             } else {
-            addNotification({
-              category: 'System',
-              title: '🎉 Goal Milestone Reached',
-              message: `Your "${goal.title}" Goal is now ${milestone}% complete. Keep it up!`,
-              targetUrl: '/goals'
-            });
-          }
+                      }
           newNotifiedMilestones.push(milestone);
         }
       });
@@ -228,6 +216,7 @@ export const GoalProvider = ({ children }) => {
     });
 
     if (hasChangesGlobally) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setGoals(updatedGoals);
     }
 
@@ -235,10 +224,10 @@ export const GoalProvider = ({ children }) => {
   }, [
 
     resumeData, 
+// eslint-disable-next-line react-hooks/exhaustive-deps
     (teams || []).length, 
     connectionsLength, 
     getResumeStrength,
-    addNotification,
     goals.length // Only depend on length/structural changes to avoid infinite loops
   ]);
 

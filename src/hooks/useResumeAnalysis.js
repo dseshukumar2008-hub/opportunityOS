@@ -1,16 +1,17 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback} from 'react';
 import { geminiService } from '../services/geminiService';
 import { resumeStorageService } from '../services/resumeStorageService';
 import { useAuth } from '../contexts/AuthContext';
-import { useNotifications } from '../contexts/NotificationContext';
+import { useActivity } from '../contexts/ActivityContext';
+
 import { fileToBase64 } from '../utils/fileUtils';
 
 const ENABLE_AI_NOTIFICATIONS = false;
 
 export function useResumeAnalysis() {
   const { user } = useAuth();
-  const { addNotification } = useNotifications();
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const { addActivity } = useActivity();
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [progressText, setProgressText] = useState('');
   const [analysisResults, setAnalysisResults] = useState(null);
@@ -18,6 +19,7 @@ export function useResumeAnalysis() {
   const [storedResumeName, setStoredResumeName] = useState(null);
   const [storedResumePath, setStoredResumePath] = useState(null);
   const [error, setError] = useState(null);
+  const [analysisStatus, setAnalysisStatus] = useState('idle');
 
   // Load saved analysis + resume metadata from Firestore on mount
   const loadSavedAnalysis = useCallback(async () => {
@@ -37,14 +39,15 @@ export function useResumeAnalysis() {
     }
   }, [user?.id]);
 
-  useEffect(() => {
-    loadSavedAnalysis();
-  }, [loadSavedAnalysis]);
+  // Note: We intentionally do NOT call loadSavedAnalysis() automatically on mount anymore.
+  // The user should start with a fresh upload state.
+  // Historical analyses remain in the History tab.
 
   const analyzeResume = useCallback(async (dataOrFile) => {
     console.log('[Resume Analysis] Upload Started');
     
     setIsAnalyzing(true);
+    setAnalysisStatus('uploading');
     setError(null);
     setUploadProgress(0);
     setProgressText('Uploading...');
@@ -112,6 +115,7 @@ export function useResumeAnalysis() {
         payloadForGemini = extractedText;
       }
 
+      setAnalysisStatus('analyzing');
       setProgressText('Analyzing Resume...');
 
       let results = null;
@@ -236,9 +240,9 @@ export function useResumeAnalysis() {
             qualityRating: aiInsights.qualityRating || localMetrics.rating || 'Good',
             smartSuggestions,
             contentSuggestions: aiInsights.contentSuggestions,
-            recommendedSkills: aiInsights.recommendedSkills,
-            recommendedCertifications: aiInsights.recommendedCertifications,
-            recommendedProjects: aiInsights.recommendedProjects
+            recommendedSkills: aiInsights.recommendedSkills || aiInsights.actionPlan?.skillsToLearn || [],
+            recommendedCertifications: aiInsights.recommendedCertifications || aiInsights.actionPlan?.certificationsToPursue || [],
+            recommendedProjects: aiInsights.recommendedProjects || aiInsights.actionPlan?.projectsToBuild || []
           };
           
         } catch (geminiError) {
@@ -305,6 +309,16 @@ export function useResumeAnalysis() {
 
           // 7. Sync to match_resumes for Match Engine integration
           // Match Engine now reads from Firestore.
+
+          // 8. Add to Activity Feed
+          if (addActivity) {
+            addActivity({
+              category: 'resume',
+              type: 'action',
+              title: 'Resume Analyzed',
+              description: `Resume analyzed with an ATS Score of ${results.atsScore}%`
+            });
+          }
         } catch (persistErr) {
           console.error('[Resume Analyzer] Failed to persist analysis to Firestore:', persistErr);
           // Non-fatal
@@ -315,15 +329,10 @@ export function useResumeAnalysis() {
       console.log('[Resume Analyzer] Adding notification and finalizing...');
 
       if (ENABLE_AI_NOTIFICATIONS) {
-        addNotification({
-          title: 'Resume Analysis Ready',
-          message: `Your resume scored ${results.atsScore}%. Click to view details.`,
-          type: 'System',
-          targetUrl: '/resume-review'
-        });
-      }
+              }
 
       setIsAnalyzing(false);
+      setAnalysisStatus('completed');
       setUploadProgress(100);
       setProgressText('Complete ✓');
       console.log('[Resume Analyzer] Analysis completed');
@@ -332,6 +341,7 @@ export function useResumeAnalysis() {
     } catch (err) {
       console.error('[Resume Analyzer] Error:', err);
       
+// eslint-disable-next-line no-useless-assignment
       let errMsg = 'Unexpected error occurred.';
       if (err.type === 'NETWORK_ERROR') errMsg = 'Network connection issue detected.';
       else if (err.type === 'GEMINI_QUOTA_EXCEEDED') errMsg = 'AI analysis temporarily unavailable due to quota/rate limits.';
@@ -347,10 +357,12 @@ export function useResumeAnalysis() {
 
       setAnalysisResults(fallbackResults);
       setIsAnalyzing(false);
+      setAnalysisStatus('idle');
       setUploadProgress(100);
       setProgressText('');
       return fallbackResults;
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   const deleteStoredResume = useCallback(async () => {
@@ -369,6 +381,7 @@ export function useResumeAnalysis() {
     setAnalysisResults(null);
     setError(null);
     setIsAnalyzing(false);
+    setAnalysisStatus('idle');
     setUploadProgress(0);
     setProgressText('');
   }, []);
@@ -384,6 +397,7 @@ export function useResumeAnalysis() {
     analysisResults,
     storedResumeUrl,
     storedResumeName,
-    error
+    error,
+    analysisStatus
   };
 }

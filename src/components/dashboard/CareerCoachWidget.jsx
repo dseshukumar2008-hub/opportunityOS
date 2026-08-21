@@ -17,11 +17,16 @@ export default function CareerCoachWidget() {
   const { messages, isLoading, error, sendMessage, clearChat, suggestedPrompts } = useCareerCoach();
   const { nextBestAction } = useDashboardInsights();
   const [inputText, setInputText] = useState('');
-  const bottomRef = useRef(null);
+  const containerRef = useRef(null);
 
   // Auto-scroll to latest message
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [messages, isLoading]);
 
   const handleSend = () => {
@@ -90,7 +95,7 @@ export default function CareerCoachWidget() {
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-hide">
+      <div ref={containerRef} className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-hide">
         {/* Suggested Prompts — shown when no messages */}
         {(messages || []).length === 0 && !isLoading && (
           <div className="flex flex-col gap-3">
@@ -160,7 +165,6 @@ export default function CareerCoachWidget() {
           </div>
         )}
 
-        <div ref={bottomRef} />
       </div>
 
       {/* Input Area */}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { onboardingOptions } from '../data/careerPathsDb';
 import { 
   ChevronRight, 
+// eslint-disable-next-line no-unused-vars
   ChevronLeft, 
   Check, 
   Sparkles,
@@ -27,8 +28,10 @@ import {
   User,
   Users,
   MessageCircle,
-  Settings
+  Settings,
+  HelpCircle
 } from 'lucide-react';
+import CareerExplorerHowItWorksModal from './CareerExplorerHowItWorksModal';
 
 const ICON_MAP = {
   Code, 
@@ -60,6 +63,7 @@ export default function OnboardingFlow({ onComplete, initialData }) {
   const [selections, setSelections] = useState(initialData);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStep, setAnalysisStep] = useState(0);
+  const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
 
   const toggleSelection = (category, itemId) => {
     setSelections(prev => {
@@ -223,6 +227,10 @@ export default function OnboardingFlow({ onComplete, initialData }) {
     }
 
     // Fallback UI for any unexpected step
+// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
     let title, description, category, options;
     if (step === 2) {
       return (
@@ -347,7 +355,15 @@ export default function OnboardingFlow({ onComplete, initialData }) {
             <h1 className="text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
               Career Explorer <Sparkles size={20} className="text-purple-400" />
             </h1>
-            <p className="text-slate-500 text-xs lg:text-sm mt-0.5 lg:mt-1">Discover personalized career paths based on your unique profile.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-1 lg:mt-2">
+              <p className="text-slate-500 text-xs lg:text-sm">Discover personalized career paths based on your unique profile.</p>
+              <button 
+                onClick={() => setIsHowItWorksOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] lg:text-xs font-bold text-[#6D5DF6] hover:text-white bg-indigo-50 hover:bg-[#6D5DF6] rounded-lg transition-all w-fit"
+              >
+                <HelpCircle size={14} /> How It Works
+              </button>
+            </div>
           </div>
         </div>
 
@@ -425,6 +441,11 @@ export default function OnboardingFlow({ onComplete, initialData }) {
 
         </div>
       </div>
+      
+      <CareerExplorerHowItWorksModal 
+        isOpen={isHowItWorksOpen} 
+        onClose={() => setIsHowItWorksOpen(false)} 
+      />
     </div>
   );
 }

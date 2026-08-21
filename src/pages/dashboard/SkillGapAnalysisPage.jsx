@@ -9,6 +9,7 @@ import Step2bInputCollection from '../../components/skill-gap/Step2bInputCollect
 import Step3Analyzing from '../../components/skill-gap/Step3Analyzing';
 import Step4Dashboard from '../../components/skill-gap/Step4Dashboard';
 import ContextualBackButton from '../../components/navigation/ContextualBackButton';
+import SkillGapHowItWorksModal from '../../components/skill-gap/SkillGapHowItWorksModal';
 
 export default function SkillGapAnalysisPage() {
   const location = useLocation();
@@ -30,6 +31,7 @@ export default function SkillGapAnalysisPage() {
   const [analysisData, setAnalysisData] = useState(() => {
     return JSON.parse(sessionStorage.getItem('sg_analysis') || 'null');
   });
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
 
   useEffect(() => {
     sessionStorage.setItem('sg_step', currentStep);
@@ -43,6 +45,7 @@ export default function SkillGapAnalysisPage() {
 
   useEffect(() => {
     if (isContextMode && careerContext?.targetRole && !targetRole) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTargetRole(careerContext.targetRole);
       
       // Pre-fill and advance to input collection instead of automatically analyzing
@@ -52,7 +55,7 @@ export default function SkillGapAnalysisPage() {
         setCurrentStep(3); // Jump to Step2bInputCollection
       }
     }
-  }, [isContextMode, careerContext?.targetRole, careerContext?.missingSkills]);
+  }, [isContextMode, careerContext?.targetRole, careerContext?.missingSkills, targetRole]);
 
   useEffect(() => {
     // If we're entering directly, don't automatically prepopulate skills
@@ -64,6 +67,7 @@ export default function SkillGapAnalysisPage() {
       : profile?.extractedSkills || [];
       
     if (skills.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setInputData(prev => ({
         ...prev,
         manualSkills: prev.manualSkills?.length ? prev.manualSkills : skills
@@ -112,9 +116,24 @@ export default function SkillGapAnalysisPage() {
   return (
     <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 bg-transparent min-h-[calc(100vh-64px)]">
       <WidgetErrorBoundary>
-        <div className="w-full mb-6">
+        <div className="w-full mb-6 flex items-center justify-between">
           <ContextualBackButton />
+          <button 
+            onClick={() => setShowHowItWorks(true)}
+            className="ml-auto flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors bg-white shadow-sm"
+          >
+            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            How it works
+          </button>
         </div>
+        
+        <SkillGapHowItWorksModal 
+          isOpen={showHowItWorks} 
+          onClose={() => setShowHowItWorks(false)} 
+        />
+        
         <div className="flex flex-col items-center w-full">
         {currentStep === 1 && (
           <Step1TargetRole 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState,  useRef } from 'react';
 import { UploadCloud, GitBranch, Link as LinkIcon, ListPlus, ChevronLeft, ChevronRight, X, FileText, CheckCircle2 } from 'lucide-react';
 
 export default function Step2bInputCollection({ sources, onSubmit, onBack, initialData = {} }) {
@@ -109,7 +109,7 @@ export default function Step2bInputCollection({ sources, onSubmit, onBack, initi
         <h1 className="text-2xl lg:text-3xl font-black text-slate-900 mb-2">Provide Your Details</h1>
         <p className="text-slate-500 font-medium">We need a bit more information based on the sources you selected.</p>
       </div>
-
+    
       <div className="space-y-6 mb-10">
         
         {/* Resume Input */}

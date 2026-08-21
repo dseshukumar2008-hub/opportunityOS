@@ -4,6 +4,7 @@ import { useTeam } from '../contexts/TeamContext';
 
 export function useTeamMatch() {
   const { profile } = useUserProfile();
+// eslint-disable-next-line no-unused-vars
   const { teams, getDiscoverTeams } = useTeam();
 
   const userSkills = useMemo(() => {

@@ -1,4 +1,3 @@
-import { calculateATSScore } from '../utils/atsScoringEngine';
 import { analyticsService } from './analyticsService';
 
 import { generate } from './ai/aiProvider';
@@ -182,14 +181,9 @@ Perform the following analysis:
 6. AREAS FOR IMPROVEMENT
    List concrete improvements supported by resume evidence.
 
-7. INTERVIEW READINESS
-   Return:
-   * Not Ready
-   * Beginner Ready
-   * Internship Ready
-   * Entry-Level Ready
 
-8. ATS RATING
+
+7. ATS RATING
    Return:
    * Poor
    * Fair
@@ -205,7 +199,6 @@ Return JSON only in this format:
   "summary": "",
   "strengths": [],
   "improvements": [],
-  "interviewReadiness": "",
   "atsRating": ""
 }`;
 
@@ -256,7 +249,6 @@ Return JSON only in this format:
         "summary": "...",
         "strengths": ["...", "...", "...", "..."],
         "areasForGrowth": ["...", "...", "...", "..."],
-        "interviewReadiness": "Not Ready | Beginner Ready | Internship Ready | Entry-Level Ready | Experienced Ready",
         "actionPlan": {
           "immediateFixes": ["..."],
           "skillsToLearn": ["..."],
@@ -344,68 +336,6 @@ Return JSON only in this format:
     }
   },
 
-  async detectHiddenPotential(contextData) {
-    analyticsService.trackEvent('Hidden Potential Detection Started');
-    
-    // Check Cache
-    const cacheKey = `hp_cache_${JSON.stringify(contextData).length}_${contextData.targetRole?.replace(/[^a-zA-Z0-9]/g, '')}`;
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached) {
-      console.log('[Hidden Potential] Using cached result');
-      return JSON.parse(cached);
-    }
-    
-    try {
-      const prompt = `You are an expert tech recruiter and career strategist.
-      Analyze this user's entire digital footprint:
-      ${JSON.stringify(contextData)}
-
-      Your task is to act as a "Hidden Potential Detector". 
-      Identify 3 alternative tech careers where the user has unexpectedly high potential, EXCLUDING their current target role.
-
-      For each alternative career, provide:
-      1. "potentialScore" (0-100)
-      2. "whyYouMatch" (Existing strengths, matching projects/GitHub activity)
-      3. "skillGaps" (What they are missing and learning effort)
-      4. "actionPlan" (Actionable 30, 60, and 90-day steps)
-
-      Required JSON Output:
-      {
-        "detectedCareers": [
-          {
-            "role": "...",
-            "potentialScore": 0,
-            "whyYouMatch": {
-              "strengths": ["..."],
-              "matchingProjects": ["..."],
-              "githubEvidence": "..."
-            },
-            "skillGaps": {
-              "required": ["..."],
-              "missing": ["..."],
-              "learningEffort": "..."
-            },
-            "actionPlan": {
-              "days30": ["..."],
-              "days60": ["..."],
-              "days90": ["..."]
-            }
-          }
-        ]
-      }`;
-      
-      // Use longer timeout as this is a heavy reasoning task
-      const result = await callGemini(prompt, "You are a top-tier Career Strategist AI. Output valid JSON only.", [], 0.4, 'Hidden Potential Detection', 60000);
-      
-      sessionStorage.setItem(cacheKey, JSON.stringify(result));
-      analyticsService.trackEvent('Hidden Potential Detection Completed');
-      return result;
-    } catch (error) {
-      console.error('Gemini Hidden Potential Error:', error);
-      analyticsService.trackError('Hidden Potential Feature Error', error);
-      throw error;
-    }
-  },
 
   async analyzeSkillGap(contextData) {
     analyticsService.trackEvent('Skill Gap Analysis Started');
@@ -612,11 +542,10 @@ JSON FORMAT:
     }
     
     try {
-      const { targetRole, manualSkills, githubData, linkedinData, resumeData } = payload;
+      const { targetRole, manualSkills, githubData, resumeData } = payload;
       
       const inlineDataItems = [];
       let resumeContext = "No resume provided.";
-      let linkedinContext = "No LinkedIn profile provided.";
       
       if (resumeData) {
         inlineDataItems.push({
@@ -626,13 +555,6 @@ JSON FORMAT:
         resumeContext = "A resume document is provided as an attachment. Extract all technical skills, programming languages, tools, frameworks, and experience from it.";
       }
 
-      if (linkedinData) {
-        inlineDataItems.push({
-          mimeType: linkedinData.mimeType,
-          data: linkedinData.base64
-        });
-        linkedinContext = "A LinkedIn Profile PDF is provided as an attachment. Extract Skills, Experience, Education, Certifications, and Projects. IMPORTANT QUALITY CHECK: If the LinkedIn PDF contains very little information, you MUST output the exact phrase: 'Limited LinkedIn profile data detected. Resume and GitHub analysis will be prioritized.' inside the 'aiAdvice' field.";
-      }
 
       const prompt = `You are a world-class AI Career Coach.
 Generate a highly personalized Skill Gap Analysis for the user targeting the role of: "${targetRole}"
@@ -641,10 +563,9 @@ Generate a highly personalized Skill Gap Analysis for the user targeting the rol
 1. Manual Skills Provided: ${manualSkills?.length ? manualSkills.join(", ") : "None"}
 2. GitHub Data: ${githubData ? JSON.stringify(githubData) : "Not connected"}
 3. Resume Context: ${resumeContext}
-4. LinkedIn Context: ${linkedinContext}
 
 # INSTRUCTIONS:
-1. Extract all skills from the attached Resume and LinkedIn Profile PDF (if provided), as well as GitHub and Manual skills.
+1. Extract all skills from the attached Resume, as well as GitHub and Manual skills.
 2. Merge and deduplicate all extracted skills from all sources.
 3. Compare the merged skills against the standard industry requirements for a "${targetRole}".
 4. Calculate a realistic "readinessScore" (0 to 100) and a "skillGapPercentage" (0 to 100).
@@ -706,7 +627,7 @@ Generate a highly personalized Skill Gap Analysis for the user targeting the rol
   async generateProjectRecommendations(contextData) {
     analyticsService.trackEvent('Project Recommendations Started');
     try {
-      const { specialization, targetRole, missingSkills } = contextData;
+      const { specialization, targetRole, missingSkills, excludedProjects = [] } = contextData;
       
       const prompt = `You are an expert technology mentor.
 
@@ -723,6 +644,9 @@ ${targetRole || 'Software Engineer'}
 Missing Skills to Target:
 ${missingSkills?.length > 0 ? missingSkills.join(', ') : 'None specified. Generate well-rounded projects.'}
 
+Excluded Projects (DO NOT recommend these or highly similar variations):
+${excludedProjects?.length > 0 ? excludedProjects.join(', ') : 'None'}
+
 Requirements:
 
 * Generate projects relevant to the specialization.
@@ -730,6 +654,7 @@ Requirements:
 * Focus on portfolio-worthy and real-world projects.
 * Avoid generic beginner projects.
 * Recommend modern technologies and current industry use cases.
+* MUST NOT recommend any project title or concept listed in the 'Excluded Projects' section.
 * Make recommendations dynamic and AI-generated.
 * Do not analyze skill gaps.
 * Do not analyze user profiles.
@@ -755,183 +680,79 @@ Return JSON only. Format as an array of the above object.`;
     }
   },
 
-  async generateInterviewQuestions(targetRole) {
-    analyticsService.trackEvent('Interview Questions Generation Started');
+
+
+  async analyzeGithubPortfolio(username, githubData, targetRole, localMetrics) {
+    analyticsService.trackEvent('GitHub Analysis Started');
     try {
-      const prompt = `You are an expert technical interviewer.
-      Generate 5 highly relevant interview questions for the following role: "${targetRole}".
-      Include a mix of:
-      - Technical Questions
-      - Behavioral Questions
-      - Scenario-Based Questions
-      
-      Required JSON format:
-      [
-        {
-          "type": "Technical" | "Behavioral" | "Scenario",
-          "question": "The interview question text"
-        }
-      ]
-      
-      Return JSON only.`;
+      const prompt = `You are a senior engineering manager and expert technical recruiter.
+Analyze the provided GitHub portfolio data for user "${username}" against their target role of "${targetRole}".
 
-      const result = await callGemini(prompt, "You are an expert technical interviewer. Output valid JSON only.", [], 0.3, 'Generate Interview Questions');
-      analyticsService.trackEvent('Interview Questions Generation Completed');
-      return result;
-    } catch (error) {
-      console.error('Gemini Interview Questions Error:', error);
-      analyticsService.trackError('Interview Questions Feature Error', error);
-      throw error;
-    }
-  },
+GITHUB PROFILE STATS:
+Followers: ${localMetrics.basicStats.followers}
+Total Stars: ${localMetrics.basicStats.totalStars}
+Languages Detected: ${localMetrics.technologyAnalysis.detected.join(', ')}
 
-  async evaluateInterviewAnswer(question, answer, targetRole) {
-    analyticsService.trackEvent('Interview Evaluation Started');
-    try {
-      const prompt = `You are an expert technical interviewer.
+TOP REPOSITORY DEEP ANALYSIS:
+${JSON.stringify(localMetrics.deepAnalysis, null, 2)}
 
-Question:
-${question}
-
-User Answer:
-${answer}
-
-Target Role:
-${targetRole}
-
-Evaluate the answer. Provide detailed coaching, not just a score.
-Be constructive and educational to help the user improve their interview performance.
-
-Required JSON format:
-{
-  "score": 8,
-  "strengths": ["..."],
-  "improvements": ["..."],
-  "feedback": "Detailed constructive feedback...",
-  "idealAnswer": "A professional answer that could be used in a real interview...",
-  "missingConcepts": ["..."],
-  "topicsToRevise": ["..."]
-}
-
-Return JSON only.`;
-
-      const result = await callGemini(prompt, "You are an expert technical interviewer. Output valid JSON only.", [], 0.3, 'Evaluate Interview Answer');
-      analyticsService.trackEvent('Interview Evaluation Completed');
-      return result;
-    } catch (error) {
-      console.error('Gemini Interview Evaluation Error:', error);
-      analyticsService.trackError('Interview Evaluation Feature Error', error);
-      throw error;
-    }
-  },
-
-  async analyzeLinkedInProfile(payload) {
-    analyticsService.trackEvent('LinkedIn Analysis Started');
-    try {
-      const { textData, fileData, targetRole, specialization } = payload;
-      
-      const inlineDataItems = [];
-      let prompt = `You are an expert career coach and profile analyzer.
-Analyze the provided LinkedIn profile and generate a comprehensive review.
-
-`;
-      if (targetRole) {
-        prompt += `Target Role: ${targetRole}\n`;
-      }
-      if (specialization) {
-        prompt += `Specialization: ${specialization}\n`;
-      }
-      prompt += `\n`;
-
-      if (fileData) {
-        inlineDataItems.push({
-          mimeType: fileData.mimeType || 'application/pdf',
-          data: fileData.base64
-        });
-        prompt += `A PDF of the LinkedIn profile is attached. Please extract the contents and analyze it.\n`;
-      } else if (textData) {
-        prompt += `Here is the pasted text from the LinkedIn profile:\n${textData}\n`;
-      } else {
-        throw new Error("No LinkedIn data provided.");
-      }
-
-      prompt += `
 CRITICAL INSTRUCTIONS:
-1. Identify the Headline, About Section, Skills, Projects, Experience, and Certifications.
-2. Provide constructive feedback for each section.
-3. Calculate an overallScore, completenessScore, and searchVisibilityScore (0-100).
-4. Provide the top 5 actionable improvement suggestions.
-5. If the profile is very sparse, mention it in the feedback.
+1. You must dynamically generate the entire analysis based ONLY on the provided Top Repository Deep Analysis data. Do not hallucinate projects, languages, or tools not present in the data.
+2. Every string in "strengths" and "weaknesses" MUST cite a specific repository name, file (e.g. package.json, Dockerfile), or metric from the data as evidence.
+   - Good Example: "The 'opportunity-os' repository demonstrates strong React architecture with its package.json dependencies."
+   - Bad Example: "You have strong React skills."
+3. Calculate a "githubScore" (0-100) based on repository complexity, documentation (README), tech diversity, and commit consistency.
+4. Calculate a "careerMatch" breakdown (0-100 for each: frontend, backend, aiTools, cloudDevOps) based strictly on the detected technologies in the deep analysis.
+5. Provide exactly 5 personalized "recommendations" based on detected gaps (e.g. if no Dockerfile, recommend Docker).
+   - "title" must be short (max 4-5 words).
+   - "desc" must be exactly 2-3 lines (around 18-25 words). It MUST be highly professional, action-oriented, and easy to scan. Do NOT sound conversational.
+   - "priority" must be "High", "Medium", or "Low".
+6. Provide an "analysisSummary" (array of exactly 5-6 string bullet points) summarizing key metrics. Examples: "18 public repositories analyzed.", "Primary language: JavaScript.", "Documentation quality is moderate." DO NOT return empty strings.
+7. Provide an "overallAssessment" paragraph. It MUST be different for every profile and based entirely on the analyzed repositories. Do NOT return empty strings, null, or placeholders. This MUST be a professional engineering audit summary. Do NOT use generic AI phrases like "Great job" or "Good start".
 
 Required JSON Schema:
 {
-  "overallScore": 85,
-  "completenessScore": 90,
-  "searchVisibilityScore": 80,
-  "analysis": {
-    "headline": "Feedback on headline...",
-    "about": "Feedback on about section...",
-    "skills": "Feedback on skills gap...",
-    "projects": "Feedback on project quality...",
-    "experience": "Feedback on experience...",
-    "certifications": "Feedback on certifications..."
+  "githubScore": 0,
+  "analysisSummary": [
+    "string",
+    "string",
+    "string",
+    "string",
+    "string"
+  ],
+  "overallAssessment": "string",
+  "careerMatch": {
+    "frontend": 0,
+    "backend": 0,
+    "aiTools": 0,
+    "cloudDevOps": 0
   },
-  "topSuggestions": [
-    { "priority": "High", "suggestion": "..." }
+  "strengths": ["..."],
+  "weaknesses": ["..."],
+  "recommendations": [
+    { "title": "...", "desc": "...", "priority": "High" }
   ]
 }
 
 Return JSON only.`;
 
-      const result = await callGemini(prompt, "You are an expert career coach. Output valid JSON only.", inlineDataItems, 0.3, 'LinkedIn Analysis', 45000);
-      analyticsService.trackEvent('LinkedIn Analysis Completed', { overallScore: result.overallScore });
-      return result;
-    } catch (error) {
-      console.error('Gemini LinkedIn Analysis Error:', error);
-      analyticsService.trackError('LinkedIn Analysis Feature Error', error);
-      throw error;
-    }
-  },
-
-  async analyzeGithubPortfolio(username, githubData, targetRole, localMetrics) {
-    analyticsService.trackEvent('GitHub Analysis Started');
-    try {
-      const prompt = `You are a senior engineering manager and career coach.
-Analyze the provided GitHub portfolio data for user "${username}" against the target role of "${targetRole}".
-
-GITHUB DATA SUMMARY:
-Total Repos: ${githubData.length}
-Languages Detected: ${localMetrics.technologyAnalysis.detected.join(', ')}
-
-CRITICAL INSTRUCTIONS:
-1. Identify specific strengths and weaknesses based on the portfolio.
-2. Provide actionable improvement suggestions.
-3. Generate a list of explicitly "missingSkills" and "missingProjects" that the user should build next to improve their chances.
-
-Required JSON Schema:
-{
-  "strengths": ["..."],
-  "weaknesses": ["..."],
-  "improvementSuggestions": ["..."],
-  "missingSkills": ["..."],
-  "missingProjects": ["..."]
-}
-
-Return JSON only.`;
-
-      const result = await callGemini(prompt, "You are an expert career coach. Output valid JSON only.", [], 0.3, 'GitHub Analysis', 45000);
+      // Use longer timeout as this is a heavy reasoning task (passing deep repo data)
+      console.log("[geminiService] Sending prompt to callGemini...");
+      const result = await callGemini(prompt, "You are an expert tech recruiter. Output valid JSON only.", [], 0.3, 'GitHub Analysis', 60000);
+      console.log("[geminiService] callGemini returned:", result);
       
-      if (result._fallbackMode) {
+      if (result && result._fallbackMode) {
+        console.warn("[geminiService] Result has _fallbackMode = true");
         return result; // Pass fallback flag up
       }
 
       analyticsService.trackEvent('GitHub Analysis Completed');
       return result;
     } catch (error) {
-      console.error('Gemini GitHub Analysis Error:', error);
+      console.error('=== [geminiService] Gemini GitHub Analysis ERROR CAUGHT ===', error);
       analyticsService.trackError('GitHub Analysis Feature Error', error);
       // Return fallback mode object if it completely throws
-      return { _fallbackMode: true, _status: "Error" };
+      return { _fallbackMode: true, _status: "Error", _errorMessage: error.message };
     }
   }
 };

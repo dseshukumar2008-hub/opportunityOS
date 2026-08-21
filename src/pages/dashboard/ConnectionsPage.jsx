@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConnections } from '../../contexts/ConnectionContext';
-import { useNotifications } from '../../contexts/NotificationContext';
 import {
   Users, Search, MessageSquare, UserMinus, GraduationCap,
   Link2, ChevronRight, Sparkles, X
@@ -59,8 +58,7 @@ function ConfirmDialog({ name, onConfirm, onCancel }) {
 export default function ConnectionsPage() {
   const navigate = useNavigate();
   const { getMyConnections, getMutualCount, removeConnection } = useConnections();
-  const { addNotification } = useNotifications();
-
+  
   const [search, setSearch] = useState('');
   const [confirmRemove, setConfirmRemove] = useState(null); // { connectionId, name }
 
@@ -79,12 +77,7 @@ export default function ConnectionsPage() {
   const handleRemove = () => {
     if (!confirmRemove) return;
     removeConnection(confirmRemove.connectionId);
-    addNotification({
-      category: 'Connections',
-      title: 'Connection Removed',
-      message: `You removed ${confirmRemove.name} from your connections.`,
-    });
-    setConfirmRemove(null);
+        setConfirmRemove(null);
   };
 
   const handleMessage = () => {

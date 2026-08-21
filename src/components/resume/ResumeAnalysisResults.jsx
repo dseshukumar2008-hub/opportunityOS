@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertCircle, FileSearch, Sparkles, RefreshCw, ChevronRight, Zap, Target, Award, TrendingUp, Briefcase, Activity } from 'lucide-react';
+import { CheckCircle2, AlertCircle,  Sparkles, RefreshCw, ChevronRight,  Target, Award, TrendingUp, Briefcase, Activity } from 'lucide-react';
 
 function CircularScore({ score }) {
   const r = 36;
@@ -58,7 +58,6 @@ export default function ResumeAnalysisResults({ results, onReset }) {
   const summary = results.summary || 'Resume analysis completed.';
   const strengths = results.strengths || [];
   const areasForGrowth = results.areasForGrowth || [];
-  const interviewReadiness = results.interviewReadiness || 'Not Ready';
   const qualityRating = results.qualityRating || (score >= 90 ? 'Excellent' : score >= 70 ? 'Good' : 'Needs Work');
   const actionPlan = results.actionPlan || {};
   const explanation = results.explanation || [];
@@ -102,10 +101,9 @@ export default function ResumeAnalysisResults({ results, onReset }) {
           </p>
         </div>
 
-        <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4 w-full h-full">
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 w-full h-full">
            <StatCard icon={CheckCircle2} label="Skills" value={extractedSkills.length} color="text-[#10B981]" bg="bg-[#ECFDF5]" />
            <StatCard icon={AlertCircle} label="Missing" value={missingKeywords.length} color="text-[#F97316]" bg="bg-[#FFF7ED]" />
-           <StatCard icon={TrendingUp} label="Readiness" value={interviewReadiness.split(' ')[0]} color="text-[#6D5DF6]" bg="bg-[#F4F2FF]" />
            <StatCard icon={Award} label="Quality" value={qualityRating} color="text-[#F59E0B]" bg="bg-[#FFFBEB]" />
         </div>
       </div>

@@ -99,6 +99,7 @@ export const optimizeLargeResumeText = (text, maxLength = 25000) => {
   
   for (const chunk of chunks) {
     // Ignore purely decorative chunks
+// eslint-disable-next-line no-useless-escape
     if (/^[=_\-*\| ]+$/.test(chunk.trim())) continue;
     
     if (optimizedText.length + chunk.length + 2 > maxLength) {

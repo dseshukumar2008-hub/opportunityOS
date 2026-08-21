@@ -72,6 +72,7 @@ export default function ResumeSmartSuggestions({ suggestions, currentScore, pote
             dotColor = 'bg-amber-500';
             impactScore = '+5';
           } else if (suggestion.priority === 'LOW') {
+// eslint-disable-next-line no-unused-vars
             priorityColor = 'bg-blue-50 text-blue-700 border-blue-100';
             dotColor = 'bg-blue-500';
             impactScore = '+2';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrainCircuit, Target, Briefcase, TrendingUp } from 'lucide-react';
 
 export default function RecommendationReasoning({ recommendation }) {

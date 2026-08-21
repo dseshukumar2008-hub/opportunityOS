@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import  { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { UploadCloud, ArrowRight, ArrowLeft, CheckCircle2, FileText, Sparkles } from 'lucide-react';
 

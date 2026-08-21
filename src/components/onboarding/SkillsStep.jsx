@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Code2, ArrowRight, ArrowLeft, Layout, Server, Database, Cpu, Cloud, Settings, Smartphone, PieChart } from 'lucide-react';
+import { Check,  ArrowRight, ArrowLeft, Layout, Server, Database, Cpu, Cloud, Settings, Smartphone, PieChart } from 'lucide-react';
 
 const skillCategories = [
   {
@@ -52,6 +52,7 @@ export default function SkillsStep({ onNext, onBack, data = [], updateData }) {
     if (updateData) {
       updateData(selectedSkills);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSkills]);
 
   const toggleSkill = (skill) => {

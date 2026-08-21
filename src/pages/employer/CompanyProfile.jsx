@@ -21,6 +21,7 @@ export default function CompanyProfile() {
 
   useEffect(() => {
     if (companyProfile) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         company_name: companyProfile.company_name || '',
         website: companyProfile.website || '',

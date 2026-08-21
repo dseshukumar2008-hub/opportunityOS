@@ -1,4 +1,3 @@
-import React from 'react';
 import { Target, FileText, Code, ChevronRight, Briefcase, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';

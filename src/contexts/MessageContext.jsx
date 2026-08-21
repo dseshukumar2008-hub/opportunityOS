@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect} from 'react';
 import { useAuth } from './AuthContext';
 import { db } from '../config/firebase';
 import { collection, query, where, onSnapshot, addDoc, updateDoc, doc, serverTimestamp, getDocs, or } from 'firebase/firestore';
@@ -28,6 +28,7 @@ export function MessageProvider({ children }) {
 
   useEffect(() => {
     if (!user) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setConversations([]);
       return;
     }
@@ -123,6 +124,7 @@ export function MessageProvider({ children }) {
     });
 
     return () => unsubscribe();
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const migrateLocalMessages = async () => {

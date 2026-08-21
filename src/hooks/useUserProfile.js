@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../config/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 const profileCache = new Map();
-const pendingFetches = new Map();
 
 export function useUserProfile() {
   const { user } = useAuth();
@@ -12,28 +11,21 @@ export function useUserProfile() {
   const [isLoading, setIsLoading] = useState(!profileCache.has(user?.id));
 
   useEffect(() => {
-    if (!user) {
+    if (!user?.id) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setProfile(null);
       setIsLoading(false);
       return;
     }
 
-    if (profileCache.has(user.id)) {
-      setProfile(profileCache.get(user.id));
-      setIsLoading(false);
-      return;
+    if (!profileCache.has(user.id)) {
+      setIsLoading(true);
     }
 
-    const fetchProfile = async () => {
-      try {
-        let fetchPromise = pendingFetches.get(user.id);
-        if (!fetchPromise) {
-          const docRef = doc(db, 'users', user.id);
-          fetchPromise = getDoc(docRef);
-          pendingFetches.set(user.id, fetchPromise);
-        }
-
-        const docSnap = await fetchPromise;
+    const docRef = doc(db, 'users', user.id);
+    const unsubscribe = onSnapshot(
+      docRef,
+      (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
           profileCache.set(user.id, data);
@@ -41,16 +33,16 @@ export function useUserProfile() {
         } else {
           setProfile(null);
         }
-      } catch (err) {
-        console.error("Error fetching user profile:", err);
-      } finally {
-        pendingFetches.delete(user.id);
+        setIsLoading(false);
+      },
+      (err) => {
+        console.error("Error subscribing to user profile:", err);
         setIsLoading(false);
       }
-    };
+    );
 
-    fetchProfile();
-  }, [user]);
+    return () => unsubscribe();
+  }, [user?.id]);
 
   const updateCache = (newProfile) => {
     if (user?.id) {

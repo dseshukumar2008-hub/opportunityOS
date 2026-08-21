@@ -41,6 +41,7 @@ export const providerHealth = {
     health.averageResponseTime = Math.round((currentTotal + responseTimeMs) / health.totalRequests);
   },
 
+// eslint-disable-next-line no-unused-vars
   recordFailure: (providerName, error) => {
     const health = healthRegistry[providerName];
     if (!health) return;

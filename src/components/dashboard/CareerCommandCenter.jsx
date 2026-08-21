@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
+// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
   User, FileText, Briefcase, BookmarkCheck, Users2,
   Sparkles, ChevronRight, TrendingUp,
   Target, Zap,

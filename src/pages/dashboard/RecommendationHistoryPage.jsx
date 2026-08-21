@@ -3,6 +3,7 @@ import { useRecommendationHistory } from '../../hooks/useRecommendationHistory';
 import { 
   History, TrendingUp, Calendar, ArrowUpRight, CheckCircle2, ChevronRight, 
   Award, Search, SlidersHorizontal, Grid, List, Clock, Sparkles, Trophy, 
+// eslint-disable-next-line no-unused-vars
   Briefcase, CheckSquare, ShieldAlert, ArrowUpDown, ChevronDown, RefreshCcw
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -45,6 +46,7 @@ export default function RecommendationHistoryPage() {
 
   // Calculate improvement metrics
   const scoreImprovement = newestSnapshot.averageMatchScore - oldestSnapshot.averageMatchScore;
+// eslint-disable-next-line no-unused-vars
   const averageRecommendationCount = Math.round(
     history.reduce((sum, h) => sum + (h.recommendationCount || 0), 0) / history.length
   );

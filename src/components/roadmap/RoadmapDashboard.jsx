@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import {
   CheckCircle2, Circle, ChevronDown, ChevronRight, Trophy,
   Clock, Target, BookOpen, FolderOpen, PlaySquare,
+// eslint-disable-next-line no-unused-vars
   Zap, TrendingUp, RotateCcw, Star, FileText, Code, Briefcase, Sparkles, ArrowRight, ExternalLink, Download
 } from 'lucide-react';
 import { generateRoadmapPDF } from '../../utils/generateRoadmapPDF';
@@ -173,10 +173,6 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
                         {r.provider && <span className="text-[11px] font-bold text-slate-400 truncate">{r.provider}</span>}
                       </div>
                       <p className="font-bold text-slate-800 text-sm line-clamp-2 group-hover:text-[#6C4CF1] transition-colors">{r.title}</p>
-                      
-                      <div className="flex items-center gap-1.5 text-[12px] font-bold text-[#6C4CF1] mt-auto pt-2">
-                        View Resource <ExternalLink size={14} />
-                      </div>
                     </a>
                   );
                 })}
@@ -285,6 +281,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
   // Expand the active phase by default
   const [expandedPhases, setExpandedPhases] = useState({});
   useEffect(() => {
+// eslint-disable-next-line react-hooks/set-state-in-effect
     setExpandedPhases({ [activePhaseIdx]: true });
   }, [activePhaseIdx]);
 
@@ -425,6 +422,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
             const tks = p.tasks || [];
             const isDone = tks.length > 0 && tks.every(t => completedTasks.includes(t.id));
             
+// eslint-disable-next-line no-unused-vars
             const isNextDone = i < phases.length - 1 && phases[i+1]?.tasks?.length > 0 && phases[i+1].tasks.every(t => completedTasks.includes(t.id));
             const isPathActive = isDone || (i < activePhaseIdx);
             
@@ -499,10 +497,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
             </div>
             <div className="bg-indigo-50/60 rounded-2xl p-6 border border-indigo-100/50">
               <h4 className="text-[18px] font-black text-slate-900 mb-2">{sidebar.currentFocus?.title || phases[activePhaseIdx]?.title || 'Foundation'}</h4>
-              <p className="text-[13px] text-slate-600 font-medium leading-relaxed mb-6">{sidebar.currentFocus?.description || phases[activePhaseIdx]?.description}</p>
-              <button onClick={() => setExpandedPhases({[activePhaseIdx]: true})} className="w-full py-3 bg-[#6C4CF1]/10 text-[#6C4CF1] hover:bg-[#6C4CF1]/20 rounded-xl font-bold text-sm transition-colors">
-                View Active Phase
-              </button>
+              <p className="text-[13px] text-slate-600 font-medium leading-relaxed">{sidebar.currentFocus?.description || phases[activePhaseIdx]?.description}</p>
             </div>
           </div>
 
@@ -520,12 +515,9 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
                   </div>
                   <h4 className="text-[15px] font-extrabold text-slate-900 mb-1">{dynamicResource.title}</h4>
                   <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-2">{dynamicResource.platform || dynamicResource.provider}</p>
-                  <div className="flex items-center gap-1 text-[12px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded mb-5">
+                  <div className="flex items-center gap-1 text-[12px] font-bold text-amber-500 bg-amber-50 px-2 py-1 rounded">
                     <Star size={12} className="fill-amber-500"/> {dynamicResource.rating}
                   </div>
-                  <a href={dynamicResource.url} target="_blank" rel="noopener noreferrer" className="w-full py-3 bg-slate-900 hover:bg-black text-white rounded-xl font-bold text-sm transition-colors text-center block">
-                    Watch Now
-                  </a>
                 </>
               ) : (
                 <>
@@ -533,10 +525,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
                     <BookOpen size={32} />
                   </div>
                   <h4 className="text-[15px] font-extrabold text-slate-900 mb-1">No recommended resource available yet.</h4>
-                  <p className="text-[12px] font-medium text-slate-500 mb-5">Check back later or explore manually.</p>
-                  <button disabled className="w-full py-3 bg-slate-100 text-slate-400 rounded-xl font-bold text-sm cursor-not-allowed">
-                    Watch Now
-                  </button>
+                  <p className="text-[12px] font-medium text-slate-500">Check back later or explore manually.</p>
                 </>
               )}
             </div>

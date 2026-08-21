@@ -1,4 +1,3 @@
-import React from 'react';
 import { Layers, CheckCircle2, Circle } from 'lucide-react';
 import { useCareer } from '../../contexts/CareerContext';
 

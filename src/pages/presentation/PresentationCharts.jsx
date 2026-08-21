@@ -41,8 +41,7 @@ const oppCategoriesData = [
 
 const funnelData = [
   { name: 'Applied', value: 1243, color: '#6C4CF1' },
-  { name: 'Screened', value: 680, color: '#3b82f6' },
-  { name: 'Interview', value: 310, color: '#14b8a6' },
+  { name: 'Portfolio', value: 290, color: '#f59e0b' },
   { name: 'Offer', value: 112, color: '#f59e0b' },
   { name: 'Accepted', value: 89, color: '#10b981' },
 ];

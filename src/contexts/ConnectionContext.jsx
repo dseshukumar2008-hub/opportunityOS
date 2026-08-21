@@ -49,6 +49,7 @@ export function ConnectionProvider({ children }) {
     if (unsubRequests.current) unsubRequests.current();
 
     if (!currentUserId) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setConnections([]);
       setRequests([]);
       setLoading(false);
@@ -68,6 +69,7 @@ export function ConnectionProvider({ children }) {
       collection(db, 'connections'),
       where('userId1', '==', currentUserId)
     );
+    
     // Connections where user is participant 2
     const connQuery2 = query(
       collection(db, 'connections'),

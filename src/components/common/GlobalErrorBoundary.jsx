@@ -1,6 +1,5 @@
 import { ErrorBoundary } from 'react-error-boundary';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { analyticsService } from '../../services/analyticsService';
 
 
@@ -10,6 +9,7 @@ function FallbackUI({ error, resetErrorBoundary, type = 'global' }) {
   };
 
   const isWidget = type === 'widget';
+// eslint-disable-next-line no-unused-vars
   const isRoute = type === 'route';
 
   return (

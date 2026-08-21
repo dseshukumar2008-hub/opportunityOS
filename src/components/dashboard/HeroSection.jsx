@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Briefcase, FileText, TrendingUp, Clock, Users } from 'lucide-react';
+import { Sparkles,  FileText, TrendingUp} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
@@ -29,6 +29,8 @@ function StatPill({ icon: Icon, label, value, colorClass, href }) {
 export default function HeroSection() {
   const { user } = useAuth();
   const { profile } = useUserProfile();
+// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
   const { recommendedOpportunities, careerReadiness, bestOpportunity, isLoading } =
     useDashboardInsights();
   const { atsScore, hasInsights } = useResumeInsights();

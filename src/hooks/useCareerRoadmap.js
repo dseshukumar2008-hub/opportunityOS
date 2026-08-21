@@ -2,7 +2,6 @@ import { useReducer, useEffect, useRef, useCallback } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
-import { useNotifications } from '../contexts/NotificationContext';
 import { useProfile } from '../contexts/ProfileContext';
 import { analyticsService } from '../services/analyticsService';
 import { getTemplateRoadmap } from '../data/roadmapTemplates';
@@ -172,7 +171,6 @@ const ENABLE_AI_NOTIFICATIONS = false;
 
 export function useCareerRoadmap() {
   const [state, dispatch] = useReducer(reducer, INITIAL);
-  const { addNotification } = useNotifications();
   const { profile, mergeProfileData } = useProfile();
   const uidRef = useRef(null);
   const dispatch$ = useRef(dispatch);
@@ -265,9 +263,9 @@ export function useCareerRoadmap() {
     }
 
     if (!parsed) {
-      console.log('[Roadmap Gen] All attempts failed. Using fallback template.');
-      parsed = getTemplateRoadmap(wizardData.targetCareer);
-      fallbackUsed = true;
+      console.log('[Roadmap Gen] All attempts failed.');
+      dispatch$.current({ type: 'GEN_ERROR', error: 'Failed to generate a roadmap. Please try again later.' });
+      return;
     }
 
     try {
@@ -302,22 +300,8 @@ export function useCareerRoadmap() {
       });
 
       if (ENABLE_AI_NOTIFICATIONS) {
-        if (fallbackUsed) {
-          addNotification({
-            title: 'Template Generated',
-            message: 'AI generation is temporarily unavailable. A professional roadmap template has been generated.',
-            type: 'System',
-            targetUrl: '/career-roadmap'
-          });
-        } else {
-          addNotification({
-            title: 'Career Roadmap Created',
-            message: `Your new roadmap for ${wizardData.targetCareer} is ready.`,
-            type: 'System',
-            targetUrl: '/career-roadmap'
-          });
-        }
-        console.log("[STEP 9] Notification created");
+        // Notifications are currently disabled globally.
+        console.log("[STEP 9] Notification system disabled");
       }
       if (!fallbackUsed) {
         analyticsService.trackEvent('Roadmap Generated', { targetCareer: wizardData.targetCareer });
@@ -328,7 +312,7 @@ export function useCareerRoadmap() {
       console.error('[Roadmap Gen] Save Error:', saveErr);
       dispatch$.current({ type: 'GEN_ERROR', error: 'Failed to save roadmap to database.' });
     }
-  }, [profile, addNotification, mergeProfileData]);
+  }, [profile, mergeProfileData]);
 
   const toggleTask = useCallback(async (taskId, done) => {
     const uid = uidRef.current;
@@ -354,19 +338,14 @@ export function useCareerRoadmap() {
           const wereAllCompleted = allPhaseTasks.every(id => prev.includes(id));
           const areAllCompleted = allPhaseTasks.every(id => next.includes(id));
           if (!wereAllCompleted && areAllCompleted) {
-             addNotification({
-               title: 'Phase Completed & Unlocked',
-               message: `You completed "${phase.title}". Next phase unlocked!`,
-               type: 'Opportunities',
-               targetUrl: '/career-roadmap'
-             });
+             console.log(`Phase "${phase.title}" completed`);
           }
         }
       }
     } catch (err) {
       console.error('Failed to update task:', err);
     }
-  }, [state.roadmap, addNotification]);
+  }, [state.roadmap]);
 
   const reset = useCallback(async () => {
     const uid = uidRef.current;

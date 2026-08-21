@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { TrendingUp, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCareer } from '../../contexts/CareerContext';

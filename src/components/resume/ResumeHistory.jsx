@@ -28,7 +28,7 @@ export default function ResumeHistory({ history, getBestVersion, compareVersions
   }
 
   // Trend Chart logic
-  const chartHeight = 150;
+  const chartHeight = 150;  
   const maxScore = 100;
   const minScore = Math.max(0, Math.min(...history.map(h => h.results.overallScore)) - 10);
   const chartRange = maxScore - minScore;

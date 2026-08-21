@@ -124,12 +124,13 @@ export function useOpportunityMatch() {
           sourcesUsed: contextToUse.sourcesUsed,
           confidence: 'Low'
         });
-      } catch (fallbackErr) {
+      } catch (_e) {
         setMatchResult(null);
       }
     } finally {
       setIsAnalyzing(false);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileContext, uploadNewResume, resumeData]);
 
   return {

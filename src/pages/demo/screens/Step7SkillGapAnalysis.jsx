@@ -20,7 +20,7 @@ export default function Step7SkillGapAnalysis() {
       low: ["Docker"]
     },
     learningPath: [
-      { title: "Grokking the System Design Interview", time: "Week 1-2" },
+      { title: "System Design Architecture", time: "Week 1-2" },
       { title: "AWS Solutions Architect", time: "Week 3-4" },
       { title: "GraphQL Apollo Server", time: "Week 5" }
     ],

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowLeft, X, Rocket, CheckCircle2, Home } from 'lucide-react';
+import { ArrowRight, ArrowLeft, X, Rocket, CheckCircle2} from 'lucide-react';
 import DemoTimeline from './DemoTimeline';
 import DemoPreviewCard from './DemoPreviewCard';
 

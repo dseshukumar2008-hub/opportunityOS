@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Bot, CheckCircle2, Loader2 } from 'lucide-react';
 import { geminiService } from '../../services/geminiService';
 import { fileToBase64 } from '../../utils/fileUtils';
-import { toast } from 'react-hot-toast';
 
 const STEPS = [
   "Extracting Skills from Sources...",
@@ -12,6 +11,7 @@ const STEPS = [
   "Building Personalized Learning Path..."
 ];
 
+// eslint-disable-next-line no-unused-vars
 export default function Step3Analyzing({ targetRole, sources, inputData, onComplete }) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 

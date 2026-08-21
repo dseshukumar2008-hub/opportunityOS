@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../config/firebase';
-import { collection, query, where, getDocs, doc, deleteDoc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc,  setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { ShieldAlert, CheckCircle2, XCircle, Search, Building2, Briefcase, MapPin, Clock, BarChart3, Users, FileText, Map, Target, MessageSquare } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, XCircle,  Building2, Briefcase, MapPin, Clock, BarChart3, Users, FileText, Map, Target, MessageSquare } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
@@ -23,20 +23,6 @@ export default function AdminDashboardPage() {
   
   // Modal state
   const [actionOpportunity, setActionOpportunity] = useState(null); // { opp, action: 'approve' | 'reject' }
-  const [isConfirming, setIsConfirming] = useState(false);
-
-  useEffect(() => {
-    // Basic admin check - in a real app this would be a strict middleware
-    if (user?.user_type !== 'admin') {
-      toast.error('Unauthorized access');
-      navigate('/dashboard');
-      return;
-    }
-
-    fetchPendingOpportunities();
-    fetchMetrics();
-  }, [user, navigate]);
-
   const fetchMetrics = async () => {
     try {
       const snapshot = await getDocs(collection(db, 'telemetry_events'));
@@ -76,6 +62,20 @@ export default function AdminDashboardPage() {
       setIsLoading(false);
     }
   };
+
+  const [isConfirming, setIsConfirming] = useState(false);
+  useEffect(() => {
+    // Basic admin check - in a real app this would be a strict middleware
+    if (user?.user_type !== 'admin') {
+      toast.error('Unauthorized access');
+      navigate('/dashboard');
+      return;
+    }
+
+    fetchPendingOpportunities();
+    fetchMetrics();
+  }, [user, navigate]);
+
 
   const triggerAction = (opp, action) => {
     setActionOpportunity({ opp, action });

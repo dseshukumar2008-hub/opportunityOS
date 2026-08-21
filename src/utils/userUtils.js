@@ -13,6 +13,7 @@ export const getUserFirstName = (user, profile = null) => {
   }
   if (user?.email) {
     // Try to extract a clean first name from email by removing numbers/symbols
+// eslint-disable-next-line no-useless-escape
     const namePart = user.email.split('@')[0].split(/[\._0-9]/)[0];
     if (namePart && namePart.length > 1) {
       return namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
@@ -35,6 +36,7 @@ export const getUserFullName = (user, profile = null) => {
     return user.name;
   }
   if (user?.email) {
+// eslint-disable-next-line no-useless-escape
     const namePart = user.email.split('@')[0].split(/[\._0-9]/)[0];
     if (namePart && namePart.length > 1) {
       return namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();

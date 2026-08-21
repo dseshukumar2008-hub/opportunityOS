@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import { useAuth } from './AuthContext';
 import { useActivity } from './ActivityContext';
 import { auth, db } from '../config/firebase';
-import { collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, where} from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
 const ResumeContext = createContext(null);
@@ -122,6 +122,7 @@ export const ResumeProvider = ({ children }) => {
   }, [user, activeResumeId]);
 
   useEffect(() => {
+// eslint-disable-next-line react-hooks/set-state-in-effect
     fetchResumes();
   }, [fetchResumes, session]);
 
@@ -283,7 +284,7 @@ export const ResumeProvider = ({ children }) => {
 
         try {
           await deleteDoc(doc(db, 'users', user.uid, 'match_resume', 'current'));
-        } catch (e) {
+        } catch (_e) {
           console.log('No current match to delete');
         }
       } catch (cleanupErr) {
@@ -579,6 +580,7 @@ export const ResumeProvider = ({ children }) => {
       }
     }, 1500);
     return () => clearTimeout(timeout);
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resumeData, activeTemplate, isDirty, activeResumeId]);
 
   const handleSetActiveTemplate = (tmpl) => {

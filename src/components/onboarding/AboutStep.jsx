@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { motion } from 'framer-motion';
-import { UserRoundPen, ArrowRight, ArrowLeft } from 'lucide-react';
+import {  ArrowRight, ArrowLeft } from 'lucide-react';
 
 export default function AboutStep({ onNext, onBack, data = {}, updateData }) {
   const [focused, setFocused] = useState(false);
   const maxLength = 300;
   
   // Local state as fallback if FloatingOnboarding isn't passing data yet
-  const [localText, setLocalText] = useState(data.about || '');
+  const [localText, setLocalText] = useState(data.bio || '');
 
-  const text = data.about !== undefined ? data.about : localText;
+  const text = data.bio !== undefined ? data.bio : localText;
   
   const handleChange = (e) => {
     const val = e.target.value;
     if (val.length <= maxLength) {
       if (updateData) {
-        updateData({ about: val });
+        updateData({ bio: val });
       }
       setLocalText(val);
     }
@@ -81,7 +81,12 @@ export default function AboutStep({ onNext, onBack, data = {}, updateData }) {
           ) : <div></div>}
           
           <button
-            onClick={onNext}
+            onClick={() => {
+              if (updateData && (!text || text.trim() === '')) {
+                updateData({ bio: '' });
+              }
+              onNext();
+            }}
             className="h-[58px] px-8 bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white rounded-[18px] font-bold text-[16px] shadow-[0_12px_24px_rgba(124,58,237,0.25)] hover:-translate-y-[2px] hover:shadow-[0_16px_32px_rgba(124,58,237,0.35)] active:translate-y-0 active:scale-[0.98] active:shadow-[0_4px_12px_rgba(124,58,237,0.2)] transition-all duration-200 flex items-center justify-center gap-3"
           >
             Continue

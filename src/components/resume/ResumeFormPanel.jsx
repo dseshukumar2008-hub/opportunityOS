@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState} from 'react';
 import { useResume } from '../../contexts/ResumeContext';
 import { 
   User, 
@@ -55,7 +55,7 @@ export default function ResumeFormPanel() {
       const enhanced = await geminiService.enhanceResumeText(currentValue, contextType, actionType);
       setAiDrafts(prev => ({ ...prev, [id]: enhanced }));
       toast.success('AI generation complete!');
-    } catch (err) {
+    } catch (_e) {
       toast.error('Failed to enhance text.');
     } finally {
       setEnhancingField(null);

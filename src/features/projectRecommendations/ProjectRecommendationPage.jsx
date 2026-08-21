@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, Compass } from 'lucide-react';
+import { Sparkles, Compass, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { useCareer } from '../../contexts/CareerContext';
 import { generateProjectRecommendations } from '../../services/projectRecommendationEngine';
-import { saveRecommendation, getSavedRecommendations } from '../../services/recommendationRepository';
+import { saveRecommendation, getSavedRecommendations, removeSavedRecommendation } from '../../services/recommendationRepository';
 import { toast } from 'react-hot-toast';
 
 import ContextualBackButton from '../../components/navigation/ContextualBackButton';
@@ -21,11 +21,13 @@ export default function ProjectRecommendationPage() {
   const { careerContext } = useCareer();
   
   const [recommendations, setRecommendations] = useState([]);
+  const [history, setHistory] = useState([]);
   const [savedProjectIds, setSavedProjectIds] = useState(new Set());
   const [loading, setLoading] = useState(false);
   const [specialization, setSpecialization] = useState('');
   const [targetRole, setTargetRole] = useState('');
   const [missingSkills, setMissingSkills] = useState([]);
+// eslint-disable-next-line no-unused-vars
   const [apiError, setApiError] = useState(null);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
 
@@ -41,11 +43,13 @@ export default function ProjectRecommendationPage() {
       return;
     }
 
+// eslint-disable-next-line no-useless-assignment
     let contextRole = '';
     let parsedMissingSkills = missingSkillsStr ? missingSkillsStr.split(',') : [];
     
     if (careerContext?.targetRole) {
       contextRole = careerContext.targetRole;
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setTargetRole(contextRole);
       
       if (parsedMissingSkills.length > 0) {
@@ -66,6 +70,7 @@ export default function ProjectRecommendationPage() {
     if (user) {
       loadSavedProjects();
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadSavedProjects = async () => {
@@ -92,21 +97,35 @@ export default function ProjectRecommendationPage() {
     setApiError(null);
     setLoading(true);
     try {
+      let currentExcluded = [...history];
+      if (forceRefresh && recommendations.length > 0) {
+        const currentTitles = recommendations.map(r => r.title);
+        currentExcluded = [...currentExcluded, ...currentTitles];
+      }
+
       const newRecs = await generateProjectRecommendations({
         specialization: spec,
         targetRole: role,
         missingSkills: skills
-      }, forceRefresh);
+      }, forceRefresh, currentExcluded);
+      
       setRecommendations(newRecs);
+      if (forceRefresh) {
+        setHistory(currentExcluded);
+      }
       
       // Check if it's the fallback data (has isMock true)
       if (!(newRecs.length > 0 && newRecs[0].isMock)) {
-        toast.success("Generated personalized project recommendations!");
+        if (forceRefresh && recommendations.length > 0) {
+          toast.success("Generated fresh project recommendations!");
+        } else {
+          toast.success("Generated personalized project recommendations!");
+        }
       }
     } catch (error) {
       console.error("Recommendation Generation Error:", error);
-      // Fallback handled silently
-
+      setApiError(error.message || "Failed to generate recommendations");
+      toast.error("Analysis failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -115,17 +134,26 @@ export default function ProjectRecommendationPage() {
   const handleSaveProject = async (project) => {
     if (!user) return;
     
+    const isSaved = savedProjectIds.has(project.id);
+    
     try {
-      const careerGoal = profile?.careerGoal || "Software Engineer";
-      await saveRecommendation(user.uid, project, careerGoal);
-      setSavedProjectIds(prev => new Set(prev).add(project.id));
-      toast.success("Project saved to your workspace!");
+      if (isSaved) {
+        await removeSavedRecommendation(user.uid, project.id);
+        setSavedProjectIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(project.id);
+          return newSet;
+        });
+        toast.success("Project removed from saved projects");
+      } else {
+        const careerGoal = profile?.careerGoal || "Software Engineer";
+        await saveRecommendation(user.uid, project, careerGoal);
+        setSavedProjectIds(prev => new Set(prev).add(project.id));
+        toast.success("Project saved to your workspace!");
+      }
     } catch (error) {
-      console.log("Current User:", user);
-      console.log("UID:", user?.uid);
-      console.log("Project Data:", project);
-      console.error("Save Error:", error);
-      toast.error(`Failed to save project: ${error.message || error}`);
+      console.error("Toggle Save Error:", error);
+      toast.error(`Failed to ${isSaved ? 'remove' : 'save'} project: ${error.message || error}`);
     }
   };
 
@@ -179,6 +207,7 @@ export default function ProjectRecommendationPage() {
                 setSpecialization('');
                 setTargetRole('');
                 setRecommendations([]);
+                setHistory([]);
               }}
               className="flex-1 sm:flex-none items-center justify-center px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 transition-colors"
             >
@@ -189,8 +218,12 @@ export default function ProjectRecommendationPage() {
               disabled={loading}
               className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-[#6D4AFF] text-white text-sm font-bold rounded-lg hover:bg-[#5B3DE6] shadow-sm transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              <Sparkles size={16} className="text-white" />
-              {loading ? "Generating..." : "Refresh Ideas"}
+              {loading && recommendations.length > 0 ? (
+                <RefreshCw size={16} className="text-white animate-spin" />
+              ) : (
+                <Sparkles size={16} className="text-white" />
+              )}
+              {loading && recommendations.length > 0 ? "Refreshing Ideas..." : loading ? "Generating..." : "Refresh Ideas"}
             </button>
           </div>
         </div>
@@ -199,6 +232,17 @@ export default function ProjectRecommendationPage() {
       <div className="space-y-6">
         {loading ? (
           <LoadingState />
+        ) : apiError ? (
+          <div className="bg-red-50 border border-red-100 rounded-[24px] p-8 text-center mt-6">
+            <h3 className="text-xl font-bold text-red-600 mb-2">Analysis Failed</h3>
+            <p className="text-red-500 mb-6">{apiError}</p>
+            <button 
+              onClick={() => setApiError(null)}
+              className="px-6 py-2 bg-white text-red-600 border border-red-200 rounded-xl font-bold shadow-sm"
+            >
+              Dismiss
+            </button>
+          </div>
         ) : recommendations.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {recommendations.map((project, idx) => (

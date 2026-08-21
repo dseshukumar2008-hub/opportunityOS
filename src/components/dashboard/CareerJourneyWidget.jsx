@@ -1,28 +1,18 @@
-import { Map, CheckCircle2, Circle, Briefcase, FileText, Code, User, MessageSquare, Award } from 'lucide-react';
-import { useDashboardInsights } from '../../hooks/useDashboardInsights';
+import { Map, CheckCircle2, Circle, Briefcase, FileText, Code, User } from 'lucide-react';
+import { useUserProfile } from '../../hooks/useUserProfile';
 
-export default function CareerJourneyWidget() {
-  const { careerReadiness, isLoading } = useDashboardInsights();
+export default function CareerJourneyWidget({ userState }) {
+// eslint-disable-next-line no-unused-vars
+  const { hasProfile, hasResume, isNewUser } = userState || {};
+  const { profile } = useUserProfile(); // To check if skills are added
 
-  if (isLoading) {
-    return (
-      <div className="card-standard p-6 animate-pulse">
-        <div className="h-6 w-32 bg-slate-200 rounded mb-6"></div>
-        <div className="space-y-4">
-          {[1,2,3,4,5,6].map(i => (
-             <div key={i} className="h-10 bg-slate-100 rounded-lg w-full"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  const { breakdown } = careerReadiness;
+  const hasSkills = profile?.skills && profile.skills.length > 0;
 
   const steps = [
-    { id: 'profile', label: 'Profile Complete', icon: User, done: breakdown?.profile?.done },
-    { id: 'resume', label: 'Resume Uploaded', icon: FileText, done: breakdown?.resume?.done },
-    { id: 'skills', label: 'Core Skills Added', icon: Code, done: breakdown?.skills?.done },
+    { id: 'profile', label: 'Complete Profile', icon: User, done: hasProfile },
+    { id: 'skills', label: 'Add Skills', icon: Code, done: hasSkills },
+    { id: 'resume', label: 'Create Resume', icon: FileText, done: hasResume },
+    { id: 'opportunities', label: 'Explore Opportunities', icon: Briefcase, done: false }, // Typically false unless they applied
   ];
 
   return (
@@ -40,6 +30,7 @@ export default function CareerJourneyWidget() {
 
         <div className="space-y-5 relative z-10">
           {steps.map((step, index) => {
+// eslint-disable-next-line no-unused-vars
             const Icon = step.icon;
             const isDone = step.done;
             const isNext = !isDone && (index === 0 || steps[index - 1].done);
@@ -61,7 +52,7 @@ export default function CareerJourneyWidget() {
             return (
               <div key={step.id} className="flex items-center gap-4">
                 <div className={markerClass}>
-                  {isDone ? <CheckCircle2 size={16} /> : <Icon size={14} />}
+                  {isDone ? <CheckCircle2 size={16} /> : <Circle size={14} />}
                 </div>
                 <div className="flex-1 bg-white border border-slate-100 rounded-lg p-2 shadow-sm flex items-center">
                    <span className={textClass}>{step.label}</span>

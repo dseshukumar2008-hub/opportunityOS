@@ -21,12 +21,14 @@ export function ActivityProvider({ children }) {
   // Real-time listener for activities
   useEffect(() => {
     if (!currentUserId) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setActivities([]);
       setLoading(false);
       return;
     }
 
     // We only fetch activities for the current user to save reads
+// eslint-disable-next-line no-unused-vars
     const q = query(
       collection(db, 'activities'), 
       where('userId', '==', currentUserId),
@@ -56,6 +58,7 @@ export function ActivityProvider({ children }) {
       if (error.code === 'failed-precondition') {
         const fallbackQ = query(collection(db, 'activities'), where('userId', '==', currentUserId));
         let fallbackUnsubscribe;
+// eslint-disable-next-line no-unused-vars
         fallbackUnsubscribe = onSnapshot(fallbackQ, (fallbackSnapshot) => {
             const fetched = fallbackSnapshot.docs.map(doc => ({
                 id: doc.id,

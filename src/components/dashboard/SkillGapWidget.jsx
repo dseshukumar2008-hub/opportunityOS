@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Layers, ChevronRight } from 'lucide-react';
+import {  ChevronRight } from 'lucide-react';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 
 export default function SkillGapWidget() {
@@ -35,7 +35,7 @@ export default function SkillGapWidget() {
     return 'text-slate-600 bg-slate-50 border-slate-100';
   };
 
-  return (
+  return ( 
     <div className="card-standard p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[16px] font-black text-slate-900">Skill Gap Analysis</h3>

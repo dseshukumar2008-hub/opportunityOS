@@ -155,7 +155,7 @@ Example: ["ResumeAgent", "SkillGapAgent", "RoadmapAgent", "CareerPlannerAgent"]
         agentsUsed: ['FALLBACK'],
         error: error.message
       };
-    } catch (e) {
+    } catch (_e) {
       return {
         finalAnswer: "I apologize, but I am currently unable to process your request.",
         agentsUsed: [],

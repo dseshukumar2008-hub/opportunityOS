@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 import { getUserFirstName } from '../../utils/userUtils';
 
 export default function DailyDigestStrip() {
   const { user } = useAuth();
+// eslint-disable-next-line no-unused-vars
   const { recommendedOpportunities, isLoading } = useDashboardInsights();
 
   const firstName = getUserFirstName(user, null);

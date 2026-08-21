@@ -5,7 +5,6 @@ import { collection, query, orderBy, getDocs, addDoc, serverTimestamp } from 'fi
 import { useAuth } from '../../contexts/AuthContext';
 import { geminiService } from '../../services/geminiService';
 import ReactMarkdown from 'react-markdown';
-import toast from 'react-hot-toast';
 import { analyticsService } from '../../services/analyticsService';
 
 export default function OpportunityOSCopilot({ mode = 'student', contextData }) {
@@ -22,6 +21,7 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
     if (user && isOpen) {
       loadHistory();
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, isOpen]);
 
   useEffect(() => {

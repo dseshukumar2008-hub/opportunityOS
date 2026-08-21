@@ -1,37 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { 
   User, Mail, BookOpen, GraduationCap, Calendar, 
-  MapPin, Edit, FileText, Award, Bookmark, X, Camera,
-  Code, BarChart3, Trophy, Settings, Link as LinkIcon, 
+  MapPin, Edit, FileText, Award, Bookmark, X,
+  Code, BarChart3, Trophy, Link as LinkIcon, 
+// eslint-disable-next-line no-unused-vars
   Globe, Save, ChevronDown, Check
 } from 'lucide-react';
 import CareerReadinessPanel from '../../components/dashboard/CareerReadinessPanel';
-import AchievementsShowcase from '../../components/profile/AchievementsShowcase';
-import toast from 'react-hot-toast';
 import { getUserFullName } from '../../utils/userUtils';
+import toast from 'react-hot-toast';
+import { useDashboardInsights } from '../../hooks/useDashboardInsights';
+import { useResumeInsights } from '../../hooks/useResumeInsights';
+import { useCareerReadiness } from '../../hooks/useCareerReadiness';
+import { useGoals } from '../../contexts/GoalContext';
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
   const { profile, updateProfile } = useProfile();
+  const { profileCompletion } = useDashboardInsights();
+  const { hasInsights, atsScore } = useResumeInsights();
+  const { score: readinessScore } = useCareerReadiness();
+  const { goals } = useGoals();
   
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('personal-info');
   
   const profileData = {
     name: profile?.profile?.fullName || user?.name || getUserFullName(user, null),
     email: user?.email || '',
-    phone: profile?.profile?.phone || user?.phone || '+91 98765 43210',
-    college: profile?.education?.university || user?.college || 'NIAT',
-    branch: profile?.education?.branch || user?.branch || 'Computer Science Engineering',
-    year: profile?.education?.currentYear || user?.year || '1st Year',
-    expectedGraduation: profile?.education?.graduationYear || user?.expectedGraduation || '2029',
-    country: user?.country || user?.profile?.country || 'India',
+    phone: profile?.profile?.phone || user?.phone || '',
+    college: profile?.education?.university || user?.college || '',
+    branch: profile?.education?.branch || user?.branch || '',
+    year: profile?.education?.currentYear || user?.year || '',
+    expectedGraduation: profile?.education?.graduationYear || user?.expectedGraduation || '',
+    country: user?.country || user?.profile?.country || '',
     state: user?.state || user?.profile?.state || '',
     city: user?.city || user?.profile?.city || '',
     location: user?.location || '',
-    bio: profile?.about?.bio || user?.bio || 'Passionate first year Computer Science student who loves building web applications and solving real-world problems. I enjoy learning new technologies and working on innovative projects that create impact. Always excited to collaborate and grow together!',
-    skills: profile?.skills?.join(', ') || user?.skills || 'React, JavaScript, Python, HTML, CSS, Git, GitHub, C++, Node.js, Tailwind CSS, Figma, MongoDB, Firebase'
+    bio: profile?.about?.bio || user?.bio || '',
+    skills: profile?.skills?.join(', ') || user?.skills || '',
+    socialLinks: {
+      linkedin: profile?.socialLinks?.linkedin || '',
+      github: profile?.socialLinks?.github || '',
+      portfolio: profile?.socialLinks?.portfolio || '',
+      twitter: profile?.socialLinks?.twitter || ''
+    }
   };
 
   const [editForm, setEditForm] = useState(profileData);
@@ -50,13 +65,47 @@ export default function ProfilePage() {
       if (!cleanSkill) return;
       const currentSkills = editForm.skills ? editForm.skills.split(',').map(s => s.trim()).filter(Boolean) : [];
       if (currentSkills.some(s => s.toLowerCase() === cleanSkill.toLowerCase())) {
-        toast.error('Skill tag already exists in edit list!');
+        toast.error(`${cleanSkill} is already in your skills.`);
         return;
       }
       const updatedSkillsStr = [...currentSkills, cleanSkill].join(', ');
       setEditForm({ ...editForm, skills: updatedSkillsStr });
       setSkillInput('');
-      toast.success(`Staged skill: ${cleanSkill}`);
+    }
+  };
+
+  useEffect(() => {
+    if (!isEditModalOpen) return;
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    }, { rootMargin: '-20% 0px -60% 0px' });
+
+    const sections = ['personal-info', 'skills', 'about-me', 'links'];
+    
+    // Slight delay to allow DOM to render modal content
+    const timeoutId = setTimeout(() => {
+      sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+      });
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, [isEditModalOpen]);
+
+  const scrollToSection = (id) => {
+    setActiveSection(id);
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -67,13 +116,15 @@ export default function ProfilePage() {
     toast.success(`Removed staged skill: ${skillToRemove}`);
   };
 
-  const skillsList = profileData.skills.split(',').map(s => s.trim()).filter(Boolean);
+  const skillsList = profileData.skills ? profileData.skills.split(',').map(s => s.trim()).filter(Boolean) : [];
+  
+  const completedGoalsCount = goals?.filter(g => g.status === 'Completed' || g.currentValue >= g.targetValue)?.length || 0;
   
   const stats = [
-    { label: 'Resume Score', value: '85%', icon: FileText, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
-    { label: 'Profile Completion', value: '100%', icon: Trophy, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
-    { label: 'AI Readiness', value: '80%', icon: BarChart3, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
-    { label: 'Goals Completed', value: '12', icon: Bookmark, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
+    { label: 'Resume Score', value: hasInsights && atsScore ? `${atsScore}%` : 'Not analyzed', icon: FileText, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
+    { label: 'Profile Completion', value: `${profileCompletion?.score ?? 0}%`, icon: Trophy, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
+    { label: 'AI Readiness', value: `${readinessScore || 0}%`, icon: BarChart3, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
+    { label: 'Goals Completed', value: goals?.length > 0 ? `${completedGoalsCount}` : 'No goals tracked', icon: Bookmark, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
   ];
 
   return (
@@ -103,13 +154,10 @@ export default function ProfilePage() {
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div className="relative shrink-0">
                 <img 
-                  src={`https://api.dicebear.com/7.x/notionists/svg?seed=${getUserFullName(user, null)}&backgroundColor=e2e8f0`} 
+                  src={user?.photoURL || `https://api.dicebear.com/7.x/notionists/svg?seed=${getUserFullName(user, null)}&backgroundColor=e2e8f0`} 
                   alt="Profile Avatar" 
                   className="w-[120px] h-[120px] rounded-full border border-slate-200 bg-slate-100 object-cover"
                 />
-                <button className="absolute bottom-1 right-1 w-8 h-8 bg-[#6C4CF1] text-white rounded-full flex items-center justify-center hover:bg-[#5b3fda] transition-colors shadow-sm border-2 border-white">
-                  <Camera size={14} />
-                </button>
               </div>
               
               <div className="text-center sm:text-left mt-2">
@@ -120,9 +168,6 @@ export default function ProfilePage() {
                 <div className="flex flex-col gap-2.5 text-[14px] text-slate-600 font-medium">
                   <span className="flex items-center gap-2.5 justify-center sm:justify-start">
                     <Mail size={16} className="text-slate-400" /> {profileData.email}
-                  </span>
-                  <span className="flex items-center gap-2.5 justify-center sm:justify-start">
-                    <MapPin size={16} className="text-slate-400" /> {[profileData.city, profileData.state, profileData.country].filter(Boolean).join(', ') || profileData.location || 'Location not set'}
                   </span>
                 </div>
               </div>
@@ -229,6 +274,44 @@ export default function ProfilePage() {
               </p>
             </div>
 
+            {/* Social Links */}
+            {(profileData.socialLinks?.linkedin || profileData.socialLinks?.github || profileData.socialLinks?.portfolio || profileData.socialLinks?.twitter) && (
+              <div className="bg-white rounded-[16px] border border-slate-100 shadow-sm p-7">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="text-[#6C4CF1] bg-[#F4F2FF] w-8 h-8 rounded-lg flex items-center justify-center">
+                    <Globe size={16} />
+                  </div>
+                  <h3 className="text-[16px] font-bold text-slate-900">Social Links</h3>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {profileData.socialLinks.linkedin && (
+                    <a href={profileData.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-[13px] font-bold rounded-xl transition-colors border border-slate-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                      LinkedIn
+                    </a>
+                  )}
+                  {profileData.socialLinks.github && (
+                    <a href={profileData.socialLinks.github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-[13px] font-bold rounded-xl transition-colors border border-slate-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+                      GitHub
+                    </a>
+                  )}
+                  {profileData.socialLinks.portfolio && (
+                    <a href={profileData.socialLinks.portfolio} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-[13px] font-bold rounded-xl transition-colors border border-slate-200">
+                      <Globe size={14} />
+                      Portfolio
+                    </a>
+                  )}
+                  {profileData.socialLinks.twitter && (
+                    <a href={profileData.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 text-[13px] font-bold rounded-xl transition-colors border border-slate-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16z" /><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" /></svg>
+                      Twitter (X)
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
 
@@ -262,10 +345,6 @@ export default function ProfilePage() {
 
       </div>
 
-      <div className="mt-8">
-        <AchievementsShowcase />
-      </div>
-
       {/* Edit Profile Modal */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -292,33 +371,42 @@ export default function ProfilePage() {
               
               {/* Left Sidebar */}
               <div className="w-full lg:w-[240px] shrink-0 border-r border-slate-100 p-6 flex flex-col gap-2 overflow-y-auto">
-                <button className="w-full flex items-center gap-3 px-4 py-3 bg-[#F3F0FF] text-[#6C4CF1] rounded-xl font-semibold text-[14px] transition-colors">
+                <button 
+                  onClick={() => scrollToSection('personal-info')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[14px] transition-colors ${activeSection === 'personal-info' ? 'bg-[#F3F0FF] text-[#6C4CF1]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                >
                   <User size={18} />
                   Personal Info
                 </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-semibold text-[14px] transition-colors">
+                <button 
+                  onClick={() => scrollToSection('about-me')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[14px] transition-colors ${activeSection === 'about-me' ? 'bg-[#F3F0FF] text-[#6C4CF1]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                >
                   <FileText size={18} />
                   About Me
                 </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-semibold text-[14px] transition-colors">
+                <button 
+                  onClick={() => scrollToSection('skills')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[14px] transition-colors ${activeSection === 'skills' ? 'bg-[#F3F0FF] text-[#6C4CF1]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                >
                   <Code size={18} />
                   Skills
                 </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-semibold text-[14px] transition-colors">
+                <button 
+                  onClick={() => scrollToSection('links')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[14px] transition-colors ${activeSection === 'links' ? 'bg-[#F3F0FF] text-[#6C4CF1]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                >
                   <LinkIcon size={18} />
                   Links
-                </button>
-                <button className="w-full flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl font-semibold text-[14px] transition-colors">
-                  <Settings size={18} />
-                  Preferences
                 </button>
               </div>
 
               {/* Center Column */}
-              <div className="flex-1 p-8 overflow-y-auto border-r border-slate-100 min-w-0">
-                <h3 className="text-[16px] font-bold text-slate-900 mb-6">Personal Information</h3>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6 mb-8">
+              <div className="flex-1 p-8 overflow-y-auto border-r border-slate-100 min-w-0 scroll-smooth">
+                <div id="personal-info" className="scroll-mt-8">
+                  <h3 className="text-[16px] font-bold text-slate-900 mb-6">Personal Information</h3>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6 mb-8">
                   <div>
                     <label className="block text-[13px] font-semibold text-slate-700 mb-2">Full Name</label>
                     <input 
@@ -350,12 +438,21 @@ export default function ProfilePage() {
                   <div>
                     <label className="block text-[13px] font-semibold text-slate-700 mb-2">Branch/Major</label>
                     <div className="relative">
-                      <input 
-                        type="text" 
-                        value={editForm.branch} 
+                      <select 
+                        value={editForm.branch || ""} 
                         onChange={e => setEditForm({...editForm, branch: e.target.value})}
-                        className="w-full h-[52px] px-4 pr-10 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700"
-                      />
+                        className="w-full h-[52px] px-4 pr-10 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700 appearance-none"
+                      >
+                        <option value="" disabled>Select a branch</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="AI / ML">AI / ML</option>
+                        <option value="Data Science">Data Science</option>
+                        <option value="Cyber Security">Cyber Security</option>
+                        <option value="Electronics & Comm.">Electronics & Comm.</option>
+                        <option value="Electrical Eng.">Electrical Eng.</option>
+                        <option value="Mechanical Eng.">Mechanical Eng.</option>
+                        <option value="Civil Eng.">Civil Eng.</option>
+                      </select>
                       <ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     </div>
                   </div>
@@ -421,10 +518,11 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
+                </div>
                 
                 <div className="w-full border-b border-slate-100 mb-8"></div>
 
-                <div className="mb-8">
+                <div id="skills" className="mb-8 scroll-mt-8">
                   <label className="block text-[13px] font-semibold text-slate-700 mb-2">Skills Editor (Type and press Enter)</label>
                   <div className="p-4 bg-white border border-slate-200 rounded-xl flex flex-wrap gap-2 items-center min-h-[52px]">
                     {editForm.skills.split(',').map((skill, index) => skill.trim() && (
@@ -450,7 +548,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div>
+                <div id="about-me" className="mb-8 scroll-mt-8">
                   <label className="block text-[13px] font-semibold text-slate-700 mb-4">About Me (Bio)</label>
                   <textarea 
                     value={editForm.bio} 
@@ -462,31 +560,10 @@ export default function ProfilePage() {
               </div>
 
               {/* Right Column */}
-              <div className="w-full lg:w-[340px] shrink-0 bg-[#FAFAFA] p-8 overflow-y-auto">
-                <div className="mb-8 flex flex-col items-center">
-                  <h3 className="text-[14px] font-semibold text-slate-900 w-full text-left mb-6">Profile Photo</h3>
-                  
-                  <div className="relative mb-4">
-                    <img 
-                      src={`https://api.dicebear.com/7.x/notionists/svg?seed=${getUserFullName(user, null)}&backgroundColor=e2e8f0`} 
-                      alt="Profile Avatar" 
-                      className="w-[140px] h-[140px] rounded-full border border-slate-200 object-cover bg-slate-100"
-                    />
-                    <button className="absolute bottom-2 right-2 w-10 h-10 bg-[#6C4CF1] text-white rounded-full flex items-center justify-center hover:bg-[#5b3fda] transition-colors shadow-sm border-[3px] border-white">
-                      <Camera size={16} />
-                    </button>
-                  </div>
-                  
-                  <p className="text-[12px] text-slate-500 mb-6">JPG, PNG or WEBP. Max size 5MB.</p>
-                  
-                  <button className="w-full h-[44px] flex items-center justify-center bg-white border border-slate-300 text-[#6C4CF1] rounded-xl text-[14px] font-bold hover:bg-slate-50 transition-colors">
-                    Upload New Photo
-                  </button>
-                </div>
+              <div className="w-full lg:w-[340px] shrink-0 bg-[#FAFAFA] p-8 overflow-y-auto scroll-smooth">
+
                 
-                <div className="w-full border-b border-slate-200 mb-8"></div>
-                
-                <div>
+                <div id="links" className="scroll-mt-8">
                   <h3 className="text-[14px] font-semibold text-slate-900 mb-6">Social Links</h3>
                   
                   <div className="space-y-4">
@@ -498,6 +575,8 @@ export default function ProfilePage() {
                         </div>
                         <input 
                           type="text" 
+                          value={editForm.socialLinks?.linkedin || ''}
+                          onChange={e => setEditForm({ ...editForm, socialLinks: { ...editForm.socialLinks, linkedin: e.target.value } })}
                           placeholder="https://linkedin.com/in/yourprofile"
                           className="w-full h-[48px] pl-11 pr-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[13px] outline-none transition-all text-slate-500"
                         />
@@ -512,6 +591,8 @@ export default function ProfilePage() {
                         </div>
                         <input 
                           type="text" 
+                          value={editForm.socialLinks?.github || ''}
+                          onChange={e => setEditForm({ ...editForm, socialLinks: { ...editForm.socialLinks, github: e.target.value } })}
                           placeholder="https://github.com/yourusername"
                           className="w-full h-[48px] pl-11 pr-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[13px] outline-none transition-all text-slate-500"
                         />
@@ -526,6 +607,8 @@ export default function ProfilePage() {
                         </div>
                         <input 
                           type="text" 
+                          value={editForm.socialLinks?.portfolio || ''}
+                          onChange={e => setEditForm({ ...editForm, socialLinks: { ...editForm.socialLinks, portfolio: e.target.value } })}
                           placeholder="https://yourportfolio.com"
                           className="w-full h-[48px] pl-11 pr-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[13px] outline-none transition-all text-slate-500"
                         />
@@ -540,6 +623,8 @@ export default function ProfilePage() {
                         </div>
                         <input 
                           type="text" 
+                          value={editForm.socialLinks?.twitter || ''}
+                          onChange={e => setEditForm({ ...editForm, socialLinks: { ...editForm.socialLinks, twitter: e.target.value } })}
                           placeholder="https://twitter.com/yourusername"
                           className="w-full h-[48px] pl-11 pr-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[13px] outline-none transition-all text-slate-500"
                         />
@@ -581,7 +666,8 @@ export default function ProfilePage() {
                     about: {
                       ...profile?.about,
                       bio: editForm.bio
-                    }
+                    },
+                    socialLinks: editForm.socialLinks
                   });
                   updateUser({ name: editForm.name });
                   setIsEditModalOpen(false);

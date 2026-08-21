@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Compass, ArrowRight, ArrowLeft, Code2, Cpu, Cloud, Shield, PenTool, Rocket, Lightbulb, PieChart, Settings } from 'lucide-react';
+import { Check,  ArrowRight, ArrowLeft, Code2, Cpu, Cloud,  PenTool, Rocket, Lightbulb, PieChart, Settings } from 'lucide-react';
 
 const interestCategories = [
   {
@@ -52,6 +52,7 @@ export default function CareerInterestsStep({ onNext, onBack, data = [], updateD
     if (updateData) {
       updateData(selectedInterests);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedInterests]);
 
   const toggleInterest = (interest) => {

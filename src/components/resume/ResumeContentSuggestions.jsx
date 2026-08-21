@@ -25,7 +25,11 @@ export default function ResumeContentSuggestions({ results }) {
   } = results;
 
   // Render a "Perfect" state if there are no AI suggestions (fallback)
-  if (!contentSuggestions && (!missingKeywords || missingKeywords.length === 0)) {
+  const hasContentSuggestions = contentSuggestions?.summary?.improved || (contentSuggestions?.projects && contentSuggestions.projects.length > 0);
+  const hasMissingKeywords = missingKeywords && missingKeywords.length > 0;
+  const hasRecommendations = (recommendedSkills && recommendedSkills.length > 0) || (recommendedCertifications && recommendedCertifications.length > 0) || (recommendedProjects && recommendedProjects.length > 0);
+
+  if (!hasContentSuggestions && !hasMissingKeywords && !hasRecommendations) {
     return (
       <div className="mt-8 bg-indigo-50 border border-indigo-100 rounded-2xl p-8 flex flex-col items-center justify-center text-center">
         <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-4 text-indigo-600">
@@ -140,12 +144,17 @@ export default function ResumeContentSuggestions({ results }) {
             <h3 className="text-lg font-bold text-slate-800">Critical ATS Keywords Missing</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {missingKeywords.map((kw, idx) => (
-              <div key={idx} className="bg-white border border-slate-200 rounded-lg p-3 flex flex-col hover:border-amber-300 transition-colors">
-                <span className="font-bold text-slate-800 text-sm mb-1">{kw.keyword}</span>
-                <span className="text-xs text-slate-500 leading-snug">{kw.reason}</span>
-              </div>
-            ))}
+            {missingKeywords.map((kw, idx) => {
+              const isObj = typeof kw === 'object' && kw !== null;
+              const keyword = isObj ? kw.keyword : kw;
+              const reason = isObj ? kw.reason : `Missing critical skill for this role.`;
+              return (
+                <div key={idx} className="bg-white border border-slate-200 rounded-lg p-3 flex flex-col hover:border-amber-300 transition-colors">
+                  <span className="font-bold text-slate-800 text-sm mb-1">{keyword}</span>
+                  <span className="text-xs text-slate-500 leading-snug">{reason}</span>
+                </div>
+              );
+            })}
           </div>
         </section>
       )}

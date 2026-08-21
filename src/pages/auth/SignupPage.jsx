@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, Lock, User, ArrowRight, AlertCircle, CheckCircle2, Briefcase } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, AlertCircle, CheckCircle2} from 'lucide-react';
 import AuthLayout from './AuthLayout';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -21,12 +21,30 @@ export default function SignupPage() {
   const { signup } = useAuth();
   const navigate = useNavigate();
 
+  const getFriendlyErrorMessage = (errorCode) => {
+    switch (errorCode) {
+      case 'auth/email-already-in-use':
+        return 'This email is already registered.';
+      case 'auth/invalid-email':
+        return 'Please enter a valid email address.';
+      case 'auth/weak-password':
+        return 'Password must contain at least 6 characters.';
+      case 'auth/too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      case 'auth/network-request-failed':
+        return 'Network error. Please check your internet connection.';
+      default:
+        return 'Something went wrong. Please try again.';
+    }
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading) return;
     setError('');
 
     if (!formData.name.trim()) {
@@ -38,7 +56,7 @@ export default function SignupPage() {
       return;
     }
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long.');
+      setError('Password must contain at least 8 characters.');
       return;
     }
     if (formData.password !== formData.confirmPassword) {
@@ -56,10 +74,11 @@ export default function SignupPage() {
       setTimeout(() => navigate('/dashboard'), 2000);
     } catch (err) {
       console.error("Signup Error:", err);
-      if (err.message.includes('User already registered')) {
-         setError('An account with this email already exists.');
+      const errorCode = err.code || '';
+      if (err.message.includes('User already registered') || errorCode === 'auth/email-already-in-use') {
+         setError('This email is already registered.');
       } else {
-         setError(err.message || 'Failed to create account.');
+         setError(getFriendlyErrorMessage(errorCode));
       }
     } finally {
       setIsLoading(false);
@@ -122,9 +141,10 @@ export default function SignupPage() {
                 name="name"
                 type="text"
                 required
+                disabled={isLoading}
                 value={formData.name}
                 onChange={handleChange}
-                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('name') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all`}
+                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('name') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="John Doe"
               />
             </div>
@@ -144,9 +164,10 @@ export default function SignupPage() {
                 type="email"
                 autoComplete="email"
                 required
+                disabled={isLoading}
                 value={formData.email}
                 onChange={handleChange}
-                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('email') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all`}
+                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('email') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="you@university.edu"
               />
             </div>
@@ -165,9 +186,10 @@ export default function SignupPage() {
                 name="password"
                 type="password"
                 required
+                disabled={isLoading}
                 value={formData.password}
                 onChange={handleChange}
-                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('Password') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all`}
+                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('Password') || error.includes('characters') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="••••••••"
               />
             </div>
@@ -186,9 +208,10 @@ export default function SignupPage() {
                 name="confirmPassword"
                 type="password"
                 required
+                disabled={isLoading}
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('match') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all`}
+                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('match') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="••••••••"
               />
             </div>
@@ -200,7 +223,7 @@ export default function SignupPage() {
               disabled={isLoading}
               className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#6C4CF1] hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Creating account...' : 'Create Account'}
+              {isLoading ? 'Creating Account...' : 'Create Account'}
               {!isLoading && <ArrowRight size={16} />}
             </button>
           </div>

@@ -5,13 +5,15 @@ import { useResumeInsights } from './useResumeInsights';
 
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../config/firebase';
-import { collection, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import {  doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 const CACHE_SESSION_KEY = 'career_coach_session';
 
 /**
  * Builds a rich context object to inject into every Gemini prompt.
  */
+// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
 function buildContext({ profile, atsScore, topStrength, topWeakness, recommendations, applications }) {
   return {
     profile: {
@@ -119,7 +121,7 @@ export function useCareerCoach() {
             setMessages(saved.messages);
           }
         }
-      } catch (e) {
+      } catch (_e) {
         // Silently ignore offline errors — start fresh
         const local = sessionStorage.getItem(`${CACHE_SESSION_KEY}_${user.id}`);
         if (local) {
@@ -146,7 +148,7 @@ export function useCareerCoach() {
         updatedAt: serverTimestamp(),
         createdAt: serverTimestamp(),
       }, { merge: true });
-    } catch (e) {
+    } catch (_e) {
       // Firebase offline — session is still safe in sessionStorage
     }
   }, [user]);

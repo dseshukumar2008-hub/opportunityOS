@@ -25,6 +25,7 @@ export default function Step1TargetRole({ onSubmit, initialRole }) {
       const activeGoal = goals.find(g => g.isActive) || goals[0];
       if (activeGoal && activeGoal.targetCareer) {
         if (ROLES.some(r => r.id === activeGoal.targetCareer)) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
           setRole(activeGoal.targetCareer);
         } else {
           setRole('other');

@@ -10,6 +10,7 @@ import Footer from './components/Footer';
 import { useEffect } from 'react';
 import { analyticsService } from './services/analyticsService';
 
+
 export default function LandingPage() {
   useEffect(() => {
     analyticsService.trackEvent('Page Visit', { page: 'Landing Page' });

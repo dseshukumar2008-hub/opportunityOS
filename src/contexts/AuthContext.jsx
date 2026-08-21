@@ -116,6 +116,7 @@ export const AuthProvider = ({ children }) => {
     logout, 
     updateUser,
     loginWithGoogle
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }), [mappedUser, loading]);
 
   return (

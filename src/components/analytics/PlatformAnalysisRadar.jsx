@@ -1,4 +1,3 @@
-import React from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { Activity } from 'lucide-react';
 import { motion } from 'framer-motion';

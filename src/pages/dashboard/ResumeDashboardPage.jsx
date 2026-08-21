@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FileText, 
@@ -65,7 +65,7 @@ export default function ResumeDashboardPage() {
     try {
       await deleteResume(resumeToDelete.id);
       toast.success('Resume deleted successfully');
-    } catch (error) {
+    } catch (_e) {
       toast.error('Failed to delete resume');
     } finally {
       setIsDeleting(false);

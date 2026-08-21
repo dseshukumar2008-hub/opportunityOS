@@ -115,6 +115,7 @@ export function useUserProfileRecord(userId) {
 
   useEffect(() => {
     if (!userId || userId === 'me') {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setProfile(null);
       setLoading(false);
       setError(null);

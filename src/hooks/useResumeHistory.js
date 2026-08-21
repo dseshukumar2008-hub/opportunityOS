@@ -16,6 +16,7 @@ export function useResumeHistory() {
   // Subscribe to real-time resume history from Firestore
   useEffect(() => {
     if (!user?.id) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setHistory([]);
       setIsLoading(false);
       return;

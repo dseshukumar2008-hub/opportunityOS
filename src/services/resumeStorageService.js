@@ -79,11 +79,15 @@ export const resumeStorageService = {
    */
   async saveAnalysisToFirestore(uid, analysis) {
     const userRef = doc(db, 'users', uid);
+    
+    // Sanitize object to remove undefined values which Firebase rejects
+    const cleanAnalysis = JSON.parse(JSON.stringify(analysis));
+    
     await setDoc(
       userRef,
       {
         resumeAnalysis: {
-          ...analysis,
+          ...cleanAnalysis,
           analyzedAt: new Date().toISOString()
         }
       },

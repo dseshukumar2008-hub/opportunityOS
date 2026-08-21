@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Bookmark, BookmarkCheck, Clock, Signal, Code2, BrainCircuit, Compass } from 'lucide-react';
+import  { useState } from 'react';
+import { Bookmark, BookmarkCheck,   Code2, BrainCircuit} from 'lucide-react';
 
 export default function ProjectRecommendationCard({ project, onSave, isSaved }) {
   const [saving, setSaving] = useState(false);

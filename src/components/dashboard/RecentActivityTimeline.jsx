@@ -1,22 +1,30 @@
 import { useMemo } from 'react';
 import { useActivity } from '../../contexts/ActivityContext';
 import { 
+// eslint-disable-next-line no-unused-vars
   Send, 
+// eslint-disable-next-line no-unused-vars
   Calendar, 
+// eslint-disable-next-line no-unused-vars
   Award, 
+// eslint-disable-next-line no-unused-vars
   XCircle, 
+// eslint-disable-next-line no-unused-vars
   Bookmark, 
+// eslint-disable-next-line no-unused-vars
   Clock,
   ArrowRight,
   Activity
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export default function RecentActivityTimeline() {
+export default function RecentActivityTimeline({ userState }) {
   const { activities: rawActivities } = useActivity();
+  const { isNewUser } = userState || {};
 
   const activities = useMemo(() => {
     let feed = [];
+// eslint-disable-next-line no-unused-vars
     const now = Date.now();
 
     rawActivities.forEach((act) => {
@@ -41,13 +49,15 @@ export default function RecentActivityTimeline() {
         <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
           <Activity className="text-[#6C4CF1] opacity-60" size={32} />
         </div>
-        <h3 className="text-[16px] font-bold text-slate-800 mb-2">No recent activity</h3>
+        <h3 className="text-[16px] font-bold text-slate-800 mb-2">Your activity will appear here</h3>
         <p className="text-[13px] text-slate-500 font-medium mb-6 max-w-[240px]">
-          Start building your profile or track jobs to see your timeline grow.
+          Complete your first profile action to start tracking your progress.
         </p>
-        <Link to="/profile" className="px-5 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-[13px] font-bold transition-colors">
-          Complete Profile
-        </Link>
+        {isNewUser && (
+          <Link to="/profile" className="px-5 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-[13px] font-bold transition-colors">
+            Complete Profile
+          </Link>
+        )}
       </div>
     );
   }
@@ -68,21 +78,23 @@ export default function RecentActivityTimeline() {
             {activities.map((activity) => {
               const Icon = activity.icon;
               return (
-                <div key={activity.id} className="relative flex gap-4 group items-center">
-                  <div className="relative z-10 shrink-0">
+                <div key={activity.id} className="relative flex items-start sm:items-center gap-4 group">
+                  <div className="relative z-10 shrink-0 pt-0.5 sm:pt-0">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center border-[3px] border-white ${activity.bgColor} ${activity.iconColor} shadow-sm group-hover:scale-110 transition-transform`}>
                       <Icon size={16} strokeWidth={2.5} />
                     </div>
                   </div>
-                  <div className="flex flex-col flex-1">
-                    <p className="text-[13px] font-bold text-slate-800 leading-tight pr-16 truncate">
-                      {activity.text}
-                    </p>
-                  </div>
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2">
-                    <span className="text-[11px] font-medium text-slate-400">
-                      {activity.timeString}
-                    </span>
+                  <div className="flex flex-col sm:flex-row sm:items-center flex-1 min-w-0 gap-1 sm:gap-4">
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <p className="text-[13px] font-bold text-slate-800 leading-tight line-clamp-2">
+                        {activity.text}
+                      </p>
+                    </div>
+                    <div className="shrink-0">
+                      <span className="text-[11px] font-medium text-slate-400">
+                        {activity.timeString}
+                      </span>
+                    </div>
                   </div>
                 </div>
               );

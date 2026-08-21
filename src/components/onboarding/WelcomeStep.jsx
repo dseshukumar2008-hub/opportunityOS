@@ -1,5 +1,4 @@
-import React from 'react';
-import { Rocket, ArrowRight, Clock, Target, CheckCircle2 } from 'lucide-react';
+import { Rocket,  Clock, Target, CheckCircle2 } from 'lucide-react';
 
 const STEPS = [
   { id: 1, title: 'Personal Details', desc: 'Tell us about yourself', icon: '👤', iconBg: 'bg-gradient-to-br from-[#997CFF] to-[#6D5CFF] shadow-[0_0_14px_rgba(109,92,255,0.4)]', accentBorder: 'border-l-[#8B5CFF]', cardBg: 'bg-gradient-to-br from-[#F5F3FF] to-[#FCFAFF]', badgeBg: 'bg-[#EDE9FE]', badgeText: 'text-[#6D5CFF]', cardShadow: 'shadow-[0_4px_12px_rgba(109,92,255,0.08)]', hoverCardShadow: 'hover:shadow-[0_8px_20px_rgba(109,92,255,0.2)]' },

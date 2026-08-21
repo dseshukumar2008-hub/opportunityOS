@@ -37,7 +37,7 @@ function ScoreRing({ score, size = 140 }) {
   );
 }
 
-export default function DashboardHeroWidget() {
+export default function DashboardHeroWidget({ userState }) {
   const { user } = useAuth();
   const { profile, isLoading: profileLoading } = useUserProfile();
   const { careerReadiness, isLoading: insightsLoading } = useDashboardInsights();
@@ -45,8 +45,16 @@ export default function DashboardHeroWidget() {
   const greeting = useMemo(() => getGreeting(), []);
   const isLoading = profileLoading || insightsLoading;
   const firstName = getUserFirstName(user, profile);
-  const aiScore = careerReadiness?.score ?? 62;
+  
+  // Dynamic Content logic based on userState
+  const { hasProfile, isNewUser } = userState || {};
+
+  const aiScore = isNewUser ? 0 : (careerReadiness?.score ?? 0);
   const nextMilestone = aiScore < 70 ? 70 : aiScore < 85 ? 85 : 100;
+
+// eslint-disable-next-line no-unused-vars
+  const readinessLabel = isNewUser ? 'Getting started' : `${aiScore}%`;
+  const progressBarWidth = isNewUser ? '0%' : `${Math.min((aiScore / nextMilestone) * 100, 100)}%`;
 
   if (isLoading) {
     return <div className="h-[200px] bg-white rounded-[24px] border border-slate-100 animate-pulse" />;
@@ -59,46 +67,58 @@ export default function DashboardHeroWidget() {
         {/* Left: Score Ring */}
         <div className="flex flex-col items-center justify-center shrink-0">
           <ScoreRing score={aiScore} size={150} />
-          <div className="flex items-center gap-1.5 mt-4 bg-emerald-50 border border-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[12px] font-bold">
-            <TrendingUp size={12} />
-            ↑ 8% this week
-          </div>
+          {!isNewUser && aiScore > 0 && (
+            <div className="flex items-center gap-1.5 mt-4 bg-emerald-50 border border-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[12px] font-bold">
+              <TrendingUp size={12} />
+              ↑ 8% this week
+            </div>
+          )}
         </div>
 
         {/* Center: Greeting + Progress */}
         <div className="flex-1 max-w-xl">
           <p className="text-[13px] font-bold text-indigo-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-            <Zap size={13} /> Career Readiness
+            <Zap size={13} /> Career Readiness: {isNewUser ? 'Getting started' : `${aiScore}%`}
           </p>
           <h1 className="text-[26px] lg:text-[30px] font-black text-slate-900 mb-1 leading-tight">
             {firstName ? `${greeting}, ${firstName}! 👋` : `${greeting}! 👋`}
           </h1>
           <p className="text-[14px] text-slate-500 font-medium mb-6">
-            Let's make progress toward your dream career.
+            {isNewUser ? "Let's get your career profile ready." : "Let's make progress toward your dream career."}
           </p>
 
           {/* Progress Bar */}
           <div className="w-full mb-2">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[12px] font-bold text-slate-600">Progress to next milestone</span>
-              <span className="text-[12px] font-bold text-[#6C4CF1]">Next: {nextMilestone}%</span>
+              <span className="text-[12px] font-bold text-slate-600">
+                {isNewUser ? 'Complete profile to unlock readiness score' : 'Progress to next milestone'}
+              </span>
+              {!isNewUser && <span className="text-[12px] font-bold text-[#6C4CF1]">Next: {nextMilestone}%</span>}
             </div>
             <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-[#6C4CF1] to-indigo-400 rounded-full transition-all duration-1000"
-                style={{ width: `${Math.min((aiScore / nextMilestone) * 100, 100)}%` }}
+                style={{ width: progressBarWidth }}
               />
             </div>
           </div>
 
           {/* Action Chips */}
           <div className="flex flex-wrap gap-2 mt-5">
-            <Link to="/resume-review" className="flex items-center gap-1.5 px-4 py-2 bg-[#6C4CF1] text-white rounded-xl text-[12px] font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
-              <Zap size={13} /> Improve Resume
-            </Link>
-            <Link to="/skill-gap" className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[12px] font-bold hover:bg-slate-50 transition-colors">
-              <Target size={13} className="text-indigo-500" /> Identify Skill Gaps
-            </Link>
+            {isNewUser || !hasProfile ? (
+              <Link to="/profile" className="flex items-center gap-1.5 px-4 py-2 bg-[#6C4CF1] text-white rounded-xl text-[12px] font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
+                <Target size={13} /> Complete Profile →
+              </Link>
+            ) : (
+              <>
+                <Link to="/resume-review" className="flex items-center gap-1.5 px-4 py-2 bg-[#6C4CF1] text-white rounded-xl text-[12px] font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
+                  <Zap size={13} /> Improve Resume
+                </Link>
+                <Link to="/skill-gap" className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[12px] font-bold hover:bg-slate-50 transition-colors">
+                  <Target size={13} className="text-indigo-500" /> Identify Skill Gaps
+                </Link>
+              </>
+            )}
           </div>
         </div>
 

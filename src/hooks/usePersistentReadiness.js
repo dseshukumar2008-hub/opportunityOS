@@ -43,9 +43,11 @@ let pendingReadinessFetches = new Map();
       pendingReadinessFetches.delete(user.uid);
       setIsLoading(false);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   useEffect(() => {
+// eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPersistentData();
   }, [fetchPersistentData]);
 

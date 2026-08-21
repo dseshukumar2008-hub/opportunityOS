@@ -1,4 +1,3 @@
-import React from 'react';
 import { Bot, ArrowRight, ArrowLeft } from 'lucide-react';
 
 export default function MentorScreen({ onNext, onBack, firstName = "User" }) {

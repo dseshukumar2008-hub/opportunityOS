@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Briefcase, Plus, MapPin, DollarSign, Clock, MoreVertical, X, Check } from 'lucide-react';
+import { Briefcase, Plus, MapPin, DollarSign, Clock,  X} from 'lucide-react';
 import { useEmployer } from '../../contexts/EmployerContext';
 import PaginationControls from '../../components/ui/PaginationControls';
 

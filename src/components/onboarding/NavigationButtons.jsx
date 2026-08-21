@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import  { useEffect } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export default function NavigationButtons({ onNext, onBack, isFirstStep, isLastStep }) {

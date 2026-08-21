@@ -123,7 +123,7 @@ export const openRouterProvider = {
       try {
         const errJson = JSON.parse(rawErrorText);
         if (errJson?.error?.message) errorMsg = errJson.error.message;
-      } catch (e) {
+      } catch (_e) {
         // Ignored
       }
       analyticsService.trackError('OpenRouter API HTTP Error', new Error(errorMsg));

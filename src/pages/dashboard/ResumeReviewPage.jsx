@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useResumeAnalysis } from '../../hooks/useResumeAnalysis';
 import { useResumeHistory } from '../../hooks/useResumeHistory';
 import { useResume } from '../../contexts/ResumeContext';
@@ -8,15 +8,47 @@ import ResumeAnalysisResults from '../../components/resume/ResumeAnalysisResults
 import ResumeSmartSuggestions from '../../components/resume/ResumeSmartSuggestions';
 import ResumeContentSuggestions from '../../components/resume/ResumeContentSuggestions';
 import ResumeHistory from '../../components/resume/ResumeHistory';
-import { Bot, Sparkles, FileText, Activity, CheckCircle2, History, User, BarChart2, Check, Target, TrendingUp, Lock } from 'lucide-react';
+import { Bot, Sparkles, FileText, Activity, CheckCircle2, History,      Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ResumeReviewPage() {
-  const [activeTab, setActiveTab] = useState('Review');
-  const { analyzeResume, resetAnalysis, isAnalyzing, uploadProgress, progressText, analysisResults, error } = useResumeAnalysis();
+// eslint-disable-next-line no-unused-vars
+  const { analyzeResume, resetAnalysis, isAnalyzing, analysisStatus, uploadProgress, progressText, analysisResults, error } = useResumeAnalysis();
   const { history, addHistory, getBestVersion, compareVersions } = useResumeHistory();
   const { resumeData, activeResumeId } = useResume();
   const { matchResume } = useMatchResume();
+
+  const hasAnalysis = analysisStatus === 'completed' && !!analysisResults;
+  const hasHistory = history && history.length > 0;
+
+  const [activeTab, setActiveTab] = useState('Review');
+
+  const resetAnalysisSession = () => {
+    resetAnalysis();
+    setActiveTab('Review');
+  };
+
+  const loadingSteps = [
+    'Uploading Resume...',
+    'Extracting Information...',
+    'Running ATS Analysis...',
+    'Generating AI Insights...',
+    'Preparing Report...'
+  ];
+  const [loadingStep, setLoadingStep] = useState(0);
+
+  useEffect(() => {
+    let interval;
+    if (isAnalyzing) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoadingStep(0);
+      interval = setInterval(() => {
+        setLoadingStep(prev => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
+      }, 2000);
+    }
+    return () => clearInterval(interval);
+// eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAnalyzing]);
 
   const handleAnalyzeFile = async (file) => {
     const results = await analyzeResume(file);
@@ -66,12 +98,12 @@ export default function ResumeReviewPage() {
   };
 
   const tabs = [
-    { id: 'Review', label: 'Review', icon: FileText },
-    { id: 'ATS Score', label: 'ATS Score', icon: Activity, disabled: !analysisResults },
-    { id: 'Suggestions', label: 'Suggestions', icon: Sparkles, disabled: !analysisResults },
-    { id: 'Action Plan', label: 'Action Plan', icon: CheckCircle2, disabled: !analysisResults },
-    { id: 'History', label: 'History', icon: History }
-  ];
+    { id: 'Review', label: 'Upload', icon: FileText, hidden: false },
+    { id: 'ATS Score', label: 'ATS Score', icon: Activity, hidden: analysisStatus !== 'completed' },
+    { id: 'Suggestions', label: 'Suggestions', icon: Sparkles, hidden: analysisStatus !== 'completed' },
+    { id: 'Action Plan', label: 'Action Plan', icon: CheckCircle2, hidden: analysisStatus !== 'completed' },
+    { id: 'History', label: 'History', icon: History, hidden: !hasHistory }
+  ].filter(tab => !tab.hidden);
 
   return (
     <div className="bg-slate-50 min-h-[calc(100vh-64px)] font-sans py-6 px-4 lg:px-8 flex flex-col items-center">
@@ -93,21 +125,18 @@ export default function ResumeReviewPage() {
 
         {/* Tab Navigation */}
         <div className="flex items-center gap-6 border-b border-[#E5E7EB] mb-6 h-[48px]">
-          {tabs.map((tab) => {
+          {tabs.map((tab, index) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
-                disabled={tab.disabled}
+                disabled={isAnalyzing}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 h-full text-[13px] font-semibold transition-colors relative ${
-                  isActive 
-                    ? 'text-[#6D5DF6]' 
-                    : tab.disabled 
-                      ? 'text-gray-300 cursor-not-allowed'
-                      : 'text-[#64748B] hover:text-[#111827]'
+                className={`relative h-full flex items-center gap-2 px-1 text-[14px] font-semibold transition-colors animate-in fade-in slide-in-from-bottom-2 duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  isActive ? 'text-[#6D5DF6]' : 'text-[#64748B] hover:text-[#111827]'
                 }`}
+                style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'both' }}
               >
                 <Icon size={14} />
                 {tab.label}
@@ -125,6 +154,15 @@ export default function ResumeReviewPage() {
             <>
               {!isAnalyzing && (
                 <div className="w-full flex flex-col items-center max-w-[1000px]">
+                  
+                  {!hasAnalysis && (
+                    <div className="text-center mb-8">
+                      <p className="text-[15px] font-medium text-[#64748B]">
+                        Upload or select a resume to generate your AI-powered analysis.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Upload Zone Wrapper */}
                   <div className="card-standard p-5 flex flex-col w-full">
                     <ResumeUploadZone onAnalyze={handleAnalyzeFile} uploadProgress={uploadProgress} progressText={progressText} />
@@ -164,26 +202,34 @@ export default function ResumeReviewPage() {
                   <p className="text-[15px] font-medium text-[#64748B] max-w-sm leading-relaxed">
                     Our AI is scanning for ATS compatibility, keyword density, and structural improvements. This will just take a moment.
                   </p>
+                  
+                  
+                  <div className="w-full max-w-md mt-8">
+                    <div className="flex justify-between text-[13px] font-semibold text-[#64748B] mb-2 animate-in fade-in">
+                      <span>{loadingSteps[loadingStep]}</span>
+                      <span>{uploadProgress || 0}%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                      <div className="bg-[#6D5DF6] h-2 rounded-full transition-all duration-300" style={{ width: `${uploadProgress || 0}%` }}></div>
+                    </div>
+                  </div>
                 </div>
               )}
             </>
           )}
 
-          {activeTab === 'ATS Score' && analysisResults && (
+          {activeTab === 'ATS Score' && analysisStatus === 'completed' && analysisResults && (
             <ResumeAnalysisResults 
               results={analysisResults} 
-              onReset={() => {
-                resetAnalysis();
-                setActiveTab('Review');
-              }} 
+              onReset={resetAnalysisSession} 
             />
           )}
 
-          {activeTab === 'Suggestions' && analysisResults && (
+          {activeTab === 'Suggestions' && analysisStatus === 'completed' && analysisResults && (
             <ResumeContentSuggestions results={analysisResults} />
           )}
 
-          {activeTab === 'Action Plan' && analysisResults && (
+          {activeTab === 'Action Plan' && analysisStatus === 'completed' && analysisResults && (
             <ResumeSmartSuggestions
               suggestions={analysisResults.improvements || analysisResults.smartSuggestions || []}
               currentScore={analysisResults.atsScore || analysisResults.overallScore || 0}

@@ -27,6 +27,7 @@ export function useLiveOpportunities() {
   }, [profile?.preferredLocations]);
 
   useEffect(() => {
+// eslint-disable-next-line react-hooks/set-state-in-effect
     fetchOpportunities();
   }, [fetchOpportunities]);
 

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { db } from '../../config/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { MapPin, X, Plus, CheckCircle2, ChevronRight } from 'lucide-react';
+import { MapPin, X, Plus,  ChevronRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 const LOCATIONS_LIST = ['India', 'Remote', 'United States', 'Europe', 'Singapore', 'Australia'];
@@ -22,6 +22,7 @@ export default function LocationMigrationModal() {
     
     // If we've already shown it this session, don't show it again immediately on remount
     if (sessionStorage.getItem(`location_migrated_${user.id}`)) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(false);
       return;
     }

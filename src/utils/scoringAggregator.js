@@ -14,19 +14,18 @@ export function calculateAggregatedReadiness({
   hasResume = false,
   atsScore = 0,
   applicationsCount = 0,
-  githubScore = 0,
-  linkedinScore = 0
+  githubScore = 0
 }) {
   // 1. Profile & Skills (20%)
   const profilePts = Math.min((profileCompletionPct / 100) * 20, 20);
 
-  // 2. Resume & ATS (30%)
-  // If resume is uploaded, give base 10 points. Remaining 20 depends on ATS score.
+  // 2. Resume & ATS (45%)
+  // If resume is uploaded, give base 15 points. Remaining 30 depends on ATS score.
   let resumePts = 0;
   if (hasResume) {
-    resumePts += 10;
+    resumePts += 15;
     const validAts = typeof atsScore === 'number' ? atsScore : 0;
-    resumePts += (validAts / 100) * 20;
+    resumePts += (validAts / 100) * 30;
   }
 
   // 3. Applications (20%) - Max out at 5 applications
@@ -35,11 +34,8 @@ export function calculateAggregatedReadiness({
   // 4. GitHub Score (15%)
   const githubPts = (githubScore / 100) * 15;
 
-  // 5. LinkedIn Score (15%)
-  const linkedinPts = (linkedinScore / 100) * 15;
-
   // Total Score
-  const score = Math.round(profilePts + resumePts + appsPts + githubPts + linkedinPts);
+  const score = Math.round(profilePts + resumePts + appsPts + githubPts);
 
   // Status mapping
   let status = 'Beginner';
@@ -49,10 +45,9 @@ export function calculateAggregatedReadiness({
 
   const breakdown = {
     profile: { done: profilePts >= 15, current: Math.round(profilePts), max: 20 },
-    resume: { done: resumePts >= 25, current: Math.round(resumePts), max: 30 },
+    resume: { done: resumePts >= 35, current: Math.round(resumePts), max: 45 },
     applications: { done: appsPts >= 20, current: Math.round(appsPts), max: 20 },
-    github: { done: githubPts >= 10, current: Math.round(githubPts), max: 15 },
-    linkedin: { done: linkedinPts >= 10, current: Math.round(linkedinPts), max: 15 }
+    github: { done: githubPts >= 10, current: Math.round(githubPts), max: 15 }
   };
 
   return { score, status, breakdown };

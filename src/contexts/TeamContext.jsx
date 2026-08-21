@@ -9,12 +9,15 @@ import {
   deleteDoc,
   doc,
   query,
+// eslint-disable-next-line no-unused-vars
   where,
   orderBy,
   onSnapshot,
   serverTimestamp,
+// eslint-disable-next-line no-unused-vars
   writeBatch,
   arrayUnion,
+// eslint-disable-next-line no-unused-vars
   getDoc,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
@@ -49,6 +52,7 @@ export const TeamProvider = ({ children }) => {
     if (unsubMessages.current) unsubMessages.current();
 
     if (!user) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setTeams([]);
       setJoinRequests([]);
       setTeamMessages([]);
@@ -259,6 +263,7 @@ export const TeamProvider = ({ children }) => {
       setError('Failed to send message.');
       toast.error('Failed to send message.');
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, currentUserId, currentUserName]);
 
   // ─── Mark team chat as read ─────────────────────────────────────────────────

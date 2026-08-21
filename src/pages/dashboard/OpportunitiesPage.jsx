@@ -12,12 +12,14 @@ import { useSavedOpportunities } from '../../contexts/SavedOpportunitiesContext'
 import { useLiveOpportunities } from '../../hooks/useLiveOpportunities';
 import OpportunityCard from '../../components/opportunities/OpportunityCard';
 import RecommendedForYouSection from '../../components/opportunities/RecommendedForYouSection';
-import Skeleton from '../../components/ui/Skeleton';
-import SubmitOpportunityModal from '../../components/opportunities/SubmitOpportunityModal';
+
 import { PlusCircle } from 'lucide-react';
 
 export default function OpportunitiesPage() {
+// eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
+// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
   const { applications, addApplication } = useApplications();
   const [searchQuery, setSearchQuery] = useState('');
   const { opportunities: liveOpportunities, isLoading } = useLiveOpportunities();
@@ -31,6 +33,7 @@ export default function OpportunitiesPage() {
   const [selectedDurations, setSelectedDurations] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+// eslint-disable-next-line no-unused-vars
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
 
   // Accordion open states

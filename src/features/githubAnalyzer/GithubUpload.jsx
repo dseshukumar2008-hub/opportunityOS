@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Sparkles, GitBranch, Target } from 'lucide-react';
+import  { useState, useEffect } from 'react';
+import { Sparkles, GitBranch, Target, User, Code, BarChart3, Lock } from 'lucide-react';
 import { useCareer } from '../../contexts/CareerContext';
 
 const ROLES = [
@@ -20,6 +20,8 @@ const ROLES = [
 export default function GithubUpload({ onAnalyze, loading }) {
   const { careerContext } = useCareer();
   const [username, setUsername] = useState('');
+  const [error, setError] = useState('');
+  const [isValidating, setIsValidating] = useState(false);
   
   // Use context targetRole if available and it exists in ROLES list, otherwise fallback to first role
   const initialRole = careerContext?.targetRole && ROLES.includes(careerContext.targetRole)
@@ -30,70 +32,180 @@ export default function GithubUpload({ onAnalyze, loading }) {
 
   useEffect(() => {
     if (careerContext?.targetRole && ROLES.includes(careerContext.targetRole)) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setTargetRole(careerContext.targetRole);
     }
   }, [careerContext?.targetRole]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onAnalyze(username, targetRole);
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername) {
+      setError('Please enter a GitHub username.');
+      return;
+    }
+
+    setIsValidating(true);
+    setError('');
+
+    try {
+      const result = await onAnalyze(trimmedUsername, targetRole);
+      
+      if (result && !result.success) {
+        if (result.error === 'USER_NOT_FOUND') {
+          setError('GitHub user not found. Please check the username and try again.');
+        } else {
+          // If it fails for another reason, we can set a generic error or rely on parent's toast
+          setError('');
+        }
+      }
+    } catch (_e) {
+      setError('An error occurred. Please try again.');
+    } finally {
+      setIsValidating(false);
+    }
   };
 
   return (
-    <div className="max-w-[900px] mx-auto px-4 py-12 space-y-8">
-      <section className="text-center space-y-4 pt-4 mb-10">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-[#6D4AFF] rounded-full text-sm font-bold tracking-wide">
-          <Sparkles size={18} /> OpportunityOS GitHub Analyzer
+    <div className="max-w-[1000px] mx-auto px-4 py-4 lg:py-6">
+      
+      {/* Hero Section */}
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-6 mb-6">
+        {/* Left: Text Content */}
+        <div className="flex-1 space-y-3 text-center lg:text-left">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#F4F2FF] text-[#6D5DF6] rounded-full text-[13px] font-bold tracking-wide">
+            <Sparkles size={16} /> OpportunityOS GitHub Analyzer
+          </div>
+          <h1 className="text-4xl md:text-[40px] lg:text-[44px] font-extrabold text-[#111827] tracking-tight leading-[1.1]">
+            Analyze Your GitHub
+          </h1>
+          <p className="text-base lg:text-lg text-slate-500 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
+            Get AI-powered insights about your repositories, technologies, contributions, and career alignment.
+          </p>
         </div>
-        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight flex items-center justify-center gap-3">
-          Analyze Your GitHub
-        </h1>
-        <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          Enter your GitHub username and target role. Our AI will analyze your portfolio, calculate alignment, and identify skill gaps.
-        </p>
-      </section>
 
-      <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-3">
-            <label className="flex items-center gap-2 text-sm font-bold text-slate-900">
-              <GitBranch size={18} className="text-slate-700" /> GitHub Username
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. torvalds"
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#6D4AFF] focus:ring-4 focus:ring-indigo-50 transition-all outline-none font-medium"
-              required
-            />
+        {/* Right: Decorative Illustration */}
+        <div className="relative w-full max-w-[400px] lg:max-w-[420px] h-[220px] hidden sm:block shrink-0">
+          {/* Faint Window Outline */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[180px] bg-white border border-slate-100 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.02)] overflow-hidden">
+            <div className="h-8 border-b border-slate-50 flex items-center px-4 gap-1.5 bg-slate-50/50">
+              <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="h-2 w-3/4 bg-slate-100 rounded-full"></div>
+              <div className="h-2 w-1/2 bg-slate-100 rounded-full"></div>
+              <div className="h-2 w-5/6 bg-slate-100 rounded-full"></div>
+            </div>
           </div>
 
-          <div className="space-y-3">
-            <label className="flex items-center gap-2 text-sm font-bold text-slate-900">
-              <Target size={18} className="text-[#6D4AFF]" /> Target Role
-            </label>
-            <select
-              value={targetRole}
-              onChange={(e) => setTargetRole(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-[#6D4AFF] focus:ring-4 focus:ring-indigo-50 transition-all outline-none font-medium text-slate-700"
-            >
-              {ROLES.map(role => (
-                <option key={role} value={role}>{role}</option>
-              ))}
-            </select>
+          {/* Main GitHub Bubble */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120px] h-[120px] rounded-full bg-gradient-to-br from-[#6D5DF6] to-[#5542F6] flex items-center justify-center shadow-[0_0_60px_rgba(109,93,246,0.25)] z-10 border-4 border-white">
+            <svg viewBox="0 0 24 24" width="60" height="60" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" className="text-white relative z-20">
+              <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path>
+              <path d="M9 18c-4.51 2-5-2-7-2"></path>
+            </svg>
+            
+            {/* Glow rings */}
+            <div className="absolute inset-0 rounded-full border border-[#6D5DF6]/20 scale-[1.3]"></div>
+            <div className="absolute inset-0 rounded-full border border-[#6D5DF6]/10 scale-[1.6]"></div>
           </div>
 
-          <div className="pt-4">
+          {/* Decorative Badges */}
+          <div className="absolute top-[30%] left-[5%] w-14 h-14 bg-white rounded-xl shadow-[0_8px_20px_rgba(16,185,129,0.15)] border border-emerald-50 flex items-center justify-center z-20 transform -rotate-6">
+             <Code size={24} className="text-emerald-500" />
+          </div>
+
+          <div className="absolute bottom-[20%] right-[5%] w-14 h-14 bg-white rounded-xl shadow-[0_8px_20px_rgba(245,158,11,0.15)] border border-orange-50 flex items-center justify-center z-20 transform rotate-6">
+             <BarChart3 size={24} className="text-orange-400" />
+          </div>
+        </div>
+      </div>
+
+      {/* Main Analysis Card */}
+      <div className="bg-white rounded-[20px] p-5 sm:p-6 lg:px-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100">
+        
+        {/* Card Header */}
+        <div className="flex items-center gap-4 mb-5">
+           <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center shrink-0">
+             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="text-white">
+                <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path>
+                <path d="M9 18c-4.51 2-5-2-7-2"></path>
+              </svg>
+           </div>
+           <div>
+             <h2 className="text-[22px] font-extrabold text-[#111827] mb-1 tracking-tight">Connect Your GitHub Profile</h2>
+             <p className="text-[15px] font-medium text-slate-500">Enter your GitHub username and select your target role to get started.</p>
+           </div>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+            {/* Username Field */}
+            <div className="space-y-1.5">
+              <label className="flex items-center gap-1.5 text-[13px] font-bold text-slate-700">
+                <User size={14} className="text-slate-400" /> GitHub Username
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  if (error) setError('');
+                }}
+                placeholder="e.g. torvalds"
+                className={`w-full px-4 py-2.5 bg-white border rounded-xl focus:bg-slate-50 focus:ring-4 transition-all outline-none font-medium text-slate-900 placeholder:text-slate-400 ${
+                  error 
+                    ? 'border-red-300 focus:border-red-400 focus:ring-red-50' 
+                    : 'border-slate-200 focus:border-[#6D5DF6] focus:ring-[#6D5DF6]/10'
+                }`}
+                required
+              />
+              {error && (
+                <p className="text-red-500 text-[13px] font-medium mt-1.5 flex items-center gap-1.5">
+                  <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  {error}
+                </p>
+              )}
+            </div>
+
+            {/* Target Role Field */}
+            <div className="space-y-1.5">
+              <label className="flex items-center gap-1.5 text-[13px] font-bold text-slate-700">
+                <Target size={14} className="text-[#6D5DF6]" /> Target Role
+              </label>
+              <div className="relative">
+                <select
+                  value={targetRole}
+                  onChange={(e) => setTargetRole(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:bg-slate-50 focus:border-[#6D5DF6] focus:ring-4 focus:ring-[#6D5DF6]/10 transition-all outline-none font-medium text-slate-900 appearance-none"
+                >
+                  {ROLES.map(role => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1.5L6 6.5L11 1.5" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-1">
             <button
               type="submit"
-              disabled={loading || !username.trim()}
-              className="w-full flex items-center justify-center gap-2 bg-[#6D4AFF] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#5B3DE6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+              disabled={loading || isValidating || !username.trim()}
+              className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#6D5DF6] to-[#5542F6] text-white px-8 py-3 rounded-xl text-[15px] font-bold hover:shadow-[0_8px_20px_rgba(109,93,246,0.25)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
             >
-              {loading ? (
+              {loading || isValidating ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Analyzing Portfolio...
+                  {isValidating ? 'Checking GitHub...' : 'Analyzing Profile...'}
                 </>
               ) : (
                 <>
@@ -102,8 +214,15 @@ export default function GithubUpload({ onAnalyze, loading }) {
               )}
             </button>
           </div>
+          
+          <div className="text-center pt-1">
+            <p className="inline-flex items-center gap-1.5 text-[12px] font-medium text-slate-400">
+              <Lock size={12} /> We only read public data. Your privacy is safe with us.
+            </p>
+          </div>
         </form>
       </div>
+
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import  { useMemo } from 'react';
 import { AlertCircle, Code, Server, LayoutTemplate, Shield, Database, Cpu } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCareer } from '../../contexts/CareerContext';

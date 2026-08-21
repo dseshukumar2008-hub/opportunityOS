@@ -6,6 +6,7 @@ import Step5AICoach from './screens/Step5AICoach';
 import Step6CareerRoadmap from './screens/Step6CareerRoadmap';
 import Step7SkillGapAnalysis from './screens/Step7SkillGapAnalysis';
 import Step8Welcome from './screens/Step8Welcome';
+
 export default function DemoPreviewCard({ step }) {
   const getPreviewContent = () => {
     switch (step) {

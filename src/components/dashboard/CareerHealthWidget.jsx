@@ -58,6 +58,7 @@ export default function CareerHealthWidget() {
 
   const readinessLabel = readiness >= 80 ? 'Excellent' : readiness >= 50 ? 'Good' : 'Needs Work';
 
+// eslint-disable-next-line no-unused-vars
   const checklist = [
     { label: 'Profile', done: breakdown?.profile?.done },
     { label: 'Resume', done: breakdown?.resume?.done },

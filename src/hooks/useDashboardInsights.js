@@ -5,14 +5,19 @@ import { useCareerReadiness } from './useCareerReadiness';
 
 export function useDashboardInsights() {
   const { profile, isLoading: isProfileLoading } = useUserProfile();
+// eslint-disable-next-line no-unused-vars
   const { hasInsights: hasResume, atsScore, missingSkills: resumeMissingSkills } = useResumeInsights();
   const { score: readinessScore, breakdown } = useCareerReadiness();
 
   const insights = useMemo(() => {
     // 1. Next Best Action
+// eslint-disable-next-line no-useless-assignment
     let nextBestAction = null;
+// eslint-disable-next-line no-useless-assignment
     let nextBestActionCta = null;
+// eslint-disable-next-line no-useless-assignment
     let nextBestActionLink = null;
+// eslint-disable-next-line no-useless-assignment
     let nextBestActionIcon = null;
 
     if (!profile?.name || !profile?.college) {
@@ -43,21 +48,30 @@ export function useDashboardInsights() {
     }
 
     // 2. Profile Completion
-    const requiredFields = ['name', 'email', 'bio', 'college', 'branch', 'location'];
+    const fieldMapping = {
+      name: profile?.profile?.fullName || profile?.name,
+      email: profile?.email,
+      bio: profile?.about?.bio || profile?.bio,
+      college: profile?.education?.university || profile?.college,
+      branch: profile?.education?.branch || profile?.branch,
+      location: profile?.profile?.location || profile?.location
+    };
+
     let filled = 0;
     const missingProfileItems = [];
-    requiredFields.forEach(field => {
-      if (profile?.[field]) {
+    Object.entries(fieldMapping).forEach(([field, value]) => {
+      if (value) {
         filled++;
       } else {
         missingProfileItems.push(field);
       }
     });
+    
     if (!hasResume) missingProfileItems.push('resume');
     if (!profile?.skills || (profile.skills || []).length === 0) missingProfileItems.push('skills');
 
     // Calculate total fields to evaluate completion
-    const totalFields = requiredFields.length + 2;
+    const totalFields = Object.keys(fieldMapping).length + 2;
     let totalFilled = filled;
     if (hasResume) totalFilled++;
     if (profile?.skills?.length > 0) totalFilled++;

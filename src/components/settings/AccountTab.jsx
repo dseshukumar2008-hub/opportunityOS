@@ -4,7 +4,6 @@ import PreferencesCard from './PreferencesCard';
 import SecurityCard from './SecurityCard';
 import AccountActionsCard from './AccountActionsCard';
 
-
 export default function AccountTab({ settings, updateSetting, setIsEditModalOpen }) {
   return (
     <motion.div
@@ -14,7 +13,7 @@ export default function AccountTab({ settings, updateSetting, setIsEditModalOpen
       transition={{ duration: 0.2 }}
       className="space-y-6"
     >
-      <AccountInfoCard onEditClick={() => setIsEditModalOpen(true)} />
+      <AccountInfoCard onEditCl  ick={() => setIsEditModalOpen(true)} />
 
       <PreferencesCard settings={settings} updateSetting={updateSetting} />
 
@@ -27,4 +26,4 @@ export default function AccountTab({ settings, updateSetting, setIsEditModalOpen
 }
 
 
-
+  

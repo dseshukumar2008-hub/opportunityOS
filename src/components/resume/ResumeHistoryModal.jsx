@@ -18,6 +18,7 @@ export default function ResumeHistoryModal({ isOpen, onClose }) {
       const key = `resume_snapshots_${activeResumeId}`;
       const saved = localStorage.getItem(key);
       if (saved) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
         setSnapshots(JSON.parse(saved).reverse());
       } else {
         setSnapshots([]);

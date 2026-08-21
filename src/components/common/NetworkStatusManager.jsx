@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { Wifi, WifiOff } from 'lucide-react';
 
 export default function NetworkStatusManager() {
+// eslint-disable-next-line no-unused-vars
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
 

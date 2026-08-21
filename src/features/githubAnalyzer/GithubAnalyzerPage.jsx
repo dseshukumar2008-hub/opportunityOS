@@ -1,21 +1,24 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { geminiService } from '../../services/geminiService';
 import { useCareer } from '../../contexts/CareerContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { useProfile } from '../../contexts/ProfileContext';
 import GithubUpload from './GithubUpload';
 import GithubResults from './GithubResults';
-import { calculateLocalGithubMetrics } from '../../utils/githubAnalyzerEngine';
+import { calculateLocalGithubMetrics, fetchDeepGithubData, fetchContributionHeatmap } from '../../utils/githubAnalyzerEngine';
 import ContextualBackButton from '../../components/navigation/ContextualBackButton';
 
 export default function GithubAnalyzerPage() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
   const { updateCareerContext } = useCareer();
+  const { updateProfile } = useProfile();
 
   const handleAnalyze = async (username, targetRole) => {
     if (!username || !targetRole) {
       toast.error("Please provide both a GitHub username and a target role.");
-      return;
+      return { success: false, error: 'MISSING_DATA' };
     }
 
     setLoading(true);
@@ -26,32 +29,62 @@ export default function GithubAnalyzerPage() {
     if (cachedData) {
       try {
         const parsed = JSON.parse(cachedData);
-        setResults(parsed);
-        updateCareerContext({
-          targetRole,
-          githubScore: parsed.githubScore,
-          alignmentScore: parsed.alignmentScore,
-          strengths: parsed.strengths,
-          weaknesses: parsed.weaknesses,
-          missingSkills: parsed.technologyAnalysis?.missing || parsed.missingSkills || [],
-          missingProjects: parsed.missingProjects || [],
-          technologyAnalysis: parsed.technologyAnalysis,
-          portfolioDiversity: parsed.portfolioDiversity
-        });
-        setLoading(false);
-        toast.success("Loaded cached GitHub analysis!");
-        return;
-      } catch (e) {
+        // Ensure the cached data matches the new schema and is NOT a fallback (githubScore > 0)
+        if (parsed.basicStats && parsed.repos && parsed.deepAnalysis && parsed.githubScore > 0) {
+          setResults(parsed);
+          
+          const savePayload = {
+            targetRole,
+            githubScore: parsed.githubScore || 0,
+            alignmentScore: parsed.alignmentScore || 0,
+            strengths: parsed.strengths || [],
+            weaknesses: parsed.weaknesses || [],
+            technologyAnalysis: parsed.technologyAnalysis || { detected: [] }
+          };
+
+          try {
+            updateCareerContext({
+              ...savePayload,
+              missingSkills: parsed.technologyAnalysis?.missing || []
+            });
+          } catch (e) {
+            console.warn("Non-fatal error updating career context:", e);
+          }
+
+          if (updateProfile) {
+            await updateProfile({ 
+              githubAnalysis: { ...parsed, analyzedAt: new Date().toISOString() } 
+            });
+          }
+
+          setLoading(false);
+          toast.success("Loaded cached GitHub analysis!");
+          return { success: true };
+        } else {
+          console.warn("Stale or fallback cache detected, fetching fresh.");
+          localStorage.removeItem(cacheKey);
+        }
+      } catch (_e) {
         console.warn("Invalid cache data, fetching fresh.");
+        localStorage.removeItem(cacheKey);
       }
     }
 
     try {
-      const response = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`);
-      if (!response.ok) {
+      const [userResponse, reposResponse] = await Promise.all([
+        fetch(`https://api.github.com/users/${username}`),
+        fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`)
+      ]);
+
+      if (!userResponse.ok || !reposResponse.ok) {
+        if (userResponse.status === 404 || reposResponse.status === 404) {
+          throw new Error("USER_NOT_FOUND");
+        }
         throw new Error("Failed to fetch GitHub data. Please check the username.");
       }
-      const repos = await response.json();
+      
+      const userData = await userResponse.json();
+      const repos = await reposResponse.json();
       
       const githubData = repos.map(repo => ({
         name: repo.name,
@@ -65,69 +98,100 @@ export default function GithubAnalyzerPage() {
       }));
 
       // Calculate deterministic metrics locally
-      const localMetrics = calculateLocalGithubMetrics(githubData, targetRole);
+      const localMetrics = calculateLocalGithubMetrics(githubData, userData, targetRole);
+
+      // Deep fetch top 5 repos for AI context and real heatmap
+      const [deepAnalysis, heatmapData] = await Promise.all([
+        fetchDeepGithubData(username, repos),
+        fetchContributionHeatmap(username)
+      ]);
+
+      // Add heatmap to local metrics so it renders
+      localMetrics.heatmap = heatmapData.heatmap;
+      localMetrics.totalContributions = heatmapData.totalContributions;
+      localMetrics.deepAnalysis = deepAnalysis;
+
+      console.log("=== GITHUB ANALYZER DEBUG ===");
+      console.log("1. Target Role:", targetRole);
+      console.log("2. Total Repos analyzed:", githubData.length);
+      console.log("3. Deep Analysis Repo Count:", deepAnalysis.length);
 
       let analysisResult;
       try {
+        console.log("4. Calling geminiService.analyzeGithubPortfolio...");
         const geminiOutput = await geminiService.analyzeGithubPortfolio(username, githubData, targetRole, localMetrics);
+        console.log("5. Gemini Output received:", geminiOutput);
         
         if (geminiOutput._fallbackMode) {
-          // Fallback silently
-          analysisResult = {
-            ...localMetrics,
-            strengths: ["Active GitHub Profile"],
-            weaknesses: ["(AI qualitative analysis temporarily unavailable)"],
-            improvementSuggestions: ["Keep committing and building projects!"],
-            missingSkills: localMetrics.technologyAnalysis.missing,
-            missingProjects: ["(AI project suggestions temporarily unavailable)"]
-          };
+          console.warn("6. FALLBACK MODE TRIGGERED! Throwing error instead of silent fallback.");
+          throw new Error("AI analysis temporarily unavailable due to API limits or failure.");
         } else {
-          // Merge Gemini qualitative data with local deterministic data
+          // Calculate overall alignment from careerMatch
+          const m = geminiOutput.careerMatch || { frontend: 0, backend: 0, aiTools: 0, cloudDevOps: 0 };
+          const avgMatch = Math.round((m.frontend + m.backend + m.aiTools + m.cloudDevOps) / 4);
+          
+          // Merge Gemini qualitative and scored data with local deterministic data
           analysisResult = {
             ...localMetrics,
+            githubScore: geminiOutput.githubScore || 0,
+            alignmentScore: avgMatch,
+            careerMatch: m,
+            analysisSummary: geminiOutput.analysisSummary || [],
+            overallAssessment: geminiOutput.overallAssessment || "",
             strengths: geminiOutput.strengths || [],
             weaknesses: geminiOutput.weaknesses || [],
-            improvementSuggestions: geminiOutput.improvementSuggestions || [],
-            missingSkills: geminiOutput.missingSkills || localMetrics.technologyAnalysis.missing,
-            missingProjects: geminiOutput.missingProjects || []
+            recommendations: geminiOutput.recommendations || []
           };
+          console.log("7. Final Analysis Result Object:", analysisResult);
         }
       } catch (geminiError) {
-        console.error("Gemini Error during GitHub Analysis:", geminiError);
-        // Fallback silently
-        analysisResult = {
-          ...localMetrics,
-          strengths: ["Active GitHub Profile"],
-          weaknesses: ["(AI qualitative analysis temporarily unavailable)"],
-          improvementSuggestions: ["Keep committing and building projects!"],
-          missingSkills: localMetrics.technologyAnalysis.missing,
-          missingProjects: ["(AI project suggestions temporarily unavailable)"]
-        };
+        console.error("6. GEMINI ERROR CAUGHT:", geminiError);
+        throw geminiError; // DO NOT silently fall back, throw to the UI so we can see it!
       }
       
-      // Update Shared Career Context
-      updateCareerContext({
+      // Update Shared Career Context safely
+      const savePayload = {
         targetRole,
-        githubScore: analysisResult.githubScore,
-        alignmentScore: analysisResult.alignmentScore,
-        strengths: analysisResult.strengths,
-        weaknesses: analysisResult.weaknesses,
-        missingSkills: analysisResult.technologyAnalysis?.missing || analysisResult.missingSkills || [],
-        missingProjects: analysisResult.missingProjects || [],
-        technologyAnalysis: analysisResult.technologyAnalysis,
-        portfolioDiversity: analysisResult.portfolioDiversity
-      });
+        githubScore: analysisResult.githubScore || 0,
+        alignmentScore: analysisResult.alignmentScore || 0,
+        strengths: analysisResult.strengths || [],
+        weaknesses: analysisResult.weaknesses || [],
+        technologyAnalysis: analysisResult.technologyAnalysis || { detected: [] }
+      };
+
+      try {
+        updateCareerContext(savePayload);
+      } catch (e) {
+        console.warn("Non-fatal error updating career context:", e);
+      }
 
       const finalResultObj = { ...analysisResult, username, targetRole };
       setResults(finalResultObj);
       localStorage.setItem(cacheKey, JSON.stringify(finalResultObj));
 
+      if (updateProfile) {
+        await updateProfile({ 
+          githubAnalysis: { ...finalResultObj, analyzedAt: new Date().toISOString() } 
+        });
+      }
+
       if (analysisResult.githubScore > 0) {
         toast.success("GitHub portfolio analyzed successfully!");
       }
+      return { success: true };
     } catch (error) {
       console.error("GitHub Fetch Error:", error);
-      // Fail silently for STARDANCE
+      if (error.message === "USER_NOT_FOUND") {
+        toast.error(
+          <div>
+            <p className="font-bold mb-1">❌ GitHub user not found</p>
+            <p className="text-sm">Please enter a valid GitHub username and try again.</p>
+          </div>,
+          { duration: 5000, style: { maxWidth: '500px' } }
+        );
+        return { success: false, error: "USER_NOT_FOUND" };
+      }
+      return { success: false, error: error.message };
     } finally {
       setLoading(false);
     }

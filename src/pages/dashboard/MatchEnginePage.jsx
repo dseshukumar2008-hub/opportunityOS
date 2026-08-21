@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, Bot, ShieldCheck, Target, ArrowRight, CheckCircle2, XCircle, ChevronRight, FileText, UploadCloud, Map, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Bot,  Target,  CheckCircle2, XCircle,  FileText, UploadCloud,  ChevronDown, ChevronUp } from 'lucide-react';
 import { useOpportunityMatch } from '../../hooks/useOpportunityMatch';
 import { useMatchResume } from '../../hooks/useMatchResume';
 

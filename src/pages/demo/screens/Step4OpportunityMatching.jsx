@@ -1,4 +1,4 @@
-import { Sparkles, CheckCircle2, XCircle, Target } from 'lucide-react';
+import {  CheckCircle2, XCircle, Target } from 'lucide-react';
 
 export default function Step4OpportunityMatching() {
   const matchResult = {

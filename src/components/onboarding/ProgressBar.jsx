@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function ProgressBar({ currentStep, totalSteps }) {
   // If we are on success step (6), treat it as 100%

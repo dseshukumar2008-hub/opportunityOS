@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import  { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Rocket, Bot, Sparkles, ArrowRight, FileText, Target, LayoutDashboard, BrainCircuit, Check } from 'lucide-react';
 
+// eslint-disable-next-line no-unused-vars
 export default function SuccessStep({ onFinish, data }) {
   const [confetti, setConfetti] = useState([]);
 
@@ -32,17 +33,12 @@ export default function SuccessStep({ onFinish, data }) {
     show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
   };
 
-  const firstName = data?.profile?.fullName?.split(' ')[0] || 'User';
-  const branch = data?.education?.branch || 'Student';
-  const skillsCount = data?.skills?.length || 0;
-  const interestsCount = data?.careerInterests?.length || 0;
-  const hasResume = !!data?.resume?.fileUrl;
 
   return (
-    <div className="flex flex-col w-full h-full relative overflow-hidden px-8 pb-8 pt-8 bg-white">
+    <div className="flex flex-col w-full min-h-full relative px-8 pb-8 pt-8 bg-white">
       
       {/* Background (Reduced purple glow by 15%) */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-r-[36px]">
         <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-[#9333EA]/[0.04] rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-[-10%] left-[-20%] w-[400px] h-[400px] bg-[#3B82F6]/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
       </div>
@@ -64,7 +60,7 @@ export default function SuccessStep({ onFinish, data }) {
         variants={container}
         initial="hidden"
         animate="show"
-        className="flex flex-col w-full h-full mx-auto relative z-10 max-w-[850px] justify-between"
+        className="flex flex-col w-full mx-auto relative z-10 max-w-[850px] my-auto py-4"
       >
         
         {/* 2. HERO SECTION */}
@@ -102,9 +98,9 @@ export default function SuccessStep({ onFinish, data }) {
         </div>
 
         {/* 3 & 4. CONTENT ALIGNMENT & FEATURE CARDS */}
-        <div className="flex-1 min-h-0 flex flex-col justify-center gap-[32px]">
+        <div className="flex flex-col justify-center gap-[32px] mb-0">
           
-          <div className="grid grid-cols-2 gap-8 h-auto min-h-[240px]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-auto">
             {/* SUCCESS CARD */}
             <motion.div variants={item} className="bg-white/70 backdrop-blur-2xl border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.04),inset_0_1px_0_rgba(255,255,255,0.8)] rounded-[24px] p-7 flex flex-col h-full relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/5 blur-[40px] rounded-full" />
@@ -172,46 +168,16 @@ export default function SuccessStep({ onFinish, data }) {
             </motion.div>
           </div>
 
-          {/* 5. PROFILE SUMMARY */}
-          <motion.div variants={item} className="w-full bg-white/70 backdrop-blur-xl border border-slate-200/50 shadow-sm rounded-[20px] py-4 px-6 flex items-center justify-center gap-6 sm:gap-8 flex-wrap">
-            <div className="flex items-center gap-2">
-              <span className="text-[16px]">👤</span>
-              <span className="text-[13px] font-bold text-slate-800">{firstName}</span>
-            </div>
-            {branch && (
-              <div className="flex items-center gap-2">
-                <span className="text-[16px]">🎓</span>
-                <span className="text-[13px] font-semibold text-slate-600">{branch}</span>
-              </div>
-            )}
-            <div className="flex items-center gap-2">
-              <span className="text-[16px]">💻</span>
-              <span className="text-[13px] font-semibold text-slate-600">{skillsCount} Skills</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[16px]">🎯</span>
-              <span className="text-[13px] font-semibold text-slate-600">{interestsCount} Interests</span>
-            </div>
-            {hasResume && (
-              <div className="flex items-center gap-2">
-                <span className="text-[16px]">📄</span>
-                <span className="text-[13px] font-semibold text-slate-600">Resume Uploaded</span>
-              </div>
-            )}
-            <div className="flex items-center gap-2">
-              <span className="text-[16px]">🤖</span>
-              <span className="text-[13px] font-semibold text-purple-600">AI Ready</span>
-            </div>
-          </motion.div>
+
 
         </div>
 
         {/* 6. CTA BUTTON */}
-        <div className="flex flex-col items-center shrink-0 w-full mt-10 mb-2">
+        <div className="flex flex-col items-center shrink-0 w-full mt-6 mb-4 z-20 relative">
           <motion.div variants={item} className="w-full flex flex-col items-center">
             <button 
               onClick={onFinish}
-              className="w-full max-w-[360px] h-[56px] bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] hover:from-[#6D28D9] hover:to-[#5B21B6] text-white rounded-[20px] font-bold text-[15px] transition-all shadow-[0_8px_25px_rgba(124,58,237,0.3)] hover:shadow-[0_12px_35px_rgba(124,58,237,0.4)] hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] flex items-center justify-center gap-2.5 group relative overflow-hidden mb-4"
+              className="w-full max-w-[360px] h-[56px] bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] hover:from-[#6D28D9] hover:to-[#5B21B6] text-white rounded-[20px] font-bold text-[15px] transition-all shadow-[0_8px_25px_rgba(124,58,237,0.3)] hover:shadow-[0_12px_35px_rgba(124,58,237,0.4)] hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] flex items-center justify-center gap-2.5 group relative overflow-hidden mb-2"
             >
               <div className="absolute inset-0 bg-white/20 translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-700 ease-in-out" />
               🚀 Launch My Dashboard 

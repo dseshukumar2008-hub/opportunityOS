@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useConnections } from '../../contexts/ConnectionContext';
-import { useNotifications } from '../../contexts/NotificationContext';
 import {
   UserCheck, UserX, Clock, CheckCircle2, Inbox, SendHorizontal,
   GraduationCap, ChevronRight, ArrowLeft
@@ -19,8 +18,6 @@ function Avatar({ seed, size = 'md', className = '' }) {
   );
 }
 
-
-
 export default function ConnectionRequestsPage() {
   const navigate = useNavigate();
   const {
@@ -30,8 +27,7 @@ export default function ConnectionRequestsPage() {
     rejectConnectionRequest,
     withdrawRequest,
   } = useConnections();
-  const { addNotification } = useNotifications();
-
+  
   const [activeTab, setActiveTab] = useState('incoming');
   const [processing, setProcessing] = useState(new Set());
 
@@ -41,33 +37,18 @@ export default function ConnectionRequestsPage() {
   const handleAccept = async (req) => {
     setProcessing(prev => new Set(prev).add(req.id));
     acceptConnectionRequest(req.id);
-    addNotification({
-      category: 'Connections',
-      title: 'Connection Accepted',
-      message: `You and ${req.fromUser.name} are now connected.`,
-    });
-    setTimeout(() => setProcessing(prev => { const s = new Set(prev); s.delete(req.id); return s; }), 400);
+        setTimeout(() => setProcessing(prev => { const s = new Set(prev); s.delete(req.id); return s; }), 400);
   };
 
   const handleReject = async (req) => {
     setProcessing(prev => new Set(prev).add(req.id));
     rejectConnectionRequest(req.id);
-    addNotification({
-      category: 'Connections',
-      title: 'Connection Request Declined',
-      message: `You declined ${req.fromUser.name}'s connection request.`,
-    });
-    setTimeout(() => setProcessing(prev => { const s = new Set(prev); s.delete(req.id); return s; }), 400);
+        setTimeout(() => setProcessing(prev => { const s = new Set(prev); s.delete(req.id); return s; }), 400);
   };
 
   const handleWithdraw = (req) => {
     withdrawRequest(req.id);
-    addNotification({
-      category: 'Connections',
-      title: 'Request Withdrawn',
-      message: `Connection request to ${req.toUser.name} was withdrawn.`,
-    });
-  };
+      };
 
   const tabs = [
     { id: 'incoming', label: 'Incoming', count: incomingRequests.length, icon: Inbox },

@@ -3,7 +3,7 @@ import { Target, Plus, Flag, CheckCircle2, CircleDashed } from 'lucide-react';
 import { useGoals } from '../../contexts/GoalContext';
 import CreateGoalModal from '../../components/goals/CreateGoalModal';
 import EmptyState from '../../components/ui/EmptyState';
-import Skeleton from '../../components/ui/Skeleton';
+
 
 
 export default function GoalsPage() {

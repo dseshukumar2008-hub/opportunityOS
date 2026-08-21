@@ -4,7 +4,7 @@ import { useOnlineStatus } from '../../contexts/OnlineStatusContext';
 import StatusDot from '../../components/ui/StatusDot';
 import { Search, Send, ArrowLeft, MoreVertical, Phone, Video, MessageSquare, Smile, Cloud } from 'lucide-react';
 import EmptyState from '../../components/ui/EmptyState';
-import Skeleton from '../../components/ui/Skeleton';
+
 import PaginationControls from '../../components/ui/PaginationControls';
 
 const formatTime = (isoString) => {

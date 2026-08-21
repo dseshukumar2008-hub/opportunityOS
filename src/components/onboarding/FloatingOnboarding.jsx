@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { db } from '../../config/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { User, GraduationCap, Code2, Target, FileText, UploadCloud, Sparkles } from 'lucide-react';
+import { User, GraduationCap, Code2, Target, FileText, UploadCloud} from 'lucide-react';
 
-import WelcomeStep from './WelcomeStep';
 import ProfileStep from './ProfileStep';
 import EducationStep from './EducationStep';
 import SkillsStep from './SkillsStep';
@@ -20,6 +20,7 @@ export default function FloatingOnboarding() {
   const { profile } = useProfile();
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
   
   const [currentStep, setCurrentStep] = useState(0);
   const [onboardingData, setOnboardingData] = useState({
@@ -46,6 +47,7 @@ export default function FloatingOnboarding() {
 
   useEffect(() => {
     if (profile) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setOnboardingData(prev => ({
         ...prev,
         profile: {
@@ -74,6 +76,7 @@ export default function FloatingOnboarding() {
     const isLocallyCompleted = localStorage.getItem(`onboarding_${user.uid}`) === 'completed';
     
     if (isLocallyCompleted) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(false);
       setIsVisible(false);
       return;
@@ -153,6 +156,7 @@ export default function FloatingOnboarding() {
   // Default to step 1 if currentStep is 0 (Welcome step removed)
   useEffect(() => {
     if (currentStep === 0 && isVisible) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentStep(1);
     }
   }, [currentStep, isVisible]);
@@ -195,6 +199,8 @@ export default function FloatingOnboarding() {
     }
     setIsVisible(false);
     toast.success('Dashboard unlocked!');
+    navigate('/dashboard');
+    window.scrollTo(0, 0);
   };
 
   if (isLoading) {

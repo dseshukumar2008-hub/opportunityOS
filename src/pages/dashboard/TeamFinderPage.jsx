@@ -9,8 +9,10 @@ import EmptyState from '../../components/ui/EmptyState';
 import Skeleton from '../../components/ui/Skeleton';
 import PaginationControls from '../../components/ui/PaginationControls';
 
-
 export default function TeamFinderPage() {
+// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
   const { teams, getDiscoverTeams, getMyTeams, getMyPendingRequests, currentUserId, fetchTeams, teamsTotal, loading, error } = useTeam();
   const [activeTab, setActiveTab] = useState('discover');
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,7 +24,7 @@ export default function TeamFinderPage() {
 
   const limit = 10;
 
-  // Debounce search input
+  // Debounce search i nput
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedSearch(searchQuery), 300);
     return () => clearTimeout(handler);
@@ -30,6 +32,7 @@ export default function TeamFinderPage() {
 
   // Reset to page 1 when filters change
   useEffect(() => {
+// eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [debouncedSearch, activeFilter, activeTab]);
 

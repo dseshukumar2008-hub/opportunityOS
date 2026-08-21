@@ -1,4 +1,4 @@
-import { ArrowUp, Calendar, UserPlus } from 'lucide-react';
+import { ArrowUp, Calendar} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function YourActivityWidget() {

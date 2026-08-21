@@ -1,4 +1,4 @@
-import { Users, Code, Info, ChevronRight } from 'lucide-react';
+import { Users, Code,  ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { useTeam } from '../../contexts/TeamContext';
 

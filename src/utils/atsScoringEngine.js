@@ -10,7 +10,6 @@ export function calculateATSScore(metrics) {
     missingCrucialKeywords: 0,
     formattingErrors: 0,
     hasGitHub: false,
-    hasLinkedIn: false,
     hasPortfolio: false,
     hasEmail: false,
     hasPhone: false,
@@ -18,7 +17,7 @@ export function calculateATSScore(metrics) {
     ...metrics
   };
 
-  let totalScore = 0;
+  let totalScore;
   const breakdown = {
     experienceStrength: 0,
     projectStrength: 0,
@@ -99,7 +98,7 @@ export function calculateATSScore(metrics) {
   if (m.profileType !== 'experienced' && !m.hasGitHub && !m.hasPortfolio) {
     atsCompScore -= 5;
     explanation.push({ type: 'loss', label: 'Missing GitHub or Portfolio link', points: '-5' });
-  } else if (m.hasGitHub || m.hasLinkedIn || m.hasPortfolio) {
+  } else if (m.hasGitHub || m.hasPortfolio) {
     explanation.push({ type: 'gain', label: 'Professional links detected', points: '+5' });
   }
   breakdown.atsCompatibility = atsCompScore;

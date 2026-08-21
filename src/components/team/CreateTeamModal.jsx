@@ -141,7 +141,7 @@ export default function CreateTeamModal({ onClose }) {
       await createTeam(teamData);
       // Removed duplicate toast.success since TeamContext already triggers it
       onClose();
-    } catch (err) {
+    } catch (_e) {
       // Removed duplicate toast.error since TeamContext already triggers it
       setIsSubmitting(false);
     }

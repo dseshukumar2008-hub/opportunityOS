@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { 
   GraduationCap, 
   Building2, 
@@ -7,7 +7,9 @@ import {
   ArrowLeft,
   Laptop,
   Beaker,
+// eslint-disable-next-line no-unused-vars
   Briefcase,
+// eslint-disable-next-line no-unused-vars
   MonitorPlay,
   Cpu,
   ShieldCheck,
@@ -16,7 +18,7 @@ import {
   Radio,
   BookOpen
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion} from 'framer-motion';
 
 export default function EducationStep({ onNext, onBack, data, updateData }) {
   const [errors, setErrors] = useState({});

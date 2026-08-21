@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import  { useState, useRef } from 'react';
 import { User, Phone, Calendar, ArrowLeft, ArrowRight, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -10,7 +10,7 @@ export default function ProfileStep({ onNext, onBack, data, updateData }) {
   const handleDateClick = () => {
     if (dateInputRef.current) {
       if (typeof dateInputRef.current.showPicker === 'function') {
-        try { dateInputRef.current.showPicker(); } catch (e) { dateInputRef.current.focus(); dateInputRef.current.click(); }
+        try { dateInputRef.current.showPicker(); } catch (_e) { dateInputRef.current.focus(); dateInputRef.current.click(); }
       } else {
         dateInputRef.current.focus();
         dateInputRef.current.click();

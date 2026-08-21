@@ -48,7 +48,7 @@ export default function CareerReadinessPanel() {
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-      <div className="p-6 md:p-8 border-b border-slate-100">
+      <div className="p-5 md:p-6 border-b border-slate-100">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
           
           {/* Circular Score */}
@@ -118,13 +118,16 @@ export default function CareerReadinessPanel() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-100">
         {/* Breakdown */}
-        <div className="p-6 md:p-8">
+        <div className="p-5 md:p-6">
           <h3 className="text-[15px] font-extrabold text-slate-900 mb-6 flex items-center gap-2">
             <BarChartIcon size={18} className="text-indigo-500" /> Breakdown Panel
           </h3>
           <div className="space-y-5">
             {categories.map(cat => {
-              const progress = (cat.data.current / cat.data.max) * 100;
+              let progress = 0;
+              if (cat.data.max > 0) {
+                progress = Math.max(0, Math.min(100, (cat.data.current / cat.data.max) * 100));
+              }
               return (
                 <div key={cat.id}>
                   <div className="flex justify-between items-end mb-2">
@@ -133,7 +136,7 @@ export default function CareerReadinessPanel() {
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div 
-                      className={`h-fit bg-gradient-to-r ${gradient} rounded-full`}
+                      className={`h-full bg-gradient-to-r ${gradient} rounded-full`}
                       style={{ width: `${progress}%` }}
                     ></div>
                   </div>
@@ -144,7 +147,7 @@ export default function CareerReadinessPanel() {
         </div>
 
         {/* Insights */}
-        <div className="p-6 md:p-8 bg-slate-50/50">
+        <div className="p-5 md:p-6 bg-slate-50/50">
           <h3 className="text-[15px] font-extrabold text-slate-900 mb-6 flex items-center gap-2">
             <Zap size={18} className="text-amber-500" /> Improvement Insights
           </h3>

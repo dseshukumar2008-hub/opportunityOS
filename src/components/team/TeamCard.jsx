@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Users, ShieldCheck, Bot, Trophy, Rocket, Code2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTeam } from '../../contexts/TeamContext';
-import toast from 'react-hot-toast';
 
 export default function TeamCard({ team, mode }) {
   const { joinTeam, getMyPendingRequests } = useTeam();
@@ -18,7 +17,7 @@ export default function TeamCard({ team, mode }) {
       setIsJoining(true);
       await joinTeam(team.id);
       // Removed duplicate toast.success since TeamContext already triggers it
-    } catch (err) {
+    } catch (_e) {
       // Removed duplicate toast.error since TeamContext already triggers it
     } finally {
       setIsJoining(false);

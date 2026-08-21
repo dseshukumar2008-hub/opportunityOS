@@ -1,10 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import  { useState, useMemo } from 'react';
 import { careerPaths } from '../data/careerPathsDb';
 import CareerPathCard from './CareerPathCard';
-import { RefreshCcw } from 'lucide-react';
+import { RefreshCcw, HelpCircle } from 'lucide-react';
+import CareerExplorerHowItWorksModal from './CareerExplorerHowItWorksModal';
 
 export default function CareerPathResults({ userProfile, onRetake, resumeData, profileData }) {
   const [simulatedSkills, setSimulatedSkills] = useState([]);
+  const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
 
   const toggleSimulatedSkill = (skill) => {
     setSimulatedSkills(prev => 
@@ -72,13 +74,21 @@ export default function CareerPathResults({ userProfile, onRetake, resumeData, p
             Calculated instantly from your Resume, GitHub, LinkedIn, and Onboarding profile.
           </p>
         </div>
-        <button 
-          onClick={onRetake}
-          className="flex items-center gap-2 text-[13px] font-bold text-slate-500 hover:text-[#6D5DF6] transition-colors"
-        >
-          <RefreshCcw size={16} />
-          Retake Assessment
-        </button>
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setIsHowItWorksOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] lg:text-xs font-bold text-[#6D5DF6] hover:text-white bg-indigo-50 hover:bg-[#6D5DF6] rounded-lg transition-all"
+          >
+            <HelpCircle size={14} /> How It Works
+          </button>
+          <button 
+            onClick={onRetake}
+            className="flex items-center gap-2 text-[13px] font-bold text-slate-500 hover:text-[#6D5DF6] transition-colors"
+          >
+            <RefreshCcw size={16} />
+            Retake Assessment
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -91,6 +101,10 @@ export default function CareerPathResults({ userProfile, onRetake, resumeData, p
           />
         ))}
       </div>
+      <CareerExplorerHowItWorksModal 
+        isOpen={isHowItWorksOpen} 
+        onClose={() => setIsHowItWorksOpen(false)} 
+      />
     </div>
   );
 }

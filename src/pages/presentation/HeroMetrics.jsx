@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect,  useState } from 'react';
 import { Briefcase, Send, Users, UserPlus, MessageSquare, FileText, Target, CheckCircle, TrendingUp } from 'lucide-react';
 
 // ── Inline count-up hook ──────────────────────────────────────────

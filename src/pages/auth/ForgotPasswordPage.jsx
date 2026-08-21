@@ -22,8 +22,24 @@ export default function ForgotPasswordPage() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
+  const getFriendlyErrorMessage = (errorCode) => {
+    switch (errorCode) {
+      case 'auth/invalid-email':
+        return 'Please enter a valid email address.';
+      case 'auth/user-not-found':
+        return 'No account found with this email.';
+      case 'auth/too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      case 'auth/network-request-failed':
+        return 'Network error. Please check your internet connection.';
+      default:
+        return 'Something went wrong. Please try again.';
+    }
+  };
+
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
+    if (isLoading) return;
     setError('');
 
     if (!email || !email.includes('@')) {
@@ -38,7 +54,7 @@ export default function ForgotPasswordPage() {
       setCountdown(30);
     } catch (err) {
       console.error(err);
-      setError("We couldn't send the reset email. Please try again.");
+      setError(getFriendlyErrorMessage(err.code));
     } finally {
       setIsLoading(false);
     }
@@ -64,17 +80,10 @@ export default function ForgotPasswordPage() {
               
               <div className="text-slate-600 mb-8 text-sm space-y-4 text-left bg-slate-50 p-5 rounded-xl border border-slate-100 w-full">
                 <p className="font-medium text-slate-700">
-                  If an account exists for this email, we've sent a secure password reset link.
+                  We've sent a secure password reset link to your email address.
                 </p>
-                <div>
-                  <p className="font-semibold mb-2 text-slate-800">Please check:</p>
-                  <ul className="list-disc pl-5 space-y-1.5 text-slate-600">
-                    <li>Your Inbox</li>
-                    <li>Your Spam/Junk folder</li>
-                  </ul>
-                </div>
-                <p className="text-slate-500 italic text-xs pt-2 border-t border-slate-200">
-                  The email usually arrives within a few minutes.
+                <p className="font-medium text-slate-700">
+                  Please check your Inbox and Spam folder.
                 </p>
               </div>
               
@@ -84,13 +93,16 @@ export default function ForgotPasswordPage() {
                   Back to Login
                 </Link>
                 
-                <button
-                  onClick={handleSubmit}
-                  disabled={countdown > 0 || isLoading}
-                  className="w-full flex justify-center items-center py-2.5 px-4 border border-slate-200 rounded-lg shadow-sm text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {countdown > 0 ? `Resend in ${countdown}s` : 'Resend Email'}
-                </button>
+                <div className="pt-4 mt-4 border-t border-slate-100 text-center">
+                  <p className="text-sm text-slate-500 mb-3">Didn't receive the email?</p>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={countdown > 0 || isLoading}
+                    className="w-full flex justify-center items-center py-2.5 px-4 border border-slate-200 rounded-lg shadow-sm text-sm font-bold text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? 'Sending...' : (countdown > 0 ? `Available in ${countdown}s` : 'Resend Email')}
+                  </button>
+                </div>
               </div>
             </motion.div>
           ) : (
@@ -132,9 +144,10 @@ export default function ForgotPasswordPage() {
                       type="email"
                       autoComplete="email"
                       required
+                      disabled={isLoading}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className={`block w-full pl-10 pr-3 py-2.5 border ${error ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all`}
+                      className={`block w-full pl-10 pr-3 py-2.5 border ${error ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                       placeholder="you@university.edu"
                     />
                   </div>
@@ -146,7 +159,7 @@ export default function ForgotPasswordPage() {
                     disabled={isLoading}
                     className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#6C4CF1] hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    {isLoading ? 'Sending link...' : 'Send reset link'}
+                    {isLoading ? 'Sending...' : 'Send reset link'}
                   </button>
                 </div>
               </form>

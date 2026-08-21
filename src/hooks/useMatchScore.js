@@ -71,6 +71,7 @@ export function calculateMatchScore(opportunity, userProfile) {
 
   // 4. Career Goal / Interest Match (+10)
   let goalOrInterestMatched = false;
+// eslint-disable-next-line no-useless-assignment
   let matchedItemName = '';
   
   if (userGoals.length > 0) {

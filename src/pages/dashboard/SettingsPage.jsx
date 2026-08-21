@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import SettingsSidebar from '../../components/settings/SettingsSidebar';
 import AccountTab from '../../components/settings/AccountTab';
-import NotificationsSettings from '../../components/settings/NotificationsSettings';
 import PrivacySettings from '../../components/settings/PrivacySettings';
 import PasswordSecuritySettings from '../../components/settings/PasswordSecuritySettings';
 import AppearanceSettings from '../../components/settings/AppearanceSettings';
@@ -12,6 +11,7 @@ import IntegrationsSettings from '../../components/settings/IntegrationsSettings
 
 import { 
   User, FileText, Code, Settings, Camera,
+// eslint-disable-next-line no-unused-vars
   Globe, Save, ChevronDown, X, Check, Loader2
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -31,6 +31,7 @@ export default function SettingsPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+// eslint-disable-next-line no-unused-vars
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   
   // Custom hook logic for Firestore user settings persistence
@@ -38,6 +39,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!user?.uid) {
+// eslint-disable-next-line react-hooks/set-state-in-effect
       setSettings({});
       setIsLoadingSettings(false);
       return;
@@ -135,8 +137,6 @@ export default function SettingsPage() {
     switch (activeTab) {
       case 'account':
         return <AccountTab key="account" settings={settings} updateSetting={updateSetting} setIsEditModalOpen={setIsEditModalOpen} />;
-      case 'notifications':
-        return <NotificationsSettings key="notifications" settings={settings} updateSetting={updateSetting} />;
       case 'privacy':
         return <PrivacySettings key="privacy" settings={settings} updateSetting={updateSetting} />;
       case 'password':

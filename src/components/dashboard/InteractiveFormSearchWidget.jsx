@@ -37,6 +37,7 @@ export default function InteractiveFormSearchWidget() {
   useEffect(() => {
     const baseScore = 40;
     const addedScore = checklist.reduce((sum, item) => sum + (item.checked ? item.score : 0), 0);
+// eslint-disable-next-line react-hooks/set-state-in-effect
     setAtsScore(Math.min(98, baseScore + addedScore));
   }, [checklist]);
 

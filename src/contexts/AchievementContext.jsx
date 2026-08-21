@@ -9,7 +9,7 @@ import { useConnections } from './ConnectionContext';
 import { useResume } from './ResumeContext';
 import { useTeam } from './TeamContext';
 import { useCareerReadiness } from '../hooks/useCareerReadiness';
-import { useNotifications } from './NotificationContext';
+
 import toast from 'react-hot-toast';
 
 const AchievementContext = createContext(null);
@@ -49,8 +49,7 @@ export const AchievementProvider = ({ children }) => {
   const { resumeData, getResumeStrength } = useResume();
   const { teams } = useTeam();
   const { score: readinessScore } = useCareerReadiness();
-  const { addNotification } = useNotifications();
-
+  
   const currentUserId = user?.id || null;
 
   const [unlockedBadges, setUnlockedBadges] = useState([]);
@@ -112,12 +111,7 @@ export const AchievementProvider = ({ children }) => {
       }, { merge: true });
 
       // Trigger Notification and Toast on actual success
-      addNotification({
-        category: 'Achievements',
-        title: '🎉 Badge Unlocked',
-        message: `${badgeDef.title}\n${badgeDef.description}`
-      });
-      toast.success(`Achievement Unlocked: ${badgeDef.title} 🎉`);
+            toast.success(`Achievement Unlocked: ${badgeDef.title} 🎉`);
     } catch (err) {
       console.error('Failed to save achievement:', err);
     }

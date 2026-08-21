@@ -1,14 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState,  useCallback } from 'react';
 import { useResume } from '../contexts/ResumeContext';
 import { useResumeHistory } from './useResumeHistory';
-
 import { useTeam } from '../contexts/TeamContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../contexts/ProfileContext';
 import { geminiService } from '../services/geminiService';
 import { db } from '../config/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useNotifications } from '../contexts/NotificationContext';
+
 
 const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000;
 const ENABLE_AI_NOTIFICATIONS = false;
@@ -20,8 +19,7 @@ export function useGeminiSkillGap(opportunity) {
   const { teams } = useTeam();
   const { user } = useAuth();
   const { profile, mergeProfileData } = useProfile();
-  const { addNotification } = useNotifications();
-
+  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [gapData, setGapData] = useState(null);
@@ -87,29 +85,27 @@ export function useGeminiSkillGap(opportunity) {
         setGapData(results);
         localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data: results }));
         
+        const normalizedMissingSkills = Array.isArray(results.missingSkills)
+          ? { high: results.missingSkills, medium: [], low: [] }
+          : results.missingSkills || { high: [], medium: [], low: [] };
+
         // Save generated analysis to Firebase
         await addDoc(collection(db, 'skill_gap_analysis'), {
           uid: user.id,
           generatedAt: serverTimestamp(),
           currentSkills: results.currentSkills || [],
-          missingSkills: results.missingSkills || [],
+          missingSkills: normalizedMissingSkills,
           prioritySkills: results.prioritySkills || [],
           recommendations: results.recommendations || [],
           reasoning: results.reasoning || ""
         }).catch(err => console.error("Firebase save failed", err));
 
-        if (results.missingSkills?.length > 0) {
-          await mergeProfileData({ missingSkills: results.missingSkills });
+        if (normalizedMissingSkills.high?.length > 0) {
+          await mergeProfileData({ missingSkills: normalizedMissingSkills.high });
         }
 
         if (!cachedString && ENABLE_AI_NOTIFICATIONS) {
-          addNotification({
-            title: 'Skill Gap Analysis Ready',
-            message: `Analysis completed for ${opportunity.title} at ${opportunity.company}.`,
-            type: 'System',
-            targetUrl: '/skill-gap'
-          });
-        }
+                  }
       }
     } catch (err) {
       console.error("Skill Gap Analysis Error:", err);
@@ -117,6 +113,7 @@ export function useGeminiSkillGap(opportunity) {
     } finally {
       setIsLoading(false);
     }
+// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opportunity, resumeData, bestVersion, teams, user]);
 
   // Removed automatic execution on load. Call generateGapAnalysis manually.

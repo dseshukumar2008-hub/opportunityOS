@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, Send, RefreshCw, Zap, Target, FileText, TrendingUp, Briefcase, Code2, Users2, ArrowRight, ChevronDown } from 'lucide-react';
+import { Sparkles, Send, RefreshCw, Zap, Target, FileText, TrendingUp, Briefcase, Code2, Users2, ArrowRight} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { useCareerRoadmap } from '../../hooks/useCareerRoadmap';
@@ -9,7 +9,6 @@ import { geminiService } from '../../services/geminiService';
 
 const QUICK_PROMPTS = [
   { icon: FileText, label: 'Resume Tips', prompt: 'Give me 5 actionable tips to improve my resume for tech roles.' },
-  { icon: Target, label: 'Interview Prep', prompt: 'Help me prepare for a technical software engineering interview.' },
   { icon: TrendingUp, label: 'Career Path', prompt: 'What career path should I take to become a Senior Software Engineer?' },
   { icon: Briefcase, label: 'Salary Negotiation', prompt: 'How do I negotiate a better salary for a software engineering offer?' },
   { icon: Code2, label: 'Skill Gaps', prompt: 'What skills should I learn to become more competitive in today\'s job market?' },
@@ -101,10 +100,11 @@ export default function CareerCoachPage() {
   // Derive visible messages
   const initialMessage = {
     role: 'assistant',
-    content: `👋 Hi ${firstName}! I'm your **AI Career Copilot**, powered by OpportunityOS Intelligence.\n\nI can help you with:\n- 📄 **Resume optimization** and ATS improvements\n- 🎯 **Interview preparation** and mock Q&As\n- 📈 **Career planning** and skill gap analysis\n- 💼 **Job search strategies** and salary negotiation\n- 🤝 **Networking tips** and LinkedIn optimization\n\nWhat would you like to work on today?`,
+    content: `👋 Hi ${firstName}! I'm your **AI Career Copilot**, powered by OpportunityOS Intelligence.\n\nI can help you with:\n- 📄 **Resume optimization** and ATS improvements\n- 📈 **Career planning** and skill gap analysis\n- 💼 **Job search strategies** and salary negotiation\n- 🤝 **Networking tips** and LinkedIn optimization\n\nWhat would you like to work on today?`,
     timestamp: new Date().toISOString(),
   };
 
+// eslint-disable-next-line react-hooks/exhaustive-deps
   const messages = historyMessages.length > 0 ? historyMessages : [initialMessage];
 
   useEffect(() => {
@@ -181,47 +181,8 @@ export default function CareerCoachPage() {
             </div>
           </div>
         </div>
-        <button
-          onClick={clearChat}
-          className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 rounded-xl text-[13px] font-bold text-slate-600 transition-all"
-        >
-          <RefreshCw size={14} /> New Chat
-        </button>
       </div>
 
-      {/* ── Context Bar ── */}
-      <div className="shrink-0 bg-indigo-50/50 border-b border-indigo-100/50 px-6 py-2.5 flex items-center justify-between overflow-x-auto hide-scrollbar">
-        <div className="flex items-center gap-4 lg:gap-6">
-          <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest shrink-0">Profile Context:</span>
-          <div className="flex items-center gap-1.5 shrink-0 text-slate-600">
-            <Target size={14} className="text-indigo-500" />
-            <span className="text-[12px] font-bold">{profile?.targetRole || profile?.title || 'Target Role Not Set'}</span>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0 text-slate-600">
-            <FileText size={14} className="text-emerald-500" />
-            <span className="text-[12px] font-bold">{profile?.extractedSkills?.length || 0} Resume Skills</span>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0 text-slate-600">
-            <Zap size={14} className="text-amber-500" />
-            <span className="text-[12px] font-bold">{profile?.missingSkills?.length || 0} Missing Skills</span>
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0 text-slate-600">
-            <TrendingUp size={14} className="text-blue-500" />
-            <span className="text-[12px] font-bold">
-              Roadmap: {roadmapState?.roadmap?.roadmapData?.header?.currentPhase || 'Not Started'}
-            </span>
-          </div>
-        </div>
-
-        <button
-          onClick={() => sendMessage("Generate my Weekly Goals and Daily Actions based on my current readiness and skill gaps.", true)}
-          disabled={isTyping || isMemoryLoading}
-          className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-[#6C4CF1] hover:from-indigo-600 hover:to-[#5B3DE0] text-white rounded-lg shadow-sm shadow-indigo-200 text-[12px] font-bold transition-all disabled:opacity-50 shrink-0"
-        >
-          <Sparkles size={14} />
-          Generate Weekly Goals
-        </button>
-      </div>
 
       {/* ── Messages Area ── */}
       <div className="flex-1 overflow-y-auto px-4 lg:px-8 py-6 scrollbar-thin scrollbar-thumb-slate-200">
