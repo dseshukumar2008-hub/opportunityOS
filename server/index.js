@@ -121,7 +121,14 @@ async function callGemini(apiKey, prompt, responseType, options = {}) {
   
   const parts = [];
   if (options.inlineDataItems && options.inlineDataItems.length > 0) {
-    parts.push(...options.inlineDataItems);
+    const formattedItems = options.inlineDataItems.map(item => {
+      if (item.inlineData) return item;
+      if (item.mimeType && item.data) {
+        return { inlineData: { mimeType: item.mimeType, data: item.data } };
+      }
+      return item;
+    });
+    parts.push(...formattedItems);
   }
   parts.push({ text: prompt });
 
