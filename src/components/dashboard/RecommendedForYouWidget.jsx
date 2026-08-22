@@ -26,10 +26,10 @@ export default function RecommendedForYouWidget({ userState }) {
         color: 'emerald' 
       },
       { 
-        icon: Briefcase, 
-        title: 'Explore Opportunities', 
-        description: 'Find roles that match your career goals.', 
-        path: '/opportunities', 
+        icon: Code, 
+        title: 'Build Better Projects', 
+        description: 'Get personalized project ideas based on your skills and career goals.', 
+        path: '/project-recommendations', 
         color: 'amber' 
       }
     ];
@@ -51,10 +51,10 @@ export default function RecommendedForYouWidget({ userState }) {
         color: 'emerald' 
       },
       { 
-        icon: Briefcase, 
-        title: 'Explore Opportunities', 
-        description: 'Find relevant jobs and internships for you.', 
-        path: '/opportunities', 
+        icon: Code, 
+        title: 'Build Better Projects', 
+        description: 'Get personalized project ideas based on your skills and career goals.', 
+        path: '/project-recommendations', 
         color: 'amber' 
       }
     ];

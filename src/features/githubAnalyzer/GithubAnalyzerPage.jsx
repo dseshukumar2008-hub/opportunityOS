@@ -4,16 +4,19 @@ import { geminiService } from '../../services/geminiService';
 import { useCareer } from '../../contexts/CareerContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
+import { useActivity } from '../../contexts/ActivityContext';
 import GithubUpload from './GithubUpload';
 import GithubResults from './GithubResults';
 import { calculateLocalGithubMetrics, fetchDeepGithubData, fetchContributionHeatmap } from '../../utils/githubAnalyzerEngine';
 import ContextualBackButton from '../../components/navigation/ContextualBackButton';
+import { sanitizeForFirestore, findNestedArrays } from '../../utils/firestoreSanitizer';
 
 export default function GithubAnalyzerPage() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
   const { updateCareerContext } = useCareer();
   const { updateProfile } = useProfile();
+  const { addActivity } = useActivity();
 
   const handleAnalyze = async (username, targetRole) => {
     if (!username || !targetRole) {
@@ -42,19 +45,33 @@ export default function GithubAnalyzerPage() {
             technologyAnalysis: parsed.technologyAnalysis || { detected: [] }
           };
 
+          const firestoreSafeContext = sanitizeForFirestore({
+            ...savePayload,
+            missingSkills: parsed.technologyAnalysis?.missing || []
+          });
+
           try {
-            updateCareerContext({
-              ...savePayload,
-              missingSkills: parsed.technologyAnalysis?.missing || []
-            });
+            await updateCareerContext(firestoreSafeContext);
           } catch (e) {
-            console.warn("Non-fatal error updating career context:", e);
+            console.warn("Non-fatal error updating career context from cache:", e);
           }
 
           if (updateProfile) {
-            await updateProfile({ 
-              githubAnalysis: { ...parsed, analyzedAt: new Date().toISOString() } 
-            });
+            // eslint-disable-next-line no-unused-vars
+            const { repos, deepAnalysis, heatmap, ...safeToSaveObj } = parsed;
+            const firestoreSafeAnalysis = sanitizeForFirestore(safeToSaveObj);
+            
+            try {
+              const saveResult = await updateProfile({ 
+                githubAnalysis: { ...firestoreSafeAnalysis, analyzedAt: new Date().toISOString() } 
+              });
+              if (saveResult && saveResult.error) {
+                console.error("Firestore cache save error:", saveResult.error);
+                // We won't block the UI here, but we log it.
+              }
+            } catch (saveError) {
+              console.error("Firestore Save Error from cache:", saveError);
+            }
           }
 
           setLoading(false);
@@ -159,8 +176,15 @@ export default function GithubAnalyzerPage() {
         technologyAnalysis: analysisResult.technologyAnalysis || { detected: [] }
       };
 
+      const firestoreSafeContext = sanitizeForFirestore(savePayload);
+      const contextNested = findNestedArrays(firestoreSafeContext);
+      if (contextNested.length > 0) {
+        console.warn("Found nested arrays in career context:", contextNested);
+      }
+
       try {
-        updateCareerContext(savePayload);
+        console.log("Saving to updateCareerContext...");
+        await updateCareerContext(firestoreSafeContext);
       } catch (e) {
         console.warn("Non-fatal error updating career context:", e);
       }
@@ -170,12 +194,43 @@ export default function GithubAnalyzerPage() {
       localStorage.setItem(cacheKey, JSON.stringify(finalResultObj));
 
       if (updateProfile) {
-        await updateProfile({ 
-          githubAnalysis: { ...finalResultObj, analyzedAt: new Date().toISOString() } 
-        });
+        // Strip heavy/raw data to prevent Firestore 1MB limits
+        // eslint-disable-next-line no-unused-vars
+        const { repos, deepAnalysis, heatmap, ...safeToSaveObj } = finalResultObj;
+        
+        const firestoreSafeAnalysis = sanitizeForFirestore(safeToSaveObj);
+        const analysisNested = findNestedArrays(firestoreSafeAnalysis);
+        if (analysisNested.length > 0) {
+           console.error("CRITICAL: Found nested arrays in githubAnalysis after sanitization!", analysisNested);
+        }
+        
+        try {
+          console.log("Saving to updateProfile...");
+          const saveResult = await updateProfile({ 
+            githubAnalysis: { ...firestoreSafeAnalysis, analyzedAt: new Date().toISOString() } 
+          });
+          
+          if (saveResult && saveResult.error) {
+            throw saveResult.error;
+          }
+        } catch (saveError) {
+          console.error("Firestore Save Error:", saveError);
+          toast.error("Analysis complete, but failed to save to profile. " + (saveError.message || ""));
+          return { success: false, error: "SAVE_FAILED" };
+        }
       }
 
       if (analysisResult.githubScore > 0) {
+        if (addActivity) {
+          addActivity({
+            title: "GitHub Profile Analyzed",
+            description: "Your GitHub profile and repositories have been analyzed.",
+            category: "Analysis",
+            type: "action",
+            iconType: "GitBranch",
+            color: "bg-blue-50 text-blue-600"
+          });
+        }
         toast.success("GitHub portfolio analyzed successfully!");
       }
       return { success: true };

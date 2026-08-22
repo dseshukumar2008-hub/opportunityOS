@@ -50,11 +50,10 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
       if (data && data.length > 0) {
         setMessages(data);
       } else {
-        const userName = contextData?.user?.name ? ` ${contextData.user.name.split(' ')[0]}` : '';
         const welcome = {
           id: 'welcome',
           role: 'assistant',
-          content: `Hi${userName}! I'm your OpportunityOS Copilot. I have analyzed your ${mode === 'student' ? 'Profile, Resume, and Applications' : 'Company Profile, Opportunities, and Applicants'}. How can I help you today?`
+          content: `Hi! I’m your OpportunityOS AI Assistant. I can help you explore the platform, understand its features, and answer general career questions. For personalized advice based on your profile and career data, try the Career Copilot.`
         };
         setMessages([welcome]);
       }
@@ -116,7 +115,7 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
       
       const result = await geminiService.chatWithCopilot({
         mode,
-        contextData,
+        isGeneralAssistant: true,
         history: recentHistory,
         message: userText
       });
@@ -144,19 +143,14 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
     }
   };
 
-  const studentPrompts = [
-    "How can I improve my ATS score?",
-    "What skills should I learn next?",
-    "Which opportunity is best for me?"
+  const suggestedPrompts = [
+    "How does OpportunityOS work?",
+    "Which feature should I use first?",
+    "How does GitHub Analyzer work?",
+    "Help me improve my resume",
+    "Explain Skill Gap Analysis",
+    "How can I prepare for an interview?"
   ];
-
-  const employerPrompts = [
-    "Who is my strongest applicant?",
-    "What skills are missing in my applicant pool?",
-    "Which applicants should I interview first?"
-  ];
-
-  const suggestedPrompts = mode === 'student' ? studentPrompts : employerPrompts;
 
   return (
     <>
@@ -193,7 +187,7 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
             </div>
             <div>
               <h2 className="text-base font-bold leading-tight">OpportunityOS Copilot</h2>
-              <p className="text-[12px] text-indigo-100 font-medium">Context-Aware AI Assistant</p>
+              <p className="text-[12px] text-indigo-100 font-medium">General AI Assistant</p>
             </div>
           </div>
           <button 
@@ -217,7 +211,7 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
                   <Bot size={32} />
                 </div>
                 <h3 className="text-[16px] font-bold text-slate-900 mb-2">Ready to assist you</h3>
-                <p className="text-[13px] text-slate-500 mb-6">Ask me anything about your data, goals, or platform features.</p>
+                <p className="text-[13px] text-slate-500 mb-6">Ask me about OpportunityOS, its features, or general career guidance.</p>
              </div>
           )}
 

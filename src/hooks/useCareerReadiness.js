@@ -21,7 +21,7 @@ export function useCareerReadiness() {
     });
     
     let totalFilled = filled;
-    const hasResume = !!matchResume;
+    const hasResume = !!matchResume || hasInsights;
     if (hasResume) totalFilled++;
     if (profile?.skills?.length > 0) totalFilled++;
     
@@ -34,7 +34,7 @@ export function useCareerReadiness() {
     const { score, status, breakdown } = calculateAggregatedReadiness({
       profileCompletionPct,
       hasResume,
-      atsScore: (hasResume && typeof atsScore === 'number') ? atsScore : 0,
+      atsScore: (hasInsights && typeof atsScore === 'number') ? atsScore : 0,
       applicationsCount: appsCount,
       githubScore,
       linkedinScore

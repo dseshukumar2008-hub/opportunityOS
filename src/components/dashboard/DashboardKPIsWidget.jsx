@@ -54,7 +54,7 @@ export default function DashboardKPIsWidget({ userState }) {
 
   const { hasProfile, hasResume, isNewUser } = userState || {};
 
-  const resumeScore = (hasResume && hasInsights) ? atsScore : 0;
+  const resumeScore = hasInsights ? atsScore : 0;
   const aiScore = isNewUser ? 0 : (careerReadiness?.score ?? 0);
   const completion = hasProfile ? (profileCompletion?.score ?? 0) : 0;
 
@@ -67,11 +67,11 @@ export default function DashboardKPIsWidget({ userState }) {
   }
 
   const profileDisplay = hasProfile ? `${completion}%` : 'Not started';
-  const resumeDisplay = hasResume ? `${resumeScore}%` : 'Not created';
+  const resumeDisplay = hasInsights ? `${resumeScore}%` : 'Not analyzed';
   const readinessDisplay = isNewUser ? 'Getting started' : `${aiScore}%`;
 
   const profileSubtext = hasProfile ? (completion >= 80 ? "Great" : "Complete profile") : null;
-  const resumeSubtext = hasResume ? (resumeScore >= 70 ? "Good" : "Needs work") : null;
+  const resumeSubtext = hasInsights ? (resumeScore >= 70 ? "Good" : "Needs work") : null;
   const readinessSubtext = isNewUser ? null : (aiScore >= 70 ? "Ready" : "Needs work");
 
   return (

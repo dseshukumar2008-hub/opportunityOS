@@ -1,10 +1,29 @@
-import { Map, CheckCircle2, Circle, Briefcase, FileText, Code, User } from 'lucide-react';
+import { Map, CheckCircle2, Circle, FileText, Code, User, Lightbulb } from 'lucide-react';
 import { useUserProfile } from '../../hooks/useUserProfile';
+import { useAuth } from '../../contexts/AuthContext';
+import { useState, useEffect } from 'react';
+import { getSavedRecommendations } from '../../services/recommendationRepository';
+import { Link } from 'react-router-dom';
 
 export default function CareerJourneyWidget({ userState }) {
 // eslint-disable-next-line no-unused-vars
-  const { hasProfile, hasResume, isNewUser } = userState || {};
+  const { hasProfile, hasResume } = userState || {};
   const { profile } = useUserProfile(); // To check if skills are added
+  const { user } = useAuth();
+  
+  const [hasProjects, setHasProjects] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    if (user) {
+      getSavedRecommendations(user.uid).then(recs => {
+        if (mounted && recs && recs.length > 0) {
+          setHasProjects(true);
+        }
+      }).catch(console.error);
+    }
+    return () => { mounted = false; };
+  }, [user]);
 
   const hasSkills = profile?.skills && profile.skills.length > 0;
 
@@ -12,7 +31,7 @@ export default function CareerJourneyWidget({ userState }) {
     { id: 'profile', label: 'Complete Profile', icon: User, done: hasProfile },
     { id: 'skills', label: 'Add Skills', icon: Code, done: hasSkills },
     { id: 'resume', label: 'Create Resume', icon: FileText, done: hasResume },
-    { id: 'opportunities', label: 'Explore Opportunities', icon: Briefcase, done: false }, // Typically false unless they applied
+    { id: 'projects', label: 'Get Project Recommendations', icon: Lightbulb, done: hasProjects, path: '/project-recommendations' },
   ];
 
   return (
@@ -49,14 +68,24 @@ export default function CareerJourneyWidget({ userState }) {
               textClass += "text-slate-400";
             }
 
-            return (
-              <div key={step.id} className="flex items-center gap-4">
+            const content = (
+              <>
                 <div className={markerClass}>
                   {isDone ? <CheckCircle2 size={16} /> : <Circle size={14} />}
                 </div>
-                <div className="flex-1 bg-white border border-slate-100 rounded-lg p-2 shadow-sm flex items-center">
+                <div className={`flex-1 bg-white border border-slate-100 rounded-lg p-2 shadow-sm flex items-center ${step.path ? 'hover:bg-slate-50 transition-colors' : ''}`}>
                    <span className={textClass}>{step.label}</span>
                 </div>
+              </>
+            );
+
+            return step.path ? (
+              <Link key={step.id} to={step.path} className="flex items-center gap-4">
+                {content}
+              </Link>
+            ) : (
+              <div key={step.id} className="flex items-center gap-4">
+                {content}
               </div>
             );
           })}

@@ -161,11 +161,8 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
                     : `https://www.google.com/search?q=${encodeURIComponent(`${r.title} ${r.provider || ''} ${r.type || 'course'}`)}`;
                   
                   return (
-                    <a 
+                    <div 
                       key={i} 
-                      href={finalUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
                       className="p-4 bg-white border border-slate-200 rounded-2xl flex flex-col gap-2 cursor-pointer hover:shadow-sm hover:border-[#6C4CF1]/30 hover:-translate-y-0.5 transition-all group"
                     >
                       <div className="flex items-center gap-2">
@@ -173,7 +170,7 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
                         {r.provider && <span className="text-[11px] font-bold text-slate-400 truncate">{r.provider}</span>}
                       </div>
                       <p className="font-bold text-slate-800 text-sm line-clamp-2 group-hover:text-[#6C4CF1] transition-colors">{r.title}</p>
-                    </a>
+                    </div>
                   );
                 })}
               </div>

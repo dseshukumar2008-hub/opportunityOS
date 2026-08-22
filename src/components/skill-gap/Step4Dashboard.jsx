@@ -169,15 +169,15 @@ export default function Step4Dashboard({ data, onReset }) {
         {/* ROW 2: Skills Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full items-stretch">
           {/* Current Skills */}
-          <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-fit w-full">
-            <div className="flex items-center justify-between mb-5">
+          <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-full w-full">
+            <div className="flex items-center justify-between mb-5 shrink-0">
               <div className="flex items-center gap-2">
                 <CheckCircle2Icon className="text-emerald-500 w-5 h-5" />
                 <h3 className="font-extrabold text-slate-900 text-[15px]">Current Skills</h3>
               </div>
               <span className="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">{currentSkills?.length || 0} Total</span>
             </div>
-            <div className="flex flex-wrap gap-1.5 content-start overflow-y-auto max-h-[220px] pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+            <div className="flex flex-wrap gap-1.5 content-start overflow-y-auto flex-1 min-h-0 pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
               {(currentSkills || []).map(s => (
                 <span key={s} className="px-2.5 py-1 bg-slate-50 border border-slate-200 text-slate-700 text-[11px] font-semibold rounded-md transition-colors hover:border-slate-300">
                   {s}
@@ -191,7 +191,9 @@ export default function Step4Dashboard({ data, onReset }) {
 
           {/* Skills Breakdown */}
           <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-full w-full">
-            <h3 className="font-extrabold text-slate-900 text-[15px] mb-5 w-full text-left">Skills Breakdown</h3>
+            <div className="flex items-center justify-between mb-5 shrink-0">
+              <h3 className="font-extrabold text-slate-900 text-[15px]">Skills Breakdown</h3>
+            </div>
             <div className="flex flex-col items-center gap-6 w-full flex-1 justify-center">
               <div className="w-[160px] shrink-0">
                 <DonutChart strong={skillBreakdown.strong} moderate={skillBreakdown.moderate} missing={skillBreakdown.missing} />
@@ -214,29 +216,31 @@ export default function Step4Dashboard({ data, onReset }) {
           </div>
 
           {/* Next Skill - Focal Point */}
-          <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-fit w-full border-t-4 border-t-[#6C4CF1]">
-            <div className="flex items-center gap-2.5 mb-4">
+          <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-full w-full border-t-4 border-t-[#6C4CF1]">
+            <div className="flex items-center gap-2.5 mb-5 shrink-0">
               <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
                 <Target size={16} className="text-[#6C4CF1]" />
               </div>
               <h3 className="font-extrabold text-slate-900 text-[15px]">Next Skill To Learn</h3>
             </div>
             
-            <h2 className="text-[20px] font-black text-slate-900 mb-5 leading-tight line-clamp-2">{nextSkill.name}</h2>
-            
-            <div className="flex flex-wrap gap-2 mb-4">
-              <span className="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1.5 shrink-0">
-                <AlertCircle size={12}/> {nextSkill.priority} Priority
-              </span>
-              <span className="bg-slate-50 text-slate-700 border border-slate-200 px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1.5 shrink-0">
-                <Clock size={12}/> {nextSkill.time}
-              </span>
-              <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1.5 shrink-0">
-                <Zap size={12}/> {nextSkill.impact} Impact
-              </span>
-            </div>
+            <div className="flex-1 flex flex-col justify-center">
+              <h2 className="text-[20px] font-black text-slate-900 mb-4 leading-tight line-clamp-2">{nextSkill.name}</h2>
+              
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1.5 shrink-0">
+                  <AlertCircle size={12}/> {nextSkill.priority} Priority
+                </span>
+                <span className="bg-slate-50 text-slate-700 border border-slate-200 px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1.5 shrink-0">
+                  <Clock size={12}/> {nextSkill.time}
+                </span>
+                <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1.5 shrink-0">
+                  <Zap size={12}/> {nextSkill.impact} Impact
+                </span>
+              </div>
 
-            <p className="text-[13px] text-slate-500 font-medium leading-relaxed">{nextSkill.reason}</p>
+              <p className="text-[13px] text-slate-500 font-medium leading-relaxed">{nextSkill.reason}</p>
+            </div>
           </div>
         </div>
 

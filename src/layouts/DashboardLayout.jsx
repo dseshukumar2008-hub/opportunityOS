@@ -4,6 +4,7 @@ import { useProfile } from '../contexts/ProfileContext';
 
 import { useOnlineStatus } from '../contexts/OnlineStatusContext';
 import StatusDot from '../components/ui/StatusDot';
+import UserAvatar from '../components/ui/UserAvatar';
 import { useNavigate, useLocation, Outlet} from 'react-router-dom';
 import {
 // eslint-disable-next-line no-unused-vars
@@ -269,8 +270,8 @@ export default function DashboardLayout() {
                 }}
               >
                 <div className="relative">
-                  <img
-                    src={profile?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${getUserFullName(user, profile)}&backgroundColor=e2e8f0`}
+                  <UserAvatar
+                    src={profile?.avatar_url || user?.photoURL}
                     alt="User Avatar"
                     className="w-8 h-8 rounded-full border border-slate-200 bg-slate-100"
                   />

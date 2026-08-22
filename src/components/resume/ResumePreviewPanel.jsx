@@ -609,9 +609,9 @@ const ResumePreviewPanel = forwardRef((props, ref) => {
   };
 
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className={`flex flex-col w-full ${props.isModalMode ? 'h-full overflow-hidden' : 'h-full'}`}>
       {/* Compact Template Toolbar */}
-      <div className="mb-4 flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-sm">
+      <div className="mb-4 flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-sm shrink-0">
         <h3 className="text-[13px] font-bold text-slate-800">Template Style</h3>
         <div className="flex gap-2 bg-slate-100 p-1 rounded-lg">
           {templates.map(t => (
@@ -631,7 +631,7 @@ const ResumePreviewPanel = forwardRef((props, ref) => {
       </div>
 
       {/* Actual A4 Resume Paper Container */}
-      <div className="rounded-[16px] border border-slate-200 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.05)] overflow-hidden bg-white w-full">
+      <div className={`rounded-[16px] border border-slate-200 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.05)] bg-white w-full ${props.isModalMode ? 'flex-1 overflow-y-auto min-h-0' : 'overflow-hidden'}`}>
         {/* The Capture Node */}
         <div 
           ref={ref}

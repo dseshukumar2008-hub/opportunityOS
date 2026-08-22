@@ -297,7 +297,12 @@ export default function FloatingOnboarding() {
                     <div className="flex items-center gap-3 flex-1">
                       <div className={`w-[22px] flex items-center justify-center ${isActive ? 'drop-shadow-sm' : ''}`}>{step.icon}</div>
                       <div className="flex flex-col">
-                        <span className={`text-[16px] font-bold transition-colors ${isActive || isPast ? 'text-[#7C3AED]' : 'text-[#1F2435]'}`}>{step.title}</span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[16px] font-bold transition-colors ${isActive || isPast ? 'text-[#7C3AED]' : 'text-[#1F2435]'}`}>{step.title}</span>
+                          {step.id === 6 && (
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-100 px-1.5 py-0.5 rounded">Optional</span>
+                          )}
+                        </div>
                         <span className="text-[13px] text-slate-500 font-medium mt-0.5">{step.desc}</span>
                       </div>
                     </div>

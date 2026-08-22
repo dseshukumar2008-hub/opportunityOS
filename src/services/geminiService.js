@@ -11,8 +11,8 @@ async function callGemini(prompt, systemInstruction = '', inlineDataItems = [], 
     options: {
       systemInstruction,
       temperature,
-      inlineData: inlineDataItems,
-      timeout
+      inlineDataItems,
+      timeoutMs: timeout
     }
   };
   
@@ -27,69 +27,7 @@ export const geminiService = {
   /**
    * New strictly formatted ATS scanner logic
    */
-  async extractResumeData(textData, fileData) {
-    analyticsService.trackEvent('Resume Extraction Started');
-    try {
-      const inlineDataItems = [];
-      let prompt = `You are an expert resume parser.\nExtract the following information from the provided resume text or document and format it into the exact JSON schema provided.\n\n`;
 
-      if (fileData) {
-        inlineDataItems.push({
-          mimeType: fileData.mimeType || 'application/pdf',
-          data: fileData.base64
-        });
-        prompt += `A PDF/DOCX of the resume is attached.\n`;
-      } else if (textData) {
-        prompt += `Here is the pasted text from the resume:\n${textData}\n`;
-      } else {
-        throw new Error("No resume data provided.");
-      }
-
-      prompt += `
-CRITICAL INSTRUCTIONS:
-1. Extract ALL information accurately. Do not invent any data.
-2. If a section is missing from the resume, return an empty array or empty string as per the schema.
-3. For education, if cgpa is missing, leave it blank.
-4. For projects, infer the tech stack if not explicitly listed but technologies are mentioned in the description.
-
-Required JSON Schema:
-{
-  "personalInfo": {
-    "fullName": "",
-    "role": "",
-    "email": "",
-    "phone": "",
-    "location": "",
-    "linkedin": "",
-    "github": "",
-    "portfolio": ""
-  },
-  "education": [
-    { "id": "uuid1", "degree": "", "school": "", "year": "", "cgpa": "" }
-  ],
-  "skills": ["skill1", "skill2"],
-  "projects": [
-    { "id": "uuid2", "title": "", "link": "", "description": "", "techStack": "" }
-  ],
-  "experience": [
-    { "id": "uuid3", "role": "", "company": "", "duration": "", "responsibilities": "- bullet 1\\n- bullet 2" }
-  ],
-  "certifications": [
-    { "id": "uuid4", "title": "", "issuer": "", "year": "" }
-  ]
-}
-
-Return JSON only.`;
-
-      const result = await callGemini(prompt, "You are an expert resume parser. Output valid JSON only.", inlineDataItems, 0.1, 'Resume Extraction', 60000);
-      analyticsService.trackEvent('Resume Extraction Completed');
-      return result;
-    } catch (error) {
-      console.error('Gemini Resume Extraction Error:', error);
-      analyticsService.trackError('Resume Extraction Error', error);
-      throw error;
-    }
-  },
 
   async enhanceResumeText(text, contextType, actionType = 'enhance') {
     analyticsService.trackEvent('Resume Text Enhancement Started', { actionType });
@@ -484,17 +422,34 @@ JSON FORMAT:
     }
   },
 
-  async chatWithCopilot({ mode, contextData, history, message, generateGoals = false }) {
+  async chatWithCopilot({ mode, contextData, isGeneralAssistant, history, message, generateGoals = false }) {
     try {
-      let prompt = `Chat Context: Mode=${mode}
-      Context Data: ${JSON.stringify(contextData)}
-      Chat History: ${JSON.stringify(history)}
-      User Message: ${message}
+      let prompt = `Chat Context: Mode=${mode}\n`;
       
-      CRITICAL INSTRUCTIONS:
-      1. You must use the provided Context Data to ground your answers.
-      2. Do not provide generic advice. Be highly specific to their profile context.
-      3. Keep responses conversational but strictly career-focused.`;
+      if (isGeneralAssistant) {
+        prompt += `
+        Chat History: ${JSON.stringify(history)}
+        User Message: ${message}
+        
+        CRITICAL INSTRUCTIONS FOR OPPORTUNITYOS COPILOT (GENERAL ASSISTANT):
+        1. You are the OpportunityOS Copilot, a general-purpose AI assistant for the OpportunityOS platform.
+        2. Help users find and navigate existing OpportunityOS features (Dashboard, Profile, Resume Builder, Resume Analyzer, GitHub Analyzer, Skill Gap Analysis, Career Roadmap, Project Recommendations, AI Career Copilot, Analytics).
+        3. Explain clearly what each existing OpportunityOS feature does, what input it needs, and what the user can expect as output.
+        4. Answer general career questions (resumes, ATS, skills, projects, interviews, internships, career prep) in a helpful, friendly, concise tone.
+        5. DO NOT claim to know the user's personal ATS score, GitHub score, or profile data unless the user explicitly provides it in the message.
+        6. If the user asks for highly personalized data analysis or career intelligence, recommend they visit the "AI Career Copilot" page.
+        7. DO NOT invent features, pages, or functionality that do not exist in OpportunityOS.`;
+      } else {
+        prompt += `
+        Context Data: ${JSON.stringify(contextData)}
+        Chat History: ${JSON.stringify(history)}
+        User Message: ${message}
+        
+        CRITICAL INSTRUCTIONS:
+        1. You must use the provided Context Data to ground your answers.
+        2. Do not provide generic advice. Be highly specific to their profile context.
+        3. Keep responses conversational but strictly career-focused.`;
+      }
       
       if (generateGoals) {
         prompt += `
@@ -508,7 +463,7 @@ JSON FORMAT:
         }`;
       } else {
         prompt += `
-        4. Include a qualityScores object.
+        ${isGeneralAssistant ? "8." : "4."} Include a qualityScores object.
         
         Required JSON format:
         {
@@ -522,7 +477,11 @@ JSON FORMAT:
         }`;
       }
       
-      return await callGemini(prompt, "You are OpportunityOS Copilot V2, a highly personalized AI career assistant. You ONLY reason from available profile data.", [], 0.3, 'Copilot Chat');
+      const systemInstruction = isGeneralAssistant 
+        ? "You are OpportunityOS Copilot, a helpful general platform assistant and career guide."
+        : "You are OpportunityOS Copilot V2, a highly personalized AI career assistant. You ONLY reason from available profile data.";
+        
+      return await callGemini(prompt, systemInstruction, [], 0.3, 'Copilot Chat');
     } catch (error) {
       console.error('Gemini Copilot Error:', error);
       analyticsService.trackError('Copilot Feature Error', error);

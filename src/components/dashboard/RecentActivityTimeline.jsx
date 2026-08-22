@@ -14,7 +14,10 @@ import {
 // eslint-disable-next-line no-unused-vars
   Clock,
   ArrowRight,
-  Activity
+  Activity,
+  FileText,
+  GitBranch,
+  Map
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -24,19 +27,38 @@ export default function RecentActivityTimeline({ userState }) {
 
   const activities = useMemo(() => {
     let feed = [];
-// eslint-disable-next-line no-unused-vars
-    const now = Date.now();
+
+    const getRelativeTime = (timestamp) => {
+      const diffInSeconds = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000);
+      if (diffInSeconds < 60) return 'Just now';
+      const diffInMinutes = Math.floor(diffInSeconds / 60);
+      if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+      const diffInDays = Math.floor(diffInHours / 24);
+      if (diffInDays < 30) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+      return new Date(timestamp).toLocaleDateString();
+    };
+
+    const iconMap = {
+      FileText: FileText,
+      GitBranch: GitBranch,
+      Map: Map,
+      Activity: Activity
+    };
 
     rawActivities.forEach((act) => {
+      const IconComp = iconMap[act.iconType] || Activity;
+      
       feed.push({
         id: act.id,
         type: act.type,
-        text: act.description || act.action || 'Performed an action',
+        text: act.title || act.description || act.action || 'Performed an action',
         date: new Date(act.timestamp).getTime(),
-        timeString: new Date(act.timestamp).toLocaleDateString(),
-        icon: Activity,
-        iconColor: 'text-[#6C4CF1]',
-        bgColor: 'bg-indigo-50'
+        timeString: getRelativeTime(act.timestamp),
+        icon: IconComp,
+        iconColor: act.color ? act.color.split(' ')[1] : 'text-[#6C4CF1]',
+        bgColor: act.color ? act.color.split(' ')[0] : 'bg-indigo-50'
       });
     });
 

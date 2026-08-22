@@ -26,6 +26,7 @@ import { useResumeInsights } from '../../hooks/useResumeInsights';
 import { useCareer } from '../../contexts/CareerContext';
 import { useActivity } from '../../contexts/ActivityContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
+import { useCareerRoadmap } from '../../hooks/useCareerRoadmap';
 
 // Helper for relative timestamps
 function timeAgo(dateString) {
@@ -64,6 +65,7 @@ export default function AnalyticsPage() {
   const { careerContext } = useCareer();
   const { activities } = useActivity();
   const { profile } = useUserProfile();
+  const { state: roadmapState } = useCareerRoadmap();
   const navigate = useNavigate();
 
   // Determine Profile Setup Progress (5 Core Milestones)
@@ -86,7 +88,55 @@ export default function AnalyticsPage() {
   const progressPercentage = (completedStepsCount / 5) * 100;
   
   const incompleteSteps = steps.filter(s => !s.completed);
-  const nextStep = incompleteSteps[0] || { title: "Analyze Your Resume", desc: "Get AI-powered feedback on your resume.", path: "/dashboard/resume-review", icon: FileText, color: "text-emerald-600", bg: "bg-emerald-50" };
+  const hasRoadmap = !!roadmapState?.roadmap;
+
+  let nextStep = null;
+  if (!hasGithub) {
+    nextStep = {
+      title: "Analyze GitHub Profile",
+      desc: "Analyze your GitHub profile to understand your skills, projects, and development activity.",
+      path: "/github-analyzer",
+      icon: GitBranch,
+      color: "text-blue-600",
+      bg: "bg-blue-50"
+    };
+  } else if (!hasResume || (typeof atsScore === 'number' && atsScore < 60)) {
+    nextStep = {
+      title: "Improve Your Resume",
+      desc: "Build or improve your resume to strengthen your career profile.",
+      path: "/resume-review",
+      icon: FileText,
+      color: "text-emerald-600",
+      bg: "bg-emerald-50"
+    };
+  } else if (careerContext?.missingSkills?.length > 0) {
+    nextStep = {
+      title: "Analyze Your Skill Gaps",
+      desc: "Identify missing skills and understand what you should learn next.",
+      path: "/skill-gap",
+      icon: Target,
+      color: "text-purple-600",
+      bg: "bg-purple-50"
+    };
+  } else if (!hasRoadmap) {
+    nextStep = {
+      title: "Generate Career Roadmap",
+      desc: "Create a personalized roadmap based on your career goals and skills.",
+      path: "/career-roadmap",
+      icon: TrendingUp,
+      color: "text-indigo-600",
+      bg: "bg-indigo-50"
+    };
+  } else {
+    nextStep = {
+      title: "Get Project Recommendations",
+      desc: "Discover AI-powered project ideas based on your skills and profile.",
+      path: "/project-recommendations",
+      icon: Lightbulb,
+      color: "text-orange-600",
+      bg: "bg-orange-50"
+    };
+  }
 
   const overviewCards = [
     {
@@ -136,14 +186,72 @@ export default function AnalyticsPage() {
   ];
 
   // Dynamic Prioritization Engine (Max 3 items)
-  const improvementCards = incompleteSteps.slice(0, 3);
-
-  // If user completed everything, give them advanced tasks
-  if (improvementCards.length < 3) {
-    if (improvementCards.length < 3) improvementCards.push({ title: "Build Projects", desc: "Get AI recommendations for side projects.", priority: "Medium Priority", icon: Code2, color: "text-purple-600", bg: "bg-purple-50", priorityBg: "bg-amber-50 text-amber-600", path: "/project-recommendations" });
-    if (improvementCards.length < 3) improvementCards.push({ title: "Build Projects", desc: "Add real-world projects to showcase your skills.", priority: "Low Priority", icon: Briefcase, color: "text-orange-600", bg: "bg-orange-50", priorityBg: "bg-slate-100 text-slate-600", path: "/dashboard/projects" });
-    if (improvementCards.length < 3) improvementCards.push({ title: "Expand Network", desc: "Connect with peers and mentors in your field.", priority: "Low Priority", icon: Target, color: "text-blue-600", bg: "bg-blue-50", priorityBg: "bg-slate-100 text-slate-600", path: "/dashboard/network" });
+  const allPotentialImprovements = [];
+  
+  if (!hasGithub) {
+    allPotentialImprovements.push({
+      title: "Analyze GitHub Profile",
+      desc: "Analyze your repositories, skills, and development activity.",
+      path: "/github-analyzer",
+      icon: GitBranch,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      priority: "High Priority",
+      priorityBg: "bg-rose-50 text-rose-600"
+    });
   }
+  
+  if (!hasResume || (typeof atsScore === 'number' && atsScore < 60)) {
+    allPotentialImprovements.push({
+      title: "Improve Your Resume",
+      desc: "Build or optimize your resume to improve your career readiness.",
+      path: "/resume-review",
+      icon: FileText,
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+      priority: "High Priority",
+      priorityBg: "bg-rose-50 text-rose-600"
+    });
+  }
+
+  if (careerContext?.missingSkills?.length > 0) {
+    allPotentialImprovements.push({
+      title: "Analyze Your Skill Gaps",
+      desc: "Identify the skills you need to develop for your target career.",
+      path: "/skill-gap",
+      icon: Target,
+      color: "text-purple-600",
+      bg: "bg-purple-50",
+      priority: "Medium Priority",
+      priorityBg: "bg-amber-50 text-amber-600"
+    });
+  }
+
+  if (!hasRoadmap) {
+    allPotentialImprovements.push({
+      title: "Generate Career Roadmap",
+      desc: "Create a personalized learning and career roadmap.",
+      path: "/career-roadmap",
+      icon: TrendingUp,
+      color: "text-indigo-600",
+      bg: "bg-indigo-50",
+      priority: "Medium Priority",
+      priorityBg: "bg-amber-50 text-amber-600"
+    });
+  }
+
+  allPotentialImprovements.push({
+    title: "Get Project Recommendations",
+    desc: "Discover project ideas based on your existing skills and profile.",
+    path: "/project-recommendations",
+    icon: Lightbulb,
+    color: "text-orange-600",
+    bg: "bg-orange-50",
+    priority: "Ongoing",
+    priorityBg: "bg-slate-100 text-slate-600"
+  });
+
+  const improvementCards = allPotentialImprovements.slice(0, 3);
 
   const recentActivities = activities?.slice(0, 5) || [];
 
@@ -238,9 +346,6 @@ export default function AnalyticsPage() {
                     <p className="text-slate-500 font-medium text-[14px] max-w-xs leading-relaxed">{nextStep.desc}</p>
                   </div>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-100 transition-colors shrink-0 ml-4">
-                  <ChevronRight className="text-indigo-600 group-hover:translate-x-1 transition-transform" size={24} />
-                </div>
               </div>
             </div>
           </div>
@@ -258,19 +363,22 @@ export default function AnalyticsPage() {
             transition={{ duration: 0.4, delay: 0.3 }}
             className="bg-white rounded-[32px] border border-slate-100 p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col min-h-[420px]"
           >
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center mb-8">
               <div className="flex items-center gap-3">
                 <Target size={22} className="text-indigo-600" />
                 <h3 className="text-[18px] font-bold text-slate-900">What to Improve Next</h3>
               </div>
-              <button className="text-indigo-600 font-bold text-[14px] flex items-center hover:text-indigo-700">View All <ChevronRight size={16}/></button>
             </div>
             
             <div className="space-y-6 flex-1">
               {improvementCards.map((card, index) => {
                 const CardIcon = card.icon;
                 return (
-                  <div key={index} className="flex items-center justify-between group cursor-pointer border-b border-slate-50 pb-6 last:pb-0 last:border-0" onClick={() => navigate(card.path)}>
+                  <div 
+                    key={index} 
+                    onClick={() => navigate(card.path)}
+                    className="flex items-center justify-between border-b border-slate-50 pb-6 last:pb-0 last:border-0 cursor-pointer group hover:opacity-80 transition-opacity"
+                  >
                     <div className="flex items-start gap-4">
                         <div className={`w-12 h-12 rounded-full ${card.bg} flex items-center justify-center shrink-0`}>
                           <CardIcon className={card.color} size={20} />
@@ -282,7 +390,6 @@ export default function AnalyticsPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`inline-block px-3 py-1.5 text-[12px] font-bold rounded-xl ${card.priorityBg}`}>{card.priority}</span>
-                      <ChevronRight size={20} className="text-slate-400 group-hover:text-slate-600 transition-colors"/>
                     </div>
                   </div>
                 )
@@ -297,12 +404,11 @@ export default function AnalyticsPage() {
             transition={{ duration: 0.4, delay: 0.4 }}
             className="bg-white rounded-[32px] border border-slate-100 p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] flex flex-col min-h-[420px]"
           >
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center mb-8">
               <div className="flex items-center gap-3">
                 <Clock size={22} className="text-indigo-600" />
                 <h3 className="text-[18px] font-bold text-slate-900">Recent Activity</h3>
               </div>
-              <button className="text-indigo-600 font-bold text-[14px] flex items-center hover:text-indigo-700">View All <ChevronRight size={16}/></button>
             </div>
             
             <div className="flex-1 flex flex-col">

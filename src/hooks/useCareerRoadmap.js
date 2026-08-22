@@ -3,6 +3,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { useProfile } from '../contexts/ProfileContext';
+import { useActivity } from '../contexts/ActivityContext';
 import { analyticsService } from '../services/analyticsService';
 import { getTemplateRoadmap } from '../data/roadmapTemplates';
 import { generate as aiGenerate } from '../services/ai/aiProvider';
@@ -172,6 +173,7 @@ const ENABLE_AI_NOTIFICATIONS = false;
 export function useCareerRoadmap() {
   const [state, dispatch] = useReducer(reducer, INITIAL);
   const { profile, mergeProfileData } = useProfile();
+  const { addActivity } = useActivity();
   const uidRef = useRef(null);
   const dispatch$ = useRef(dispatch);
   dispatch$.current = dispatch;
@@ -298,6 +300,17 @@ export function useCareerRoadmap() {
         hasRoadmap: true,
         roadmapProgress: { totalTasks: 25, completedTasks: 0 } 
       });
+
+      if (addActivity) {
+        addActivity({
+          title: "Career Roadmap Generated",
+          description: "Your personalized career roadmap has been created.",
+          category: "Analysis",
+          type: "action",
+          iconType: "Map",
+          color: "bg-purple-50 text-purple-600"
+        });
+      }
 
       if (ENABLE_AI_NOTIFICATIONS) {
         // Notifications are currently disabled globally.

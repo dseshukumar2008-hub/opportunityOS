@@ -6,15 +6,16 @@ import {
   MapPin, Edit, FileText, Award, Bookmark, X,
   Code, BarChart3, Trophy, Link as LinkIcon, 
 // eslint-disable-next-line no-unused-vars
-  Globe, Save, ChevronDown, Check
+  Globe, Save, ChevronDown, Check, GitBranch
 } from 'lucide-react';
+import UserAvatar from '../../components/ui/UserAvatar';
 import CareerReadinessPanel from '../../components/dashboard/CareerReadinessPanel';
 import { getUserFullName } from '../../utils/userUtils';
 import toast from 'react-hot-toast';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 import { useResumeInsights } from '../../hooks/useResumeInsights';
 import { useCareerReadiness } from '../../hooks/useCareerReadiness';
-import { useGoals } from '../../contexts/GoalContext';
+
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
@@ -22,7 +23,7 @@ export default function ProfilePage() {
   const { profileCompletion } = useDashboardInsights();
   const { hasInsights, atsScore } = useResumeInsights();
   const { score: readinessScore } = useCareerReadiness();
-  const { goals } = useGoals();
+
   
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('personal-info');
@@ -118,13 +119,14 @@ export default function ProfilePage() {
 
   const skillsList = profileData.skills ? profileData.skills.split(',').map(s => s.trim()).filter(Boolean) : [];
   
-  const completedGoalsCount = goals?.filter(g => g.status === 'Completed' || g.currentValue >= g.targetValue)?.length || 0;
+  const hasGithub = !!profile?.githubAnalysis;
+  const githubScore = profile?.githubAnalysis?.alignmentScore || 0;
   
   const stats = [
     { label: 'Resume Score', value: hasInsights && atsScore ? `${atsScore}%` : 'Not analyzed', icon: FileText, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
     { label: 'Profile Completion', value: `${profileCompletion?.score ?? 0}%`, icon: Trophy, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
     { label: 'AI Readiness', value: `${readinessScore || 0}%`, icon: BarChart3, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
-    { label: 'Goals Completed', value: goals?.length > 0 ? `${completedGoalsCount}` : 'No goals tracked', icon: Bookmark, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
+    { label: 'GitHub Alignment', value: hasGithub ? `${githubScore}%` : 'Not Analyzed', icon: GitBranch, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
   ];
 
   return (
@@ -153,8 +155,8 @@ export default function ProfilePage() {
             {/* Left Side: Avatar & Basic Info */}
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div className="relative shrink-0">
-                <img 
-                  src={user?.photoURL || `https://api.dicebear.com/7.x/notionists/svg?seed=${getUserFullName(user, null)}&backgroundColor=e2e8f0`} 
+                <UserAvatar
+                  src={user?.photoURL} 
                   alt="Profile Avatar" 
                   className="w-[120px] h-[120px] rounded-full border border-slate-200 bg-slate-100 object-cover"
                 />

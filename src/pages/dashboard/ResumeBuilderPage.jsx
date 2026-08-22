@@ -10,7 +10,6 @@ import {
   ListChecks,
   X,
   Cloud,
-  FilePlus2,
 // eslint-disable-next-line no-unused-vars
   Copy,
   Trash2,
@@ -25,7 +24,6 @@ import {
 import ResumeFormPanel from '../../components/resume/ResumeFormPanel';
 import ResumePreviewPanel from '../../components/resume/ResumePreviewPanel';
 import ResumeHealthPanel from '../../components/resume/ResumeHealthPanel';
-import ResumeImportModal from '../../components/resume/ResumeImportModal';
 import ResumeHistoryModal from '../../components/resume/ResumeHistoryModal';
 import toast from 'react-hot-toast';
 import html2canvas from 'html2canvas';
@@ -64,7 +62,6 @@ export default function ResumeBuilderPage() {
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [activeTab, setActiveTab] = useState('builder'); // 'builder' or 'health'
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   
   const [isRenaming, setIsRenaming] = useState(false);
@@ -145,6 +142,17 @@ export default function ResumeBuilderPage() {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty]);
+
+  useEffect(() => {
+    if (isPreviewModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isPreviewModalOpen]);
 
   const handleSave = () => {
     saveResume();
@@ -386,13 +394,6 @@ export default function ResumeBuilderPage() {
           {/* Compact Toolbar */}
           <div className="flex items-center bg-slate-50 rounded-lg p-0.5 border border-slate-200/60 hidden sm:flex">
             <button 
-              onClick={() => setIsImportModalOpen(true)}
-              className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-white rounded shadow-sm transition-all"
-              title="Import Data"
-            >
-              <FilePlus2 size={16} />
-            </button>
-            <button 
               onClick={() => setIsHistoryModalOpen(true)}
               className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-white rounded shadow-sm transition-all"
               title="Version History"
@@ -488,19 +489,14 @@ export default function ResumeBuilderPage() {
               </button>
             </div>
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 md:p-10 flex justify-center bg-slate-100/50">
-              <div className="w-full max-w-[850px]">
-                <ResumePreviewPanel />
+            <div className="flex-1 overflow-hidden p-6 md:p-10 flex justify-center bg-slate-100/50">
+              <div className="w-full max-w-[850px] h-full">
+                <ResumePreviewPanel isModalMode={true} />
               </div>
             </div>
           </div>
         </div>
       )}
-      
-      <ResumeImportModal 
-        isOpen={isImportModalOpen} 
-        onClose={() => setIsImportModalOpen(false)} 
-      />
       
       <ResumeHistoryModal 
         isOpen={isHistoryModalOpen} 

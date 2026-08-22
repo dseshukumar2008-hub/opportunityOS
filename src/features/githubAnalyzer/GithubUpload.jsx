@@ -1,5 +1,6 @@
 import  { useState, useEffect } from 'react';
-import { Sparkles, GitBranch, Target, User, Code, BarChart3, Lock } from 'lucide-react';
+import { Sparkles, GitBranch, Target, User, Code, BarChart3, Lock, Info } from 'lucide-react';
+import GithubAnalysisHowItWorksModal from './GithubAnalysisHowItWorksModal';
 import { useCareer } from '../../contexts/CareerContext';
 
 const ROLES = [
@@ -22,6 +23,7 @@ export default function GithubUpload({ onAnalyze, loading }) {
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [isValidating, setIsValidating] = useState(false);
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
   
   // Use context targetRole if available and it exists in ROLES list, otherwise fallback to first role
   const initialRole = careerContext?.targetRole && ROLES.includes(careerContext.targetRole)
@@ -76,9 +78,18 @@ export default function GithubUpload({ onAnalyze, loading }) {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#F4F2FF] text-[#6D5DF6] rounded-full text-[13px] font-bold tracking-wide">
             <Sparkles size={16} /> OpportunityOS GitHub Analyzer
           </div>
-          <h1 className="text-4xl md:text-[40px] lg:text-[44px] font-extrabold text-[#111827] tracking-tight leading-[1.1]">
-            Analyze Your GitHub
-          </h1>
+          <div className="flex items-center justify-between gap-4">
+            <h1 className="text-4xl md:text-[40px] lg:text-[44px] font-extrabold text-[#111827] tracking-tight leading-[1.1]">
+              Analyze Your GitHub
+            </h1>
+            <button 
+              type="button"
+              onClick={() => setShowHowItWorks(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 text-[#6D5DF6] hover:bg-indigo-100 transition-colors text-sm font-bold shadow-sm shrink-0"
+            >
+              <Info size={16} /> How It Works
+            </button>
+          </div>
           <p className="text-base lg:text-lg text-slate-500 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
             Get AI-powered insights about your repositories, technologies, contributions, and career alignment.
           </p>
@@ -223,6 +234,10 @@ export default function GithubUpload({ onAnalyze, loading }) {
         </form>
       </div>
 
+      <GithubAnalysisHowItWorksModal 
+        isOpen={showHowItWorks} 
+        onClose={() => setShowHowItWorks(false)} 
+      />
     </div>
   );
 }

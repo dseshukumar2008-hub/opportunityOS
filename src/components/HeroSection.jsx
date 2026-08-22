@@ -17,13 +17,12 @@ export default function HeroSection() {
         </div>
         
         <h1 className="text-[2.75rem] xl:text-[3rem] leading-[1.05] font-black text-slate-900 mb-4 tracking-tight">
-          Find. Track. Win.<br/>
-          Your Next <span className="text-indigo-600">Opportunity.</span>
+          Build Your Career,<br/>
+          One Smart Step at a <span className="text-indigo-600">Time.</span>
         </h1>
         
         <p className="text-base xl:text-lg text-slate-600 mb-6 leading-relaxed max-w-lg">
-          Build your AI-powered career workspace.<br className="hidden md:block" />
-          Organize your profile, improve your resume, track your progress, and grow with personalized career insights.
+          Build your profile, improve your resume, discover your skill gaps, and grow with personalized AI-powered career guidance.
         </p>
 
         {/* Opportunity Pills */}

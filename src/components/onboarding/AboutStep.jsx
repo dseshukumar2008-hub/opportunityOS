@@ -35,7 +35,10 @@ export default function AboutStep({ onNext, onBack, data = {}, updateData }) {
           <h2 className="text-[32px] font-[800] leading-[1.05] tracking-[-0.02em] text-[#1F2435] flex items-center gap-[12px]">
             About Me <span className="text-[24px] leading-none flex items-center">✍️</span>
           </h2>
-          <p className="text-[15px] font-[500] text-[#64748B] mt-[8px]">Write a short introduction.</p>
+          <div className="flex items-center gap-3 mt-[8px]">
+            <p className="text-[15px] font-[500] text-[#64748B]">Write a short introduction.</p>
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-md">Optional</span>
+          </div>
         </div>
 
         {/* Form Container */}

@@ -7,6 +7,7 @@ import {
   Sparkles, ChevronRight, TrendingUp,
   Target, Zap,
 } from 'lucide-react';
+import UserAvatar from '../../components/ui/UserAvatar';
 import { useAuth } from '../../contexts/AuthContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
@@ -164,12 +165,8 @@ export default function CareerCommandCenter() {
           <div className="flex items-center gap-4">
             {/* Avatar with AI score ring */}
             <div className="relative shrink-0">
-              <div className="w-[68px] h-[68px] rounded-full bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center border-[3px] border-white shadow-lg overflow-hidden">
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt={firstName} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-2xl font-black text-indigo-600">{initials}</span>
-                )}
+              <div className="w-[68px] h-[68px] rounded-full flex items-center justify-center border-[3px] border-white shadow-lg overflow-hidden shrink-0">
+                <UserAvatar src={user?.photoURL} alt={firstName} className="w-full h-full object-cover bg-gradient-to-br from-indigo-100 to-violet-100" />
               </div>
               {/* Online dot */}
               <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-400 border-2 border-white shadow-sm" />

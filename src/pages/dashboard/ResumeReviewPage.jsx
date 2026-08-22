@@ -8,7 +8,8 @@ import ResumeAnalysisResults from '../../components/resume/ResumeAnalysisResults
 import ResumeSmartSuggestions from '../../components/resume/ResumeSmartSuggestions';
 import ResumeContentSuggestions from '../../components/resume/ResumeContentSuggestions';
 import ResumeHistory from '../../components/resume/ResumeHistory';
-import { Bot, Sparkles, FileText, Activity, CheckCircle2, History,      Lock } from 'lucide-react';
+import ResumeAnalysisHowItWorksModal from '../../components/resume/ResumeAnalysisHowItWorksModal';
+import { Bot, Sparkles, FileText, Activity, CheckCircle2, History, Lock, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ResumeReviewPage() {
@@ -22,6 +23,7 @@ export default function ResumeReviewPage() {
   const hasHistory = history && history.length > 0;
 
   const [activeTab, setActiveTab] = useState('Review');
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
 
   const resetAnalysisSession = () => {
     resetAnalysis();
@@ -115,9 +117,17 @@ export default function ResumeReviewPage() {
             <Bot size={12} className="text-[#6D5DF6]" />
             <span className="text-[10px] font-bold text-[#6D5DF6] tracking-widest uppercase">AI Review</span>
           </div>
-          <h1 className="text-3xl leading-tight font-extrabold text-[#111827] tracking-tight mb-1">
-            Resume Analysis
-          </h1>
+          <div className="flex items-center justify-between gap-4 mb-1">
+            <h1 className="text-3xl leading-tight font-extrabold text-[#111827] tracking-tight">
+              Resume Analysis
+            </h1>
+            <button 
+              onClick={() => setShowHowItWorks(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 text-[#6D5DF6] hover:bg-indigo-100 transition-colors text-sm font-bold shadow-sm"
+            >
+              <Info size={16} /> How It Works
+            </button>
+          </div>
           <p className="text-[14px] text-[#64748B] leading-snug max-w-2xl">
             Upload your resume or use your built OpportunityOS profile to get instant, AI-powered feedback on your format, skills, and ATS compatibility.
           </p>
@@ -237,16 +247,20 @@ export default function ResumeReviewPage() {
             />
           )}
 
-          {activeTab === 'History' && (
-            <ResumeHistory 
-              history={history} 
-              getBestVersion={getBestVersion}
-              compareVersions={compareVersions}
-            />
-          )}
-
-        </div>
+          {activeTab === 'History' && hasHistory && (
+          <ResumeHistory 
+            history={history}
+            getBestVersion={getBestVersion}
+            compareVersions={compareVersions}
+          />
+        )}
       </div>
+    </div>
+      
+      <ResumeAnalysisHowItWorksModal 
+        isOpen={showHowItWorks} 
+        onClose={() => setShowHowItWorks(false)} 
+      />
       
       {/* Floating Action Button */}
       <button className="fixed bottom-8 right-8 w-14 h-14 bg-[#6D5DF6] text-white rounded-full flex items-center justify-center shadow-xl shadow-indigo-500/30 hover:bg-[#5a4cd1] transition-transform hover:scale-105 z-50">
