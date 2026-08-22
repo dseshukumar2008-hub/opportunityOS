@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Bot, CheckCircle2, Loader2 } from 'lucide-react';
 import { geminiService } from '../../services/geminiService';
-import { fileToBase64 } from '../../utils/fileUtils';
+import { extractTextFromFile, optimizeLargeResumeText } from '../../utils/fileUtils';
 
 const STEPS = [
   "Extracting Skills from Sources...",
@@ -23,15 +23,20 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
         // Step 0: Extracting Skills...
         setCurrentStepIndex(0);
         
-        let resumeData = null;
-        if (inputData?.resumeFile) {
-          resumeData = await fileToBase64(inputData.resumeFile);
-        }
+        const processFileOrText = async (fileOrText) => {
+          if (!fileOrText) return null;
+          if (typeof fileOrText === 'string') {
+            return optimizeLargeResumeText(fileOrText, 25000);
+          }
+          if (fileOrText instanceof Blob) {
+            const extracted = await extractTextFromFile(fileOrText);
+            return optimizeLargeResumeText(extracted, 25000);
+          }
+          return null;
+        };
 
-        let linkedinData = null;
-        if (inputData?.linkedinFile) {
-          linkedinData = await fileToBase64(inputData.linkedinFile);
-        }
+        let resumeData = await processFileOrText(inputData?.resumeFile);
+        let linkedinData = await processFileOrText(inputData?.linkedinFile);
 
         // Step 1: Analyzing GitHub...
         setCurrentStepIndex(1);

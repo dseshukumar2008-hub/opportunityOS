@@ -507,11 +507,10 @@ JSON FORMAT:
       let resumeContext = "No resume provided.";
       
       if (resumeData) {
-        inlineDataItems.push({
-          mimeType: resumeData.mimeType,
-          data: resumeData.base64
-        });
-        resumeContext = "A resume document is provided as an attachment. Extract all technical skills, programming languages, tools, frameworks, and experience from it.";
+        resumeContext = `A resume document was provided with the following extracted text:\n\n${resumeData}\n\nExtract all technical skills, programming languages, tools, frameworks, and experience from it.`;
+      }
+      if (payload.linkedinData) {
+        resumeContext += `\n\nA LinkedIn profile was also provided with the following extracted text:\n\n${payload.linkedinData}\n\nExtract relevant skills and experience from it as well.`;
       }
 
 
