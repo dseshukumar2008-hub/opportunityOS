@@ -142,115 +142,111 @@ export function useResumeAnalysis() {
       }
 
       // Phase 2: Gemini Analysis Engine
-      if (import.meta.env.VITE_GEMINI_API_KEY) {
-        try {
-          console.log('[Resume Analysis] Phase 2: Requesting Insights');
-          const aiInsights = await geminiService.analyzeResume(payloadForGemini, extractedText, localMetrics.profileType);
-          console.log('[Resume Analysis] Phase 2 Insights Received');
-          
-          // Phase 3: Validation Layer
-          if (!aiInsights || !aiInsights.suggestedRole || !Array.isArray(aiInsights.strengths)) {
-            throw new Error('Invalid AI insight schema.');
-          }
-          
-          // Generate Smart Suggestions dynamically based on the analysis
-          const smartSuggestions = [];
-
-          // 1. Local ATS Deductions (Losses)
-          if (localMetrics.explanation) {
-            localMetrics.explanation.forEach(exp => {
-              if (exp.type === 'loss') {
-                smartSuggestions.push({
-                  area: 'ATS Formatting',
-                  priority: 'HIGH',
-                  title: exp.label,
-                  description: `This caused an ATS deduction of ${exp.points} points. Add or improve this section to increase your parsing score.`
-                });
-              }
-            });
-          }
-
-          // 2. Missing Keywords
-          if (localMetrics.missingKeywords && localMetrics.missingKeywords.length > 0) {
-            smartSuggestions.push({
-              area: 'Keywords',
-              priority: 'MEDIUM',
-              title: 'Missing Crucial Keywords',
-              description: `Your resume is missing important industry keywords. Consider adding: ${localMetrics.missingKeywords.slice(0, 5).join(', ')}.`
-            });
-          }
-
-          // 3. AI Areas for Growth
-          if (aiInsights.areasForGrowth && Array.isArray(aiInsights.areasForGrowth)) {
-            aiInsights.areasForGrowth.forEach(area => {
-              const desc = area.includes('. ') ? area : `${area}. Ensure you incorporate this feedback into your next revision.`;
-              smartSuggestions.push({
-                area: 'Content Strategy',
-                priority: 'MEDIUM',
-                title: 'Area for Growth',
-                description: desc
-              });
-            });
-          }
-
-          // 4. AI Action Plan - Immediate Fixes
-          if (aiInsights.actionPlan?.immediateFixes && Array.isArray(aiInsights.actionPlan.immediateFixes)) {
-            aiInsights.actionPlan.immediateFixes.forEach(fix => {
-              const desc = fix.includes('. ') ? fix : `${fix}. Apply this fix immediately.`;
-              smartSuggestions.push({
-                area: 'Priority Fix',
-                priority: 'HIGH',
-                title: 'Immediate Action Needed',
-                description: desc
-              });
-            });
-          }
-
-          // 5. AI Action Plan - Skills
-          if (aiInsights.actionPlan?.skillsToLearn && Array.isArray(aiInsights.actionPlan.skillsToLearn)) {
-            aiInsights.actionPlan.skillsToLearn.forEach(skill => {
-              smartSuggestions.push({
-                area: 'Skill Development',
-                priority: 'LOW',
-                title: `Learn ${skill}`,
-                description: `You are missing this skill for target roles. Acquire this skill and add it to your resume to boost your match rate.`
-              });
-            });
-          }
-
-          // Enforce ATS Score Rule: If score is < 90 but no suggestions exist, add a fallback.
-          if (localMetrics.atsScore < 90 && smartSuggestions.length === 0) {
-            smartSuggestions.push({
-              area: 'Optimization',
-              priority: 'LOW',
-              title: 'Minor Polish Needed',
-              description: 'Your resume is good but not perfect. Try quantifying more achievements to push your score above 90.'
-            });
-          }
-          
-          // Merge
-          results = {
-            ...aiInsights,
-            ...localMetrics, // override any hallucinations if they sneaked in
-            extractedSkills: localMetrics.extractedSkills,
-            missingKeywords: aiInsights.missingKeywords || localMetrics.missingKeywords, // use AI's keyword explanation first
-            atsScore: localMetrics.atsScore,
-            scoreBreakdown: localMetrics.scoreBreakdown,
-            explanation: localMetrics.explanation,
-            qualityRating: aiInsights.qualityRating || localMetrics.rating || 'Good',
-            smartSuggestions,
-            contentSuggestions: aiInsights.contentSuggestions,
-            recommendedSkills: aiInsights.recommendedSkills || aiInsights.actionPlan?.skillsToLearn || [],
-            recommendedCertifications: aiInsights.recommendedCertifications || aiInsights.actionPlan?.certificationsToPursue || [],
-            recommendedProjects: aiInsights.recommendedProjects || aiInsights.actionPlan?.projectsToBuild || []
-          };
-          
-        } catch (geminiError) {
-          console.error('[Resume Analysis Error] Phase 3 Validation Failed:', geminiError);
-          throw new Error('Resume analysis could not be completed. Please try again.');
+      try {
+        console.log('[Resume Analysis] Phase 2: Requesting Insights');
+        const aiInsights = await geminiService.analyzeResume(payloadForGemini, extractedText, localMetrics.profileType);
+        console.log('[Resume Analysis] Phase 2 Insights Received');
+        
+        // Phase 3: Validation Layer
+        if (!aiInsights || !aiInsights.suggestedRole || !Array.isArray(aiInsights.strengths)) {
+          throw new Error('Invalid AI insight schema.');
         }
-      } else {
-        throw new Error('VITE_GEMINI_API_KEY missing, cannot proceed.');
+        
+        // Generate Smart Suggestions dynamically based on the analysis
+        const smartSuggestions = [];
+
+        // 1. Local ATS Deductions (Losses)
+        if (localMetrics.explanation) {
+          localMetrics.explanation.forEach(exp => {
+            if (exp.type === 'loss') {
+              smartSuggestions.push({
+                area: 'ATS Formatting',
+                priority: 'HIGH',
+                title: exp.label,
+                description: `This caused an ATS deduction of ${exp.points} points. Add or improve this section to increase your parsing score.`
+              });
+            }
+          });
+        }
+
+        // 2. Missing Keywords
+        if (localMetrics.missingKeywords && localMetrics.missingKeywords.length > 0) {
+          smartSuggestions.push({
+            area: 'Keywords',
+            priority: 'MEDIUM',
+            title: 'Missing Crucial Keywords',
+            description: `Your resume is missing important industry keywords. Consider adding: ${localMetrics.missingKeywords.slice(0, 5).join(', ')}.`
+          });
+        }
+
+        // 3. AI Areas for Growth
+        if (aiInsights.areasForGrowth && Array.isArray(aiInsights.areasForGrowth)) {
+          aiInsights.areasForGrowth.forEach(area => {
+            const desc = area.includes('. ') ? area : `${area}. Ensure you incorporate this feedback into your next revision.`;
+            smartSuggestions.push({
+              area: 'Content Strategy',
+              priority: 'MEDIUM',
+              title: 'Area for Growth',
+              description: desc
+            });
+          });
+        }
+
+        // 4. AI Action Plan - Immediate Fixes
+        if (aiInsights.actionPlan?.immediateFixes && Array.isArray(aiInsights.actionPlan.immediateFixes)) {
+          aiInsights.actionPlan.immediateFixes.forEach(fix => {
+            const desc = fix.includes('. ') ? fix : `${fix}. Apply this fix immediately.`;
+            smartSuggestions.push({
+              area: 'Priority Fix',
+              priority: 'HIGH',
+              title: 'Immediate Action Needed',
+              description: desc
+            });
+          });
+        }
+
+        // 5. AI Action Plan - Skills
+        if (aiInsights.actionPlan?.skillsToLearn && Array.isArray(aiInsights.actionPlan.skillsToLearn)) {
+          aiInsights.actionPlan.skillsToLearn.forEach(skill => {
+            smartSuggestions.push({
+              area: 'Skill Development',
+              priority: 'LOW',
+              title: `Learn ${skill}`,
+              description: `You are missing this skill for target roles. Acquire this skill and add it to your resume to boost your match rate.`
+            });
+          });
+        }
+
+        // Enforce ATS Score Rule: If score is < 90 but no suggestions exist, add a fallback.
+        if (localMetrics.atsScore < 90 && smartSuggestions.length === 0) {
+          smartSuggestions.push({
+            area: 'Optimization',
+            priority: 'LOW',
+            title: 'Minor Polish Needed',
+            description: 'Your resume is good but not perfect. Try quantifying more achievements to push your score above 90.'
+          });
+        }
+        
+        // Merge
+        results = {
+          ...aiInsights,
+          ...localMetrics, // override any hallucinations if they sneaked in
+          extractedSkills: localMetrics.extractedSkills,
+          missingKeywords: aiInsights.missingKeywords || localMetrics.missingKeywords, // use AI's keyword explanation first
+          atsScore: localMetrics.atsScore,
+          scoreBreakdown: localMetrics.scoreBreakdown,
+          explanation: localMetrics.explanation,
+          qualityRating: aiInsights.qualityRating || localMetrics.rating || 'Good',
+          smartSuggestions,
+          contentSuggestions: aiInsights.contentSuggestions,
+          recommendedSkills: aiInsights.recommendedSkills || aiInsights.actionPlan?.skillsToLearn || [],
+          recommendedCertifications: aiInsights.recommendedCertifications || aiInsights.actionPlan?.certificationsToPursue || [],
+          recommendedProjects: aiInsights.recommendedProjects || aiInsights.actionPlan?.projectsToBuild || []
+        };
+        
+      } catch (geminiError) {
+        console.error('[Resume Analysis Error] Phase 3 Validation Failed:', geminiError);
+        throw new Error('Resume analysis could not be completed. Please try again.');
       }
 
       setAnalysisResults(results);

@@ -24,13 +24,12 @@ import DashboardSkeleton from './components/loaders/DashboardSkeleton';
 import ResumeReviewSkeleton from './components/loaders/ResumeReviewSkeleton';
 import AnalyticsSkeleton from './components/loaders/AnalyticsSkeleton';
 import ScrollToTop from './components/routing/ScrollToTop';
-
 import ResumeBuilderSkeleton from './components/loaders/ResumeBuilderSkeleton';
 import PresentationSkeleton from './components/loaders/PresentationSkeleton';
 
 const LandingPage = lazy(() => import('./LandingPage'));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
-const SignupPage = lazy(() => import('./pages/auth/SignUpPage'));
+const SignupPage = lazy(() => import('./pages/auth/SignupPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
 
@@ -130,27 +129,27 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route element={
                 <ActivityProvider>
-                    <TeamProvider>
-                      <MessageProvider>
-                        <ConnectionProvider>
-                          <ResumeProvider>
-                            <OnlineStatusProvider>
-                              <ProfileProvider>
-                                <GoalProvider>
-                                  <AchievementProvider>
-                                    <CareerProvider>
-                                      <Suspense fallback={<DashboardSkeleton />}>
-                                        <DashboardLayout />
-                                      </Suspense>
-                                    </CareerProvider>
-                                  </AchievementProvider>
-                                </GoalProvider>
-                              </ProfileProvider>
-                            </OnlineStatusProvider>
-                          </ResumeProvider>
-                        </ConnectionProvider>
-                      </MessageProvider>
-                    </TeamProvider>
+                  <TeamProvider>
+                    <MessageProvider>
+                      <ConnectionProvider>
+                        <ResumeProvider>
+                          <OnlineStatusProvider>
+                            <ProfileProvider>
+                              <GoalProvider>
+                                <AchievementProvider>
+                                  <CareerProvider>
+                                    <Suspense fallback={<DashboardSkeleton />}>
+                                      <DashboardLayout />
+                                    </Suspense>
+                                  </CareerProvider>
+                                </AchievementProvider>
+                              </GoalProvider>
+                            </ProfileProvider>
+                          </OnlineStatusProvider>
+                        </ResumeProvider>
+                      </ConnectionProvider>
+                    </MessageProvider>
+                  </TeamProvider>
                 </ActivityProvider>
               }>
                 <Route element={<RouteErrorBoundary><Suspense fallback={<PageLoader />}><Outlet /></Suspense></RouteErrorBoundary>}>

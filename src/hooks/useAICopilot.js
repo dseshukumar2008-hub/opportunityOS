@@ -30,8 +30,7 @@ function buildContext({ profile, atsScore, topStrength, topWeakness, missingSkil
 }
 
 async function generateActionPlan(contextData) {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-  if (!apiKey) throw new Error('VITE_GEMINI_API_KEY is not configured.');
+
 
   const prompt = `You are an expert AI Career Copilot inside OpportunityOS. Generate a highly personalized Today's Action Plan for this student.
 

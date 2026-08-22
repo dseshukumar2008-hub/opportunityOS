@@ -221,7 +221,6 @@ export function useCareerRoadmap() {
     let parsed = null;
     let fallbackUsed = false;
 
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     console.log("[STEP 1] Wizard data loaded");
     const wizardWithProfile = { ...wizardData, missingSkills: profile?.missingSkills || [] };
     const promptText = buildPrompt(wizardWithProfile);

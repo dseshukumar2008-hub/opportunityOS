@@ -75,9 +75,7 @@ export function useGeminiSkillGap(opportunity) {
     };
 
     try {
-      if (!import.meta.env.VITE_GEMINI_API_KEY) {
-        throw new Error('VITE_GEMINI_API_KEY is not configured.');
-      }
+
 
       const results = await geminiService.analyzeSkillGap(contextData);
       
