@@ -103,9 +103,18 @@ app.post('/api/ai/generate', verifyAuth, async (req, res) => {
     // to mimic Firebase Callable Function format for the frontend
     res.json({ data: result });
   } catch (error) {
-    console.error(`Error calling provider ${providerName}:`, error);
-    res.status(500).json({ 
-      error: 'internal', 
+    console.error(`[BACKEND] Error calling provider ${providerName}:`, error.message);
+    
+    // Attempt to extract status code if available (e.g. from "Gemini API Error: 429 - ...")
+    let statusCode = 500;
+    const match = error.message.match(/Error: (\d{3})/);
+    if (match && match[1]) {
+      statusCode = parseInt(match[1], 10);
+    }
+    
+    res.status(statusCode).json({ 
+      error: 'provider_error',
+      statusCode: statusCode,
       message: `AI Provider failed: ${error.message || "Unknown error"}` 
     });
   }

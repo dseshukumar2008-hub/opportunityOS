@@ -34,7 +34,7 @@ async function executeWithRetry(provider, request) {
         error.type === AIErrorTypes.AI_SERVER_ERROR ||
         error.type === AIErrorTypes.AI_TIMEOUT;
 
-      if (!isRetryEligible || attempt === 3) {
+      if (!isRetryEligible || attempt === 3 || error.type === AIErrorTypes.AI_QUOTA_EXHAUSTED) {
         throw error;
       }
       
@@ -153,6 +153,7 @@ ${JSON.stringify(aiContext)}
     const isFallbackEligible = 
       primaryError.type === AIErrorTypes.AI_NETWORK_ERROR ||
       primaryError.type === AIErrorTypes.AI_RATE_LIMIT ||
+      primaryError.type === AIErrorTypes.AI_QUOTA_EXHAUSTED ||
       primaryError.type === AIErrorTypes.AI_SERVER_ERROR ||
       primaryError.type === AIErrorTypes.AI_TIMEOUT;
       
@@ -208,7 +209,10 @@ ${JSON.stringify(aiContext)}
         }
       }
       
-      // If all fallbacks fail, surface the original primary error
+      // If all fallbacks fail, surface a clean error to the user instead of raw JSON
+      if (primaryError.type === AIErrorTypes.AI_QUOTA_EXHAUSTED || primaryError.type === AIErrorTypes.AI_RATE_LIMIT) {
+        primaryError.message = 'All AI providers are currently at capacity. Please wait a few minutes and try again.';
+      }
       throw primaryError;
     }
     

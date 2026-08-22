@@ -70,7 +70,17 @@ export const geminiProvider = {
       analyticsService.trackAIOperation(featureName, 0, Date.now() - startTime, false, err.message);
       
       let errorType = AIErrorTypes.AI_UNKNOWN_ERROR;
-      if (err.message && err.message.toLowerCase().includes('unauthenticated')) errorType = AIErrorTypes.AI_AUTH_ERROR;
+      const lowerMsg = err.message ? err.message.toLowerCase() : '';
+      
+      if (lowerMsg.includes('unauthenticated')) {
+        errorType = AIErrorTypes.AI_AUTH_ERROR;
+      } else if (lowerMsg.includes('quota') || lowerMsg.includes('exhausted')) {
+        errorType = AIErrorTypes.AI_QUOTA_EXHAUSTED;
+        err.message = 'The AI service is currently at capacity. Falling back to alternative provider...';
+      } else if (lowerMsg.includes('429')) {
+        errorType = AIErrorTypes.AI_RATE_LIMIT;
+        err.message = 'The AI service is currently experiencing high demand. Retrying...';
+      }
       
       throw new AIError(errorType, err.message || 'Unknown error occurred.', 'gemini');
     }
