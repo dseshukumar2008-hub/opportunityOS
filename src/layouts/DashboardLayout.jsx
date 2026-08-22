@@ -35,7 +35,6 @@ import OpportunityOSCopilot from '../components/copilot/OpportunityOSCopilot';
 import { useResume } from '../contexts/ResumeContext';
 import { useGoals } from '../contexts/GoalContext';
 import FloatingOnboarding from '../components/onboarding/FloatingOnboarding';
-import LocationMigrationModal from '../components/onboarding/LocationMigrationModal';
 import { getUserFullName, getUserFirstName } from '../utils/userUtils';
 
 
@@ -321,9 +320,6 @@ export default function DashboardLayout() {
         <OpportunityOSCopilot mode="student" contextData={studentContext} />
 
         <FloatingOnboarding />
-        
-        {/* Existing User Location Migration */}
-        <LocationMigrationModal />
       </div>
     </div>
   );

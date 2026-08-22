@@ -31,8 +31,7 @@ export default function NewUserDashboard() {
     if (progressData.skills?.length > 0) completedSteps++;
     if (progressData.interests?.length > 0) completedSteps++;
     if (progressData.goals?.length > 0) completedSteps++;
-    if (progressData.preferredLocations?.length > 0) completedSteps++;
-    return Math.min(100, Math.round((completedSteps / 5) * 100));
+    return Math.min(100, Math.round((completedSteps / 4) * 100));
   };
 
   const isProfileComplete = progressData?.profile?.fullName && progressData?.profile?.college;
