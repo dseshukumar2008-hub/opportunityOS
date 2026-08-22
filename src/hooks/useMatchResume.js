@@ -53,6 +53,9 @@ export function useMatchResume() {
     try {
       // Extract base64
       const fileBase64 = await new Promise((resolve, reject) => {
+        if (!(file instanceof Blob)) {
+          return reject(new Error('Invalid file type for resume match.'));
+        }
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => resolve(reader.result.split(',')[1]);

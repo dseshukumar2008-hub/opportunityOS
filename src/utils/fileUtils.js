@@ -9,6 +9,24 @@ if (typeof window !== 'undefined' && 'Worker' in window) {
 
 export const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
+    if (!file) {
+      return reject(new Error('No file provided for Base64 conversion.'));
+    }
+
+    // If it's already an object with base64 data, return it directly
+    if (file.base64) {
+      return resolve({
+        mimeType: file.mimeType || file.type || 'application/pdf',
+        base64: file.base64
+      });
+    }
+
+    // Check if the parameter is a valid File or Blob before passing to FileReader
+    if (!(file instanceof Blob)) {
+      console.warn('[fileToBase64] Expected a File or Blob, but received:', typeof file, file);
+      return reject(new Error(`Expected a File or Blob for conversion, but received ${typeof file}.`));
+    }
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
