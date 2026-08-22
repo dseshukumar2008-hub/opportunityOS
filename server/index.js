@@ -1,7 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const admin = require('firebase-admin');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -29,16 +30,17 @@ app.get('/api/health', (req, res) => {
 });
 
 // Initialize Firebase Admin SDK
+let firebaseApp;
 try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     // Optional: Parse full JSON if provided as single env string
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+    firebaseApp = initializeApp({
+      credential: cert(serviceAccount)
     });
   } else if (process.env.FIREBASE_PROJECT_ID) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
+    firebaseApp = initializeApp({
+      credential: cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         // Replace escaped newline characters from environment variable string
@@ -46,12 +48,13 @@ try {
       })
     });
   } else {
-    // This assumes we might be running inside GCP/Render with default credentials,
-    // or we are in development mode where admin checks might be skipped or configured differently
-    admin.initializeApp();
+    // This assumes we might be running inside GCP/Render with default credentials
+    firebaseApp = initializeApp();
   }
 } catch (error) {
-  console.error("Firebase Admin Initialization Error:", error);
+  console.error("CRITICAL: Firebase Admin Initialization Error:", error);
+  // Fail fast on initialization error to prevent insecure startup
+  process.exit(1);
 }
 
 const ALLOWED_PROVIDERS = ["gemini", "groq", "openrouter"];
@@ -65,7 +68,7 @@ const verifyAuth = async (req, res, next) => {
 
   const idToken = authHeader.split('Bearer ')[1];
   try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const decodedToken = await getAuth(firebaseApp).verifyIdToken(idToken);
     req.user = decodedToken;
     next();
   } catch (error) {
