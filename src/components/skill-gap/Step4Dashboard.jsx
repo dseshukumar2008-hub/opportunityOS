@@ -63,7 +63,6 @@ export default function Step4Dashboard({ data, onReset }) {
   const { 
     targetRole = "Unknown Role", readinessScore = 0, skillGapPercentage = 0, currentSkills = [], 
     skillBreakdown = { strong: 0, moderate: 0, missing: 0 }, 
-    nextSkill = { name: "Unknown", priority: "Low", time: "N/A", impact: "Low", reason: "" }, 
     missingSkills: rawMissingSkills, 
     learningPath = [] 
   } = data || {};
@@ -169,10 +168,10 @@ export default function Step4Dashboard({ data, onReset }) {
         )}
 
         {/* ROW 2: Skills Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full items-start">
+        <div className="grid grid-cols-1 gap-6 w-full items-start">
           
-          {/* Left Column: Current Skills & Breakdown */}
-          <div className="lg:col-span-7 flex flex-col gap-6 w-full">
+          {/* Current Skills & Breakdown */}
+          <div className="flex flex-col gap-6 w-full">
             
             {/* Current Skills - Compact with View All */}
             <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col w-full relative overflow-hidden">
@@ -237,111 +236,94 @@ export default function Step4Dashboard({ data, onReset }) {
               </div>
             </div>
           </div>
-
-          {/* Right Column: Next Skill To Learn (Hero AI Card) */}
-          <div className="lg:col-span-5 w-full h-full">
-            <div className="bg-gradient-to-br from-[#6C4CF1] to-indigo-900 rounded-[24px] p-[2px] shadow-lg hover:shadow-xl transition-shadow duration-300 w-full h-full flex flex-col relative overflow-hidden group">
-              {/* Animated background glow */}
-              <div className="absolute -inset-20 bg-indigo-500 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none" />
-              
-              <div className="bg-[#0B0F19] rounded-[22px] p-7 h-full flex flex-col w-full relative z-10 overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                  <Sparkles size={120} />
-                </div>
-                
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="bg-[#6C4CF1]/20 p-1.5 rounded-lg border border-[#6C4CF1]/30">
-                    <Bot size={16} className="text-[#8168F6]" />
-                  </div>
-                  <span className="text-[11px] font-bold text-indigo-300 uppercase tracking-widest">AI Recommended Focus</span>
-                </div>
-                
-                <div className="flex-1 flex flex-col justify-center mb-6">
-                  <h2 className="text-[32px] sm:text-[40px] font-black text-white leading-none mb-4 drop-shadow-md">
-                    {nextSkill.name}
-                  </h2>
-                  <p className="text-[14px] text-indigo-100/80 font-medium leading-relaxed max-w-sm">
-                    {nextSkill.reason}
-                  </p>
-                </div>
-                
-                <div className="flex flex-col gap-3 mt-auto">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="bg-white/10 border border-white/10 rounded-lg px-3 py-1.5 flex items-center gap-2 backdrop-blur-md">
-                      <AlertCircle size={14} className="text-rose-400" />
-                      <span className="text-[12px] font-bold text-white">{nextSkill.priority} Priority</span>
-                    </div>
-                    <div className="bg-white/10 border border-white/10 rounded-lg px-3 py-1.5 flex items-center gap-2 backdrop-blur-md">
-                      <Zap size={14} className="text-amber-400" />
-                      <span className="text-[12px] font-bold text-white">{nextSkill.impact} Impact</span>
-                    </div>
-                    <div className="bg-white/10 border border-white/10 rounded-lg px-3 py-1.5 flex items-center gap-2 backdrop-blur-md">
-                      <Clock size={14} className="text-emerald-400" />
-                      <span className="text-[12px] font-bold text-white">{nextSkill.time}</span>
-                    </div>
-                  </div>
-                  
-                  <button className="w-full mt-2 bg-white text-[#1E1B4B] hover:bg-indigo-50 font-black text-[14px] py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(108,76,241,0.4)]">
-                    Start Learning <Code size={16} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
           
         </div>
 
         {/* ROW 3: Missing Skills By Priority */}
-        <div className="w-full flex flex-col">
+        <div className="w-full flex flex-col mb-8">
           <h3 className="font-black text-slate-900 mb-5 text-[18px]">Missing Skills by Priority</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full items-stretch">
             {/* High */}
-            <div className="bg-[#FFF5F5] rounded-[24px] p-6 relative overflow-hidden w-full h-full flex flex-col shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="flex items-center justify-between mb-5">
-                <h4 className="font-bold text-red-600 text-[15px]">High Priority</h4>
-                <span className="w-7 h-7 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-[12px] font-black">{missingSkills?.high?.length || 0}</span>
+            <div className="bg-white rounded-[24px] p-6 relative overflow-hidden w-full h-full flex flex-col shadow-sm hover:shadow-lg border border-slate-100 hover:border-red-200 transition-all duration-300 group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-rose-400 opacity-80 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-red-50 rounded-full blur-2xl group-hover:bg-red-100 transition-colors pointer-events-none" />
+              
+              <div className="flex items-center justify-between mb-6 relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center shrink-0 border border-red-100 group-hover:scale-110 transition-transform duration-300">
+                    <AlertCircle size={20} className="text-red-500" />
+                  </div>
+                  <h4 className="font-extrabold text-slate-900 text-[16px]">High Priority</h4>
+                </div>
+                <span className="bg-white border border-slate-100 shadow-sm text-slate-700 px-3 py-1 rounded-xl text-[13px] font-black">{missingSkills?.high?.length || 0}</span>
               </div>
-              <ul className="space-y-3 relative z-10 flex-1">
+              
+              <div className="flex flex-col gap-3 relative z-10 flex-1">
                 {(missingSkills?.high || []).map(s => (
-                  <li key={s} className="text-[13px] font-semibold text-slate-700 flex items-start gap-2.5 leading-relaxed">
-                    <span className="text-red-400 mt-1 shrink-0">•</span> <span>{s}</span>
-                  </li>
+                  <div key={s} className="flex items-center gap-3 px-3.5 py-3 bg-white border border-slate-100 rounded-xl shadow-sm hover:shadow-md hover:border-red-200 transition-all group/item">
+                    <div className="w-2 h-2 rounded-full bg-red-500 ring-4 ring-red-50 group-hover/item:ring-red-100 group-hover/item:scale-110 transition-all" />
+                    <span className="text-[14px] font-bold text-slate-700 group-hover/item:text-slate-900 transition-colors">{s}</span>
+                  </div>
                 ))}
-              </ul>
-              <AlertCircle className="absolute -bottom-6 -right-6 text-red-100 w-32 h-32 opacity-40 z-0 pointer-events-none" />
+                {(!missingSkills?.high || missingSkills.high.length === 0) && (
+                   <div className="flex-1 flex items-center justify-center text-[13px] text-slate-400 font-medium italic py-4">No high priority skills missing</div>
+                )}
+              </div>
             </div>
             
             {/* Medium */}
-            <div className="bg-[#FFFBEB] rounded-[24px] p-6 relative overflow-hidden w-full h-full flex flex-col shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="flex items-center justify-between mb-5">
-                <h4 className="font-bold text-amber-600 text-[15px]">Medium Priority</h4>
-                <span className="w-7 h-7 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-[12px] font-black">{missingSkills?.medium?.length || 0}</span>
+            <div className="bg-white rounded-[24px] p-6 relative overflow-hidden w-full h-full flex flex-col shadow-sm hover:shadow-lg border border-slate-100 hover:border-amber-200 transition-all duration-300 group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 to-orange-400 opacity-80 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-50 rounded-full blur-2xl group-hover:bg-amber-100 transition-colors pointer-events-none" />
+              
+              <div className="flex items-center justify-between mb-6 relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center shrink-0 border border-amber-100 group-hover:scale-110 transition-transform duration-300">
+                    <Clock size={20} className="text-amber-500" />
+                  </div>
+                  <h4 className="font-extrabold text-slate-900 text-[16px]">Medium Priority</h4>
+                </div>
+                <span className="bg-white border border-slate-100 shadow-sm text-slate-700 px-3 py-1 rounded-xl text-[13px] font-black">{missingSkills?.medium?.length || 0}</span>
               </div>
-              <ul className="space-y-3 relative z-10 flex-1">
+              
+              <div className="flex flex-col gap-3 relative z-10 flex-1">
                 {(missingSkills?.medium || []).map(s => (
-                  <li key={s} className="text-[13px] font-semibold text-slate-700 flex items-start gap-2.5 leading-relaxed">
-                    <span className="text-amber-400 mt-1 shrink-0">•</span> <span>{s}</span>
-                  </li>
+                  <div key={s} className="flex items-center gap-3 px-3.5 py-3 bg-white border border-slate-100 rounded-xl shadow-sm hover:shadow-md hover:border-amber-200 transition-all group/item">
+                    <div className="w-2 h-2 rounded-full bg-amber-500 ring-4 ring-amber-50 group-hover/item:ring-amber-100 group-hover/item:scale-110 transition-all" />
+                    <span className="text-[14px] font-bold text-slate-700 group-hover/item:text-slate-900 transition-colors">{s}</span>
+                  </div>
                 ))}
-              </ul>
-              <Clock className="absolute -bottom-6 -right-6 text-amber-100 w-32 h-32 opacity-40 z-0 pointer-events-none" />
+                {(!missingSkills?.medium || missingSkills.medium.length === 0) && (
+                   <div className="flex-1 flex items-center justify-center text-[13px] text-slate-400 font-medium italic py-4">No medium priority skills missing</div>
+                )}
+              </div>
             </div>
 
             {/* Low */}
-            <div className="bg-[#F0FDF4] rounded-[24px] p-6 relative overflow-hidden w-full h-full flex flex-col shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="flex items-center justify-between mb-5">
-                <h4 className="font-bold text-emerald-600 text-[15px]">Low Priority</h4>
-                <span className="w-7 h-7 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-[12px] font-black">{missingSkills?.low?.length || 0}</span>
+            <div className="bg-white rounded-[24px] p-6 relative overflow-hidden w-full h-full flex flex-col shadow-sm hover:shadow-lg border border-slate-100 hover:border-emerald-200 transition-all duration-300 group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-400 opacity-80 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-50 rounded-full blur-2xl group-hover:bg-emerald-100 transition-colors pointer-events-none" />
+              
+              <div className="flex items-center justify-between mb-6 relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center shrink-0 border border-emerald-100 group-hover:scale-110 transition-transform duration-300">
+                    <Target size={20} className="text-emerald-500" />
+                  </div>
+                  <h4 className="font-extrabold text-slate-900 text-[16px]">Low Priority</h4>
+                </div>
+                <span className="bg-white border border-slate-100 shadow-sm text-slate-700 px-3 py-1 rounded-xl text-[13px] font-black">{missingSkills?.low?.length || 0}</span>
               </div>
-              <ul className="space-y-3 relative z-10 flex-1">
+              
+              <div className="flex flex-col gap-3 relative z-10 flex-1">
                 {(missingSkills?.low || []).map(s => (
-                  <li key={s} className="text-[13px] font-semibold text-slate-700 flex items-start gap-2.5 leading-relaxed">
-                    <span className="text-emerald-400 mt-1 shrink-0">•</span> <span>{s}</span>
-                  </li>
+                  <div key={s} className="flex items-center gap-3 px-3.5 py-3 bg-white border border-slate-100 rounded-xl shadow-sm hover:shadow-md hover:border-emerald-200 transition-all group/item">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-50 group-hover/item:ring-emerald-100 group-hover/item:scale-110 transition-all" />
+                    <span className="text-[14px] font-bold text-slate-700 group-hover/item:text-slate-900 transition-colors">{s}</span>
+                  </div>
                 ))}
-              </ul>
-              <div className="absolute -bottom-6 -right-6 text-emerald-100 w-32 h-32 opacity-40 flex items-center justify-center z-0 pointer-events-none">
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                {(!missingSkills?.low || missingSkills.low.length === 0) && (
+                   <div className="flex-1 flex items-center justify-center text-[13px] text-slate-400 font-medium italic py-4">No low priority skills missing</div>
+                )}
               </div>
             </div>
           </div>
