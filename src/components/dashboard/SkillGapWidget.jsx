@@ -68,11 +68,7 @@ export default function SkillGapWidget() {
         ))}
       </div>
 
-      <div className="mt-6 flex justify-center">
-        <Link to="/skill-gap" className="px-6 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-xl text-[12px] font-bold transition-all shadow-sm hover:shadow hover:-translate-y-0.5">
-          Start Learning
-        </Link>
-      </div>
+
     </div>
   );
 }
