@@ -82,17 +82,6 @@ export default function Footer() {
             </ul>
           </div>  
 
-          {/* Newsletter */}
-          <div className="col-span-1 md:col-span-1">
-            <h4 className="font-bold text-white text-sm mb-4">Newsletter</h4>
-            <p className="text-slate-400 text-sm mb-4">Subscribe to get the latest updates and opportunities.</p>
-            <div className="flex gap-2">
-              <input type="email" placeholder="Enter your email" className="bg-[#1A1F2B] border border-[#2D3342] text-white text-sm rounded-lg px-3 py-2 w-full focus:outline-none focus:border-indigo-500" />
-              <button className="bg-[#6C4CF1] hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                Subscribe
-              </button>
-            </div>
-          </div>
 
         </div>
 
