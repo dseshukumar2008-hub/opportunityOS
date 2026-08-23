@@ -42,10 +42,10 @@ export default function Footer() {
               The operating system for students to discover, track and win opportunities.
             </p>
             <div className="flex gap-4 text-slate-400">
-              <a href="#" className="hover:text-white transition-colors"><TwitterIcon size={18} /></a>
-              <a href="#" className="hover:text-white transition-colors"><LinkedinIcon size={18} /></a>
-              <a href="#" className="hover:text-white transition-colors"><InstagramIcon size={18} /></a>
-              <a href="#" className="hover:text-white transition-colors"><ArrowUpRight size={18} /></a>
+              <span><TwitterIcon size={18} /></span>
+              <span><LinkedinIcon size={18} /></span>
+              <span><InstagramIcon size={18} /></span>
+              <span><ArrowUpRight size={18} /></span>
             </div>
           </div>
 
