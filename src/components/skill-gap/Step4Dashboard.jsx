@@ -1,4 +1,5 @@
-import { Briefcase, RefreshCw, AlertCircle, Clock, Target, Flame, Zap, Code} from 'lucide-react';
+import { useState } from 'react';
+import { Briefcase, RefreshCw, AlertCircle, Clock, Target, Flame, Zap, Code, Bot } from 'lucide-react';
 
 function CircularProgress({ pct, color = '#6C4CF1', trackColor = '#F1F5F9', textColor = 'text-slate-900' }) {
   const size = 120;
@@ -58,6 +59,7 @@ function DonutChart({ strong, moderate, missing }) {
 }
 
 export default function Step4Dashboard({ data, onReset }) {
+  const [showAllSkills, setShowAllSkills] = useState(false);
   const { 
     targetRole = "Unknown Role", readinessScore = 0, skillGapPercentage = 0, currentSkills = [], 
     skillBreakdown = { strong: 0, moderate: 0, missing: 0 }, 
@@ -167,81 +169,126 @@ export default function Step4Dashboard({ data, onReset }) {
         )}
 
         {/* ROW 2: Skills Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full items-stretch">
-          {/* Current Skills */}
-          <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-full w-full">
-            <div className="flex items-center justify-between mb-5 shrink-0">
-              <div className="flex items-center gap-2">
-                <CheckCircle2Icon className="text-emerald-500 w-5 h-5" />
-                <h3 className="font-extrabold text-slate-900 text-[15px]">Current Skills</h3>
-              </div>
-              <span className="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">{currentSkills?.length || 0} Total</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5 content-start overflow-y-auto flex-1 min-h-0 pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-              {(currentSkills || []).map(s => (
-                <span key={s} className="px-2.5 py-1 bg-slate-50 border border-slate-200 text-slate-700 text-[11px] font-semibold rounded-md transition-colors hover:border-slate-300">
-                  {s}
-                </span>
-              ))}
-              {currentSkills?.length === 0 && (
-                <span className="text-[13px] text-slate-500 italic">No skills detected.</span>
-              )}
-            </div>
-          </div>
-
-          {/* Skills Breakdown */}
-          <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-full w-full">
-            <div className="flex items-center justify-between mb-5 shrink-0">
-              <h3 className="font-extrabold text-slate-900 text-[15px]">Skills Breakdown</h3>
-            </div>
-            <div className="flex flex-col items-center gap-6 w-full flex-1 justify-center">
-              <div className="w-[160px] shrink-0">
-                <DonutChart strong={skillBreakdown.strong} moderate={skillBreakdown.moderate} missing={skillBreakdown.missing} />
-              </div>
-              <div className="flex flex-col gap-2 w-full mt-2">
-                <div className="flex items-center justify-between text-[12px] font-bold py-1.5 border-b border-slate-50">
-                  <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-sm bg-[#10B981]" /> <span className="text-slate-700">Strong</span></div>
-                  <span className="text-slate-900">{skillBreakdown.strong} <span className="text-slate-400 font-medium ml-1">({totalSkills > 0 ? (skillBreakdown.strong / totalSkills * 100).toFixed(0) : 0}%)</span></span>
-                </div>
-                <div className="flex items-center justify-between text-[12px] font-bold py-1.5 border-b border-slate-50">
-                  <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-sm bg-[#F59E0B]" /> <span className="text-slate-700">Moderate</span></div>
-                  <span className="text-slate-900">{skillBreakdown.moderate} <span className="text-slate-400 font-medium ml-1">({totalSkills > 0 ? (skillBreakdown.moderate / totalSkills * 100).toFixed(0) : 0}%)</span></span>
-                </div>
-                <div className="flex items-center justify-between text-[12px] font-bold py-1.5">
-                  <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-sm bg-[#EF4444]" /> <span className="text-slate-700">Missing</span></div>
-                  <span className="text-slate-900">{skillBreakdown.missing} <span className="text-slate-400 font-medium ml-1">({totalSkills > 0 ? (skillBreakdown.missing / totalSkills * 100).toFixed(0) : 0}%)</span></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Next Skill - Focal Point */}
-          <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col h-full w-full border-t-4 border-t-[#6C4CF1]">
-            <div className="flex items-center gap-2.5 mb-5 shrink-0">
-              <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
-                <Target size={16} className="text-[#6C4CF1]" />
-              </div>
-              <h3 className="font-extrabold text-slate-900 text-[15px]">Next Skill To Learn</h3>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full items-start">
+          
+          {/* Left Column: Current Skills & Breakdown */}
+          <div className="lg:col-span-7 flex flex-col gap-6 w-full">
             
-            <div className="flex-1 flex flex-col justify-center">
-              <h2 className="text-[20px] font-black text-slate-900 mb-4 leading-tight line-clamp-2">{nextSkill.name}</h2>
-              
-              <div className="flex flex-wrap gap-2 mb-4">
-                <span className="bg-red-50 text-red-700 border border-red-100 px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1.5 shrink-0">
-                  <AlertCircle size={12}/> {nextSkill.priority} Priority
-                </span>
-                <span className="bg-slate-50 text-slate-700 border border-slate-200 px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1.5 shrink-0">
-                  <Clock size={12}/> {nextSkill.time}
-                </span>
-                <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1.5 shrink-0">
-                  <Zap size={12}/> {nextSkill.impact} Impact
-                </span>
+            {/* Current Skills - Compact with View All */}
+            <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col w-full relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-slate-50 to-transparent rounded-bl-full pointer-events-none opacity-50" />
+              <div className="flex items-center justify-between mb-4 shrink-0 relative z-10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0 text-emerald-500">
+                    <CheckCircle2Icon className="w-4 h-4" />
+                  </div>
+                  <h3 className="font-extrabold text-slate-900 text-[16px]">Verified Skills</h3>
+                </div>
+                <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg">{currentSkills?.length || 0} Detected</span>
               </div>
+              <div className="flex flex-wrap gap-2 relative z-10">
+                {(showAllSkills ? currentSkills : currentSkills?.slice(0, 8) || []).map(s => (
+                  <span key={s} className="px-3 py-1.5 bg-white border border-slate-200 text-slate-700 text-[12px] font-bold rounded-lg shadow-sm hover:border-[#6C4CF1] transition-colors hover:text-[#6C4CF1] cursor-default">
+                    {s}
+                  </span>
+                ))}
+                {currentSkills?.length === 0 && (
+                  <span className="text-[13px] text-slate-500 italic">No skills detected.</span>
+                )}
+                {currentSkills?.length > 8 && (
+                  <button 
+                    onClick={() => setShowAllSkills(!showAllSkills)}
+                    className="px-3 py-1.5 bg-slate-50 border border-slate-200 text-slate-600 text-[12px] font-bold rounded-lg hover:bg-slate-100 transition-colors"
+                  >
+                    {showAllSkills ? "Show Less" : `+${currentSkills.length - 8} More`}
+                  </button>
+                )}
+              </div>
+            </div>
 
-              <p className="text-[13px] text-slate-500 font-medium leading-relaxed">{nextSkill.reason}</p>
+            {/* Skills Breakdown - Horizontal Progress */}
+            <div className="bg-white rounded-[24px] border border-slate-100 p-6 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col w-full">
+              <h3 className="font-extrabold text-slate-900 text-[16px] mb-4">Readiness Breakdown</h3>
+              <div className="flex flex-col gap-4">
+                
+                {/* Progress Bar Container */}
+                <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
+                  <div style={{ width: `${totalSkills > 0 ? (skillBreakdown.strong / totalSkills) * 100 : 0}%` }} className="h-full bg-[#10B981] transition-all duration-1000" />
+                  <div style={{ width: `${totalSkills > 0 ? (skillBreakdown.moderate / totalSkills) * 100 : 0}%` }} className="h-full bg-[#F59E0B] transition-all duration-1000" />
+                  <div style={{ width: `${totalSkills > 0 ? (skillBreakdown.missing / totalSkills) * 100 : 0}%` }} className="h-full bg-[#EF4444] transition-all duration-1000" />
+                </div>
+                
+                {/* Legend */}
+                <div className="flex items-center justify-between mt-1">
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1.5 mb-0.5"><div className="w-2 h-2 rounded-full bg-[#10B981]" /> <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Strong</span></div>
+                    <span className="text-[18px] font-black text-slate-900">{skillBreakdown.strong} <span className="text-[12px] text-slate-400 font-bold ml-0.5">({totalSkills > 0 ? (skillBreakdown.strong / totalSkills * 100).toFixed(0) : 0}%)</span></span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center gap-1.5 mb-0.5"><div className="w-2 h-2 rounded-full bg-[#F59E0B]" /> <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Moderate</span></div>
+                    <span className="text-[18px] font-black text-slate-900">{skillBreakdown.moderate} <span className="text-[12px] text-slate-400 font-bold ml-0.5">({totalSkills > 0 ? (skillBreakdown.moderate / totalSkills * 100).toFixed(0) : 0}%)</span></span>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-center gap-1.5 mb-0.5"><div className="w-2 h-2 rounded-full bg-[#EF4444]" /> <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Missing</span></div>
+                    <span className="text-[18px] font-black text-slate-900">{skillBreakdown.missing} <span className="text-[12px] text-slate-400 font-bold ml-0.5">({totalSkills > 0 ? (skillBreakdown.missing / totalSkills * 100).toFixed(0) : 0}%)</span></span>
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
+
+          {/* Right Column: Next Skill To Learn (Hero AI Card) */}
+          <div className="lg:col-span-5 w-full h-full">
+            <div className="bg-gradient-to-br from-[#6C4CF1] to-indigo-900 rounded-[24px] p-[2px] shadow-lg hover:shadow-xl transition-shadow duration-300 w-full h-full flex flex-col relative overflow-hidden group">
+              {/* Animated background glow */}
+              <div className="absolute -inset-20 bg-indigo-500 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-700 pointer-events-none" />
+              
+              <div className="bg-[#0B0F19] rounded-[22px] p-7 h-full flex flex-col w-full relative z-10 overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                  <Sparkles size={120} />
+                </div>
+                
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="bg-[#6C4CF1]/20 p-1.5 rounded-lg border border-[#6C4CF1]/30">
+                    <Bot size={16} className="text-[#8168F6]" />
+                  </div>
+                  <span className="text-[11px] font-bold text-indigo-300 uppercase tracking-widest">AI Recommended Focus</span>
+                </div>
+                
+                <div className="flex-1 flex flex-col justify-center mb-6">
+                  <h2 className="text-[32px] sm:text-[40px] font-black text-white leading-none mb-4 drop-shadow-md">
+                    {nextSkill.name}
+                  </h2>
+                  <p className="text-[14px] text-indigo-100/80 font-medium leading-relaxed max-w-sm">
+                    {nextSkill.reason}
+                  </p>
+                </div>
+                
+                <div className="flex flex-col gap-3 mt-auto">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="bg-white/10 border border-white/10 rounded-lg px-3 py-1.5 flex items-center gap-2 backdrop-blur-md">
+                      <AlertCircle size={14} className="text-rose-400" />
+                      <span className="text-[12px] font-bold text-white">{nextSkill.priority} Priority</span>
+                    </div>
+                    <div className="bg-white/10 border border-white/10 rounded-lg px-3 py-1.5 flex items-center gap-2 backdrop-blur-md">
+                      <Zap size={14} className="text-amber-400" />
+                      <span className="text-[12px] font-bold text-white">{nextSkill.impact} Impact</span>
+                    </div>
+                    <div className="bg-white/10 border border-white/10 rounded-lg px-3 py-1.5 flex items-center gap-2 backdrop-blur-md">
+                      <Clock size={14} className="text-emerald-400" />
+                      <span className="text-[12px] font-bold text-white">{nextSkill.time}</span>
+                    </div>
+                  </div>
+                  
+                  <button className="w-full mt-2 bg-white text-[#1E1B4B] hover:bg-indigo-50 font-black text-[14px] py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(108,76,241,0.4)]">
+                    Start Learning <Code size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
         </div>
 
         {/* ROW 3: Missing Skills By Priority */}
