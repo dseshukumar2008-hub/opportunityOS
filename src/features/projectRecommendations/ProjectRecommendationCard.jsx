@@ -1,19 +1,6 @@
-import  { useState } from 'react';
-import { Bookmark, BookmarkCheck,   Code2, BrainCircuit} from 'lucide-react';
+import { Code2, BrainCircuit } from 'lucide-react';
 
-export default function ProjectRecommendationCard({ project, onSave, isSaved }) {
-  const [saving, setSaving] = useState(false);
-
-  const handleSave = async () => {
-    if (saving || isSaved) return;
-    setSaving(true);
-    try {
-      await onSave(project);
-    } finally {
-      setSaving(false);
-    }
-  };
-
+export default function ProjectRecommendationCard({ project }) {
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:border-indigo-200 transition-all flex flex-col h-full">
       <div className="flex justify-between items-start gap-4 mb-4">
@@ -21,18 +8,6 @@ export default function ProjectRecommendationCard({ project, onSave, isSaved }) 
           <h3 className="text-lg font-bold text-slate-900 mb-2">{project.title}</h3>
           <p className="text-sm text-slate-600 leading-relaxed">{project.description}</p>
         </div>
-        <button 
-          onClick={handleSave}
-          disabled={saving || isSaved}
-          className={`shrink-0 p-2 rounded-xl transition-colors ${
-            isSaved 
-              ? 'bg-indigo-50 text-indigo-600 cursor-default' 
-              : 'bg-slate-50 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'
-          }`}
-          title={isSaved ? "Saved to Workspace" : "Save Project"}
-        >
-          {isSaved ? <BookmarkCheck size={20} /> : <Bookmark size={20} />}
-        </button>
       </div>
 
       <div className="mb-6 mt-4">

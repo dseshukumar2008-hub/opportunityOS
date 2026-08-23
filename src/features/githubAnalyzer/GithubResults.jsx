@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { 
-  RefreshCw, Star, GitFork, CheckCircle, AlertTriangle, Rocket, Monitor, ArrowRight,
+  RefreshCw, Star, GitFork, CheckCircle, AlertTriangle, Rocket, Monitor,
   Users, UserPlus, Calendar, Folder
 } from 'lucide-react';
 
@@ -357,9 +357,6 @@ export default function GithubResults({ results, onReset }) {
                       {rec.priority} Impact
                     </span>
                   )}
-                  <button className="text-slate-400 hover:text-[#6C4CF1] transition-colors p-1">
-                    <ArrowRight size={16} strokeWidth={2} />
-                  </button>
                </div>
             </div>
           ))

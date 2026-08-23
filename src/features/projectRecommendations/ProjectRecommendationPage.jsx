@@ -6,7 +6,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { useCareer } from '../../contexts/CareerContext';
 import { generateProjectRecommendations } from '../../services/projectRecommendationEngine';
-import { saveRecommendation, getSavedRecommendations, removeSavedRecommendation } from '../../services/recommendationRepository';
 import { toast } from 'react-hot-toast';
 
 import ContextualBackButton from '../../components/navigation/ContextualBackButton';
@@ -22,7 +21,6 @@ export default function ProjectRecommendationPage() {
   
   const [recommendations, setRecommendations] = useState([]);
   const [history, setHistory] = useState([]);
-  const [savedProjectIds, setSavedProjectIds] = useState(new Set());
   const [loading, setLoading] = useState(false);
   const [specialization, setSpecialization] = useState('');
   const [targetRole, setTargetRole] = useState('');
@@ -65,22 +63,6 @@ export default function ProjectRecommendationPage() {
     
     // We intentionally DO NOT auto-generate here. The user must click "Generate".
   }, [profile, careerContext?.targetRole, missingSkillsStr, isContextMode]);
-
-  useEffect(() => {
-    if (user) {
-      loadSavedProjects();
-    }
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
-  const loadSavedProjects = async () => {
-    try {
-      const saved = await getSavedRecommendations(user.uid);
-      setSavedProjectIds(new Set(saved.map(p => p.id)));
-    } catch (error) {
-      console.error("Failed to load saved projects:", error);
-    }
-  };
 
   const handleGenerate = async () => {
     handleGenerateWithData(targetRole, specialization, missingSkills, true);
@@ -128,32 +110,6 @@ export default function ProjectRecommendationPage() {
       toast.error("Analysis failed. Please try again.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSaveProject = async (project) => {
-    if (!user) return;
-    
-    const isSaved = savedProjectIds.has(project.id);
-    
-    try {
-      if (isSaved) {
-        await removeSavedRecommendation(user.uid, project.id);
-        setSavedProjectIds(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(project.id);
-          return newSet;
-        });
-        toast.success("Project removed from saved projects");
-      } else {
-        const careerGoal = profile?.careerGoal || "Software Engineer";
-        await saveRecommendation(user.uid, project, careerGoal);
-        setSavedProjectIds(prev => new Set(prev).add(project.id));
-        toast.success("Project saved to your workspace!");
-      }
-    } catch (error) {
-      console.error("Toggle Save Error:", error);
-      toast.error(`Failed to ${isSaved ? 'remove' : 'save'} project: ${error.message || error}`);
     }
   };
 
@@ -254,8 +210,6 @@ export default function ProjectRecommendationPage() {
               >
                 <ProjectRecommendationCard 
                   project={project} 
-                  onSave={handleSaveProject}
-                  isSaved={savedProjectIds.has(project.id)}
                 />
               </motion.div>
             ))}

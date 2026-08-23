@@ -1,29 +1,14 @@
 import { Map, CheckCircle2, Circle, FileText, Code, User, Lightbulb } from 'lucide-react';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useAuth } from '../../contexts/AuthContext';
-import { useState, useEffect } from 'react';
-import { getSavedRecommendations } from '../../services/recommendationRepository';
 import { Link } from 'react-router-dom';
 
 export default function CareerJourneyWidget({ userState }) {
 // eslint-disable-next-line no-unused-vars
   const { hasProfile, hasResume } = userState || {};
   const { profile } = useUserProfile(); // To check if skills are added
-  const { user } = useAuth();
   
-  const [hasProjects, setHasProjects] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-    if (user) {
-      getSavedRecommendations(user.uid).then(recs => {
-        if (mounted && recs && recs.length > 0) {
-          setHasProjects(true);
-        }
-      }).catch(console.error);
-    }
-    return () => { mounted = false; };
-  }, [user]);
+  const hasProjects = false; // Project saving has been removed
 
   const hasSkills = profile?.skills && profile.skills.length > 0;
 

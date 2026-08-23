@@ -84,10 +84,6 @@ export default function CareerReadinessWidget() {
             <span className="text-xs font-bold text-slate-700">Core Skills Added</span>
             {breakdown?.skills?.done ? <CheckCircle2 size={16} className="text-emerald-500" /> : <Circle size={16} className="text-slate-300" />}
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-700">Applications Submitted</span>
-            {breakdown?.applications?.done ? <CheckCircle2 size={16} className="text-emerald-500" /> : <Circle size={16} className="text-slate-300" />}
-          </div>
         </div>
       </div>
     </div>

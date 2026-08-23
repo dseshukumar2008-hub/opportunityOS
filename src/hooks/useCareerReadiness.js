@@ -27,7 +27,6 @@ export function useCareerReadiness() {
     
     const profileCompletionPct = Math.round((totalFilled / (requiredFields.length + 2)) * 100);
 
-    const appsCount = 0;
     const githubScore = profile?.githubAnalysis?.githubScore || careerContext?.githubScore || 0;
     const linkedinScore = careerContext?.linkedinScore || 0;
 
@@ -35,7 +34,6 @@ export function useCareerReadiness() {
       profileCompletionPct,
       hasResume,
       atsScore: (hasInsights && typeof atsScore === 'number') ? atsScore : 0,
-      applicationsCount: appsCount,
       githubScore,
       linkedinScore
     });

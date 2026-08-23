@@ -39,7 +39,6 @@ export default function CareerReadinessPanel() {
     { id: 'profile', label: 'Profile Completeness', icon: UserIcon, data: breakdown.profile },
     { id: 'resume', label: 'Resume Quality', icon: FileTextIcon, data: breakdown.resume },
     { id: 'skills', label: 'Skills Coverage', icon: CodeIcon, data: breakdown.skills },
-    { id: 'applications', label: 'Applications', icon: Briefcase, data: breakdown.applications },
     { id: 'networking', label: 'Networking', icon: Users, data: breakdown.networking },
     { id: 'teams', label: 'Team Participation', icon: Users, data: breakdown.teams }, // reused Users for now
     { id: 'certifications', label: 'Certifications', icon: Medal, data: breakdown.certifications },
