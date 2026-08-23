@@ -12,9 +12,6 @@ export default function CTASection() {
           <Link to="/signup" className="bg-white text-indigo-600 font-bold px-6 py-3 rounded-lg text-sm hover:bg-slate-50 transition-colors shadow-sm inline-block">
             Get Started Free
           </Link>
-          <button className="bg-indigo-700/50 border border-indigo-400 text-white font-bold px-6 py-3 rounded-lg text-sm hover:bg-indigo-700 transition-colors">
-            Explore Features
-          </button>
         </div>
       </div>
       

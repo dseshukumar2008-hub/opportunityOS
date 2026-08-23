@@ -1,4 +1,4 @@
-import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star } from 'lucide-react';
 
 const testimonials = [
   {
@@ -27,13 +27,6 @@ export default function TestimonialsSection() {
       <h2 className="text-2xl font-bold text-slate-900 mb-12 tracking-tight">Loved by students</h2>
 
       <div className="flex items-center gap-6 w-full max-w-6xl">
-        <button 
-          aria-label="Previous testimonials"
-          className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 shadow-sm shrink-0 focus-visible:ring-2 focus-visible:ring-[#6C4CF1] focus-visible:outline-none"
-        >
-          <ChevronLeft size={20} />
-        </button>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
           {testimonials.map((test, i) => (
             <div key={i} className="bg-white border border-slate-100 rounded-2xl p-8 shadow-[0_4px_20px_rgba(0,0,0,0.03)] flex flex-col">
@@ -53,13 +46,6 @@ export default function TestimonialsSection() {
             </div>
           ))}
         </div>
-
-        <button 
-          aria-label="Next testimonials"
-          className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 shadow-sm shrink-0 focus-visible:ring-2 focus-visible:ring-[#6C4CF1] focus-visible:outline-none"
-        >
-          <ChevronRight size={20} />
-        </button>
       </div>
     </section>
   );

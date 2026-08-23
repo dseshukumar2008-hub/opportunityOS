@@ -19,7 +19,7 @@ export default function HowItWorksSection() {
             <div className="absolute -bottom-3 w-6 h-6 bg-slate-200 rounded-full border-2 border-white text-[10px] font-bold text-slate-700 flex items-center justify-center">1</div>
           </div>
           <h3 className="text-sm font-bold text-slate-900 mb-2 mt-2 text-center">Create Profile</h3>
-          <p className="text-xs text-slate-500 text-center max-w-[160px]">Build your profile and tell us your goals.</p>
+          <p className="text-xs text-slate-500 text-center max-w-[160px]">Build your profile by providing your basic details, education, skills, and career interests.</p>
         </div>
 
         {/* Step 2 */}
@@ -28,8 +28,8 @@ export default function HowItWorksSection() {
             <List size={20} />
             <div className="absolute -bottom-3 w-6 h-6 bg-slate-200 rounded-full border-2 border-white text-[10px] font-bold text-slate-700 flex items-center justify-center">2</div>
           </div>
-          <h3 className="text-sm font-bold text-slate-900 mb-2 mt-2 text-center">Discover Opportunities</h3>
-          <p className="text-xs text-slate-500 text-center max-w-[160px]">Get personalized opportunities that match your skills.</p>
+          <h3 className="text-sm font-bold text-slate-900 mb-2 mt-2 text-center">Set Career Goals</h3>
+          <p className="text-xs text-slate-500 text-center max-w-[160px]">Choose your target career path and areas you want to focus on.</p>
         </div>
 
         {/* Step 3 */}
@@ -38,8 +38,8 @@ export default function HowItWorksSection() {
             <Mail size={20} />
             <div className="absolute -bottom-3 w-6 h-6 bg-slate-200 rounded-full border-2 border-white text-[10px] font-bold text-slate-700 flex items-center justify-center">3</div>
           </div>
-          <h3 className="text-sm font-bold text-slate-900 mb-2 mt-2 text-center">Track Applications</h3>
-          <p className="text-xs text-slate-500 text-center max-w-[160px]">Apply and track every application in one beautiful dashboard.</p>
+          <h3 className="text-sm font-bold text-slate-900 mb-2 mt-2 text-center">Analyze Your Skills</h3>
+          <p className="text-xs text-slate-500 text-center max-w-[160px]">Use Skill Gap Analysis and other AI-powered tools to understand your current strengths and areas for improvement.</p>
         </div>
 
         {/* Step 4 */}
@@ -48,8 +48,8 @@ export default function HowItWorksSection() {
             <Users size={20} />
             <div className="absolute -bottom-3 w-6 h-6 bg-slate-200 rounded-full border-2 border-white text-[10px] font-bold text-slate-700 flex items-center justify-center">4</div>
           </div>
-          <h3 className="text-sm font-bold text-slate-900 mb-2 mt-2 text-center">Improve & Prepare</h3>
-          <p className="text-xs text-slate-500 text-center max-w-[160px]">Use AI tools and resources to improve your resume and skills.</p>
+          <h3 className="text-sm font-bold text-slate-900 mb-2 mt-2 text-center">Build & Improve</h3>
+          <p className="text-xs text-slate-500 text-center max-w-[160px]">Use features such as Career Roadmap, Project Recommendations, Resume Builder, Resume Analyzer, GitHub Analyzer, and AI Career Coach to improve your career profile.</p>
         </div>
 
         {/* Step 5 */}
@@ -58,8 +58,8 @@ export default function HowItWorksSection() {
             <ArrowUpRight size={20} />
             <div className="absolute -bottom-3 w-6 h-6 bg-slate-200 rounded-full border-2 border-white text-[10px] font-bold text-slate-700 flex items-center justify-center">5</div>
           </div>
-          <h3 className="text-sm font-bold text-slate-900 mb-2 mt-2 text-center">Get Selected</h3>
-          <p className="text-xs text-slate-500 text-center max-w-[160px]">Ace interviews and land your dream opportunities.</p>
+          <h3 className="text-sm font-bold text-slate-900 mb-2 mt-2 text-center">Achieve Your Career Goals</h3>
+          <p className="text-xs text-slate-500 text-center max-w-[160px]">Follow personalized guidance and continue improving your skills and career readiness.</p>
         </div>
       </div>
     </section>
