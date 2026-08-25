@@ -34,7 +34,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'))
 const DashboardLayout = lazy(() => import('./layouts/DashboardLayout'));
 
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
-const DemoPage = lazy(() => import('./pages/demo/DemoPage'));
+
 const PresentationPage = lazy(() => import('./pages/presentation/PresentationPage'));
 const ProfilePage = lazy(() => import('./pages/dashboard/ProfilePage'));
 const AnalyticsPage = lazy(() => import('./pages/dashboard/AnalyticsPage'));
@@ -57,6 +57,9 @@ const ProjectRecommendationPage = lazy(() => import('./features/projectRecommend
 const GithubAnalyzerPage = lazy(() => import('./features/githubAnalyzer/GithubAnalyzerPage'));
 const CareerExplorerPage = lazy(() => import('./features/careerExplorer/CareerExplorerPage'));
 
+/**
+ * Main application component that sets up routing, global providers, and layout structure.
+ */
 export default function App() {
   return (
     <GlobalErrorBoundary>
@@ -115,7 +118,7 @@ export default function App() {
           <Routes>
             {/* Public Route */}
             <Route path="/" element={<Suspense fallback={<PageLoader />}><LandingPage /></Suspense>} />
-            <Route path="/demo" element={<Suspense fallback={<PageLoader />}><DemoPage /></Suspense>} />
+
             <Route path="/presentation" element={<Suspense fallback={<PresentationSkeleton />}><PresentationPage /></Suspense>} />
 
             {/* Guest Routes */}

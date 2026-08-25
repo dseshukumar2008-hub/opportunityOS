@@ -15,10 +15,8 @@ export default function RecommendationHistoryPage() {
   const [scoreFilter, setScoreFilter] = useState('all'); // 'all' | 'high' (>=80) | 'medium' (70-79) | 'low' (<70)
   const [layoutMode, setLayoutMode] = useState('timeline'); // 'timeline' | 'grid' | 'summary'
   
-  // Track selected snapshot for the detailed view
   const [selectedSnapshotId, setSelectedSnapshotId] = useState(null);
 
-  // Fallback / Initial redirect if no history exists
   if (!history || history.length === 0) {
     return (
       <div className="max-w-[1200px] mx-auto p-6 md:p-8 flex flex-col items-center justify-center min-h-[500px]">
@@ -36,7 +34,6 @@ export default function RecommendationHistoryPage() {
     );
   }
 
-  // Pre-sort baseline
   const sortedByDateDesc = useMemo(() => {
     return [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [history]);
@@ -44,7 +41,6 @@ export default function RecommendationHistoryPage() {
   const oldestSnapshot = sortedByDateDesc[sortedByDateDesc.length - 1];
   const newestSnapshot = sortedByDateDesc[0];
 
-  // Calculate improvement metrics
   const scoreImprovement = newestSnapshot.averageMatchScore - oldestSnapshot.averageMatchScore;
 // eslint-disable-next-line no-unused-vars
   const averageRecommendationCount = Math.round(
@@ -55,7 +51,6 @@ export default function RecommendationHistoryPage() {
   const processedSnapshots = useMemo(() => {
     let result = [...history];
 
-    // 1. Search Query Filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(snap => 
@@ -65,7 +60,6 @@ export default function RecommendationHistoryPage() {
       );
     }
 
-    // 2. Score Band Filter
     if (scoreFilter !== 'all') {
       result = result.filter(snap => {
         const score = snap.averageMatchScore;
@@ -76,7 +70,6 @@ export default function RecommendationHistoryPage() {
       });
     }
 
-    // 3. Sorting logic
     result.sort((a, b) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
@@ -102,7 +95,6 @@ export default function RecommendationHistoryPage() {
   const chartWidth = 500;
   const padding = 20;
   
-  // Sort history chronologically for the line graph
   const chronologicalHistory = useMemo(() => {
     return [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
   }, [history]);
@@ -121,7 +113,6 @@ export default function RecommendationHistoryPage() {
 
   return (
     <div className="max-w-[1600px] mx-auto p-4 lg:p-8 space-y-8">
-      {/* Header and Control Row */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-[28px] font-black text-slate-900 flex items-center gap-3 tracking-tight">
@@ -149,10 +140,8 @@ export default function RecommendationHistoryPage() {
         </div>
       </div>
 
-      {/* Analytics Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         
-        {/* Metric 1: Avg Match Score Progress */}
         <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
           <div className="flex justify-between items-start mb-4">
             <div>
@@ -168,7 +157,6 @@ export default function RecommendationHistoryPage() {
           </div>
         </div>
 
-        {/* Metric 2: ATS Resume Score */}
         <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
           <div className="flex justify-between items-start mb-4">
             <div>
@@ -190,7 +178,6 @@ export default function RecommendationHistoryPage() {
           </div>
         </div>
 
-        {/* Metric 3: Goals Completed */}
         <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
           <div className="flex justify-between items-start mb-4">
             <div>
@@ -207,7 +194,6 @@ export default function RecommendationHistoryPage() {
           </p>
         </div>
 
-        {/* Metric 4: Applications Submitted */}
         <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
           <div className="flex justify-between items-start mb-4">
             <div>
@@ -225,10 +211,8 @@ export default function RecommendationHistoryPage() {
 
       </div>
 
-      {/* Chart and Detail Dashboard Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left Column: Line Trend Chart */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 p-6 shadow-sm space-y-6">
           <div className="flex items-center justify-between">
             <div>
@@ -241,15 +225,12 @@ export default function RecommendationHistoryPage() {
             </div>
           </div>
 
-          {/* Line Chart Area */}
           <div className="h-[200px] w-full border border-slate-50 bg-slate-50/50 rounded-2xl p-4 flex items-center justify-center relative overflow-visible">
             <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-full overflow-visible">
-              {/* Grids */}
               <line x1={padding} y1={padding} x2={chartWidth - padding} y2={padding} stroke="#f1f5f9" strokeWidth="1.5" />
               <line x1={padding} y1={chartHeight / 2} x2={chartWidth - padding} y2={chartHeight / 2} stroke="#f1f5f9" strokeWidth="1.5" />
               <line x1={padding} y1={chartHeight - padding} x2={chartWidth - padding} y2={chartHeight - padding} stroke="#e2e8f0" strokeWidth="1.5" />
               
-              {/* Line */}
               <polyline
                 fill="none"
                 stroke="#6D5DF6"
@@ -259,7 +240,6 @@ export default function RecommendationHistoryPage() {
                 points={points}
               />
               
-              {/* Area Under Curve */}
               <path
                 d={`M ${chronologicalHistory.map((h, i) => {
                   const x = (i / Math.max(1, chronologicalHistory.length - 1)) * (chartWidth - padding * 2) + padding;
@@ -279,7 +259,6 @@ export default function RecommendationHistoryPage() {
                 </linearGradient>
               </defs>
 
-              {/* Interactive Dots */}
               {chronologicalHistory.map((h, i) => {
                 const x = (i / Math.max(1, chronologicalHistory.length - 1)) * (chartWidth - padding * 2) + padding;
                 const y = chartHeight - padding - ((h.averageMatchScore - minScore) / range) * (chartHeight - padding * 2);
@@ -309,7 +288,6 @@ export default function RecommendationHistoryPage() {
           </div>
         </div>
 
-        {/* Right Column: Dynamic Jump Insight */}
         <div className="bg-gradient-to-br from-[#6D5DF6] to-[#5a4add] rounded-2xl p-6 shadow-md text-white flex flex-col justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 p-6 opacity-[0.07] translate-x-4 -translate-y-4">
             <Award size={180} />
@@ -335,10 +313,8 @@ export default function RecommendationHistoryPage() {
 
       </div>
 
-      {/* Filter and Sorting Layout Block */}
       <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
         <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-          {/* Search bar */}
           <div className="relative w-full lg:max-w-sm">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
@@ -352,7 +328,6 @@ export default function RecommendationHistoryPage() {
 
           {/* Filtering Dropdowns */}
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-            {/* Sorting select */}
             <div className="flex items-center gap-1.5 border border-slate-200 rounded-xl px-3 py-2 text-[13px] font-semibold text-slate-600 bg-white shadow-sm hover:border-slate-300 cursor-pointer">
               <ArrowUpDown size={14} className="text-slate-400" />
               <select 
@@ -367,7 +342,6 @@ export default function RecommendationHistoryPage() {
               </select>
             </div>
 
-            {/* Score Band Filter */}
             <div className="flex items-center gap-1.5 border border-slate-200 rounded-xl px-3 py-2 text-[13px] font-semibold text-slate-600 bg-white shadow-sm hover:border-slate-300 cursor-pointer">
               <SlidersHorizontal size={14} className="text-slate-400" />
               <select 
@@ -382,10 +356,8 @@ export default function RecommendationHistoryPage() {
               </select>
             </div>
 
-            {/* Divider */}
             <div className="hidden sm:block h-6 w-[1px] bg-slate-200 mx-1" />
 
-            {/* Layout Toggle Buttons */}
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
               <button
                 onClick={() => setLayoutMode('timeline')}
@@ -419,10 +391,8 @@ export default function RecommendationHistoryPage() {
         </div>
       </div>
 
-      {/* Main Snapshots Content & Detail Panel Viewport */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
         
-        {/* Left Span: Snapshots Listing */}
         <div className="xl:col-span-2 space-y-6">
           
           {processedSnapshots.length === 0 ? (
@@ -438,7 +408,6 @@ export default function RecommendationHistoryPage() {
               </button>
             </div>
           ) : layoutMode === 'timeline' ? (
-            /* TIMELINE VIEW */
             <div className="bg-white rounded-2xl border border-slate-100 p-6 md:p-8 shadow-sm">
               <div className="space-y-8 relative">
                 <div className="absolute top-2 bottom-2 left-[23px] w-0.5 bg-slate-100 z-0 hidden sm:block"></div>
@@ -454,7 +423,6 @@ export default function RecommendationHistoryPage() {
                       onClick={() => setSelectedSnapshotId(snapshot.id)}
                       className={`flex flex-col sm:flex-row gap-6 relative z-10 group cursor-pointer`}
                     >
-                      {/* Date & Dot indicator */}
                       <div className="flex sm:flex-col items-center sm:items-start sm:w-28 shrink-0 gap-4 sm:gap-0">
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border-4 border-white shadow-sm transition-all duration-300 ${
                           isActive 
@@ -471,7 +439,6 @@ export default function RecommendationHistoryPage() {
                         </div>
                       </div>
 
-                      {/* Content Card */}
                       <div className={`flex-1 border transition-all duration-300 rounded-[20px] p-5 ${
                         isActive 
                           ? 'bg-slate-50/50 border-[#6D5DF6]/40 shadow-sm shadow-indigo-50/50' 
@@ -505,7 +472,6 @@ export default function RecommendationHistoryPage() {
               </div>
             </div>
           ) : layoutMode === 'grid' ? (
-            /* GRID VIEW */
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {processedSnapshots.map((snapshot) => {
                 const isActive = snapshot.id === activeSnapshot?.id;
@@ -557,7 +523,6 @@ export default function RecommendationHistoryPage() {
               })}
             </div>
           ) : (
-            /* COMPACT SUMMARY LIST VIEW */
             <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -609,11 +574,9 @@ export default function RecommendationHistoryPage() {
 
         </div>
 
-        {/* Right Column: Immersive Snapshot Detailed View Panel */}
         <div className="xl:col-span-1">
           {activeSnapshot ? (
             <div className="bg-white rounded-2xl border border-[#6D5DF6]/30 shadow-lg shadow-indigo-100/30 overflow-hidden sticky top-8 animate-fade-in">
-              {/* Card Header Panel */}
               <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white relative">
                 <div className="absolute top-4 right-4 bg-white/10 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider text-indigo-200">
                   Checkpoint Detail
@@ -645,14 +608,11 @@ export default function RecommendationHistoryPage() {
                 </div>
               </div>
 
-              {/* Card Body */}
               <div className="p-6 space-y-6">
                 
-                {/* Section 1: ATS Scoring Breakdown */}
                 <div>
                   <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-3.5">Algorithm Match Breakdown</h4>
                   <div className="space-y-3">
-                    {/* Skills match */}
                     <div>
                       <div className="flex justify-between text-[12px] font-bold text-slate-700 mb-1">
                         <span>Skills Match Score</span>
@@ -665,7 +625,6 @@ export default function RecommendationHistoryPage() {
                         />
                       </div>
                     </div>
-                    {/* Experience match */}
                     <div>
                       <div className="flex justify-between text-[12px] font-bold text-slate-700 mb-1">
                         <span>Experience Compatibility</span>
@@ -678,7 +637,6 @@ export default function RecommendationHistoryPage() {
                         />
                       </div>
                     </div>
-                    {/* Resume formatting */}
                     <div>
                       <div className="flex justify-between text-[12px] font-bold text-slate-700 mb-1">
                         <span>ATS Layout & Formatting</span>
@@ -694,7 +652,6 @@ export default function RecommendationHistoryPage() {
                   </div>
                 </div>
 
-                {/* Section 2: Why it improved (Checklist) */}
                 <div>
                   <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">Key System Actions</h4>
                   <ul className="space-y-2">
@@ -707,7 +664,6 @@ export default function RecommendationHistoryPage() {
                   </ul>
                 </div>
 
-                {/* Section 3: Skills Added vs Missing */}
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
                   <div>
                     <h5 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 text-emerald-600 flex items-center gap-1">
@@ -741,7 +697,6 @@ export default function RecommendationHistoryPage() {
                   </div>
                 </div>
 
-                {/* Section 4: Recommended Roles at Snapshot */}
                 {activeSnapshot.recommendedRoles && activeSnapshot.recommendedRoles.length > 0 && (
                   <div className="border-t border-slate-100 pt-4 space-y-2.5">
                     <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Top Recommended Roles</h4>

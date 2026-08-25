@@ -329,12 +329,7 @@ export default function PresentationPage() {
             Your entire career journey — from resume to offer letter — in one intelligent workspace.
           </p>
           <div className="flex justify-center gap-3 flex-wrap">
-            <button
-              className="px-6 py-3 bg-[#6C4CF1] text-white font-bold rounded-xl text-[14px] hover:bg-indigo-700 transition-colors shadow-md"
-              onClick={() => navigate('/demo')}
-            >
-              Start Demo
-            </button>
+
             <button
               className="px-6 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl text-[14px] hover:bg-slate-50 transition-colors shadow-sm"
               onClick={() => navigate('/')}
