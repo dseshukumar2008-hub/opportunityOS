@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Copy, Check, Sparkles, BookOpen, Award, Briefcase, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Copy, Check, BookOpen, Award, Briefcase, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ResumeContentSuggestions({ results }) {
@@ -32,9 +32,7 @@ export default function ResumeContentSuggestions({ results }) {
   if (!hasContentSuggestions && !hasMissingKeywords && !hasRecommendations) {
     return (
       <div className="mt-8 bg-indigo-50 border border-indigo-100 rounded-2xl p-8 flex flex-col items-center justify-center text-center">
-        <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-4 text-indigo-600">
-          <Sparkles size={24} />
-        </div>
+
         <h3 className="text-lg font-bold text-indigo-800 mb-2">AI Analysis Pending</h3>
         <p className="text-sm font-medium text-indigo-600/80 max-w-sm">
           Please run a new analysis to generate personalized content rewrite suggestions and career recommendations.
@@ -49,9 +47,7 @@ export default function ResumeContentSuggestions({ results }) {
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-100">
-            <Sparkles size={18} />
-          </div>
+
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">AI Resume Consultant</h2>
         </div>
         <p className="text-sm font-medium text-slate-500">
@@ -76,7 +72,7 @@ export default function ResumeContentSuggestions({ results }) {
               </div>
               <div className="p-5 relative group">
                 <span className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
-                  <Sparkles size={12} /> AI Improved
+                  AI Improved
                 </span>
                 <p className="text-sm text-slate-800 font-medium leading-relaxed mb-6">
                   {contentSuggestions.summary.improved}
@@ -116,7 +112,7 @@ export default function ResumeContentSuggestions({ results }) {
                   </div>
                   <div className="p-5 relative group">
                     <span className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
-                      <Sparkles size={12} /> Impact-Driven Rewrite
+                      Impact-Driven Rewrite
                     </span>
                     <p className="text-sm text-slate-800 font-medium leading-relaxed mb-6 whitespace-pre-wrap">
                       {proj.improved}

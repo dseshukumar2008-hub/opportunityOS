@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, Send, RefreshCw, Zap, Target, FileText, TrendingUp, Briefcase, Code2, Users2, ArrowRight} from 'lucide-react';
+import { Sparkles, Send, FileText, TrendingUp, Briefcase, Code2, Users2, ArrowRight} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { useCareerRoadmap } from '../../hooks/useCareerRoadmap';
@@ -86,7 +86,7 @@ export default function CareerCoachPage() {
   const { careerReadiness, profileCompletion } = useDashboardInsights();
 
   // Memory Hook
-  const { messages: historyMessages, addMessage, clearMemory, loading: isMemoryLoading } = useCopilotMemory();
+  const { messages: historyMessages, addMessage } = useCopilotMemory();
 
   // Local state purely for typing indicator and UI driving
   const [input, setInput] = useState('');
@@ -159,10 +159,7 @@ export default function CareerCoachPage() {
     sendMessage(input);
   };
 
-  const clearChat = () => {
-    clearMemory();
-    setShowPrompts(true);
-  };
+
 
   return (
     <div className="flex flex-col h-full max-h-[calc(100vh-64px)] bg-[#F8FAFC]">

@@ -1,3 +1,14 @@
+// MATCH SCORING WEIGHTS
+// The final match score out of 100 is distributed across four core buckets.
+// - Skills (50%): Direct overlap between normalized resume skills and required job skills.
+// - Keywords (10%): Soft matches found in the resume summary or project descriptions.
+// - Experience (25%): Evaluation of required years of experience vs user history.
+// - Education (15%): Degree/Specialization matching.
+const WEIGHT_SKILLS = 50;
+const WEIGHT_KEYWORDS = 10;
+const WEIGHT_EXPERIENCE = 25;
+const WEIGHT_EDUCATION = 15;
+
 export const calculateMatchScore = (resumeData, opportunityReqs) => {
   // Phase 1: Skill Normalization
   const skillSynonyms = {
@@ -39,10 +50,6 @@ export const calculateMatchScore = (resumeData, opportunityReqs) => {
   const missingSkills = [];
   const recommendations = [];
 
-  // Phase 6: Console Logs
-  console.log('Resume Skills:', resumeSkillsNorm);
-  console.log('Opportunity Skills:', reqSkills);
-
   // 1. Skills Match (50%)
   reqSkills.forEach(req => {
     const normReq = normalize(req);
@@ -81,7 +88,7 @@ export const calculateMatchScore = (resumeData, opportunityReqs) => {
         }
       });
       
-      const impact = Math.max(1, Math.round(50 / reqSkills.length));
+      const impact = Math.max(1, Math.round(WEIGHT_SKILLS / reqSkills.length));
       
       recommendations.push({
         category: 'Skill Gap',
@@ -98,6 +105,7 @@ export const calculateMatchScore = (resumeData, opportunityReqs) => {
   });
 
   const skillsPercentage = reqSkills.length > 0 ? (skillsScore / reqSkills.length) : 1;
+  const weightedSkillsScore = skillsPercentage * WEIGHT_SKILLS;
 
   // 2. Keywords Match (10%)
   const reqKeywords = opportunityReqs.tools || opportunityReqs.requiredKeywords || [];
@@ -122,7 +130,7 @@ export const calculateMatchScore = (resumeData, opportunityReqs) => {
         }
       });
       
-      const impact = Math.max(1, Math.round(10 / reqKeywords.length));
+      const impact = Math.max(1, Math.round(WEIGHT_KEYWORDS / reqKeywords.length));
       recommendations.push({
         category: 'Keyword Optimization',
         priority: 'Medium',
@@ -138,8 +146,9 @@ export const calculateMatchScore = (resumeData, opportunityReqs) => {
   });
   
   const keywordsPercentage = reqKeywords.length > 0 ? (keywordsScore / reqKeywords.length) : 1;
+  const weightedKeywordsScore = keywordsPercentage * WEIGHT_KEYWORDS;
 
-  // 3. Projects Match (20%)
+  // 3. Projects Match
   const hasProjects = (resumeData?.projects && resumeData.projects.length > 0);
   
   // Deterministic local logic to check if projects are required
@@ -181,7 +190,7 @@ export const calculateMatchScore = (resumeData, opportunityReqs) => {
     }
   }
 
-  // 4. Experience Match (15%)
+  // 4. Experience Match (25%)
   let resumeYears = 0;
   if (resumeData?.experience && resumeData.experience.length > 0) {
     resumeYears = resumeData.experience.length; // Heuristic
@@ -197,7 +206,7 @@ export const calculateMatchScore = (resumeData, opportunityReqs) => {
           resume: `${resumeYears} years detected`
         }
       });
-      const lostExp = 15 - (expPercentage * 15);
+      const lostExp = WEIGHT_EXPERIENCE - (expPercentage * WEIGHT_EXPERIENCE);
       recommendations.push({
         category: 'Experience Gap',
         priority: 'Medium',
@@ -219,8 +228,9 @@ export const calculateMatchScore = (resumeData, opportunityReqs) => {
       });
     }
   }
+  const weightedExpScore = expPercentage * WEIGHT_EXPERIENCE;
 
-  // 5. Education Match (5%)
+  // 5. Education Match (15%)
   let eduPercentage = 1;
   if (opportunityReqs.requiredEducation) {
     const hasEdu = resumeData?.education && resumeData.education.length > 0;
@@ -236,7 +246,7 @@ export const calculateMatchScore = (resumeData, opportunityReqs) => {
       recommendations.push({
         category: 'Education Gap',
         priority: 'Medium',
-        matchImpact: `+5%`,
+        matchImpact: `+${WEIGHT_EDUCATION}%`,
         issue: `Missing Education details`,
         evidence: {
           opportunity: opportunityReqs.requiredEducation,
@@ -254,34 +264,24 @@ export const calculateMatchScore = (resumeData, opportunityReqs) => {
       });
     }
   }
+  const weightedEduScore = eduPercentage * WEIGHT_EDUCATION;
 
   // Phase 2: Final deterministic score calculation
   const currentMatchScore = Math.round(
-    (skillsPercentage * 50) +
-    (keywordsPercentage * 10) +
-    (projectsPercentage * 20) +
-    (expPercentage * 15) +
-    (eduPercentage * 5)
+    weightedSkillsScore +
+    weightedKeywordsScore +
+    (projectsPercentage * 20) + // Keep legacy project weight
+    weightedExpScore +
+    weightedEduScore
   );
 
   const potentialMatchScore = Math.round(
-    (1.0 * 50) + // Assume max skills
-    (1.0 * 10) + // Assume max keywords
+    WEIGHT_SKILLS + 
+    WEIGHT_KEYWORDS + 
     (projectsPercentage * 20) + 
-    (expPercentage * 15) +
-    (1.0 * 5) // Assume can add education
+    (expPercentage * WEIGHT_EXPERIENCE) +
+    WEIGHT_EDUCATION 
   );
-
-  // Phase 6 Logging
-  console.log('Matched Skills:', strengths.map(s => s.name));
-  console.log('Missing Skills:', missingSkills.map(s => s.name));
-  
-  console.log('Skills Score:', Math.round(skillsPercentage * 50));
-  console.log('Projects Score:', Math.round(projectsPercentage * 20));
-  console.log('Keyword Score:', Math.round(keywordsPercentage * 10));
-  console.log('Experience Score:', Math.round(expPercentage * 15));
-  
-  console.log('Final Score:', currentMatchScore);
 
   return {
     currentMatchScore,

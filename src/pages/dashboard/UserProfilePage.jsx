@@ -19,7 +19,7 @@ import { useActivity } from '../../contexts/ActivityContext';
 import { useEffect } from 'react';
 import { useUserDirectory } from '../../hooks/useUserDirectory';
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
+// 
 function SectionHeader({ icon: Icon, title }) {
   return (
     <div className="flex items-center gap-3 mb-5">
@@ -71,7 +71,7 @@ const timeAgo = (isoString) => {
   return `${Math.floor(diff / 1440)}d ago`;
 };
 
-// ─── Main Component ────────────────────────────────────────────────────────
+// 
 export default function UserProfilePage() {
   const navigate = useNavigate();
   const { userId } = useParams();
@@ -106,6 +106,8 @@ export default function UserProfilePage() {
         let isMounted = true;
         fetchUserProfile(userId).then(res => {
           if (isMounted && res?.data) setFetchedProfile(res.data);
+        }).catch(err => {
+          console.error("Failed to fetch profile:", err);
         });
         return () => { isMounted = false; };
       }
@@ -115,8 +117,6 @@ export default function UserProfilePage() {
   const viewedProfile = isOwnProfile ? ownProfile : (allUsers.find(u => u.id === userId) || fetchedProfile);
 
   // For other users, look them up; for own profile use auth user
-  const viewedDirectoryUser = !isOwnProfile ? allUsers.find(u => u.id === userId) : null;
-
   // Connection state for the viewed user
   const targetUserId = isOwnProfile ? null : userId;
   const relationship = targetUserId ? getRelationship(targetUserId) : 'self';
@@ -126,15 +126,11 @@ export default function UserProfilePage() {
 
   const handleConnect = () => {
     if (!targetUserId) return;
-// eslint-disable-next-line no-unused-vars
-    const p = viewedDirectoryUser || viewedProfile || { name: userId };
     sendConnectionRequest(targetUserId);
       };
 
   const handleAccept = () => {
     if (!incomingRequestId) return;
-// eslint-disable-next-line no-unused-vars
-    const p = viewedDirectoryUser || viewedProfile || { name: userId };
     acceptConnectionRequest(incomingRequestId);
       };
 

@@ -1,7 +1,7 @@
 import { useCareerRoadmap } from '../../hooks/useCareerRoadmap';
 import RoadmapWizard    from '../../components/roadmap/RoadmapWizard';
 import RoadmapDashboard from '../../components/roadmap/RoadmapDashboard';
-import { AlertTriangle, RefreshCw, CheckCircle } from 'lucide-react';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 import ContextualBackButton from '../../components/navigation/ContextualBackButton';
 import CareerRoadmapHowItWorksModal from '../../components/roadmap/CareerRoadmapHowItWorksModal';
 import { useState } from 'react';

@@ -107,6 +107,7 @@ export default function MatchEnginePage() {
               <Target size={16} className="text-[#6C4CF1]" /> Role / Project Description
             </h3>
             <textarea
+              aria-label="Job or project description"
               value={opportunityText}
               onChange={(e) => setOpportunityText(e.target.value)}
               placeholder="Paste job description..."

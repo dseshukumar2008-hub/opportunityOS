@@ -5,7 +5,6 @@ import {
 // eslint-disable-next-line no-unused-vars
   ChevronLeft, 
   Check, 
-  Sparkles,
   Rocket,
   Code, 
   PenTool, 
@@ -87,7 +86,7 @@ export default function OnboardingFlow({ onComplete, initialData }) {
         "Aligning with career goals...",
         "Matching with industry paths...",
         "Discovering hidden opportunities...",
-        "Generating personalized recommendations..."
+        "Generating career path recommendations..."
       ];
       
       let currentStep = 0;
@@ -296,24 +295,17 @@ export default function OnboardingFlow({ onComplete, initialData }) {
       "Aligning with career goals...",
       "Matching with industry paths...",
       "Discovering hidden opportunities...",
-      "Generating personalized recommendations..."
+      "Generating career path recommendations..."
     ];
 
     return (
       <div className="relative min-h-[calc(100vh-140px)] flex flex-col items-center justify-center pt-0 px-4">
-        <div className="fixed top-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="fixed bottom-20 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+
         
         <div className="text-center max-w-md w-full animate-in fade-in zoom-in-95 duration-700 relative z-10">
-          <div className="relative w-24 h-24 mx-auto mb-8">
-            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full animate-pulse blur-xl opacity-50" />
-            <div className="relative w-full h-full bg-white rounded-full flex items-center justify-center shadow-2xl border-4 border-indigo-50">
-              <Sparkles className="w-10 h-10 text-indigo-500" />
-            </div>
-          </div>
-          
+
           <h2 className="text-2xl font-extrabold text-slate-900 mb-2">AI Career Architect</h2>
-          <p className="text-slate-500 text-sm mb-8">We are building your personalized career roadmap...</p>
+          <p className="text-slate-500 text-sm mb-8">We are compiling your skill gap data into a career roadmap...</p>
           
           <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-xl border border-white text-left">
             {aiSteps.map((text, idx) => (
@@ -342,21 +334,20 @@ export default function OnboardingFlow({ onComplete, initialData }) {
     <div className="relative min-h-[calc(100vh-140px)] flex flex-col pt-0">
       
       {/* Background ambient glows */}
-      <div className="fixed top-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="fixed bottom-20 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
+
 
       {/* Header Area */}
       <div className="w-full flex flex-col md:flex-row md:items-center justify-between mb-4 lg:mb-6 px-4 lg:px-0">
         <div className="flex items-center gap-3 lg:gap-4 mb-4 md:mb-0">
-          <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl lg:rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 text-white transform -rotate-12 shrink-0">
+          <div className="w-10 h-10 lg:w-12 lg:h-12 bg-[#6D5DF6] rounded-xl lg:rounded-2xl flex items-center justify-center shadow-md text-white transform -rotate-12 shrink-0">
             <Rocket size={20} className="transform rotate-12 lg:w-6 lg:h-6" />
           </div>
           <div>
             <h1 className="text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-              Career Explorer <Sparkles size={20} className="text-purple-400" />
+              Career Explorer
             </h1>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-1 lg:mt-2">
-              <p className="text-slate-500 text-xs lg:text-sm">Discover personalized career paths based on your unique profile.</p>
+              <p className="text-slate-500 text-xs lg:text-sm">Discover career paths mapped to your verified skills.</p>
               <button 
                 onClick={() => setIsHowItWorksOpen(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] lg:text-xs font-bold text-[#6D5DF6] hover:text-white bg-indigo-50 hover:bg-[#6D5DF6] rounded-lg transition-all w-fit"
@@ -429,10 +420,10 @@ export default function OnboardingFlow({ onComplete, initialData }) {
             )}
             <button
               onClick={handleNext}
-              className="group flex items-center gap-2 px-6 py-2.5 lg:px-8 lg:py-3.5 bg-gradient-to-r from-[#6D5DF6] to-[#5a4add] hover:from-[#5a4add] hover:to-[#4a39d8] text-white rounded-xl font-bold transition-all duration-300 shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/40 hover:-translate-y-0.5"
+              className="group flex items-center gap-2 px-6 py-2.5 lg:px-8 lg:py-3.5 bg-[#6D5DF6] hover:bg-[#5a4add] text-white rounded-xl font-bold transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5"
             >
               {step === 3 ? (
-                <>Discover Paths <Sparkles size={18} className="group-hover:rotate-12 transition-transform" /></>
+                <>Discover Paths</>
               ) : (
                 <>Continue <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" /></>
               )}

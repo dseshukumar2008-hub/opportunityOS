@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../config/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
@@ -6,46 +6,11 @@ import { doc, onSnapshot } from 'firebase/firestore';
 export function useResumeInsights() {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  const [atsScore, setAtsScore] = useState(null);
-  const [topStrength, setTopStrength] = useState(null);
-  const [topWeakness, setTopWeakness] = useState(null);
-  const [missingSkills, setMissingSkills] = useState([]);
-  const [nextAction, setNextAction] = useState(null);
-  const [storedResumeName, setStoredResumeName] = useState(null);
-  const [hasInsights, setHasInsights] = useState(false);
+  const [savedData, setSavedData] = useState({ analysis: null, resume: null });
 
-  const applyAnalysisData = useCallback((saved) => {
-    if (saved?.analysis) {
-      const a = saved.analysis;
-      const parsedScore = parseInt(a.atsScore, 10);
-      const score = !isNaN(parsedScore) ? parsedScore : null;
-      setAtsScore(score);
-      setTopStrength(a.strengths?.[0] || null);
-      setTopWeakness(a.weaknesses?.[0] || null);
-      setMissingSkills(a.missingKeywords?.slice(0, 3) || []);
-
-      const highPriority = a.improvements?.find(i => i.priority === 'HIGH');
-      if (highPriority) {
-        setNextAction(highPriority.description);
-      } else if (a.recommendedSkills?.length > 0) {
-        setNextAction(`Build a project using ${a.recommendedSkills[0]} to strengthen your profile.`);
-      } else {
-        setNextAction('Add quantifiable metrics to your experience section to improve your ATS score.');
-      }
-
-      setHasInsights(true);
-    } else {
-      setHasInsights(false);
-    }
-
-    if (saved?.resume?.fileName) {
-      setStoredResumeName(saved.resume.fileName);
-    }
-  }, []);
   useEffect(() => {
     if (!user?.id) {
-// eslint-disable-next-line react-hooks/set-state-in-effect
-      setHasInsights(false);
+      setSavedData({ analysis: null, resume: null });
       setIsLoading(false);
       return;
     }
@@ -56,30 +21,53 @@ export function useResumeInsights() {
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        const saved = {
+        setSavedData({
           analysis: data.resumeAnalysis || null,
           resume: data.resume || null
-        };
-        applyAnalysisData(saved);
+        });
       } else {
-        setHasInsights(false);
+        setSavedData({ analysis: null, resume: null });
       }
       setIsLoading(false);
     }, (err) => {
       console.error('useResumeInsights Real-time Fetch Error:', err);
-      setHasInsights(false);
+      setSavedData({ analysis: null, resume: null });
       setIsLoading(false);
     });
 
     return () => unsubscribe();
-// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
-
-
 
   const loadInsights = useCallback(() => {
     // No-op for backwards compatibility, handled by onSnapshot
   }, []);
+
+  const hasInsights = !!savedData.analysis;
+
+  const atsScore = useMemo(() => {
+    if (!savedData.analysis?.atsScore) return null;
+    const parsedScore = parseInt(savedData.analysis.atsScore, 10);
+    return !isNaN(parsedScore) ? parsedScore : null;
+  }, [savedData.analysis]);
+
+  const topStrength = savedData.analysis?.strengths?.[0] || null;
+  const topWeakness = savedData.analysis?.weaknesses?.[0] || null;
+  const missingSkills = useMemo(() => savedData.analysis?.missingKeywords?.slice(0, 3) || [], [savedData.analysis]);
+
+  const nextAction = useMemo(() => {
+    const a = savedData.analysis;
+    if (!a) return null;
+    
+    const highPriority = a.improvements?.find(i => i.priority === 'HIGH');
+    if (highPriority) {
+      return highPriority.description;
+    } else if (a.recommendedSkills?.length > 0) {
+      return `Build a project using ${a.recommendedSkills[0]} to strengthen your profile.`;
+    }
+    return 'Add quantifiable metrics to your experience section to improve your ATS score.';
+  }, [savedData.analysis]);
+
+  const storedResumeName = savedData.resume?.fileName || null;
 
   return {
     isLoading,

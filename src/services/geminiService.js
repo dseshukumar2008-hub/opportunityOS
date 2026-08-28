@@ -194,7 +194,9 @@ Return JSON only in this format:
           "certificationsToPursue": ["..."]
         },
         "qualityRating": "Poor | Fair | Good | Excellent"
-      }`;
+      }
+      
+      OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
       
       console.log('[Resume Analyzer] Gemini request started');
       const result = await callGemini(prompt, "You are an expert ATS and Resume Analyzer. Count resume facts accurately.", inlineDataItems, 0.0, 'Resume Analysis');
@@ -220,21 +222,17 @@ Return JSON only in this format:
       1. You must use the provided context (Resume, Roadmap, Skill Gap) to generate your advice.
       2. Do not drift into generic career advice. Be highly specific to their exact profile.
       3. Maintain a supportive, professional career coach tone.
-      4. Include a qualityScores object assessing accuracy, relevance, personalization, and consistency.
+      
       
       Required JSON format:
       {
         "immediateActions": ["..."],
         "shortTermGoals": ["..."],
         "longTermStrategy": "...",
-        "recommendedResources": ["..."],
-        "qualityScores": {
-          "accuracy": 0,
-          "relevance": 0,
-          "personalization": 0,
-          "consistency": 0
-        }
-      }`;
+        "recommendedResources": ["..."]
+      }
+      
+      OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
       
       const result = await callGemini(prompt, "You are a top-tier Career Coach AI.", [], 0.3, 'Career Coach');
       return result;
@@ -244,6 +242,8 @@ Return JSON only in this format:
       throw error;
     }
   },
+
+
 
   async analyzeReadiness(contextData) {
     analyticsService.trackEvent('Readiness Analysis Started');
@@ -262,7 +262,9 @@ Return JSON only in this format:
         "strengths": ["...", "...", "..."],
         "weaknesses": ["...", "..."],
         "recommendations": ["...", "...", "..."]
-      }`;
+      }
+      
+      OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
       
       const result = await callGemini(prompt, "You are a top-tier Career Coach AI. Output valid JSON only.", [], 0.3, 'Readiness Analysis');
       analyticsService.trackEvent('Readiness Analysis Completed');
@@ -274,7 +276,6 @@ Return JSON only in this format:
     }
   },
 
-
   async analyzeSkillGap(contextData) {
     analyticsService.trackEvent('Skill Gap Analysis Started');
     try {
@@ -285,7 +286,7 @@ Return JSON only in this format:
       1. Resolve synonyms strictly (e.g. OOP = Object-Oriented Programming, ReactJS = React).
       2. Missing skills must be genuinely missing from the candidate's profile.
       3. Skill recommendations must be directly relevant to the target role. Do not hallucinate technologies.
-      4. Include a qualityScores object assessing accuracy, relevance, personalization, and consistency out of 10.
+      
       
       Required JSON format:
       {
@@ -293,14 +294,10 @@ Return JSON only in this format:
         "missingSkills": ["skills required but missing"],
         "prioritySkills": ["top 3 skills to learn immediately"],
         "recommendations": ["actionable steps to bridge the gap"],
-        "reasoning": "brief explanation of the gap analysis",
-        "qualityScores": {
-          "accuracy": 0,
-          "relevance": 0,
-          "personalization": 0,
-          "consistency": 0
-        }
-      }`;
+        "reasoning": "brief explanation of the gap analysis"
+      }
+      
+      OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
       
       const result = await callGemini(prompt, "You are an expert Career Coach.", [], 0.3, 'Skill Gap Analysis');
       analyticsService.trackEvent('Skill Gap Analysis Completed');
@@ -315,26 +312,12 @@ Return JSON only in this format:
   async analyzeOpportunityMatch(userProfileContext, opportunityText, resumeData) {
     analyticsService.trackEvent('Match Analysis Started');
     try {
-      const startTime = Date.now();
-      
-      // LOG: requested metrics
-      const resumeLen = JSON.stringify(resumeData || {}).length;
-      const oppLen = opportunityText.length;
-      
-      console.log('--- MATCH ENGINE TIMEOUT INVESTIGATION LOGS ---');
-      console.log('Request Start Time:', new Date(startTime).toISOString());
-      console.log('Model Used:', 'gemini-2.5-flash'); // Hardcoded in callGemini
-      console.log('Resume Length (not sent to Gemini):', resumeLen, 'chars');
-      console.log('Opportunity Description Length:', oppLen, 'chars');
-      console.log('Prompt sending: ONLY Opportunity Description (Extracting requirements)');
-
       // Step 1: Extract deterministic requirements from opportunity (with strict caching)
       const cacheKey = `opp_match_cache_${opportunityText.trim().substring(0, 100).replace(/[^a-zA-Z0-9]/g, '')}_${opportunityText.length}`;
       let reqsResult;
       
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
-        console.log('Match Engine: Using Cached Extraction');
         reqsResult = JSON.parse(cached);
       } else {
         const extractPrompt = `Extract requirements from the job description.
@@ -349,20 +332,12 @@ JSON FORMAT:
   "requiredExperienceYears": 2,
   "requiredEducation": "Bachelor's Degree"
 }`;
-
-        const promptLength = extractPrompt.length;
-        console.log('Prompt Length:', promptLength, 'chars');
         
         // Use 60000ms timeout for Match Engine to prevent premature timeout
         reqsResult = await callGemini(extractPrompt, "You are a precise data extractor.", [], 0.0, 'Opportunity Match Extraction', 60000);
         
         // Inject opportunity text for local deterministic checks
         reqsResult.opportunityText = opportunityText;
-
-        const endTime = Date.now();
-        console.log('Request End Time:', new Date(endTime).toISOString());
-        console.log('Duration:', endTime - startTime, 'ms');
-        console.log('Response Size:', JSON.stringify(reqsResult).length, 'chars');
         
         localStorage.setItem(cacheKey, JSON.stringify(reqsResult));
       }
@@ -397,7 +372,7 @@ JSON FORMAT:
       1. Explanations must be evidence-based and precisely reference the opportunity text.
       2. Do not invent missing skills.
       3. Do not generate random claims or hallucinated experiences.
-      4. Include a qualityScores object to evaluate your output.
+      
       
       Required JSON format:
       {
@@ -405,14 +380,10 @@ JSON FORMAT:
         "fitAnalysis": "...",
         "strengths": ["..."],
         "concerns": ["..."],
-        "recommendation": "Strong Hire | Proceed | Reject",
-        "qualityScores": {
-          "accuracy": 0,
-          "relevance": 0,
-          "personalization": 0,
-          "consistency": 0
-        }
-      }`;
+        "recommendation": "Strong Hire | Proceed | Reject"
+      }
+      
+      OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
       
       return await callGemini(prompt, "You are an expert AI Career Coach.", [], 0.3, 'Evaluate Candidate Fit');
     } catch (error) {
@@ -463,25 +434,30 @@ JSON FORMAT:
         }`;
       } else {
         prompt += `
-        ${isGeneralAssistant ? "8." : "4."} Include a qualityScores object.
+        
         
         Required JSON format:
         {
-          "response": "Your conversational response here",
-          "qualityScores": {
-            "accuracy": 0,
-            "relevance": 0,
-            "personalization": 0,
-            "consistency": 0
-          }
-        }`;
+          "response": "Your conversational response here"
+      }
+        
+        OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
       }
       
       const systemInstruction = isGeneralAssistant 
         ? "You are OpportunityOS Copilot, a helpful general platform assistant and career guide."
         : "You are OpportunityOS Copilot V2, a highly personalized AI career assistant. You ONLY reason from available profile data.";
         
-      return await callGemini(prompt, systemInstruction, [], 0.3, 'Copilot Chat');
+      const result = await callGemini(prompt, systemInstruction, [], 0.3, 'Copilot Chat');
+      
+      // Provide fallback values if omitted
+      if (generateGoals) {
+        if (!Array.isArray(result.weeklyGoals)) result.weeklyGoals = [];
+        if (!Array.isArray(result.dailyActions)) result.dailyActions = [];
+      }
+      
+      
+      return result;
     } catch (error) {
       console.error('Gemini Copilot Error:', error);
       analyticsService.trackError('Copilot Feature Error', error);
@@ -534,7 +510,7 @@ Generate a highly personalized Skill Gap Analysis for the user targeting the rol
 9. Generate personalized "aiAdvice" (2-3 sentences max) addressing their specific gaps.
 10. Generate a short "consistencyTip" (1-2 sentences max).
 11. CRITICAL: Handle synonyms perfectly (e.g. OOP = Object-Oriented Programming, React = ReactJS). Do NOT hallucinate technologies. Missing skills must be genuinely required for the role but absent from the user's profile.
-12. Include a qualityScores object to evaluate your output.
+
 
 # REQUIRED JSON SCHEMA:
 {
@@ -561,14 +537,10 @@ Generate a highly personalized Skill Gap Analysis for the user targeting the rol
     ... exactly 6 items
   ],
   "aiAdvice": "Personalized career advice based on their profile.",
-  "consistencyTip": "Short tip on how to stay consistent.",
-  "qualityScores": {
-    "accuracy": 0,
-    "relevance": 0,
-    "personalization": 0,
-    "consistency": 0
-  }
-}`;
+  "consistencyTip": "Short tip on how to stay consistent."
+      }
+
+OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
 
       const result = await callGemini(prompt, "You are a master career AI. Output only valid JSON.", inlineDataItems, 0.3, 'Dynamic Skill Gap', 60000);
       
@@ -626,7 +598,8 @@ For each project return:
   "whyThisProject": ""
 }
 
-Return JSON only. Format as an array of the above object.`;
+Return JSON only. Format as an array of the above object.
+OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
 
       const result = await callGemini(prompt, "You are an expert technology mentor. Output valid JSON only.", [], 0.3, 'Project Recommendations');
       analyticsService.trackEvent('Project Recommendations Completed');
@@ -666,7 +639,7 @@ CRITICAL INSTRUCTIONS:
    - "desc" must be exactly 2-3 lines (around 18-25 words). It MUST be highly professional, action-oriented, and easy to scan. Do NOT sound conversational.
    - "priority" must be "High", "Medium", or "Low".
 6. Provide an "analysisSummary" (array of exactly 5-6 string bullet points) summarizing key metrics. Examples: "18 public repositories analyzed.", "Primary language: JavaScript.", "Documentation quality is moderate." DO NOT return empty strings.
-7. Provide an "overallAssessment" paragraph. It MUST be different for every profile and based entirely on the analyzed repositories. Do NOT return empty strings, null, or placeholders. This MUST be a professional engineering audit summary. Do NOT use generic AI phrases like "Great job" or "Good start".
+7. Provide an "overallAssessment" paragraph. It MUST be different for every profile and based entirely on the analyzed repositories. Do NOT return empty strings or boilerplate text. This MUST be a professional, objective engineering audit summary. Maintain a strict, professional tone.
 
 Required JSON Schema:
 {
@@ -692,7 +665,7 @@ Required JSON Schema:
   ]
 }
 
-Return JSON only.`;
+OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
 
       // Use longer timeout as this is a heavy reasoning task (passing deep repo data)
       console.log("[geminiService] Sending prompt to callGemini...");

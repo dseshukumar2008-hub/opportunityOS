@@ -1,12 +1,7 @@
 import { 
   Target,
   Trophy,
-// eslint-disable-next-line no-unused-vars
-  BrainCircuit,
   FileText,
-// eslint-disable-next-line no-unused-vars
-  CheckCircle2,
-  ChevronRight,
   Code2,
   Briefcase,
   Clock,
@@ -28,7 +23,6 @@ import { useActivity } from '../../contexts/ActivityContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useCareerRoadmap } from '../../hooks/useCareerRoadmap';
 
-// Helper for relative timestamps
 function timeAgo(dateString) {
   if (!dateString) return 'Just now';
   const date = new Date(dateString);
@@ -47,7 +41,6 @@ function timeAgo(dateString) {
   return `${Math.floor(months / 12)} year${Math.floor(months / 12) > 1 ? 's' : ''} ago`;
 }
 
-// Helper for activity icons
 const getActivityIcon = (category) => {
   const map = {
     'resume': { icon: FileCheck, color: "text-emerald-600", bg: "bg-emerald-50" },
@@ -79,7 +72,7 @@ export default function AnalyticsPage() {
   const steps = [
     { id: 'profile', completed: hasBasicProfile, title: 'Complete your Profile', desc: 'Add your education, experience and career interests.', path: '/dashboard/settings', icon: User, priority: 'High Priority', color: 'text-indigo-600', bg: 'bg-indigo-50', priorityBg: 'bg-rose-50 text-rose-600' },
     { id: 'skills', completed: hasSkills, title: 'Add Your Skills', desc: 'Add relevant skills to match your career goals.', path: '/dashboard/skill-gap', icon: Code2, priority: 'High Priority', color: 'text-emerald-600', bg: 'bg-emerald-50', priorityBg: 'bg-rose-50 text-rose-600' },
-    { id: 'resume', completed: hasResume, title: 'Upload Your Resume', desc: 'Upload your resume to get AI-powered insights.', path: '/dashboard/resume', icon: Briefcase, priority: 'Medium Priority', color: 'text-amber-600', bg: 'bg-amber-50', priorityBg: 'bg-amber-50 text-amber-600' },
+    { id: 'resume', completed: hasResume, title: 'Upload Your Resume', desc: 'Upload your resume to compare it against industry keywords.', path: '/dashboard/resume', icon: Briefcase, priority: 'Medium Priority', color: 'text-amber-600', bg: 'bg-amber-50', priorityBg: 'bg-amber-50 text-amber-600' },
     { id: 'github', completed: hasGithub, title: 'Analyze GitHub Profile', desc: 'Enter your GitHub username to analyze your repositories, skills, and development activity.', path: '/github-analyzer', icon: GitBranch, priority: 'Medium Priority', color: 'text-blue-600', bg: 'bg-blue-50', priorityBg: 'bg-amber-50 text-amber-600' },
     { id: 'interests', completed: hasTargetRole, title: 'Set Career Interests', desc: 'Define your target role for better recommendations.', path: '/dashboard/settings', icon: Target, priority: 'Low Priority', color: 'text-purple-600', bg: 'bg-purple-50', priorityBg: 'bg-slate-100 text-slate-600' }
   ];
@@ -87,7 +80,7 @@ export default function AnalyticsPage() {
   const completedStepsCount = steps.filter(s => s.completed).length;
   const progressPercentage = (completedStepsCount / 5) * 100;
   
-  const incompleteSteps = steps.filter(s => !s.completed);
+
   const hasRoadmap = !!roadmapState?.roadmap;
 
   let nextStep = null;
@@ -121,7 +114,7 @@ export default function AnalyticsPage() {
   } else if (!hasRoadmap) {
     nextStep = {
       title: "Generate Career Roadmap",
-      desc: "Create a personalized roadmap based on your career goals and skills.",
+      desc: "Generate a step-by-step roadmap based on your identified skill gaps.",
       path: "/career-roadmap",
       icon: TrendingUp,
       color: "text-indigo-600",
@@ -130,7 +123,7 @@ export default function AnalyticsPage() {
   } else {
     nextStep = {
       title: "Get Project Recommendations",
-      desc: "Discover AI-powered project ideas based on your skills and profile.",
+      desc: "Generate project ideas based on your current technical stack.",
       path: "/project-recommendations",
       icon: Lightbulb,
       color: "text-orange-600",
@@ -230,7 +223,7 @@ export default function AnalyticsPage() {
   if (!hasRoadmap) {
     allPotentialImprovements.push({
       title: "Generate Career Roadmap",
-      desc: "Create a personalized learning and career roadmap.",
+      desc: "Generate a step-by-step learning and career roadmap.",
       path: "/career-roadmap",
       icon: TrendingUp,
       color: "text-indigo-600",
@@ -261,7 +254,7 @@ export default function AnalyticsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Career Intelligence</h1>
-          <p className="text-slate-500 font-medium">Your personalized career insights will grow as you build your profile.</p>
+          <p className="text-slate-500 font-medium">Your skill metrics and recommendations will update as you build your profile.</p>
         </div>
       </div>
 
@@ -318,7 +311,7 @@ export default function AnalyticsPage() {
                 </div>
                 <div className="pt-1">
                   <h4 className="text-[18px] font-bold text-indigo-600 mb-2">Your Career Journey Starts Here!</h4>
-                  <p className="text-slate-500 font-medium text-[15px] leading-relaxed max-w-sm">Complete a few steps to unlock personalized insights and accelerate your growth.</p>
+                  <p className="text-slate-500 font-medium text-[15px] leading-relaxed max-w-sm">Complete a few steps to view your skill gaps and recommended actions.</p>
                 </div>
               </div>
               

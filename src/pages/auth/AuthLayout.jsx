@@ -45,7 +45,7 @@ export default function AuthLayout({ children }) {
               <div className="w-6 h-6 rounded-full bg-indigo-500/30 flex items-center justify-center shrink-0">
                 <CheckCircle2 size={14} className="text-indigo-200" />
               </div>
-              <span className="font-medium text-indigo-50">AI-powered opportunity matching</span>
+              <span className="font-medium text-indigo-50">Skill-based opportunity matching</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-6 h-6 rounded-full bg-indigo-500/30 flex items-center justify-center shrink-0">
@@ -57,7 +57,7 @@ export default function AuthLayout({ children }) {
               <div className="w-6 h-6 rounded-full bg-indigo-500/30 flex items-center justify-center shrink-0">
                 <CheckCircle2 size={14} className="text-indigo-200" />
               </div>
-              <span className="font-medium text-indigo-50">Smart resume builder & feedback</span>
+              <span className="font-medium text-indigo-50">Automated resume formatting & feedback</span>
             </div>
           </div>
         </div>

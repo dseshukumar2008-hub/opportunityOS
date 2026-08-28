@@ -7,28 +7,8 @@ import StatusDot from '../components/ui/StatusDot';
 import UserAvatar from '../components/ui/UserAvatar';
 import { useNavigate, useLocation, Outlet} from 'react-router-dom';
 import {
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-  LayoutDashboard, Briefcase, FileText, FileEdit, Users,
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-  BarChart3, User, Settings, LogOut, Bell, Search, Menu,
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-  Bookmark, MessageSquare, ChevronDown, Clock,
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-  CheckCircle, Trash2, AlertCircle, CalendarClock, Link2, UserCheck, Globe, Bot, Map, Target, Sparkles, BookOpen, Code, Compass
+  LayoutDashboard, FileEdit, BarChart3, User, LogOut, Menu,
+  ChevronDown, Bot, Map, Target, Sparkles, Code, Gamepad2
 } from 'lucide-react';
 
 import OpportunityOSCopilot from '../components/copilot/OpportunityOSCopilot';
@@ -61,7 +41,7 @@ export default function DashboardLayout() {
     profile,
     resume: resumeData,
     atsScore: getResumeStrength ? getResumeStrength() : 0,
-    skillGapResults: [], // Mocking missing function
+    skillGapResults: [],
     goals
   };
 
@@ -116,14 +96,14 @@ export default function DashboardLayout() {
       `}>
         {/* Sidebar Header */}
         <div className="h-16 flex items-center px-6 border-b border-slate-100">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+          <button aria-label="Go to Home" className="flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 rounded-lg p-1 -ml-1" onClick={() => navigate('/')}>
             <div className="relative flex items-center justify-center w-7 h-7">
               <div className="absolute inset-0 border-[3px] border-indigo-600 rounded-full opacity-50"></div>
               <div className="absolute inset-1 border-[3px] border-indigo-600 rounded-full opacity-80"></div>
               <div className="absolute inset-2 bg-[#6C4CF1] rounded-full"></div>
             </div>
             <span className="font-bold tracking-tight text-slate-900">OpportunityOS</span>
-          </div>
+          </button>
         </div>
 
         {/* Sidebar Content */}
@@ -140,7 +120,7 @@ export default function DashboardLayout() {
                 key={item.name}
                 onClick={() => { navigate(item.path); setIsSidebarOpen(false); }}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
-                  isActive ? 'bg-[#6D5DF6]/10 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  isActive ? 'bg-[#6C4CF1]/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
                 <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
@@ -173,7 +153,7 @@ export default function DashboardLayout() {
                   setIsSidebarOpen(false); 
                 }}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
-                  isActive ? 'bg-[#6D5DF6]/10 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  isActive ? 'bg-[#6C4CF1]/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
                 <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
@@ -199,7 +179,7 @@ export default function DashboardLayout() {
                 key={item.name}
                 onClick={() => { navigate(item.path); setIsSidebarOpen(false); }}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
-                  isActive ? 'bg-[#6D5DF6]/10 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  isActive ? 'bg-[#6C4CF1]/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
                 <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
@@ -223,7 +203,30 @@ export default function DashboardLayout() {
                 key={item.name}
                 onClick={() => { navigate(item.path); setIsSidebarOpen(false); }}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
-                  isActive ? 'bg-[#6D5DF6]/10 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  isActive ? 'bg-[#6C4CF1]/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
+                <span className="flex-1 text-left">{item.name}</span>
+              </button>
+            );
+          })}
+
+          {/* Engagement Section */}
+          <div className="mt-3 mb-1 px-4">
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Engagement</p>
+          </div>
+          {[
+            { name: 'Skill Arcade', path: '/skill-arcade', icon: Gamepad2 },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+            return (
+              <button
+                key={item.name}
+                onClick={() => { navigate(item.path); setIsSidebarOpen(false); }}
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
+                  isActive ? 'bg-[#6C4CF1]/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
                 <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
@@ -254,23 +257,16 @@ export default function DashboardLayout() {
 
           <div className="flex items-center gap-5">
             <div className="relative" ref={profileDropdownRef}>
-              <div
-                className="flex items-center gap-4 pl-6 border-l border-slate-100 cursor-pointer hover:opacity-80 transition-opacity focus-visible:ring-2 focus-visible:ring-[#6C4CF1] focus-visible:outline-none"
+              <button
+                className="flex items-center gap-4 pl-6 border-l border-slate-100 cursor-pointer hover:opacity-80 transition-opacity focus-visible:ring-2 focus-visible:ring-[#6C4CF1] focus-visible:outline-none w-full text-left bg-transparent"
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                tabIndex={0}
-                role="button"
                 aria-expanded={isProfileDropdownOpen}
                 aria-haspopup="true"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setIsProfileDropdownOpen(!isProfileDropdownOpen);
-                  }
-                }}
+                aria-label="User profile menu"
               >
                 <div className="relative">
                   <UserAvatar
-                    src={profile?.avatar_url || user?.photoURL}
+                    src={profile?.avatar_url || profile?.avatarUrl || profile?.photoURL || user?.photoURL}
                     alt="User Avatar"
                     className="w-8 h-8 rounded-full border border-slate-200 bg-slate-100"
                   />
@@ -283,7 +279,7 @@ export default function DashboardLayout() {
                   <p className="text-[11px] font-medium text-slate-500 mt-1 leading-none">Student</p>
                 </div>
                 <ChevronDown size={14} className={`text-slate-400 ml-2 transition-transform duration-200 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
-              </div>
+              </button>
 
               {/* Dropdown Menu */}
               {isProfileDropdownOpen && (

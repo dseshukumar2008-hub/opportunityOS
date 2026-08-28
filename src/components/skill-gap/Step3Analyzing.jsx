@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bot, CheckCircle2, Loader2 } from 'lucide-react';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 import { geminiService } from '../../services/geminiService';
 import { extractTextFromFile, optimizeLargeResumeText } from '../../utils/fileUtils';
 
@@ -106,7 +106,7 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
     <div className="w-full max-w-lg mx-auto bg-white rounded-[24px] border border-slate-100 shadow-xl shadow-slate-200/20 p-8 lg:p-12 animate-in fade-in zoom-in-95 duration-500">
       <div className="flex flex-col items-center text-center mb-8">
         <div className="w-20 h-20 bg-[#F4F2FF] rounded-full flex items-center justify-center mb-6 relative">
-          <Bot size={40} className="text-[#6C4CF1] absolute z-10" />
+
           <div className="absolute inset-0 border-4 border-[#6C4CF1] border-t-transparent rounded-full animate-spin opacity-30" />
           <div className="absolute inset-[-8px] border-2 border-[#6C4CF1] border-b-transparent rounded-full animate-spin-[3s_linear_infinite] opacity-10" />
         </div>

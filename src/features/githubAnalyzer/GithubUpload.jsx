@@ -91,7 +91,7 @@ export default function GithubUpload({ onAnalyze, loading }) {
             </button>
           </div>
           <p className="text-base lg:text-lg text-slate-500 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-            Get AI-powered insights about your repositories, technologies, contributions, and career alignment.
+            Get insights about your repositories, technologies, contributions, and career alignment.
           </p>
         </div>
 

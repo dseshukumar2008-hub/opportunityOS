@@ -39,8 +39,8 @@ export default function SuccessStep({ onFinish, data }) {
       
       {/* Background (Reduced purple glow by 15%) */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 rounded-r-[36px]">
-        <div className="absolute top-[-20%] right-[-10%] w-[500px] h-[500px] bg-[#9333EA]/[0.04] rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-20%] w-[400px] h-[400px] bg-[#3B82F6]/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+
+
       </div>
 
       <div className="absolute inset-0 pointer-events-none z-50 flex items-center justify-center">

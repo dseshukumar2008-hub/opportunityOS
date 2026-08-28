@@ -1,5 +1,9 @@
 import { analyticsService } from '../../analyticsService';
 
+// The templateProvider acts as the absolute last resort in the AI orchestration chain.
+// If all network providers (Gemini, Groq, etc.) fail due to rate limits or network issues,
+// this provider intercepts the request and returns hardcoded, structurally valid JSON.
+// This ensures the application fails gracefully without breaking the UI.
 export const templateProvider = {
   name: 'template',
   async generate(request) {

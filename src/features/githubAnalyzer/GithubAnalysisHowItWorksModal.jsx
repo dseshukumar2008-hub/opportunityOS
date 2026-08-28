@@ -24,7 +24,7 @@ export default function GithubAnalysisHowItWorksModal({ isOpen, onClose }) {
         {/* Header */}
         <div className="relative p-6 border-b border-slate-100 bg-slate-50/50">
           <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-            How GitHub Analysis Works <Sparkles className="text-amber-500" size={20} />
+            How GitHub Analysis Works
           </h2>
           <button 
             onClick={onClose}
@@ -84,10 +84,10 @@ export default function GithubAnalysisHowItWorksModal({ isOpen, onClose }) {
             </div>
             <div className="flex-1">
               <h3 className="text-[16px] font-bold text-slate-900 mb-1 flex items-center gap-2">
-                4. Get Personalized Insights 🚀
+                4. Get Actionable Insights 🚀
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed font-medium">
-                Receive your GitHub Alignment score, identified strengths, improvement areas, skill insights, and personalized recommendations.
+                Receive your GitHub Alignment score, identified strengths, improvement areas, skill insights, and next-step recommendations.
               </p>
             </div>
           </div>

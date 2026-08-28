@@ -127,7 +127,7 @@ export default function ResumeUploadZone({ onAnalyze, uploadProgress = 0, progre
             </div>
             <h2 className="text-[15px] font-semibold text-[#111827] mb-1">Click to upload or drag and drop</h2>
             <p className="text-[12px] text-[#64748B] mb-4 max-w-[250px] leading-relaxed">
-              We'll analyze it and provide actionable AI-powered feedback.
+              We'll analyze it and provide actionable feedback.
             </p>
             <button className="bg-[#111827] hover:bg-[#374151] text-white font-medium text-[12px] px-5 py-2 rounded-lg pointer-events-auto transition-colors shadow-sm mb-3">
               Select Resume File

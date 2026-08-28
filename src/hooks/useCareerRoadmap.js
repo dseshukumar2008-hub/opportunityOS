@@ -158,7 +158,7 @@ RULES:
 - 5 tasks per phase.
 - 3-5 skills per phase.
 - 2 real-world projects per phase.
-- 3-4 resources per phase. ALL resource URLs MUST be real, valid links to trusted platforms. NEVER use placeholder links or empty URLs.
+- 3-4 resources per phase. ALL resource URLs MUST be real, valid links to trusted platforms. Do not use temporary or empty URLs.
 - Use these trusted providers for resources: Coursera, Udemy, edX, Harvard CS50, DeepLearning.AI, MDN, React Docs, Python Docs, Node.js Docs, TensorFlow Docs, PyTorch Docs, AWS Docs, Azure Docs, Google Cloud Docs, LeetCode, HackerRank, Codeforces, GeeksforGeeks, Exercism, freeCodeCamp, Traversy Media, CodeWithHarry, Abdul Bari, Tech With Tim, Books (Cracking the Coding Interview, Clean Code, Grokking Algorithms, System Design Interview).
 - Map resources specifically to the Target Career. For example, Software Engineers need LeetCode, OOP, System Design. AI Engineers need Machine Learning Specialization, Kaggle, HuggingFace, PyTorch. Use similar strict mapping logic for ${w.targetCareer}.
 - 2 certifications per phase.
@@ -168,7 +168,6 @@ RULES:
 - Return ONLY the JSON object.`;
 }
 
-const ENABLE_AI_NOTIFICATIONS = false;
 
 export function useCareerRoadmap() {
   const [state, dispatch] = useReducer(reducer, INITIAL);
@@ -221,7 +220,6 @@ export function useCareerRoadmap() {
     let parsed = null;
     let fallbackUsed = false;
 
-    console.log("[STEP 1] Wizard data loaded");
     const wizardWithProfile = { ...wizardData, missingSkills: profile?.missingSkills || [] };
     const promptText = buildPrompt(wizardWithProfile);
     
@@ -237,9 +235,6 @@ export function useCareerRoadmap() {
 
     while (attempt <= maxRetries && !parsed) {
       try {
-        console.log(`[Roadmap Gen] Attempt ${attempt + 1}`);
-        console.log("[STEP 2] AIProvider request starting");
-        
         const timeoutPromise = new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Generation timeout')), 65000)
         );
@@ -249,14 +244,11 @@ export function useCareerRoadmap() {
           throw response.error;
         }
         
-        console.log("[STEP 3] AIProvider response received");
         parsed = response.data;
-        console.log("[STEP 4] Roadmap parsed");
       } catch (err) {
         console.error(`[Roadmap Gen] Attempt ${attempt + 1} failed:`, err);
         if (attempt < maxRetries) {
           const delay = retryDelays[attempt];
-          console.log(`[Roadmap Gen] Retrying in ${delay}ms...`);
           await new Promise(res => setTimeout(res, delay));
         }
         attempt++;
@@ -264,7 +256,6 @@ export function useCareerRoadmap() {
     }
 
     if (!parsed) {
-      console.log('[Roadmap Gen] All attempts failed.');
       dispatch$.current({ type: 'GEN_ERROR', error: 'Failed to generate a roadmap. Please try again later.' });
       return;
     }
@@ -288,11 +279,8 @@ export function useCareerRoadmap() {
         isFallback: fallbackUsed
       };
 
-      console.log("[STEP 5] Firestore save starting");
       await setDoc(doc(db, 'career_roadmaps', uid), docData);
-      console.log("[STEP 6] Firestore save successful");
       dispatch$.current({ type: 'GEN_OK', data: { ...docData, createdAt: new Date() } });
-      console.log("[STEP 10] Local state updated");
       
       await mergeProfileData({ 
         targetRole: wizardData.targetCareer,
@@ -302,7 +290,7 @@ export function useCareerRoadmap() {
 
       if (addActivity) {
         addActivity({
-          title: "Career Roadmap Generated",
+          title: "Career Roadmap Created",
           description: "Your personalized career roadmap has been created.",
           category: "Analysis",
           type: "action",
@@ -311,15 +299,9 @@ export function useCareerRoadmap() {
         });
       }
 
-      if (ENABLE_AI_NOTIFICATIONS) {
-        // Notifications are currently disabled globally.
-        console.log("[STEP 9] Notification system disabled");
-      }
       if (!fallbackUsed) {
-        analyticsService.trackEvent('Roadmap Generated', { targetCareer: wizardData.targetCareer });
-        console.log("[STEP 8] Analytics tracking successful");
+        analyticsService.trackEvent('Roadmap Created', { targetCareer: wizardData.targetCareer });
       }
-      console.log("[STEP 11] Navigation successful");
     } catch (saveErr) {
       console.error('[Roadmap Gen] Save Error:', saveErr);
       dispatch$.current({ type: 'GEN_ERROR', error: 'Failed to save roadmap to database.' });

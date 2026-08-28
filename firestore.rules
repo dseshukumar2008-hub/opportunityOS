@@ -15,19 +15,27 @@ service cloud.firestore {
     }
 
     match /team_requests/{requestId} {
-      allow read, write: if isAuthed();
+      allow read: if isAuthed();
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.userId || request.auth.uid == get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.ownerId);
     }
 
     match /team_messages/{messageId} {
-      allow read, write: if isAuthed();
+      allow read: if isAuthed();
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.senderId;
+      allow update, delete: if isAuthed() && request.auth.uid == resource.data.senderId;
     }
 
     match /messages/{msgId} {
-      allow read, write: if isAuthed();
+      allow read: if isAuthed();
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.senderId;
+      allow update, delete: if isAuthed() && request.auth.uid == resource.data.senderId;
     }
 
     match /requests/{reqId} {
-      allow read, write: if isAuthed();
+      allow read: if isAuthed();
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.senderId;
+      allow update, delete: if isAuthed() && request.auth.uid == resource.data.senderId;
     }
 
     match /users/{userId} {
@@ -124,11 +132,14 @@ service cloud.firestore {
 
     match /opportunities/{oppId} {
       allow read: if isAuthed();
-      allow write: if isAuthed();
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.authorId;
+      allow update, delete: if isAuthed() && request.auth.uid == resource.data.authorId;
     }
 
     match /pending_opportunities/{oppId} {
-      allow read, write: if isAuthed();
+      allow read: if isAuthed();
+      allow create: if isAuthed() && request.auth.uid == request.resource.data.authorId;
+      allow update, delete: if isAuthed() && request.auth.uid == resource.data.authorId;
     }
 
     match /saved_opportunities/{docId} {

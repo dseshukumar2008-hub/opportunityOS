@@ -5,6 +5,7 @@ import { useActivity } from './ActivityContext';
 import { auth, db } from '../config/firebase';
 import { collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, where} from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { getResumeStrength, validateSection } from '../utils/resumeValidationUtils';
 
 const ResumeContext = createContext(null);
 
@@ -390,7 +391,7 @@ export const ResumeProvider = ({ children }) => {
         category: 'Resume',
         type: 'updated_resume',
         title: `Updated Resume`,
-        description: `Resume Score: ${getResumeStrength()}%`,
+        description: `Resume Score: ${getResumeStrength(resumeData)}%`,
         iconType: 'FileText',
         color: 'bg-emerald-50 text-emerald-500'
       });
@@ -421,151 +422,21 @@ export const ResumeProvider = ({ children }) => {
   // Debounced auto-save hook utility (can be utilized by consuming components)
   // We'll call saveResume directly when needed.
 
-  const getResumeStrength = () => {
-    let score = 0;
-    const isValidString = (val) => typeof val === 'string' && val.trim().length > 0;
-    const pi = resumeData.personalInfo || {};
-    
-    if (isValidString(pi.fullName)) score += 5;
-    if (isValidString(pi.email)) score += 5;
-    if (isValidString(pi.phone)) score += 5;
-    if (isValidString(pi.location)) score += 5;
-    if (isValidString(pi.linkedin)) score += 5;
-    if (isValidString(pi.github) || isValidString(pi.portfolio)) score += 5;
-    
-    const validEdu = (resumeData.education || []).filter(item => isValidString(item.degree) && isValidString(item.school));
-    if (validEdu.length > 0) score += 20;
-
-    const validSkills = (resumeData.skills || []).filter(isValidString);
-    if (validSkills.length > 3) score += 15;
-    else if (validSkills.length > 0) score += 5;
-
-    const validProjects = (resumeData.projects || []).filter(item => isValidString(item.title) && isValidString(item.description) && isValidString(item.techStack));
-    if (validProjects.length > 1) score += 15;
-    else if (validProjects.length > 0) score += 10;
-
-    const validExp = (resumeData.experience || []).filter(item => isValidString(item.company) && isValidString(item.role) && isValidString(item.responsibilities));
-    if (validExp.length > 0) score += 15;
-
-    const validCerts = (resumeData.certifications || []).filter(item => isValidString(item.title) && isValidString(item.issuer));
-    if (validCerts.length > 0) score += 5;
-
-    return Math.min(score, 100);
-  };
-
-  const validateSection = (section) => {
-    let required = [];
-    let filled = [];
-    let isComplete = false;
-
-    const isValidString = (val) => typeof val === 'string' && val.trim().length > 0;
-
-    if (section === 'Personal Info') {
-      const pi = resumeData.personalInfo || {};
-      required = ['fullName', 'email', 'phone', 'location'];
-      filled = required.filter(field => isValidString(pi[field]));
-      isComplete = filled.length === required.length;
-    }
-    else if (section === 'Summary') {
-      const pi = resumeData.personalInfo || {};
-      required = ['summary'];
-      filled = required.filter(field => isValidString(pi[field]));
-      isComplete = filled.length === required.length;
-    }
-    else if (section === 'Education') {
-      const items = resumeData.education || [];
-      required = ['degree', 'school'];
-      if (items.length === 0) {
-        isComplete = false;
-      } else {
-        // All items must have required fields
-        isComplete = items.every(item => isValidString(item.degree) && isValidString(item.school));
-        if (items.length > 0) {
-          // Just for logging, we count the first item's fields
-          filled = required.filter(field => isValidString(items[0][field]));
-        }
-      }
-    }
-    else if (section === 'Skills') {
-      const items = resumeData.skills || [];
-      required = ['skills'];
-      if (items.length > 0 && items.some(isValidString)) {
-        filled = ['skills'];
-        isComplete = true;
-      }
-    }
-    else if (section === 'Projects') {
-      const items = resumeData.projects || [];
-      required = ['title', 'description', 'techStack'];
-      if (items.length === 0) {
-        isComplete = false;
-      } else {
-        isComplete = items.every(item => isValidString(item.title) && isValidString(item.description) && isValidString(item.techStack));
-        if (items.length > 0) {
-          filled = required.filter(field => isValidString(items[0][field]));
-        }
-      }
-    }
-    else if (section === 'Experience') {
-      const items = resumeData.experience || [];
-      required = ['company', 'role', 'responsibilities'];
-      if (items.length === 0) {
-        isComplete = false;
-      } else {
-        isComplete = items.every(item => isValidString(item.company) && isValidString(item.role) && isValidString(item.responsibilities));
-        if (items.length > 0) {
-          filled = required.filter(field => isValidString(items[0][field]));
-        }
-      }
-    }
-    else if (section === 'Certifications') {
-      const items = resumeData.certifications || [];
-      required = ['title', 'issuer'];
-      if (items.length === 0) {
-        isComplete = false;
-      } else {
-        isComplete = items.every(item => isValidString(item.title) && isValidString(item.issuer));
-        if (items.length > 0) {
-          filled = required.filter(field => isValidString(items[0][field]));
-        }
-      }
-    }
-    else if (section === 'Workshops') {
-      const items = resumeData.workshops || [];
-      required = ['title', 'issuer'];
-      if (items.length === 0) {
-        isComplete = false;
-      } else {
-        isComplete = items.every(item => isValidString(item.title) && isValidString(item.issuer));
-        if (items.length > 0) {
-          filled = required.filter(field => isValidString(items[0][field]));
-        }
-      }
-    }
-
-    const percentage = required.length > 0 ? Math.round((filled.length / required.length) * 100) : 0;
-    
-    // Log output as requested
-    console.log(`[Resume Builder] Section: ${section} | Required: ${required.join(', ')} | Filled: ${filled.join(', ')} | Completion: ${percentage}%`);
-
-    return isComplete;
-  };
-
   const getSectionsCompleted = () => {
     let completed = 0;
-    if (validateSection('Personal Info')) completed++;
-    if (validateSection('Summary')) completed++;
-    if (validateSection('Education')) completed++;
-    if (validateSection('Skills')) completed++;
-    if (validateSection('Projects')) completed++;
-    if (validateSection('Experience')) completed++;
-    if (validateSection('Certifications')) completed++;
-    if (validateSection('Workshops')) completed++;
+    if (validateSection('Personal Info', resumeData)) completed++;
+    if (validateSection('Summary', resumeData)) completed++;
+    if (validateSection('Education', resumeData)) completed++;
+    if (validateSection('Skills', resumeData)) completed++;
+    if (validateSection('Projects', resumeData)) completed++;
+    if (validateSection('Experience', resumeData)) completed++;
+    if (validateSection('Certifications', resumeData)) completed++;
+    if (validateSection('Workshops', resumeData)) completed++;
     return completed;
   };
 
   const isSectionComplete = (section) => {
-    return validateSection(section);
+    return validateSection(section, resumeData);
   };
 
   // Mutable functions trigger state update + auto-save
@@ -652,7 +523,7 @@ export const ResumeProvider = ({ children }) => {
       renameResume,
       switchResume,
       migrateLocalResume,
-      getResumeStrength,
+      getResumeStrength: () => getResumeStrength(resumeData),
       getSectionsCompleted,
       isSectionComplete,
       updatePersonalInfo,

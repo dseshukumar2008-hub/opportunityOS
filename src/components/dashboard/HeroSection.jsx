@@ -29,13 +29,10 @@ function StatPill({ icon: Icon, label, value, colorClass, href }) {
 export default function HeroSection() {
   const { user } = useAuth();
   const { profile } = useUserProfile();
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-  const { recommendedOpportunities, careerReadiness, bestOpportunity, isLoading } =
-    useDashboardInsights();
+  const { careerReadiness, isLoading } = useDashboardInsights();
   const { atsScore, hasInsights } = useResumeInsights();
 
-  const greeting = useMemo(() => getGreeting(), []);
+  const greeting = getGreeting();
   const firstName = profile?.name?.split(' ')[0] || user?.name?.split(' ')[0] || 'there';
   const initials = (profile?.name || user?.name || 'U')
     .split(' ')
@@ -88,7 +85,7 @@ export default function HeroSection() {
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
 
       {/* Background decorative orb */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/60 rounded-full blur-3xl translate-x-1/3 -translate-y-1/2 pointer-events-none" />
+
 
       <div className="relative z-10 px-6 py-5">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">

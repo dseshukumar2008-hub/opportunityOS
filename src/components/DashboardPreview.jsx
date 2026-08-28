@@ -107,7 +107,7 @@ export default function DashboardPreview() {
                     </div>
                     <div>
                       <h4 className="text-[14px] font-bold text-indigo-600 mb-1.5">Your Career Journey Starts Here!</h4>
-                      <p className="text-[11px] text-slate-500 leading-relaxed max-w-xs">Complete a few steps to unlock personalized insights and accelerate your growth.</p>
+                      <p className="text-[11px] text-slate-500 leading-relaxed max-w-xs">Complete a few steps to view your skill gaps and next best actions.</p>
                     </div>
                   </div>
 

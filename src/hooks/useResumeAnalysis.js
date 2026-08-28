@@ -4,9 +4,7 @@ import { resumeStorageService } from '../services/resumeStorageService';
 import { useAuth } from '../contexts/AuthContext';
 import { useActivity } from '../contexts/ActivityContext';
 
-import { fileToBase64 } from '../utils/fileUtils';
-
-const ENABLE_AI_NOTIFICATIONS = false;
+import { useRef } from 'react';
 
 export function useResumeAnalysis() {
   const { user } = useAuth();
@@ -20,6 +18,7 @@ export function useResumeAnalysis() {
   const [storedResumePath, setStoredResumePath] = useState(null);
   const [error, setError] = useState(null);
   const [analysisStatus, setAnalysisStatus] = useState('idle');
+  const isAnalyzingRef = useRef(false);
 
   // Load saved analysis + resume metadata from Firestore on mount
   const loadSavedAnalysis = useCallback(async () => {
@@ -36,14 +35,19 @@ export function useResumeAnalysis() {
       }
     } catch (err) {
       console.warn('Could not load saved analysis:', err);
+      isAnalyzingRef.current = false;
     }
-  }, [user?.id]);
+  }, [user, addActivity]);
 
   // Note: We intentionally do NOT call loadSavedAnalysis() automatically on mount anymore.
   // The user should start with a fresh upload state.
   // Historical analyses remain in the History tab.
 
   const analyzeResume = useCallback(async (dataOrFile) => {
+    if (isAnalyzingRef.current) {
+      return { _error: true, message: 'Analysis already in progress.' };
+    }
+    isAnalyzingRef.current = true;
     console.log('[Resume Analysis] Upload Started');
     
     setIsAnalyzing(true);
@@ -72,7 +76,7 @@ export function useResumeAnalysis() {
           console.log(`[Resume Analyzer] Text extraction success: ${extractedText?.length} characters`);
           
           if (!extractedText || extractedText.trim().length === 0) {
-            throw new Error('No readable text was found in this resume.');
+            throw new Error('Resume text could not be extracted.');
           }
           if (extractedText.length < 100) {
             throw new Error(`Extracted text is too short (${extractedText.length} chars). Please upload a valid resume with selectable text.`);
@@ -106,6 +110,7 @@ export function useResumeAnalysis() {
           payloadForGemini = extractedText;
         } else {
           setProgressText('Preparing AI Analysis...');
+          const { fileToBase64 } = await import('../utils/fileUtils');
           payloadForGemini = await fileToBase64(dataOrFile);
           console.log('[Resume Analysis] Base64 Generated');
         }
@@ -144,12 +149,44 @@ export function useResumeAnalysis() {
       // Phase 2: Gemini Analysis Engine
       try {
         console.log('[Resume Analysis] Phase 2: Requesting Insights');
-        const aiInsights = await geminiService.analyzeResume(payloadForGemini, extractedText, localMetrics.profileType);
+        let aiInsights = await geminiService.analyzeResume(payloadForGemini, extractedText, localMetrics.profileType);
         console.log('[Resume Analysis] Phase 2 Insights Received');
         
-        // Phase 3: Validation Layer
-        if (!aiInsights || !aiInsights.suggestedRole || !Array.isArray(aiInsights.strengths)) {
-          throw new Error('Invalid AI insight schema.');
+        // Phase 3: Validation & Fallback Layer
+        if (aiInsights && !aiInsights.suggestedRole && typeof aiInsights === 'object') {
+          const keys = Object.keys(aiInsights);
+          if (keys.length === 1 && aiInsights[keys[0]] && typeof aiInsights[keys[0]] === 'object' && aiInsights[keys[0]].suggestedRole) {
+            console.log('[Resume Analyzer] Extracted nested AI response');
+            aiInsights = aiInsights[keys[0]];
+          }
+        }
+
+        // Basic structural validation - if it's not even an object, fail entirely
+        if (!aiInsights || typeof aiInsights !== 'object') {
+          console.error('[Resume Analyzer Error] Expected an object from AI, got:', typeof aiInsights);
+          throw new Error('The AI service returned incomplete or malformed data. Please try analyzing the resume again.');
+        }
+
+        // Provide robust fallbacks for optional fields to prevent UI crashes
+        if (!aiInsights.suggestedRole) aiInsights.suggestedRole = 'Candidate';
+        if (!aiInsights.summary) aiInsights.summary = 'Analysis completed successfully.';
+        if (!Array.isArray(aiInsights.strengths)) aiInsights.strengths = [];
+        if (!Array.isArray(aiInsights.areasForGrowth)) aiInsights.areasForGrowth = [];
+        if (!aiInsights.qualityRating) aiInsights.qualityRating = 'Fair';
+        
+        // Ensure actionPlan exists and its arrays are valid
+        if (!aiInsights.actionPlan || typeof aiInsights.actionPlan !== 'object') {
+          aiInsights.actionPlan = {
+            immediateFixes: [],
+            skillsToLearn: [],
+            projectsToBuild: [],
+            certificationsToPursue: []
+          };
+        } else {
+          if (!Array.isArray(aiInsights.actionPlan.immediateFixes)) aiInsights.actionPlan.immediateFixes = [];
+          if (!Array.isArray(aiInsights.actionPlan.skillsToLearn)) aiInsights.actionPlan.skillsToLearn = [];
+          if (!Array.isArray(aiInsights.actionPlan.projectsToBuild)) aiInsights.actionPlan.projectsToBuild = [];
+          if (!Array.isArray(aiInsights.actionPlan.certificationsToPursue)) aiInsights.actionPlan.certificationsToPursue = [];
         }
         
         // Generate Smart Suggestions dynamically based on the analysis
@@ -246,7 +283,7 @@ export function useResumeAnalysis() {
         
       } catch (geminiError) {
         console.error('[Resume Analysis Error] Phase 3 Validation Failed:', geminiError);
-        throw new Error('Resume analysis could not be completed. Please try again.');
+        throw geminiError;
       }
 
       setAnalysisResults(results);
@@ -324,14 +361,13 @@ export function useResumeAnalysis() {
       console.log(`[Resume Analyzer] ATS score calculated: ${results.atsScore}`);
       console.log('[Resume Analyzer] Adding notification and finalizing...');
 
-      if (ENABLE_AI_NOTIFICATIONS) {
-              }
 
       setIsAnalyzing(false);
       setAnalysisStatus('completed');
       setUploadProgress(100);
       setProgressText('Complete ✓');
       console.log('[Resume Analyzer] Analysis completed');
+      isAnalyzingRef.current = false;
       return results;
 
     } catch (err) {
@@ -339,10 +375,13 @@ export function useResumeAnalysis() {
       
 // eslint-disable-next-line no-useless-assignment
       let errMsg = 'Unexpected error occurred.';
-      if (err.type === 'NETWORK_ERROR') errMsg = 'Network connection issue detected.';
-      else if (err.type === 'GEMINI_QUOTA_EXCEEDED') errMsg = 'AI analysis temporarily unavailable due to quota/rate limits.';
-      else if (err.type === 'GEMINI_SERVER_ERROR') errMsg = 'AI analysis temporarily unavailable.';
-      else errMsg = 'Unexpected error occurred.';
+      if (err.type === 'AI_NETWORK_ERROR') errMsg = 'Network connection issue detected. Is the backend running?';
+      else if (err.type === 'AI_QUOTA_EXHAUSTED' || err.type === 'AI_RATE_LIMIT') errMsg = 'AI analysis temporarily unavailable due to quota/rate limits.';
+      else if (err.type === 'AI_SERVER_ERROR') {
+        if (err.message.includes('API_KEY is not configured')) errMsg = 'Server configuration is missing.';
+        else errMsg = 'AI analysis temporarily unavailable.';
+      }
+      else errMsg = err.message || 'Unexpected error occurred.';
       
       setError(errMsg);
       
@@ -356,6 +395,7 @@ export function useResumeAnalysis() {
       setAnalysisStatus('idle');
       setUploadProgress(100);
       setProgressText('');
+      isAnalyzingRef.current = false;
       return fallbackResults;
     }
 // eslint-disable-next-line react-hooks/exhaustive-deps

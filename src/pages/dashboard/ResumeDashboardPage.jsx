@@ -65,7 +65,7 @@ export default function ResumeDashboardPage() {
     try {
       await deleteResume(resumeToDelete.id);
       toast.success('Resume deleted successfully');
-    } catch (_e) {
+    } catch {
       toast.error('Failed to delete resume');
     } finally {
       setIsDeleting(false);
@@ -178,8 +178,8 @@ export default function ResumeDashboardPage() {
                   )}
                 </div>
 
-                <div 
-                  className="p-6 pb-4 cursor-pointer flex-1"
+                <button 
+                  className="w-full text-left p-6 pb-4 cursor-pointer flex-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-600 bg-transparent rounded-t-2xl"
                   onClick={() => openResume(resume.id)}
                 >
                   <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4">
@@ -226,7 +226,7 @@ export default function ResumeDashboardPage() {
                       ></div>
                     </div>
                   </div>
-                </div>
+                </button>
                 
                 <div className="px-6 py-4 bg-white border-t border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-[12px] font-medium text-slate-500">

@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const { initializeApp, cert } = require('firebase-admin/app');
@@ -33,7 +33,6 @@ app.get('/api/health', (req, res) => {
 let firebaseApp;
 try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-    // Optional: Parse full JSON if provided as single env string
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
     firebaseApp = initializeApp({
       credential: cert(serviceAccount)
@@ -43,17 +42,19 @@ try {
       credential: cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // Replace escaped newline characters from environment variable string
         privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined
       })
     });
   } else {
-    // This assumes we might be running inside GCP/Render with default credentials
-    firebaseApp = initializeApp();
+    // Local development fallback: no service account key needed.
+    // Passing projectId allows verifyIdToken() to validate tokens via Firebase's
+    // public JWKS endpoint without requiring a downloaded credentials file.
+    firebaseApp = initializeApp({
+      projectId: 'oppurtunity-os'
+    });
   }
 } catch (error) {
   console.error("CRITICAL: Firebase Admin Initialization Error:", error);
-  // Fail fast on initialization error to prevent insecure startup
   process.exit(1);
 }
 
@@ -128,21 +129,40 @@ async function callGemini(apiKey, prompt, responseType, options = {}) {
   const modelName = options.model || (responseType === "json" ? "gemini-2.5-flash" : "gemini-1.5-pro");
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   
-  const parts = [];
-  if (options.inlineDataItems && options.inlineDataItems.length > 0) {
-    const formattedItems = options.inlineDataItems.map(item => {
-      if (item.inlineData) return item;
-      if (item.mimeType && item.data) {
-        return { inlineData: { mimeType: item.mimeType, data: item.data } };
+  let finalContents;
+  
+  if (options.contents && Array.isArray(options.contents)) {
+    finalContents = [...options.contents];
+    // If inlineDataItems exist, attach them to the last user message
+    if (options.inlineDataItems && options.inlineDataItems.length > 0 && finalContents.length > 0) {
+      const lastItem = finalContents[finalContents.length - 1];
+      if (lastItem.role === 'user') {
+        const formattedItems = options.inlineDataItems.map(item => {
+          if (item.inlineData) return item;
+          if (item.mimeType && item.data) return { inlineData: { mimeType: item.mimeType, data: item.data } };
+          return item;
+        });
+        lastItem.parts = [...formattedItems, ...lastItem.parts];
       }
-      return item;
-    });
-    parts.push(...formattedItems);
+    }
+  } else {
+    const parts = [];
+    if (options.inlineDataItems && options.inlineDataItems.length > 0) {
+      const formattedItems = options.inlineDataItems.map(item => {
+        if (item.inlineData) return item;
+        if (item.mimeType && item.data) {
+          return { inlineData: { mimeType: item.mimeType, data: item.data } };
+        }
+        return item;
+      });
+      parts.push(...formattedItems);
+    }
+    parts.push({ text: prompt });
+    finalContents = [{ role: "user", parts: parts }];
   }
-  parts.push({ text: prompt });
 
   const payload = {
-    contents: [{ role: "user", parts: parts }],
+    contents: finalContents,
     generationConfig: {
       temperature: options.temperature || 0.7,
       maxOutputTokens: options.maxTokens || 8192,

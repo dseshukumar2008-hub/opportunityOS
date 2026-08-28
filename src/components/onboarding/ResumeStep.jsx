@@ -49,7 +49,7 @@ export default function ResumeStep({ onNext, onBack }) {
             You're All Set! <span className="text-[24px] leading-none flex items-center">🎉</span>
           </h2>
           <p className="text-[16px] font-[500] text-[#64748B] mt-[8px]">
-            Your profile is ready. Upload your resume now to unlock AI-powered career features, or skip and do it later from your dashboard.
+            Your profile is ready. Upload your resume now to unlock career features, or skip and do it later from your dashboard.
           </p>
         </div>
 
@@ -63,7 +63,7 @@ export default function ResumeStep({ onNext, onBack }) {
                 <div className="w-10 h-10 rounded-full bg-purple-200/50 flex items-center justify-center text-purple-600">
                   <Sparkles size={20} />
                 </div>
-                <h3 className="text-[18px] font-bold text-purple-900">Unlock with Your Resume</h3>
+                <h3 className="text-[18px] font-bold text-purple-900">Analyze Your Resume</h3>
               </div>
               
               <ul className="space-y-5">

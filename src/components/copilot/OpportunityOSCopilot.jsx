@@ -96,7 +96,7 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
     // Save user message to DB asynchronously
     saveMessage('user', userText).then(saved => {
       setMessages(prev => prev.map(m => m.id === tempUserMsg.id ? saved : m));
-    });
+    }).catch(err => console.error("Failed to save user message:", err));
 
     // Check cache
     if (queryCache[userText.toLowerCase()]) {
@@ -106,7 +106,7 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
       setIsTyping(false);
       saveMessage('assistant', cachedResponse).then(saved => {
         setMessages(prev => prev.map(m => m.id === tempAstMsg.id ? saved : m));
-      });
+      }).catch(err => console.error("Failed to save cached message:", err));
       return;
     }
 
@@ -130,7 +130,7 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
       
       saveMessage('assistant', responseText).then(saved => {
         setMessages(prev => prev.map(m => m.id === tempAstMsg.id ? saved : m));
-      });
+      }).catch(err => console.error("Failed to save assistant message:", err));
 
     } catch (err) {
       console.error("Copilot Error:", err);

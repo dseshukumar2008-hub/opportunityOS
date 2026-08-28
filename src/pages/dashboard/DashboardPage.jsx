@@ -1,6 +1,5 @@
 import React, { Suspense} from 'react';
 import { WidgetErrorBoundary } from '../../components/common/GlobalErrorBoundary';
-import { useAuth } from '../../contexts/AuthContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useResume } from '../../contexts/ResumeContext';
 import { useActivity } from '../../contexts/ActivityContext';
@@ -17,8 +16,6 @@ const RecentActivityTimeline = React.lazy(() => import('../../components/dashboa
 const CareerJourneyWidget = React.lazy(() => import('../../components/dashboard/CareerJourneyWidget'));
 
 export default function DashboardPage() {
-// eslint-disable-next-line no-unused-vars
-  const { user } = useAuth();
   const { profile, isLoading: profileLoading } = useUserProfile();
   const { resumes, loading: resumeLoading } = useResume();
   const { activities, loading: activityLoading } = useActivity();

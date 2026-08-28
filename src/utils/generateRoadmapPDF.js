@@ -1,13 +1,11 @@
-import { jsPDF } from 'jspdf';
-
-export const generateRoadmapPDF = (roadmap, profile, progressData) => {
+export const generateRoadmapPDF = async (roadmap, profile, progressData) => {
+  const { jsPDF } = await import('jspdf');
   const doc = new jsPDF();
   let y = 20;
   const margin = 20;
   const pageWidth = doc.internal.pageSize.width;
   const usableWidth = pageWidth - margin * 2;
   
-  // Helper to handle auto-pagination
   const checkPageBreak = (neededSpace) => {
     if (y + neededSpace > doc.internal.pageSize.height - 20) {
       doc.addPage();
@@ -15,12 +13,10 @@ export const generateRoadmapPDF = (roadmap, profile, progressData) => {
     }
   };
 
-  // Color Palette
   const primaryColor = [108, 76, 241]; // #6C4CF1
   const textColor = [51, 65, 85]; // slate-700
   const lightText = [100, 116, 139]; // slate-500
   
-  // ── HEADER & BRANDING ──
   doc.setFontSize(24);
   doc.setTextColor(...primaryColor);
   doc.setFont('helvetica', 'bold');

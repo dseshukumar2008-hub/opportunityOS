@@ -39,7 +39,7 @@ export default function HowItWorksSection() {
             <div className="absolute -bottom-3 w-6 h-6 bg-slate-200 rounded-full border-2 border-white text-[10px] font-bold text-slate-700 flex items-center justify-center">3</div>
           </div>
           <h3 className="text-sm font-bold text-slate-900 mb-2 mt-2 text-center">Analyze Your Skills</h3>
-          <p className="text-xs text-slate-500 text-center max-w-[160px]">Use Skill Gap Analysis and other AI-powered tools to understand your current strengths and areas for improvement.</p>
+          <p className="text-xs text-slate-500 text-center max-w-[160px]">Use Skill Gap Analysis and other tools to understand your current strengths and areas for improvement.</p>
         </div>
 
         {/* Step 4 */}

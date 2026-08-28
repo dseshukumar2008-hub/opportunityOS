@@ -91,7 +91,7 @@ export default function DashboardHeroWidget({ userState }) {
           <div className="w-full mb-2">
             <div className="flex justify-between items-center mb-2">
               <span className="text-[12px] font-bold text-slate-600">
-                {isNewUser ? 'Complete profile to unlock readiness score' : 'Progress to next milestone'}
+                {isNewUser ? 'Complete profile to view readiness score' : 'Progress to next milestone'}
               </span>
               {!isNewUser && <span className="text-[12px] font-bold text-[#6C4CF1]">Next: {nextMilestone}%</span>}
             </div>
@@ -126,7 +126,7 @@ export default function DashboardHeroWidget({ userState }) {
         <div className="hidden lg:flex items-center justify-center shrink-0 w-[220px]">
           <div className="relative w-full h-[160px] bg-gradient-to-br from-indigo-50 to-violet-50 rounded-2xl border border-indigo-100 flex items-center justify-center overflow-hidden">
             <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-indigo-100/40 blur-xl" />
-            <Rocket size={72} className="text-[#6C4CF1] opacity-90 mb-2 mr-2" strokeWidth={1.5} />
+            <Rocket size={72} className="text-[#6C4CF1] opacity-90 mb-2 ml-8" strokeWidth={1.5} />
           </div>
         </div>
 

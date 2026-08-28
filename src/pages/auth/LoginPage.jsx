@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, Lock, ArrowRight, AlertCircle, Loader2, Sparkles, Check } from 'lucide-react';
+import { Mail, Lock, ArrowRight, AlertCircle, Loader2, Check } from 'lucide-react';
 import AuthLayout from './AuthLayout';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -239,28 +239,24 @@ export default function LoginPage() {
 
       {showNoAccountModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-          <div className="bg-white/90 backdrop-blur-xl rounded-[24px] shadow-[0_32px_64px_rgba(108,76,241,0.15)] border border-white/50 w-full max-w-md overflow-hidden relative animate-in fade-in zoom-in-95 duration-300">
+          <div className="bg-white/90 backdrop-blur-xl rounded-[24px] shadow-2xl border border-white/50 w-full max-w-md overflow-hidden relative animate-in fade-in zoom-in-95 duration-300">
             {/* Ambient glow */}
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-purple-400/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-400/20 rounded-full blur-3xl pointer-events-none" />
+
             
             <div className="p-8 relative z-10 flex flex-col items-center text-center">
-              {/* Illustration */}
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#8168f8] to-[#5136db] flex items-center justify-center shadow-[0_8px_16px_rgba(108,76,241,0.3)] mb-6">
-                <Sparkles className="text-white w-8 h-8" />
-              </div>
+
               
               <h3 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">You're almost there! ✨</h3>
               <p className="text-slate-600 mb-8 leading-relaxed">
-                Create your OpportunityOS account to personalize your dashboard, organize your career journey, and unlock AI-powered career tools.
+                Create your OpportunityOS account to set up your dashboard, organize your career journey, and access automated resume and GitHub analysis tools.
               </p>
               
               {/* Benefits */}
               <div className="w-full bg-slate-50/80 rounded-2xl p-4 mb-8 space-y-3 text-left">
                 {[
-                  "Personalized Dashboard",
-                  "AI-Powered Career Tools",
-                  "Organized Career Journey"
+                  "Career Tracking Dashboard",
+                  "Automated Resume & GitHub Analysis",
+                  "Skill Gap Recommendations"
                 ].map((benefit, i) => (
                   <div key={i} className="flex items-center gap-3 group">
                     <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-200 transition-transform">

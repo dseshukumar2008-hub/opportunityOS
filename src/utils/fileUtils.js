@@ -1,11 +1,6 @@
-import * as pdfjsLib from 'pdfjs-dist';
-import mammoth from 'mammoth';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-// Initialize PDF.js worker
-if (typeof window !== 'undefined' && 'Worker' in window) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
-}
+// We'll initialize the worker lazily inside extractTextFromFile
 
 export const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -55,6 +50,10 @@ export const extractTextFromFile = async (file) => {
 
           if (fileType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
             try {
+              const pdfjsLib = await import('pdfjs-dist');
+              if (typeof window !== 'undefined' && 'Worker' in window) {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+              }
               const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
               let extractedText = '';
               for (let i = 1; i <= pdf.numPages; i++) {
@@ -72,6 +71,8 @@ export const extractTextFromFile = async (file) => {
             }
           } else if (fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || fileName.toLowerCase().endsWith('.docx')) {
             try {
+              const mammothModule = await import('mammoth');
+              const mammoth = mammothModule.default || mammothModule;
               const result = await mammoth.extractRawText({ arrayBuffer });
               text = result.value;
             } catch (docxErr) {

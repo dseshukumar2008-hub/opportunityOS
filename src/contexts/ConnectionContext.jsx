@@ -18,7 +18,7 @@ import { useActivity } from './ActivityContext';
 import { createFallbackUserProfile, useUserDirectory } from '../hooks/useUserDirectory';
 import toast from 'react-hot-toast';
 
-// ─── Context Setup ────────────────────────────────────────────────────────────
+// 
 const ConnectionContext = createContext(null);
 
 export function useConnections() {
@@ -42,7 +42,7 @@ export function ConnectionProvider({ children }) {
   const unsubConnections = useRef(null);
   const unsubRequests = useRef(null);
 
-  // ─── Real-time Firestore listeners ────────────────────────────────────────
+  // 
   useEffect(() => {
     // Clean up previous listeners before re-attaching
     if (unsubConnections.current) unsubConnections.current();
@@ -175,7 +175,7 @@ export function ConnectionProvider({ children }) {
     };
   }, [currentUserId]);
 
-  // ─── Derived Selectors ────────────────────────────────────────────────────
+  // 
 
   const getRelationship = useCallback((targetUserId) => {
     if (!currentUserId) return 'none';
@@ -253,7 +253,7 @@ export function ConnectionProvider({ children }) {
     return connections.filter((c) => c.userId1 === uid || c.userId2 === uid).length;
   }, [connections, currentUserId]);
 
-  // ─── CRUD Operations ──────────────────────────────────────────────────────
+  // 
 
   const sendConnectionRequest = useCallback(async (targetUserId) => {
     if (!currentUserId) return;
@@ -361,7 +361,7 @@ export function ConnectionProvider({ children }) {
     }
   }, []);
 
-  // ─── Context Value ────────────────────────────────────────────────────────
+  // 
   return (
     <ConnectionContext.Provider
       value={{

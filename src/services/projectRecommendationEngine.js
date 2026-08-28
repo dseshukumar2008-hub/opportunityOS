@@ -19,7 +19,7 @@ export const generateProjectRecommendations = async (profileData, forceRefresh =
         const parsed = JSON.parse(cachedData);
         // Ensure they are proper recommendation objects
         return parsed.map(proj => createRecommendation(proj));
-      } catch (_e) {
+      } catch {
         console.warn("Invalid cache data, fetching fresh.");
       }
     }
@@ -32,22 +32,32 @@ export const generateProjectRecommendations = async (profileData, forceRefresh =
   console.log(`[Project Engine] Gemini Request Count: ${requestCount}`);
 
   try {
-    const rawProjects = await geminiService.generateProjectRecommendations({
+    let rawProjects = await geminiService.generateProjectRecommendations({
       specialization,
       targetRole,
       missingSkills,
       excludedProjects
     });
 
+    // Safely extract array if Gemini wrapped it in an object (e.g. { "projects": [...] })
+    if (rawProjects && !Array.isArray(rawProjects) && typeof rawProjects === 'object') {
+      const keys = Object.keys(rawProjects);
+      if (keys.length === 1 && Array.isArray(rawProjects[keys[0]])) {
+        console.log('[Project Engine] Extracted nested project array from AI response');
+        rawProjects = rawProjects[keys[0]];
+      }
+    }
+
     if (!Array.isArray(rawProjects)) {
+      console.error('[Project Engine Error] Expected an array of projects from AI, got:', typeof rawProjects);
       throw new Error("Invalid response from Gemini API");
     }
 
     const formattedProjects = rawProjects.map(proj => createRecommendation({
-      title: proj.title,
-      description: proj.description,
-      technologies: proj.technologies || [],
-      whyThisProject: proj.whyThisProject,
+      title: proj?.title || "Untitled Project",
+      description: proj?.description || "A recommended project to build your skills.",
+      technologies: Array.isArray(proj?.technologies) ? proj.technologies : [],
+      whyThisProject: proj?.whyThisProject || "This project is highly recommended for your target role.",
       isMock: false
     }));
 
@@ -68,7 +78,7 @@ export const generateProjectRecommendations = async (profileData, forceRefresh =
         console.log("[Project Engine] Using fallback cached data due to Gemini failure.");
         const parsedFallback = JSON.parse(fallbackData);
         return parsedFallback.map(proj => createRecommendation(proj));
-      } catch (_e) {
+      } catch {
         console.warn("Invalid fallback cache data.");
       }
     }

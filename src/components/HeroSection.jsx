@@ -8,7 +8,7 @@ export default function HeroSection() {
     <section id="hero" className="relative w-full max-w-[1600px] mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between gap-12 xl:gap-20 pt-16 lg:pt-20 pb-8 lg:pb-12 overflow-hidden min-h-[calc(100vh-80px)] lg:min-h-0">
       
       {/* Subtle Ambient Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-gradient-to-tr from-indigo-500/10 via-purple-500/10 to-pink-500/10 blur-[120px] rounded-full pointer-events-none -z-10"></div>
+      {/* Subtle Ambient Glow Removed */}
 
       {/* Left Column: Copy */}
       <div className="flex-1 w-full max-w-xl z-10 shrink-0 xl:ml-8">
@@ -18,11 +18,11 @@ export default function HeroSection() {
         
         <h1 className="text-[2.75rem] xl:text-[3rem] leading-[1.05] font-black text-slate-900 mb-4 tracking-tight">
           Build Your Career,<br/>
-          One Smart Step at a <span className="text-indigo-600">Time.</span>
+          One Measurable Step at a <span className="text-indigo-600">Time.</span>
         </h1>
         
         <p className="text-base xl:text-lg text-slate-600 mb-6 leading-relaxed max-w-lg">
-          Build your profile, improve your resume, discover your skill gaps, and grow with personalized AI-powered career guidance.
+          Build your profile, improve your resume, discover your skill gaps, and grow with personalized career guidance.
         </p>
 
         {/* Opportunity Pills */}
@@ -37,7 +37,7 @@ export default function HeroSection() {
           </div>
           <div className="w-full xl:flex-1 flex items-center justify-start gap-2 bg-white border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-[13px] font-semibold text-slate-700 cursor-default overflow-hidden">
             <div className="shrink-0 w-5 h-5 xl:w-6 xl:h-6 bg-emerald-100 text-emerald-600 rounded flex items-center justify-center"><Target size={12}/></div>
-            <span className="truncate">Smart Matching</span>
+            <span className="truncate">Skill Matching</span>
           </div>
           <div className="w-full xl:flex-1 flex items-center justify-start gap-2 bg-white border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-[13px] font-semibold text-slate-700 cursor-default overflow-hidden">
             <div className="shrink-0 w-5 h-5 xl:w-6 xl:h-6 bg-blue-100 text-blue-600 rounded flex items-center justify-center"><LayoutDashboard size={12}/></div>

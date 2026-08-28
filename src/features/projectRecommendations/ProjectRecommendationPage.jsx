@@ -7,6 +7,7 @@ import { useProfile } from '../../contexts/ProfileContext';
 import { useCareer } from '../../contexts/CareerContext';
 import { generateProjectRecommendations } from '../../services/projectRecommendationEngine';
 import { toast } from 'react-hot-toast';
+import { useRef } from 'react';
 
 import ContextualBackButton from '../../components/navigation/ContextualBackButton';
 import ProjectRecommendationCard from './ProjectRecommendationCard';
@@ -22,12 +23,16 @@ export default function ProjectRecommendationPage() {
   const [recommendations, setRecommendations] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState(null);
   const [specialization, setSpecialization] = useState('');
   const [targetRole, setTargetRole] = useState('');
   const [missingSkills, setMissingSkills] = useState([]);
-// eslint-disable-next-line no-unused-vars
-  const [apiError, setApiError] = useState(null);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => { isMounted.current = false; };
+  }, []);
 
   const location = useLocation();
   const isContextMode = !!location.state?.sourceName;
@@ -41,14 +46,11 @@ export default function ProjectRecommendationPage() {
       return;
     }
 
-// eslint-disable-next-line no-useless-assignment
-    let contextRole = '';
     let parsedMissingSkills = missingSkillsStr ? missingSkillsStr.split(',') : [];
     
     if (careerContext?.targetRole) {
-      contextRole = careerContext.targetRole;
 // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTargetRole(contextRole);
+      setTargetRole(careerContext.targetRole);
       
       if (parsedMissingSkills.length > 0) {
         setMissingSkills(parsedMissingSkills);
@@ -91,25 +93,25 @@ export default function ProjectRecommendationPage() {
         missingSkills: skills
       }, forceRefresh, currentExcluded);
       
+      if (!isMounted.current) return;
+      
       setRecommendations(newRecs);
       if (forceRefresh) {
         setHistory(currentExcluded);
       }
       
-      // Check if it's the fallback data (has isMock true)
-      if (!(newRecs.length > 0 && newRecs[0].isMock)) {
-        if (forceRefresh && recommendations.length > 0) {
-          toast.success("Generated fresh project recommendations!");
-        } else {
-          toast.success("Generated personalized project recommendations!");
-        }
+      if (forceRefresh && recommendations.length > 0) {
+        toast.success("Found fresh project recommendations!");
+      } else {
+        toast.success("Found personalized project matches!");
       }
     } catch (error) {
+      if (!isMounted.current) return;
       console.error("Recommendation Generation Error:", error);
       setApiError(error.message || "Failed to generate recommendations");
       toast.error("Analysis failed. Please try again.");
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
 
@@ -124,11 +126,8 @@ export default function ProjectRecommendationPage() {
           <div>
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl font-bold text-slate-900">Project Engine</h1>
-              <span className="px-2.5 py-1 bg-[#6D4AFF]/10 text-[#6D4AFF] text-xs font-bold rounded-full">
-                AI Powered
-              </span>
             </div>
-            <p className="text-sm text-slate-500">AI-curated portfolio projects tailored to your career goals.</p>
+            <p className="text-sm text-slate-500">Curated portfolio projects tailored to your career goals.</p>
           </div>
         </div>
         <button 
@@ -151,11 +150,6 @@ export default function ProjectRecommendationPage() {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-bold text-slate-900">Top Recommendations for You</h2>
-            {recommendations.some(r => r.isMock) && (
-              <span className="px-2 py-0.5 bg-amber-100 border border-amber-200 text-amber-700 text-[11px] uppercase tracking-wider font-bold rounded-md">
-                Demo
-              </span>
-            )}
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <button 

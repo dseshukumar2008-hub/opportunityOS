@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
-  ChevronRight, ChevronLeft, Sparkles, GraduationCap,
+  ChevronRight, ChevronLeft, GraduationCap,
 // eslint-disable-next-line no-unused-vars
   GitBranch, CalendarDays, Target, CheckCircle2, AlertTriangle,
   Code, Bot, LineChart, Layers, ShieldCheck, Settings, Cloud, 
-  Briefcase, Palette, Rocket, Microscope
+  Briefcase, Palette, Rocket, Microscope, Sparkles
 } from 'lucide-react';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// 
 
 const STEPS = [
   { num: 1, label: 'Course',      icon: GraduationCap },
@@ -52,7 +52,7 @@ const GEN_STAGES = [
   'Finalizing your roadmap…',
 ];
 
-// ─── Option button ─────────────────────────────────────────────────────────────
+// 
 
 function OptionButton({ label, icon, selected, onClick }) {
   return (
@@ -99,7 +99,7 @@ function CareerOptionButton({ label, icon: Icon, desc, selected, onClick }) {
   );
 }
 
-// ─── Step indicator ────────────────────────────────────────────────────────────
+// 
 
 function StepTrack({ current }) {
   return (
@@ -127,7 +127,7 @@ function StepTrack({ current }) {
   );
 }
 
-// ─── Generating screen ────────────────────────────────────────────────────────
+// 
 // Self-contained — manages its own stage ticker via useEffect (properly cleaned up)
 
 function GeneratingScreen({ targetCareer }) {
@@ -153,9 +153,7 @@ function GeneratingScreen({ targetCareer }) {
       <div className="relative w-20 h-20 mb-8">
         <div className="absolute inset-0 rounded-full border-4 border-slate-100" />
         <div className="absolute inset-0 rounded-full border-4 border-t-[#6C4CF1] border-x-transparent border-b-transparent animate-spin" />
-        <div className="absolute inset-3 rounded-full bg-indigo-50 flex items-center justify-center">
-          <Sparkles size={20} className="text-[#6C4CF1]" />
-        </div>
+
       </div>
       <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Building Your Career OS</h2>
       <p className="text-slate-500 text-sm font-medium mb-8">
@@ -186,7 +184,7 @@ function GeneratingScreen({ targetCareer }) {
   );
 }
 
-// ─── Main Wizard ──────────────────────────────────────────────────────────────
+// 
 
 import { useLocation } from 'react-router-dom';
 
@@ -358,7 +356,7 @@ export default function RoadmapWizard({ onGenerate, isGenerating, genError }) {
             }`}
           >
             {step === 5
-              ? <><Sparkles size={15} /> Generate Roadmap</>
+              ? <>Generate Roadmap</>
               : <>Continue <ChevronRight size={17} /></>}
           </button>
         </div>

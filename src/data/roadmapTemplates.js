@@ -176,7 +176,7 @@ export const ROADMAP_TEMPLATES = {
           { id: 'p3_t4', title: 'Manage CORS between frontend and backend', completed: false, status: 'Not Started' },
           { id: 'p3_t5', title: 'Implement basic authentication (JWT)', completed: false, status: 'Not Started' }
         ],
-        skills: ['Databases', 'Integration', 'JWT'], projects: [{ title: 'Full Stack Todo App', difficulty: 'Intermediate', description: 'MERN stack application with authentication.' }], resources: [], certifications: [], milestones: ['Complete first full-stack app']
+        skills: ['Databases', 'Integration', 'JWT'], projects: [{ title: 'Task Management Dashboard with RBAC', difficulty: 'Intermediate', description: 'MERN stack application featuring role-based access control and analytics.' }], resources: [], certifications: [], milestones: ['Complete first full-stack app']
       },
       {
         id: 'phase_4', title: 'Advanced Full Stack & Deployment', description: 'Scale and deploy your apps.', overview: 'Learn Next.js, Docker, and AWS/Vercel deployment.',

@@ -1,12 +1,14 @@
 import { useState, useMemo } from 'react';
 import { useRecommendationHistory } from '../../hooks/useRecommendationHistory';
 import { 
-  History, TrendingUp, Calendar, ArrowUpRight, CheckCircle2, ChevronRight, 
+  History, TrendingUp, Calendar, ArrowUpRight, ChevronRight, 
   Award, Search, SlidersHorizontal, Grid, List, Clock, Sparkles, Trophy, 
 // eslint-disable-next-line no-unused-vars
-  Briefcase, CheckSquare, ShieldAlert, ArrowUpDown, ChevronDown, RefreshCcw
+  Briefcase, CheckSquare, ArrowUpDown, RefreshCcw
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import MatchTrendChart from '../../features/projectRecommendations/components/MatchTrendChart';
+import SnapshotDetailPanel from '../../features/projectRecommendations/components/SnapshotDetailPanel';
 
 export default function RecommendationHistoryPage() {
   const { history, clearHistory } = useRecommendationHistory();
@@ -17,39 +19,19 @@ export default function RecommendationHistoryPage() {
   
   const [selectedSnapshotId, setSelectedSnapshotId] = useState(null);
 
-  if (!history || history.length === 0) {
-    return (
-      <div className="max-w-[1200px] mx-auto p-6 md:p-8 flex flex-col items-center justify-center min-h-[500px]">
-        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-6 animate-pulse">
-          <History size={24} className="text-slate-400" />
-        </div>
-        <h2 className="text-[20px] font-extrabold text-slate-900 mb-2">No recommendation history available.</h2>
-        <p className="text-[14px] text-slate-500 mb-6 max-w-sm text-center">
-          Improve your profile, add skills, and get a better resume score to start tracking recommendation growth over time.
-        </p>
-        <Link to="/resume-builder" className="px-6 py-2.5 bg-[#6D5DF6] hover:bg-[#5a4add] text-white rounded-xl text-[14px] font-bold transition-all shadow-[0_4px_14px_rgba(109,93,246,0.3)]">
-          Improve Profile
-        </Link>
-      </div>
-    );
-  }
-
   const sortedByDateDesc = useMemo(() => {
-    return [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
+    return [...(history || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
   }, [history]);
 
-  const oldestSnapshot = sortedByDateDesc[sortedByDateDesc.length - 1];
-  const newestSnapshot = sortedByDateDesc[0];
+  const oldestSnapshot = sortedByDateDesc.length > 0 ? sortedByDateDesc[sortedByDateDesc.length - 1] : null;
+  const newestSnapshot = sortedByDateDesc.length > 0 ? sortedByDateDesc[0] : null;
 
-  const scoreImprovement = newestSnapshot.averageMatchScore - oldestSnapshot.averageMatchScore;
-// eslint-disable-next-line no-unused-vars
-  const averageRecommendationCount = Math.round(
-    history.reduce((sum, h) => sum + (h.recommendationCount || 0), 0) / history.length
-  );
+  const scoreImprovement = (newestSnapshot?.averageMatchScore || 0) - (oldestSnapshot?.averageMatchScore || 0);
+
 
   // Filters & Sorting calculations
   const processedSnapshots = useMemo(() => {
-    let result = [...history];
+    let result = [...(history || [])];
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -96,20 +78,39 @@ export default function RecommendationHistoryPage() {
   const padding = 20;
   
   const chronologicalHistory = useMemo(() => {
-    return [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+    return [...(history || [])].sort((a, b) => new Date(a.date) - new Date(b.date));
   }, [history]);
 
-  const minScore = Math.max(0, Math.min(...history.map(h => h.averageMatchScore)) - 10);
-  const maxScore = Math.min(100, Math.max(...history.map(h => h.averageMatchScore)) + 10);
+  const safeHistory = history || [];
+  const minScore = safeHistory.length > 0 ? Math.max(0, Math.min(...safeHistory.map(h => h.averageMatchScore)) - 10) : 0;
+  const maxScore = safeHistory.length > 0 ? Math.min(100, Math.max(...safeHistory.map(h => h.averageMatchScore)) + 10) : 100;
   const range = maxScore - minScore || 1;
 
   const points = useMemo(() => {
+    if (chronologicalHistory.length === 0) return '';
     return chronologicalHistory.map((h, i) => {
       const x = (i / Math.max(1, chronologicalHistory.length - 1)) * (chartWidth - padding * 2) + padding;
       const y = chartHeight - padding - ((h.averageMatchScore - minScore) / range) * (chartHeight - padding * 2);
       return `${x},${y}`;
     }).join(' ');
   }, [chronologicalHistory, minScore, range]);
+
+  if (!history || history.length === 0) {
+    return (
+      <div className="max-w-[1200px] mx-auto p-6 md:p-8 flex flex-col items-center justify-center min-h-[500px]">
+        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-6 animate-pulse">
+          <History size={24} className="text-slate-400" />
+        </div>
+        <h2 className="text-[20px] font-extrabold text-slate-900 mb-2">No recommendation history available.</h2>
+        <p className="text-[14px] text-slate-500 mb-6 max-w-sm text-center">
+          Improve your profile, add skills, and get a better resume score to start tracking recommendation growth over time.
+        </p>
+        <Link to="/resume-builder" className="px-6 py-2.5 bg-[#6D5DF6] hover:bg-[#5a4add] text-white rounded-xl text-[14px] font-bold transition-all shadow-[0_4px_14px_rgba(109,93,246,0.3)]">
+          Improve Profile
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1600px] mx-auto p-4 lg:p-8 space-y-8">
@@ -205,7 +206,7 @@ export default function RecommendationHistoryPage() {
             </div>
           </div>
           <p className="text-[12px] text-slate-500 font-medium">
-            <span className="font-extrabold text-blue-500">{(newestSnapshot.applicationsSubmitted || 8) * 3} matches</span> generated from latest run
+            <span className="font-extrabold text-blue-500">{(newestSnapshot.applicationsSubmitted || 8) * 3} matches</span> discovered from latest run
           </p>
         </div>
 
@@ -225,67 +226,18 @@ export default function RecommendationHistoryPage() {
             </div>
           </div>
 
-          <div className="h-[200px] w-full border border-slate-50 bg-slate-50/50 rounded-2xl p-4 flex items-center justify-center relative overflow-visible">
-            <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-full overflow-visible">
-              <line x1={padding} y1={padding} x2={chartWidth - padding} y2={padding} stroke="#f1f5f9" strokeWidth="1.5" />
-              <line x1={padding} y1={chartHeight / 2} x2={chartWidth - padding} y2={chartHeight / 2} stroke="#f1f5f9" strokeWidth="1.5" />
-              <line x1={padding} y1={chartHeight - padding} x2={chartWidth - padding} y2={chartHeight - padding} stroke="#e2e8f0" strokeWidth="1.5" />
-              
-              <polyline
-                fill="none"
-                stroke="#6D5DF6"
-                strokeWidth="4.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                points={points}
-              />
-              
-              <path
-                d={`M ${chronologicalHistory.map((h, i) => {
-                  const x = (i / Math.max(1, chronologicalHistory.length - 1)) * (chartWidth - padding * 2) + padding;
-                  const y = chartHeight - padding - ((h.averageMatchScore - minScore) / range) * (chartHeight - padding * 2);
-                  return `${x} ${y}`;
-                }).join(' L ')} L ${
-                  (chronologicalHistory.length - 1) / Math.max(1, chronologicalHistory.length - 1) * (chartWidth - padding * 2) + padding
-                } ${chartHeight - padding} L ${padding} ${chartHeight - padding} Z`}
-                fill="url(#grad)"
-                opacity="0.08"
-              />
-
-              <defs>
-                <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#6D5DF6" />
-                  <stop offset="100%" stopColor="#6D5DF6" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-
-              {chronologicalHistory.map((h, i) => {
-                const x = (i / Math.max(1, chronologicalHistory.length - 1)) * (chartWidth - padding * 2) + padding;
-                const y = chartHeight - padding - ((h.averageMatchScore - minScore) / range) * (chartHeight - padding * 2);
-                const isSelected = h.id === activeSnapshot?.id;
-                
-                return (
-                  <g key={h.id} className="cursor-pointer group" onClick={() => setSelectedSnapshotId(h.id)}>
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r={isSelected ? "8" : "5"}
-                      fill={isSelected ? "#6D5DF6" : "white"}
-                      stroke="#6D5DF6"
-                      strokeWidth={isSelected ? "3" : "2.5"}
-                      className="transition-all hover:scale-125"
-                    />
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r="12"
-                      fill="transparent"
-                    />
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
+          <MatchTrendChart
+            chronologicalHistory={chronologicalHistory}
+            activeSnapshot={activeSnapshot}
+            setSelectedSnapshotId={setSelectedSnapshotId}
+            minScore={minScore}
+            maxScore={maxScore}
+            range={range}
+            chartWidth={chartWidth}
+            chartHeight={chartHeight}
+            padding={padding}
+            points={points}
+          />
         </div>
 
         <div className="bg-gradient-to-br from-[#6D5DF6] to-[#5a4add] rounded-2xl p-6 shadow-md text-white flex flex-col justify-between relative overflow-hidden">
@@ -301,7 +253,7 @@ export default function RecommendationHistoryPage() {
             <p className="text-[22px] font-black leading-tight mb-4">{newestSnapshot.topRecommendation}</p>
             
             <p className="text-[13px] text-indigo-100 leading-relaxed font-medium">
-              You increased your average match rate by a massive <span className="font-extrabold text-white text-[15px]">{scoreImprovement}%</span> over the last 90 days. This unlock was catalyzed by optimizing missing skill keywords in the ATS resume model.
+              You increased your average match rate by a massive <span className="font-extrabold text-white text-[15px]">{scoreImprovement}%</span> over the last 90 days. This improvement resulted from optimizing your skills.
             </p>
           </div>
           <div className="flex items-center justify-between mt-6 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-xl border border-white/15">
@@ -418,10 +370,10 @@ export default function RecommendationHistoryPage() {
                   const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                   
                   return (
-                    <div 
+                    <button 
                       key={snapshot.id} 
                       onClick={() => setSelectedSnapshotId(snapshot.id)}
-                      className={`flex flex-col sm:flex-row gap-6 relative z-10 group cursor-pointer`}
+                      className={`flex flex-col sm:flex-row gap-6 relative z-10 group cursor-pointer w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#6D5DF6] rounded-[20px]`}
                     >
                       <div className="flex sm:flex-col items-center sm:items-start sm:w-28 shrink-0 gap-4 sm:gap-0">
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border-4 border-white shadow-sm transition-all duration-300 ${
@@ -466,7 +418,7 @@ export default function RecommendationHistoryPage() {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -479,10 +431,10 @@ export default function RecommendationHistoryPage() {
                 const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
                 return (
-                  <div 
+                  <button 
                     key={snapshot.id}
                     onClick={() => setSelectedSnapshotId(snapshot.id)}
-                    className={`border rounded-2xl p-6 cursor-pointer transition-all duration-300 flex flex-col justify-between h-[210px] group ${
+                    className={`border rounded-2xl p-6 cursor-pointer transition-all duration-300 flex flex-col justify-between h-[210px] group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#6D5DF6] ${
                       isActive 
                         ? 'border-[#6D5DF6] bg-slate-50/50 shadow-md' 
                         : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-md'
@@ -507,7 +459,7 @@ export default function RecommendationHistoryPage() {
                         {snapshot.topRecommendation}
                       </h4>
                       <p className="text-[12px] text-slate-400 font-semibold mt-1">
-                        {snapshot.recommendationCount || 2} matching opportunities generated
+                        {snapshot.recommendationCount || 2} matching opportunities found
                       </p>
                     </div>
 
@@ -518,7 +470,7 @@ export default function RecommendationHistoryPage() {
                         <ChevronRight size={14} />
                       </span>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -545,7 +497,10 @@ export default function RecommendationHistoryPage() {
                         <tr 
                           key={snapshot.id}
                           onClick={() => setSelectedSnapshotId(snapshot.id)}
-                          className={`cursor-pointer hover:bg-slate-50/40 transition-colors ${
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedSnapshotId(snapshot.id); } }}
+                          tabIndex={0}
+                          role="button"
+                          className={`cursor-pointer hover:bg-slate-50/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#6D5DF6] ${
                             isActive ? 'bg-slate-50/70 text-[#6D5DF6] font-semibold' : 'text-slate-600'
                           }`}
                         >
@@ -575,154 +530,7 @@ export default function RecommendationHistoryPage() {
         </div>
 
         <div className="xl:col-span-1">
-          {activeSnapshot ? (
-            <div className="bg-white rounded-2xl border border-[#6D5DF6]/30 shadow-lg shadow-indigo-100/30 overflow-hidden sticky top-8 animate-fade-in">
-              <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-6 text-white relative">
-                <div className="absolute top-4 right-4 bg-white/10 px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider text-indigo-200">
-                  Checkpoint Detail
-                </div>
-                <span className="text-[12px] text-slate-300 font-bold flex items-center gap-1">
-                  <Calendar size={13} />
-                  {new Date(activeSnapshot.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                </span>
-                
-                <h3 className="text-[18px] font-extrabold text-white mt-3 leading-snug line-clamp-2">
-                  {activeSnapshot.topRecommendation}
-                </h3>
-                
-                <div className="flex items-center gap-4 mt-5 pt-4 border-t border-slate-700/60">
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Checkpoint Score</span>
-                    <p className="text-[22px] font-black text-emerald-400">{activeSnapshot.averageMatchScore}%</p>
-                  </div>
-                  <div className="h-8 w-[1px] bg-slate-700" />
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">ATS Score</span>
-                    <p className="text-[22px] font-black text-blue-300">{activeSnapshot.atsScore || 70}%</p>
-                  </div>
-                  <div className="h-8 w-[1px] bg-slate-700" />
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Recommendations</span>
-                    <p className="text-[22px] font-black text-indigo-300">{activeSnapshot.recommendationCount || 2}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6 space-y-6">
-                
-                <div>
-                  <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-3.5">Algorithm Match Breakdown</h4>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex justify-between text-[12px] font-bold text-slate-700 mb-1">
-                        <span>Skills Match Score</span>
-                        <span>{activeSnapshot.matchBreakdown?.skills || 78}%</span>
-                      </div>
-                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
-                          style={{ width: `${activeSnapshot.matchBreakdown?.skills || 78}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-[12px] font-bold text-slate-700 mb-1">
-                        <span>Experience Compatibility</span>
-                        <span>{activeSnapshot.matchBreakdown?.experience || 70}%</span>
-                      </div>
-                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-blue-500 rounded-full transition-all duration-500" 
-                          style={{ width: `${activeSnapshot.matchBreakdown?.experience || 70}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-[12px] font-bold text-slate-700 mb-1">
-                        <span>ATS Layout & Formatting</span>
-                        <span>{activeSnapshot.matchBreakdown?.formatting || 85}%</span>
-                      </div>
-                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-purple-500 rounded-full transition-all duration-500" 
-                          style={{ width: `${activeSnapshot.matchBreakdown?.formatting || 85}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">Key System Actions</h4>
-                  <ul className="space-y-2">
-                    {activeSnapshot.improvements && activeSnapshot.improvements.map((insight, i) => (
-                      <li key={i} className="flex items-start gap-2 text-[13px] text-slate-600 font-semibold leading-relaxed">
-                        <CheckCircle2 size={15} className="text-emerald-500 shrink-0 mt-0.5" />
-                        {insight}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
-                  <div>
-                    <h5 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 text-emerald-600 flex items-center gap-1">
-                      <CheckCircle2 size={11} /> Unlocked
-                    </h5>
-                    <div className="flex flex-wrap gap-1">
-                      {activeSnapshot.skillsAdded && activeSnapshot.skillsAdded.map((skill, i) => (
-                        <span key={i} className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-100">
-                          {skill}
-                        </span>
-                      ))}
-                      {(!activeSnapshot.skillsAdded || activeSnapshot.skillsAdded.length === 0) && (
-                        <span className="text-[11px] text-slate-400 italic font-medium">None added</span>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <h5 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 text-amber-600 flex items-center gap-1">
-                      <ShieldAlert size={11} /> Missing
-                    </h5>
-                    <div className="flex flex-wrap gap-1">
-                      {activeSnapshot.skillsMissing && activeSnapshot.skillsMissing.map((skill, i) => (
-                        <span key={i} className="bg-amber-50 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded border border-amber-100">
-                          {skill}
-                        </span>
-                      ))}
-                      {(!activeSnapshot.skillsMissing || activeSnapshot.skillsMissing.length === 0) && (
-                        <span className="text-[11px] text-slate-400 italic font-medium">None missing</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {activeSnapshot.recommendedRoles && activeSnapshot.recommendedRoles.length > 0 && (
-                  <div className="border-t border-slate-100 pt-4 space-y-2.5">
-                    <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-wider">Top Recommended Roles</h4>
-                    <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
-                      {activeSnapshot.recommendedRoles.map((roleObj, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-2.5 border border-slate-100 hover:bg-slate-50 transition-colors rounded-xl bg-slate-50/30">
-                          <div>
-                            <p className="text-[13px] font-black text-slate-800 line-clamp-1">{roleObj.role}</p>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase">{roleObj.type}</span>
-                          </div>
-                          <span className="text-[12px] font-black text-[#6D5DF6] bg-indigo-50 px-2 py-0.5 rounded-lg shrink-0">
-                            {roleObj.score}% Match
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-              </div>
-            </div>
-          ) : (
-            <div className="bg-slate-50 rounded-2xl border border-slate-200 border-dashed p-8 text-center text-slate-400">
-              Select a history snapshot to inspect breakdown analytics.
-            </div>
-          )}
+          <SnapshotDetailPanel activeSnapshot={activeSnapshot} />
         </div>
 
       </div>

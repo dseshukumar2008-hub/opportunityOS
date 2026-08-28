@@ -135,9 +135,9 @@ export default function FeaturesSection() {
 
   return (
     <section id="features" className="w-full max-w-[1400px] mx-auto px-6 py-24 flex flex-col items-center">
-      <div className="text-cent er mb-20 max-w-2xl">
-        <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-6 tracking-tight">Everything you need to succeed, supercharged by AI.</h2>
-        <p className="text-lg text-slate-600 leading-relaxed">Experience a workspace that doesn't just store your data, but actively works to accelerate your career.</p>
+      <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-24 px-4">
+        <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-6 tracking-tight">Tools to advance your career.</h2>
+        <p className="text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">rkspace that doesn't just store your data, but actively works to accelerate your career.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl">

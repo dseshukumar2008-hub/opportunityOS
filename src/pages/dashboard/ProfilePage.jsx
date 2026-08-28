@@ -3,10 +3,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { 
   User, Mail, BookOpen, GraduationCap, Calendar, 
-  MapPin, Edit, FileText, Award, Bookmark, X,
+  Edit, FileText, Award, X,
   Code, BarChart3, Trophy, Link as LinkIcon, 
-// eslint-disable-next-line no-unused-vars
-  Globe, Save, ChevronDown, Check, GitBranch
+  Save, ChevronDown, GitBranch, Globe
 } from 'lucide-react';
 import UserAvatar from '../../components/ui/UserAvatar';
 import CareerReadinessPanel from '../../components/dashboard/CareerReadinessPanel';
@@ -156,7 +155,7 @@ export default function ProfilePage() {
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div className="relative shrink-0">
                 <UserAvatar
-                  src={user?.photoURL} 
+                  src={profile?.avatar_url || profile?.avatarUrl || profile?.photoURL || user?.photoURL} 
                   alt="Profile Avatar" 
                   className="w-[120px] h-[120px] rounded-full border border-slate-200 bg-slate-100 object-cover"
                 />
@@ -410,8 +409,9 @@ export default function ProfilePage() {
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6 mb-8">
                   <div>
-                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">Full Name</label>
+                    <label htmlFor="profile-name" className="block text-[13px] font-semibold text-slate-700 mb-2">Full Name</label>
                     <input 
+                      id="profile-name"
                       type="text" 
                       value={editForm.name} 
                       onChange={e => setEditForm({...editForm, name: e.target.value})}
@@ -419,8 +419,9 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">Email Address</label>
+                    <label htmlFor="profile-email" className="block text-[13px] font-semibold text-slate-700 mb-2">Email Address</label>
                     <input 
+                      id="profile-email"
                       type="email" 
                       value={editForm.email} 
                       onChange={e => setEditForm({...editForm, email: e.target.value})}
@@ -429,8 +430,9 @@ export default function ProfilePage() {
                   </div>
                   
                   <div>
-                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">College/University</label>
+                    <label htmlFor="profile-college" className="block text-[13px] font-semibold text-slate-700 mb-2">College/University</label>
                     <input 
+                      id="profile-college"
                       type="text" 
                       value={editForm.college} 
                       onChange={e => setEditForm({...editForm, college: e.target.value})}
@@ -438,9 +440,10 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">Branch/Major</label>
+                    <label htmlFor="profile-branch" className="block text-[13px] font-semibold text-slate-700 mb-2">Branch/Major</label>
                     <div className="relative">
                       <select 
+                        id="profile-branch"
                         value={editForm.branch || ""} 
                         onChange={e => setEditForm({...editForm, branch: e.target.value})}
                         className="w-full h-[52px] px-4 pr-10 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700 appearance-none"
@@ -460,9 +463,10 @@ export default function ProfilePage() {
                   </div>
                   
                   <div>
-                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">Graduation Year</label>
+                    <label htmlFor="profile-grad-year" className="block text-[13px] font-semibold text-slate-700 mb-2">Graduation Year</label>
                     <div className="relative">
                       <select 
+                        id="profile-grad-year"
                         value={editForm.expectedGraduation || "2029"}
                         onChange={e => setEditForm({...editForm, expectedGraduation: e.target.value})}
                         className="w-full h-[52px] px-4 pr-10 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700 appearance-none"
@@ -476,9 +480,10 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">Current Year</label>
+                    <label htmlFor="profile-current-year" className="block text-[13px] font-semibold text-slate-700 mb-2">Current Year</label>
                     <div className="relative">
                       <select 
+                        id="profile-current-year"
                         value={editForm.year}
                         onChange={e => setEditForm({...editForm, year: e.target.value})}
                         className="w-full h-[52px] px-4 pr-10 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700 appearance-none"
@@ -493,8 +498,9 @@ export default function ProfilePage() {
                   </div>
                   
                   <div>
-                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">Country</label>
+                    <label htmlFor="profile-country" className="block text-[13px] font-semibold text-slate-700 mb-2">Country</label>
                     <input 
+                      id="profile-country"
                       type="text" 
                       value={editForm.country} 
                       onChange={e => setEditForm({...editForm, country: e.target.value})}
@@ -502,8 +508,9 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">State/Province</label>
+                    <label htmlFor="profile-state" className="block text-[13px] font-semibold text-slate-700 mb-2">State/Province</label>
                     <input 
+                      id="profile-state"
                       type="text" 
                       value={editForm.state} 
                       onChange={e => setEditForm({...editForm, state: e.target.value})}
@@ -511,8 +518,9 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[13px] font-semibold text-slate-700 mb-2">City</label>
+                    <label htmlFor="profile-city" className="block text-[13px] font-semibold text-slate-700 mb-2">City</label>
                     <input 
+                      id="profile-city"
                       type="text" 
                       value={editForm.city} 
                       onChange={e => setEditForm({...editForm, city: e.target.value})}
@@ -525,7 +533,7 @@ export default function ProfilePage() {
                 <div className="w-full border-b border-slate-100 mb-8"></div>
 
                 <div id="skills" className="mb-8 scroll-mt-8">
-                  <label className="block text-[13px] font-semibold text-slate-700 mb-2">Skills Editor (Type and press Enter)</label>
+                  <label htmlFor="profile-skills" className="block text-[13px] font-semibold text-slate-700 mb-2">Skills Editor (Type and press Enter)</label>
                   <div className="p-4 bg-white border border-slate-200 rounded-xl flex flex-wrap gap-2 items-center min-h-[52px]">
                     {editForm.skills.split(',').map((skill, index) => skill.trim() && (
                       <span key={index} className="px-3 py-1.5 bg-[#F3F0FF] text-[#6C4CF1] rounded-[8px] text-[13px] font-semibold flex items-center gap-1.5">
@@ -540,6 +548,7 @@ export default function ProfilePage() {
                       </span>
                     ))}
                     <input 
+                      id="profile-skills"
                       type="text" 
                       value={skillInput}
                       onChange={e => setSkillInput(e.target.value)}
@@ -551,8 +560,9 @@ export default function ProfilePage() {
                 </div>
 
                 <div id="about-me" className="mb-8 scroll-mt-8">
-                  <label className="block text-[13px] font-semibold text-slate-700 mb-4">About Me (Bio)</label>
+                  <label htmlFor="profile-bio" className="block text-[13px] font-semibold text-slate-700 mb-4">About Me (Bio)</label>
                   <textarea 
+                    id="profile-bio"
                     value={editForm.bio} 
                     onChange={e => setEditForm({...editForm, bio: e.target.value})}
                     rows={6}
@@ -649,6 +659,11 @@ export default function ProfilePage() {
               </button>
               <button 
                 onClick={async () => {
+                  if (!editForm.name?.trim()) {
+                    toast.error("Full name cannot be empty.");
+                    return;
+                  }
+                  
                   const skillsArray = editForm.skills ? editForm.skills.split(',').map(s => s.trim()).filter(Boolean) : [];
                   
                   await updateProfile({

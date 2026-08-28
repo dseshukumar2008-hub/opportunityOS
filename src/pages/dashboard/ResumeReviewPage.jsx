@@ -9,12 +9,19 @@ import ResumeSmartSuggestions from '../../components/resume/ResumeSmartSuggestio
 import ResumeContentSuggestions from '../../components/resume/ResumeContentSuggestions';
 import ResumeHistory from '../../components/resume/ResumeHistory';
 import ResumeAnalysisHowItWorksModal from '../../components/resume/ResumeAnalysisHowItWorksModal';
-import { Bot, Sparkles, FileText, Activity, CheckCircle2, History, Lock, Info } from 'lucide-react';
+import { Sparkles, FileText, Activity, CheckCircle2, History, Info, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+const LOADING_STEPS = [
+  'Uploading Resume...',
+  'Extracting Information...',
+  'Running ATS Analysis...',
+  'Extracting Keywords...',
+  'Preparing Report...'
+];
+
 export default function ResumeReviewPage() {
-// eslint-disable-next-line no-unused-vars
-  const { analyzeResume, resetAnalysis, isAnalyzing, analysisStatus, uploadProgress, progressText, analysisResults, error } = useResumeAnalysis();
+  const { analyzeResume, resetAnalysis, isAnalyzing, analysisStatus, uploadProgress, progressText, analysisResults } = useResumeAnalysis();
   const { history, addHistory, getBestVersion, compareVersions } = useResumeHistory();
   const { resumeData, activeResumeId } = useResume();
   const { matchResume } = useMatchResume();
@@ -30,26 +37,33 @@ export default function ResumeReviewPage() {
     setActiveTab('Review');
   };
 
-  const loadingSteps = [
-    'Uploading Resume...',
-    'Extracting Information...',
-    'Running ATS Analysis...',
-    'Generating AI Insights...',
-    'Preparing Report...'
-  ];
   const [loadingStep, setLoadingStep] = useState(0);
+  const [simulatedProgress, setSimulatedProgress] = useState(0);
 
   useEffect(() => {
-    let interval;
+    let stepInterval = null;
+    let progressInterval = null;
+    
     if (isAnalyzing) {
-// eslint-disable-next-line react-hooks/set-state-in-effect
       setLoadingStep(0);
-      interval = setInterval(() => {
-        setLoadingStep(prev => (prev < loadingSteps.length - 1 ? prev + 1 : prev));
-      }, 2000);
+      setSimulatedProgress(0);
+      
+      stepInterval = setInterval(() => {
+        setLoadingStep(prev => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
+      }, 2500);
+      
+      progressInterval = setInterval(() => {
+        setSimulatedProgress(prev => {
+          if (prev >= 96) return 96; // Hold at 96% until real response comes back
+          return prev + Math.floor(Math.random() * 6) + 1;
+        });
+      }, 600);
     }
-    return () => clearInterval(interval);
-// eslint-disable-next-line react-hooks/exhaustive-deps
+    
+    return () => {
+      clearInterval(stepInterval);
+      clearInterval(progressInterval);
+    };
   }, [isAnalyzing]);
 
   const handleAnalyzeFile = async (file) => {
@@ -108,14 +122,14 @@ export default function ResumeReviewPage() {
   ].filter(tab => !tab.hidden);
 
   return (
-    <div className="bg-slate-50 min-h-[calc(100vh-64px)] font-sans py-6 px-4 lg:px-8 flex flex-col items-center">
-      <div className="w-full max-w-[1000px] flex-1 flex flex-col">
+    <>
+      <div className="bg-slate-50 min-h-[calc(100vh-64px)] font-sans py-6 px-4 lg:px-8 flex flex-col items-center">
+        <div className="w-full max-w-[1000px] flex-1 flex flex-col">
         
         {/* Header */}
         <div className="flex flex-col mb-4 pt-2">
           <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-indigo-50 border border-indigo-100 self-start mb-2">
-            <Bot size={12} className="text-[#6D5DF6]" />
-            <span className="text-[10px] font-bold text-[#6D5DF6] tracking-widest uppercase">AI Review</span>
+            <span className="text-[10px] font-bold text-[#6D5DF6] tracking-widest uppercase">Automated Review</span>
           </div>
           <div className="flex items-center justify-between gap-4 mb-1">
             <h1 className="text-3xl leading-tight font-extrabold text-[#111827] tracking-tight">
@@ -129,7 +143,7 @@ export default function ResumeReviewPage() {
             </button>
           </div>
           <p className="text-[14px] text-[#64748B] leading-snug max-w-2xl">
-            Upload your resume or use your built OpportunityOS profile to get instant, AI-powered feedback on your format, skills, and ATS compatibility.
+            Upload your resume or use your built OpportunityOS profile to get automated feedback on your format, missing skills, and ATS compatibility.
           </p>
         </div>
 
@@ -168,7 +182,7 @@ export default function ResumeReviewPage() {
                   {!hasAnalysis && (
                     <div className="text-center mb-8">
                       <p className="text-[15px] font-medium text-[#64748B]">
-                        Upload or select a resume to generate your AI-powered analysis.
+                        Upload or select a resume to parse and analyze your format and skills.
                       </p>
                     </div>
                   )}
@@ -192,7 +206,7 @@ export default function ResumeReviewPage() {
                         onClick={handleAnalyzeExisting}
                         className="bg-white border border-[#E5E7EB] hover:bg-gray-50 text-[#111827] px-4 py-1.5 rounded-md text-[13px] font-semibold shadow-sm transition-colors flex items-center gap-2 shrink-0"
                       >
-                        <Sparkles size={14} className="text-[#6D5DF6]" /> Analyze Existing
+                        Analyze Existing
                       </button>
                     </div>
                   )}
@@ -205,22 +219,24 @@ export default function ResumeReviewPage() {
                     <div className="absolute inset-0 border-4 border-indigo-50 rounded-full"></div>
                     <div className="absolute inset-0 border-4 border-[#6D5DF6] rounded-full border-t-transparent animate-spin"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Sparkles className="text-[#6D5DF6] animate-pulse" size={28} />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-[#111827] tracking-tight mb-3">Analyzing your resume...</h3>
-                  <p className="text-[15px] font-medium text-[#64748B] max-w-sm leading-relaxed">
-                    Our AI is scanning for ATS compatibility, keyword density, and structural improvements. This will just take a moment.
+                  <h3 className="text-2xl font-bold text-[#111827] tracking-tight mb-3" aria-live="polite">Analyzing your resume...</h3>
+                  <p className="text-sm font-medium text-[#6D4AFF] animate-pulse" aria-live="polite">
+                    {LOADING_STEPS[loadingStep]}
+                  </p>
+                  <p className="text-[15px] font-medium text-[#64748B] max-w-sm leading-relaxed mt-2">
+                    We are scanning for ATS compatibility, keyword density, and structural improvements. This will just take a moment.
                   </p>
                   
                   
                   <div className="w-full max-w-md mt-8">
                     <div className="flex justify-between text-[13px] font-semibold text-[#64748B] mb-2 animate-in fade-in">
-                      <span>{loadingSteps[loadingStep]}</span>
-                      <span>{uploadProgress || 0}%</span>
+                      <span>{LOADING_STEPS[loadingStep]}</span>
+                      <span>{Math.min(99, simulatedProgress)}%</span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                      <div className="bg-[#6D5DF6] h-2 rounded-full transition-all duration-300" style={{ width: `${uploadProgress || 0}%` }}></div>
+                      <div className="bg-[#6D5DF6] h-2 rounded-full transition-all duration-300" style={{ width: `${Math.min(99, simulatedProgress)}%` }}></div>
                     </div>
                   </div>
                 </div>
@@ -263,10 +279,10 @@ export default function ResumeReviewPage() {
       />
       
       {/* Floating Action Button */}
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-[#6D5DF6] text-white rounded-full flex items-center justify-center shadow-xl shadow-indigo-500/30 hover:bg-[#5a4cd1] transition-transform hover:scale-105 z-50">
+      <button aria-label="Resume AI Assistant" className="fixed bottom-8 right-8 w-14 h-14 bg-[#6D5DF6] text-white rounded-full flex items-center justify-center shadow-xl shadow-indigo-500/30 hover:bg-[#5a4cd1] transition-transform hover:scale-105 z-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-600">
         <Sparkles size={24} />
       </button>
     </div>
+    </>
   );
 }
-

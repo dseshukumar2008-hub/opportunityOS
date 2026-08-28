@@ -50,9 +50,9 @@ export async function generate(request) {
   const startTime = Date.now();
   const { providerName, feature = 'UnknownFeature' } = request;
   
-  // --- AI CONTEXT INJECTION (PHASE 5.3) ---
+  // Context injection
   const safeParse = (key) => {
-    try { return JSON.parse(localStorage.getItem(key)); } catch(e) { return null; }
+    try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
   };
 
   const resumeData = safeParse('resumeData') || {};
@@ -81,7 +81,6 @@ ${JSON.stringify(aiContext)}
   } else {
     request.options.systemInstruction = contextString;
   }
-  // ----------------------------------------
   
   // 1. Check Cache
   const cachedResponse = aiCache.get(request);

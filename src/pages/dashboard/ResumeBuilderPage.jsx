@@ -3,15 +3,9 @@ import {
   Eye, 
   Download, 
   Save, 
-// eslint-disable-next-line no-unused-vars
-  Calendar, 
-// eslint-disable-next-line no-unused-vars
-  LayoutTemplate,
   ListChecks,
   X,
   Cloud,
-// eslint-disable-next-line no-unused-vars
-  Copy,
   Trash2,
   Loader2,
   ChevronDown,
@@ -23,15 +17,21 @@ import {
 } from 'lucide-react';
 import ResumeFormPanel from '../../components/resume/ResumeFormPanel';
 import ResumePreviewPanel from '../../components/resume/ResumePreviewPanel';
-import ResumeHealthPanel from '../../components/resume/ResumeHealthPanel';
 import ResumeHistoryModal from '../../components/resume/ResumeHistoryModal';
 import toast from 'react-hot-toast';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useResume } from '../../contexts/ResumeContext';
+
+const getRelativeTime = (timestamp) => {
+  const diff = Math.floor((Date.now() - timestamp) / 60000);
+  if (diff < 1) return 'Just now';
+  if (diff < 60) return `${diff} min ago`;
+  const hours = Math.floor(diff / 60);
+  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days > 1 ? 's' : ''} ago`;
+};
 
 export default function ResumeBuilderPage() {
   const { id } = useParams();
@@ -44,8 +44,6 @@ export default function ResumeBuilderPage() {
     hasLocalMigration,
     resumeData,
     lastUpdated, 
-// eslint-disable-next-line no-unused-vars
-    activeTemplate, 
     isDirty,
     getResumeStrength, 
     getSectionsCompleted,
@@ -61,7 +59,6 @@ export default function ResumeBuilderPage() {
   const resumeRef = useRef(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [activeTab, setActiveTab] = useState('builder'); // 'builder' or 'health'
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   
   const [isRenaming, setIsRenaming] = useState(false);
@@ -185,6 +182,10 @@ export default function ResumeBuilderPage() {
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
       
+      const html2canvasModule = await import('html2canvas');
+      const html2canvas = html2canvasModule.default || html2canvasModule;
+      const { jsPDF } = await import('jspdf');
+      
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
@@ -228,23 +229,6 @@ export default function ResumeBuilderPage() {
   const strength = getResumeStrength();
   const completed = getSectionsCompleted();
   
-// eslint-disable-next-line no-unused-vars
-  const formatDate = (timestamp) => {
-    const d = new Date(timestamp);
-    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-  };
-
-  const getRelativeTime = (timestamp) => {
-    // eslint-disable-next-line react-hooks/purity
-    const diff = Math.floor((Date.now() - timestamp) / 60000);
-    if (diff < 1) return 'Just now';
-    if (diff < 60) return `${diff} min ago`;
-    const hours = Math.floor(diff / 60);
-    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    const days = Math.floor(hours / 24);
-    return `${days} day${days > 1 ? 's' : ''} ago`;
-  };
-
   return (
     <div className="bg-slate-50 font-sans pb-20 p-4 lg:p-6">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -297,13 +281,14 @@ export default function ResumeBuilderPage() {
                   autoFocus
                 />
               ) : (
-                <h1 
+                <button 
                   onClick={handleRenameStart}
-                  className="text-[15px] font-bold text-slate-900 tracking-tight leading-none cursor-text hover:bg-slate-100 px-1 py-0.5 rounded -ml-1 transition-colors"
+                  className="text-[15px] font-bold text-slate-900 tracking-tight leading-none cursor-text hover:bg-slate-100 px-1 py-0.5 rounded -ml-1 transition-colors bg-transparent border-0 focus-visible:ring-2 focus-visible:ring-indigo-500 focus:outline-none"
                   title="Click to rename"
+                  aria-label="Rename Resume"
                 >
                   {currentResume?.title || 'Untitled Resume'}
-                </h1>
+                </button>
               )}
 
               <div className="relative">
@@ -439,24 +424,8 @@ export default function ResumeBuilderPage() {
         {/* Left Panel: Tabs & Content (Fixed width to give more space to preview) */}
         <div className="w-full xl:w-[450px] shrink-0 flex flex-col gap-4">
           
-          {/* Panel Tabs */}
-          <div className="flex items-center gap-2 p-1.5 bg-slate-200/50 rounded-xl">
-            <button 
-              onClick={() => setActiveTab('builder')}
-              className={`flex-1 py-2 text-[13px] font-bold rounded-lg transition-all ${activeTab === 'builder' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
-            >
-              Resume Builder
-            </button>
-            <button 
-              onClick={() => setActiveTab('health')}
-              className={`flex-1 py-2 text-[13px] font-bold rounded-lg transition-all ${activeTab === 'health' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
-            >
-              Live ATS Health
-            </button>
-          </div>
-
           <div className="h-[800px]">
-            {activeTab === 'builder' ? <ResumeFormPanel /> : <ResumeHealthPanel />}
+            <ResumeFormPanel />
           </div>
         </div>
 

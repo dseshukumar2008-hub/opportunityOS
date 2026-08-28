@@ -34,7 +34,7 @@ export default function AdminDashboardPage() {
         totalUsers: uniqueUsers, // Approximated by active users in telemetry
         activeUsers: uniqueUsers,
         resumeAnalyses: events.filter(e => e.eventName === 'Resume Analysis Completed').length,
-        roadmapsGenerated: events.filter(e => e.eventName === 'Roadmap Generated').length,
+        roadmapsGenerated: events.filter(e => e.eventName === 'Roadmap Created').length,
         matchAnalyses: events.filter(e => e.eventName === 'Match Analysis Completed').length,
         careerCoach: events.filter(e => e.eventName === 'Message Sent').length,
       });
@@ -71,7 +71,6 @@ export default function AdminDashboardPage() {
       navigate('/dashboard');
       return;
     }
-
     fetchPendingOpportunities();
     fetchMetrics();
   }, [user, navigate]);

@@ -288,8 +288,8 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
     setExpandedPhases(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
 
-  const handleDownloadPDF = () => {
-    generateRoadmapPDF(roadmapData, profile, {
+  const handleDownloadPDF = async () => {
+    await generateRoadmapPDF(roadmapData, profile, {
       overallProgress,
       doneTasks,
       totalTasks,

@@ -132,7 +132,7 @@ export const GoalProvider = ({ children }) => {
     }
   };
 
-  // ─── Auto-Tracking Engine ───────────────────────────────────────────────────
+  // 
   useEffect(() => {
     if (goals.length === 0) return;
 

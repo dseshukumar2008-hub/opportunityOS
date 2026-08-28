@@ -57,7 +57,7 @@ export default function DashboardNextActionWidget({ userState }) {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
       {/* Left Card: Next Best Action */}
       <div className="card-standard p-5 flex flex-col relative overflow-hidden w-full h-full border-slate-200">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none opacity-60"></div>
+
         
         <div className="relative z-10 flex flex-col h-full">
           <div className="flex items-center gap-2 mb-3">
@@ -91,7 +91,7 @@ export default function DashboardNextActionWidget({ userState }) {
 
       {/* Right Card: Career Progress */}
       <div className="card-standard p-5 flex flex-col relative overflow-hidden w-full h-full border-slate-200">
-        <div className="absolute bottom-0 right-0 w-64 h-64 bg-emerald-50 rounded-full blur-3xl -mr-32 -mb-32 pointer-events-none opacity-60"></div>
+
         
         <div className="relative z-10 flex flex-col h-full">
           <div className="flex items-center gap-2 mb-3">
@@ -113,7 +113,7 @@ export default function DashboardNextActionWidget({ userState }) {
               <p className="text-[13px] text-slate-500 font-medium leading-relaxed max-w-[280px]">
                 {completedCount === steps.length 
                   ? "Your profile is fully optimized!" 
-                  : "Keep building your profile to unlock more insights."}
+                  : "Complete your profile to receive personalized recommendations."}
               </p>
             </div>
           </div>

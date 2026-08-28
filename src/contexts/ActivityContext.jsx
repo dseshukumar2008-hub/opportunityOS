@@ -43,6 +43,8 @@ export function ActivityProvider({ children }) {
       orderBy('timestamp', 'desc')
     );
 
+    let unsubscribeFallback;
+
     const unsubscribe = onSnapshot(qWithOrder, (snapshot) => {
       const fetchedActivities = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -57,9 +59,7 @@ export function ActivityProvider({ children }) {
       // Fallback if index is missing: just fetch without orderBy
       if (error.code === 'failed-precondition') {
         const fallbackQ = query(collection(db, 'activities'), where('userId', '==', currentUserId));
-        let fallbackUnsubscribe;
-// eslint-disable-next-line no-unused-vars
-        fallbackUnsubscribe = onSnapshot(fallbackQ, (fallbackSnapshot) => {
+        unsubscribeFallback = onSnapshot(fallbackQ, (fallbackSnapshot) => {
             const fetched = fallbackSnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
@@ -73,7 +73,10 @@ export function ActivityProvider({ children }) {
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if (unsubscribeFallback) unsubscribeFallback();
+    };
   }, [currentUserId]);
 
   const addActivity = useCallback(async (activity) => {

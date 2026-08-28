@@ -5,8 +5,7 @@ import { useCareerReadiness } from './useCareerReadiness';
 
 export function useDashboardInsights() {
   const { profile, isLoading: isProfileLoading } = useUserProfile();
-// eslint-disable-next-line no-unused-vars
-  const { hasInsights: hasResume, atsScore, missingSkills: resumeMissingSkills } = useResumeInsights();
+  const { hasInsights: hasResume, atsScore } = useResumeInsights();
   const { score: readinessScore, breakdown } = useCareerReadiness();
 
   const insights = useMemo(() => {
@@ -21,12 +20,12 @@ export function useDashboardInsights() {
     let nextBestActionIcon = null;
 
     if (!profile?.name || !profile?.college) {
-      nextBestAction = "Complete your profile to unlock better matches.";
+      nextBestAction = "Complete your profile to receive personalized recommendations.";
       nextBestActionCta = "Complete Profile";
       nextBestActionLink = "/profile";
       nextBestActionIcon = "User";
     } else if (!hasResume) {
-      nextBestAction = "Upload a resume to unlock AI analysis.";
+      nextBestAction = "Upload a resume to get feedback.";
       nextBestActionCta = "Upload Resume";
       nextBestActionLink = "/resume-review";
       nextBestActionIcon = "FileText";

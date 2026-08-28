@@ -2,14 +2,14 @@ import { Sparkles, ShieldCheck, Users, Building, Bot, Wand2, Database, MonitorSm
 
 export default function CapabilitiesSection() {
   const capabilities = [
-    { icon: Sparkles, title: "AI Powered", desc: "Smart matching & recommendations" },
+    { icon: Sparkles, title: "Automated Analysis", desc: "Skill matching & project recommendations" },
     { icon: ShieldCheck, title: "Secure Cloud", desc: "Enterprise-grade data protection" },
-    { icon: Users, title: "Realtime Sync", desc: "Collaborate seamlessly with teams" },
+    { icon: Users, title: "Realtime Sync", desc: "Collaborate directly with teams" },
     { icon: Building, title: "Employer Portal", desc: "Direct access to top talent" },
     { icon: Bot, title: "AI Analyzer", desc: "Automated candidate screening" },
     { icon: Wand2, title: "Opportunity Copilot", desc: "Your personal career assistant" },
     { icon: Database, title: "Firebase Backend", desc: "Scalable & reliable database" },
-    { icon: MonitorSmartphone, title: "Responsive UI", desc: "Flawless experience on any device" },
+    { icon: MonitorSmartphone, title: "Responsive UI", desc: "Optimized for mobile and desktop displays" },
   ];
 
   return (

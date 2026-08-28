@@ -73,7 +73,7 @@ export function useResumeHistory() {
     });
 
     return () => unsubscribe();
-  }, [user?.id]);
+  }, [user]);
 
   const addHistory = useCallback(async (results, sourceName) => {
     if (!user?.id) return;
@@ -90,7 +90,7 @@ export function useResumeHistory() {
       console.error('Error adding resume history:', err);
       throw err;
     }
-  }, [user?.id, history]);
+  }, [user, history]);
   
   const clearHistory = useCallback(async () => {
     if (!user?.id) return;
@@ -105,7 +105,7 @@ export function useResumeHistory() {
       console.error('Error clearing resume history:', err);
       throw err;
     }
-  }, [user?.id]);
+  }, [user]);
 
   const getBestVersion = useCallback(() => {
     if (history.length === 0) return null;

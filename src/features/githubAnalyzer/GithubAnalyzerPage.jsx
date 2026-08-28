@@ -17,6 +17,11 @@ export default function GithubAnalyzerPage() {
   const { updateCareerContext } = useCareer();
   const { updateProfile } = useProfile();
   const { addActivity } = useActivity();
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => { isMounted.current = false; };
+  }, []);
 
   const handleAnalyze = async (username, targetRole) => {
     if (!username || !targetRole) {
@@ -74,7 +79,10 @@ export default function GithubAnalyzerPage() {
             }
           }
 
-          setLoading(false);
+          if (isMounted.current) {
+            setLoading(false);
+            setResults(parsed);
+          }
           toast.success("Loaded cached GitHub analysis!");
           return { success: true };
         } else {
@@ -190,7 +198,7 @@ export default function GithubAnalyzerPage() {
       }
 
       const finalResultObj = { ...analysisResult, username, targetRole };
-      setResults(finalResultObj);
+      if (isMounted.current) setResults(finalResultObj);
       localStorage.setItem(cacheKey, JSON.stringify(finalResultObj));
 
       if (updateProfile) {
@@ -248,7 +256,7 @@ export default function GithubAnalyzerPage() {
       }
       return { success: false, error: error.message };
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
 

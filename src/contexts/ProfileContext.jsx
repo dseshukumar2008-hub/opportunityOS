@@ -80,7 +80,6 @@ export const ProfileProvider = ({ children }) => {
     }
   };
 
-  // Function to fetch any user's profile by ID
   const fetchUserProfile = async (userId) => {
     try {
       const docRef = doc(db, 'users', userId);

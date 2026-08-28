@@ -36,14 +36,14 @@ export default function Navbar() {
       <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between">
         
         {/* Logo */}
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => scrollToSection('hero')}>
+        <button aria-label="Go to Home" className="flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 rounded-lg p-1 -ml-1" onClick={() => scrollToSection('hero')}>
           <div className="relative flex items-center justify-center w-8 h-8">
             <div className="absolute inset-0 border-4 border-indigo-600 rounded-full opacity-50"></div>
             <div className="absolute inset-1 border-4 border-indigo-600 rounded-full opacity-80"></div>
             <div className="absolute inset-2 bg-[#6C4CF1] rounded-full"></div>
           </div>
           <span className="font-bold text-xl tracking-tight text-slate-900">OpportunityOS</span>
-        </div>
+        </button>
 
         {/* Desktop Nav Links */}
         <div className="hidden md:flex items-center gap-8">

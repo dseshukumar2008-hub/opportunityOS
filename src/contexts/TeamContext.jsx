@@ -44,7 +44,7 @@ export const TeamProvider = ({ children }) => {
   const unsubRequests = useRef(null);
   const unsubMessages = useRef(null);
 
-  // ─── Real-time Firestore listeners ─────────────────────────────────────────
+  // 
   useEffect(() => {
     // Clean up previous listeners
     if (unsubTeams.current) unsubTeams.current();
@@ -64,7 +64,7 @@ export const TeamProvider = ({ children }) => {
     setLoading(true);
     setError(null);
 
-    // --- Teams listener (all teams, ordered by creation) ---
+    // Teams listener
     const teamsQuery = query(
       collection(db, 'teams'),
       orderBy('createdAt', 'desc')
@@ -88,7 +88,7 @@ export const TeamProvider = ({ children }) => {
       }
     );
 
-    // --- Join Requests listener ---
+    // Join Requests listener
     const requestsQuery = query(
       collection(db, 'team_requests'),
       orderBy('createdAt', 'desc')
@@ -110,7 +110,7 @@ export const TeamProvider = ({ children }) => {
       }
     );
 
-    // --- Team Messages listener ---
+    // Team Messages listener
     const messagesQuery = query(
       collection(db, 'team_messages'),
       orderBy('createdAt', 'asc')
@@ -142,7 +142,7 @@ export const TeamProvider = ({ children }) => {
 
 
 
-  // ─── CRUD: Create Team ──────────────────────────────────────────────────────
+  // 
   const createTeam = useCallback(async (teamData) => {
     if (!user) return;
     try {
@@ -179,7 +179,7 @@ export const TeamProvider = ({ children }) => {
     }
   }, [user, currentUserId, addActivity]);
 
-  // ─── CRUD: Join Team (send request) ────────────────────────────────────────
+  // 
   const joinTeam = useCallback(async (teamId, message = "I would love to join your team!") => {
     if (!user) return;
 
@@ -210,7 +210,7 @@ export const TeamProvider = ({ children }) => {
     }
   }, [user, currentUserId, currentUserName, joinRequests]);
 
-  // ─── CRUD: Accept Join Request ──────────────────────────────────────────────
+  // 
   const acceptRequest = useCallback(async (requestId) => {
     if (!user) return;
     const req = joinRequests.find((r) => r.id === requestId);
@@ -233,7 +233,7 @@ export const TeamProvider = ({ children }) => {
     }
   }, [user, joinRequests]);
 
-  // ─── CRUD: Reject Join Request ──────────────────────────────────────────────
+  // 
   const rejectRequest = useCallback(async (requestId) => {
     if (!user) return;
     try {
@@ -246,7 +246,7 @@ export const TeamProvider = ({ children }) => {
     }
   }, [user]);
 
-  // ─── CRUD: Send Team Message ────────────────────────────────────────────────
+  // 
   const sendTeamMessage = useCallback(async (teamId, content) => {
     if (!user || !content?.trim()) return;
     try {
@@ -266,12 +266,12 @@ export const TeamProvider = ({ children }) => {
 // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, currentUserId, currentUserName]);
 
-  // ─── Mark team chat as read ─────────────────────────────────────────────────
+  // 
   const markTeamAsRead = useCallback((teamId) => {
     setTeamLastRead((prev) => ({ ...prev, [teamId]: new Date().toISOString() }));
   }, []);
 
-  // ─── Derived selectors ──────────────────────────────────────────────────────
+  // 
   const getMyTeams = useCallback(() => {
     if (!currentUserId) return [];
     return (teams || []).filter((t) => Array.isArray(t.members) && t.members.includes(currentUserId));

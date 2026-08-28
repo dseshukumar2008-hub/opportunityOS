@@ -2,7 +2,6 @@
  * Utility to deeply analyze GitHub portfolio and calculate metrics.
  */
 
-// Helper to fetch the actual 52-week contribution heatmap
 export async function fetchContributionHeatmap(username) {
   try {
     const res = await fetch(`https://github-contributions-api.jasonbarry.com/v1/${username}`);
@@ -151,8 +150,6 @@ export async function fetchDeepGithubData(username, allRepos) {
 // eslint-disable-next-line no-unused-vars
 export function calculateLocalGithubMetrics(githubData, userData, targetRole) {
   let stars = 0;
-// eslint-disable-next-line no-unused-vars
-  let forks = 0;
   let repoCount = githubData.length;
   let languageCounts = {};
   let topics = new Set();
@@ -160,7 +157,6 @@ export function calculateLocalGithubMetrics(githubData, userData, targetRole) {
   // Calculate raw metrics
   githubData.forEach(repo => {
     stars += repo.stargazers_count || 0;
-    forks += repo.forks_count || 0;
     if (repo.language) {
       languageCounts[repo.language] = (languageCounts[repo.language] || 0) + 1;
     }

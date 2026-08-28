@@ -12,9 +12,9 @@ export const STATUS = {
 
 const AWAY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
-// Mock statuses for other users — keyed by participant name
+// Initial statuses for other users — keyed by participant name
 // In a real app these would come from a WebSocket / server heartbeat
-const MOCK_USER_STATUSES = {};
+const INITIAL_STATUSES = {};
 
 function formatLastSeen(isoString) {
   const date = new Date(isoString);
@@ -32,7 +32,7 @@ function formatLastSeen(isoString) {
 }
 
 export function OnlineStatusProvider({ children }) {
-  // ─── Local user status ───────────────────────────────────────
+  // 
   const [myStatus, setMyStatus] = useState(() => {
     const saved = localStorage.getItem('oppOs_my_status');
     return saved ? JSON.parse(saved).status : STATUS.ONLINE;
@@ -75,8 +75,8 @@ export function OnlineStatusProvider({ children }) {
     };
   }, [resetAwayTimer]);
 
-  // ─── Other users' statuses ────────────────────────────────────
-  const [userStatuses, setUserStatuses] = useState(MOCK_USER_STATUSES);
+  // 
+  const [userStatuses, setUserStatuses] = useState(INITIAL_STATUSES);
 
   // Simulate some status changes over time (optional realism)
   useEffect(() => {
@@ -86,7 +86,7 @@ export function OnlineStatusProvider({ children }) {
     return () => clearInterval(interval);
   }, []);
 
-  // ─── Helpers ─────────────────────────────────────────────────
+  // 
   const getUserStatus = useCallback((name) => {
     return userStatuses[name] ?? { status: STATUS.OFFLINE, lastSeen: null };
   }, [userStatuses]);

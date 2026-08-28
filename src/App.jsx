@@ -10,7 +10,6 @@ import NetworkStatusManager from './components/common/NetworkStatusManager';
 import { ResumeProvider } from './contexts/ResumeContext';
 import { TeamProvider } from './contexts/TeamContext';
 
-import { MessageProvider } from './contexts/MessageContext';
 import { ActivityProvider } from './contexts/ActivityContext';
 import { GoalProvider } from './contexts/GoalContext';
 import { AchievementProvider } from './contexts/AchievementContext';
@@ -19,6 +18,7 @@ import { OnlineStatusProvider } from './contexts/OnlineStatusContext';
 import { ConnectionProvider } from './contexts/ConnectionContext';
 import { ProfileProvider } from './contexts/ProfileContext';
 import { CareerProvider } from './contexts/CareerContext';
+import { SkillArcadeProvider } from './contexts/SkillArcadeContext';
 
 import DashboardSkeleton from './components/loaders/DashboardSkeleton';
 import ResumeReviewSkeleton from './components/loaders/ResumeReviewSkeleton';
@@ -56,6 +56,7 @@ const ProjectRecommendationPage = lazy(() => import('./features/projectRecommend
 
 const GithubAnalyzerPage = lazy(() => import('./features/githubAnalyzer/GithubAnalyzerPage'));
 const CareerExplorerPage = lazy(() => import('./features/careerExplorer/CareerExplorerPage'));
+const SkillArcadePage = lazy(() => import('./pages/dashboard/SkillArcadePage'));
 
 /**
  * Main application component that sets up routing, global providers, and layout structure.
@@ -133,17 +134,18 @@ export default function App() {
               <Route element={
                 <ActivityProvider>
                   <TeamProvider>
-                    <MessageProvider>
-                      <ConnectionProvider>
-                        <ResumeProvider>
+                    <ConnectionProvider>
+                      <ResumeProvider>
                           <OnlineStatusProvider>
                             <ProfileProvider>
                               <GoalProvider>
                                 <AchievementProvider>
                                   <CareerProvider>
-                                    <Suspense fallback={<DashboardSkeleton />}>
-                                      <DashboardLayout />
-                                    </Suspense>
+                                    <SkillArcadeProvider>
+                                      <Suspense fallback={<DashboardSkeleton />}>
+                                        <DashboardLayout />
+                                      </Suspense>
+                                    </SkillArcadeProvider>
                                   </CareerProvider>
                                 </AchievementProvider>
                               </GoalProvider>
@@ -151,7 +153,6 @@ export default function App() {
                           </OnlineStatusProvider>
                         </ResumeProvider>
                       </ConnectionProvider>
-                    </MessageProvider>
                   </TeamProvider>
                 </ActivityProvider>
               }>
@@ -176,6 +177,7 @@ export default function App() {
                   <Route path="/user/:userId" element={<UserProfilePage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/career-coach" element={<Suspense fallback={<PageLoader />}><CareerCoachPage /></Suspense>} />
+                  <Route path="/skill-arcade" element={<Suspense fallback={<PageLoader />}><SkillArcadePage /></Suspense>} />
                 </Route>
               </Route>
             </Route>
@@ -185,5 +187,3 @@ export default function App() {
     </GlobalErrorBoundary>
   );
 }
-
-// End of file

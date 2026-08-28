@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import {
   ArrowLeft, Download, Rocket, ShieldCheck, Zap, TrendingUp,
-// eslint-disable-next-line no-unused-vars
-  Users, Target, Code, BrainCircuit, Shield, UserPlus,
-// eslint-disable-next-line no-unused-vars
-  Lightbulb, BarChart3, Map, MessageSquare, Award, Globe,
+  Users, Target, Code, BrainCircuit, UserPlus,
+  Lightbulb, BarChart3, Map, Award, Globe,
   ChevronRight, Star
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -13,8 +11,8 @@ import PresentationCharts from './PresentationCharts';
 
 const FEATURES = [
   { title: 'Analyze Resume', icon: BrainCircuit, color: 'text-indigo-500', bg: 'bg-indigo-50', desc: 'Instant feedback on resume quality and structure' },
-  { title: 'ATS Score Engine', icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-50', desc: 'Beat applicant tracking systems with smart optimization' },
-  { title: 'Role Matching', icon: Target, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'AI-ranked career paths personalized to your profile' },
+  { title: 'ATS Score Engine', icon: ShieldCheck, color: 'text-emerald-500', bg: 'bg-emerald-50', desc: 'Check your resume against common applicant tracking system rules' },
+  { title: 'Role Matching', icon: Target, color: 'text-amber-500', bg: 'bg-amber-50', desc: 'Compare your current skills against target role requirements' },
   { title: 'Skill Gap Analysis', icon: Zap, color: 'text-pink-500', bg: 'bg-pink-50', desc: 'Know exactly what to learn next for your target role' },
   { title: 'Team Finder', icon: Users, color: 'text-blue-500', bg: 'bg-blue-50', desc: 'Discover and form teams for hackathons and projects' },
   { title: 'Networking Hub', icon: UserPlus, color: 'text-teal-500', bg: 'bg-teal-50', desc: 'Connect with peers across colleges and disciplines' },
@@ -36,11 +34,11 @@ const JOURNEY_STEPS = [
 
 const WHY_ITEMS = [
   'End-to-end career ecosystem — not fragmented tools.',
-  'AI-driven, personalized career path discovery.',
+  'Skill gap analysis and step-by-step career path generation.',
   'Built-in Resume Intelligence to bypass ATS filters.',
   'Organic team collaboration for hackathons and projects.',
   'Measurable, gamified career growth tracking.',
-  'Seamless networking platform built for students.',
+  'Direct connection platform built for students.',
 ];
 
 export default function PresentationPage() {
@@ -110,7 +108,7 @@ export default function PresentationPage() {
       <div className="max-w-[1400px] mx-auto px-6 pt-10">
 
         {/* ── HERO BANNER ── */}
-        <div className="relative bg-gradient-to-br from-slate-900 via-[#1a0f4f] to-slate-900 rounded-3xl p-10 md:p-16 text-white mb-12 overflow-hidden shadow-2xl">
+        <div className="relative bg-[#1a0f4f] rounded-3xl p-10 md:p-16 text-white mb-12 overflow-hidden shadow-xl">
           {/* Background decoration */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#6C4CF1] rounded-full opacity-20 blur-3xl" />
@@ -128,7 +126,7 @@ export default function PresentationPage() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <span className="px-3 py-1 bg-[#6C4CF1]/30 text-[#a78bfa] border border-[#6C4CF1]/30 rounded-full text-[12px] font-bold uppercase tracking-wider">
-                  AI-Powered Platform
+                  Automated Analysis Platform
                 </span>
                 <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 rounded-full text-[12px] font-bold uppercase tracking-wider">
                   Live Demo
@@ -187,7 +185,7 @@ export default function PresentationPage() {
         </div>
 
         {/* ── SECTION 3: Career Growth Highlight ── */}
-        <div className="bg-gradient-to-br from-indigo-900 to-[#6C4CF1] rounded-3xl p-10 md:p-12 text-white mb-12 shadow-xl relative overflow-hidden">
+        <div className="bg-[#6C4CF1] rounded-3xl p-10 md:p-12 text-white mb-12 shadow-md relative overflow-hidden">
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-8">

@@ -24,7 +24,7 @@ export default function ResumeAnalysisHowItWorksModal({ isOpen, onClose }) {
         {/* Header */}
         <div className="relative p-6 border-b border-slate-100 bg-slate-50/50">
           <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-            How AI Resume Analysis Works <Sparkles className="text-amber-500" size={20} />
+            How AI Resume Analysis Works
           </h2>
           <button 
             onClick={onClose}

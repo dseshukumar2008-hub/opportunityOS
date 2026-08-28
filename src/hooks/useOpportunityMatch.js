@@ -68,8 +68,8 @@ export function useOpportunityMatch() {
     setIsAnalyzing(true);
     setError(null);
 
+    let contextToUse = { ...profileContext };
     try {
-      const contextToUse = { ...profileContext };
 
       // If user provided a new file right now, parse it and extract skills via useMatchResume
       if (uploadedResumeFile) {

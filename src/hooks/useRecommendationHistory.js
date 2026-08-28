@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 
 const STORAGE_KEY = 'oppOs_recHistory';
 
-const INITIAL_MOCK_HISTORY = [];
+const INITIAL_HISTORY = [];
 
 export function useRecommendationHistory() {
   const [history, setHistory] = useState(() => {
@@ -11,13 +11,12 @@ export function useRecommendationHistory() {
       if (saved) {
         return JSON.parse(saved);
       } else {
-        // Initialize with mock history to demonstrate timeline
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_MOCK_HISTORY));
-        return INITIAL_MOCK_HISTORY;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_HISTORY));
+        return INITIAL_HISTORY;
       }
     } catch (err) {
       console.warn('Failed to parse recommendation history from local storage:', err);
-      return INITIAL_MOCK_HISTORY;
+      return INITIAL_HISTORY;
     }
   });
 
@@ -105,7 +104,7 @@ export function useRecommendationHistory() {
   }, [history, saveHistory]);
 
   const clearHistory = useCallback(() => {
-    saveHistory(INITIAL_MOCK_HISTORY);
+    saveHistory(INITIAL_HISTORY);
   }, [saveHistory]);
 
   return {
