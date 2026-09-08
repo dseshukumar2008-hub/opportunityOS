@@ -9,6 +9,7 @@ import { generateRoadmapPDF } from '../../utils/generateRoadmapPDF';
 import { useProfile } from '../../contexts/ProfileContext';
 import roadmapResources from '../../data/roadmapResources.json';
 import ConfirmationModal from '../common/ConfirmationModal';
+import { useModalBehavior } from '../../hooks/useModalBehavior';
 
 const PHASE_COLORS = [
   { bg: 'bg-[#6C4CF1]', text: 'text-[#6C4CF1]', light: 'bg-indigo-50', border: 'border-[#6C4CF1]' },
@@ -62,7 +63,7 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
   
   const tasks = phase.tasks || [];
   const doneCount = tasks.filter(t => completedTasks.includes(t.id)).length;
-  const pct = tasks.length > 0 ? Math.round((doneCount / tasks.length) * 100) : 0;
+  const pct = tasks.length > 0 ? Math.round((doneCount / tasks.length) * 100) : 100;
   
   const pcol = PHASE_COLORS[index % PHASE_COLORS.length];
   const Icon = index === 0 ? BookOpen : index === 1 ? Code : index === 2 ? FolderOpen : index === 3 ? Briefcase : Target;
@@ -71,7 +72,13 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
     <div className={`bg-white rounded-2xl border transition-all duration-300 mb-4 ${isActive ? 'border-[#6C4CF1]/30 shadow-[0_8px_30px_rgba(108,76,241,0.08)]' : 'border-slate-200 shadow-sm hover:border-slate-300'}`}>
       
       {/* Clickable Header */}
-      <div onClick={onToggle} className="py-3 px-5 md:py-4 md:px-6 flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/50 transition-colors rounded-t-2xl">
+      <div 
+        role="button"
+        tabIndex={0}
+        onClick={onToggle} 
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }}
+        className="py-3 px-5 md:py-4 md:px-6 flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/50 transition-colors rounded-t-2xl outline-none focus-visible:ring-2 focus-visible:ring-[#6C4CF1]"
+      >
         <div className="flex items-center gap-4 overflow-hidden">
           <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 transition-colors ${isActive ? 'bg-[#6C4CF1] text-white shadow-md shadow-indigo-200' : `${pcol.light} ${pcol.text}`}`}>
             <Icon size={22} />
@@ -117,22 +124,32 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
             {activeTab === 'Overview' && (
               <div className="text-slate-600 text-[14px] leading-relaxed">
                 {phase.overview || 'No overview provided.'}
-                <div className="mt-6">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Key Skills Acquired</p>
-                  <div className="flex flex-wrap gap-2">
-                    {(phase.skills || []).map(s => <span key={s} className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 shadow-sm">{s}</span>)}
+                {(phase.skills && phase.skills.length > 0) && (
+                  <div className="mt-6">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Key Skills Acquired</p>
+                    <div className="flex flex-wrap gap-2">
+                      {phase.skills.map((s, idx) => <span key={idx} className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 shadow-sm">{s}</span>)}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
             {activeTab === 'Tasks' && (
               <div className="space-y-3">
+                {tasks.length === 0 && <p className="text-sm text-slate-500">No tasks specified.</p>}
                 {tasks.map((t) => {
                   const isDone = completedTasks.includes(t.id);
                   let statusBadge = isDone ? 'Completed' : (t.status || 'Not Started');
                   return (
-                    <div key={t.id} onClick={() => toggleTask(t.id, !isDone)} className="flex items-center justify-between p-4 rounded-2xl border border-slate-200 hover:border-[#6C4CF1]/30 hover:shadow-sm transition-all cursor-pointer group bg-white">
+                    <div 
+                      key={t.id} 
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => toggleTask(t.id, !isDone)} 
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTask(t.id, !isDone); } }}
+                      className="flex items-center justify-between p-4 rounded-2xl border border-slate-200 hover:border-[#6C4CF1]/30 hover:shadow-sm transition-all cursor-pointer group bg-white outline-none focus-visible:ring-2 focus-visible:ring-[#6C4CF1]"
+                    >
                       <div className="flex items-center gap-4 pr-4">
                         <button className={`shrink-0 transition-colors ${isDone ? 'text-emerald-500' : 'text-slate-300 group-hover:text-[#6C4CF1]'}`}>
                           {isDone ? <CheckCircle2 size={24}/> : <Circle size={24}/>}
@@ -161,8 +178,11 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
                     : `https://www.google.com/search?q=${encodeURIComponent(`${r.title} ${r.provider || ''} ${r.type || 'course'}`)}`;
                   
                   return (
-                    <div 
-                      key={i} 
+                    <a 
+                      key={i}
+                      href={finalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="p-4 bg-white border border-slate-200 rounded-2xl flex flex-col gap-2 cursor-pointer hover:shadow-sm hover:border-[#6C4CF1]/30 hover:-translate-y-0.5 transition-all group"
                     >
                       <div className="flex items-center gap-2">
@@ -170,7 +190,7 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
                         {r.provider && <span className="text-[11px] font-bold text-slate-400 truncate">{r.provider}</span>}
                       </div>
                       <p className="font-bold text-slate-800 text-sm line-clamp-2 group-hover:text-[#6C4CF1] transition-colors">{r.title}</p>
-                    </div>
+                    </a>
                   );
                 })}
               </div>
@@ -220,10 +240,23 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
 
   const { profile } = useProfile();
 
-  const { header = {}, phases = [], sidebar = {} } = roadmapData;
+  const header = roadmapData?.header || {};
+  const sidebar = roadmapData?.sidebar || {};
+  const phases = Array.isArray(roadmapData?.phases) 
+    ? roadmapData.phases.map(p => ({
+        ...p,
+        title: p.title || 'Untitled Phase',
+        description: p.description || '',
+        tasks: Array.isArray(p.tasks) ? p.tasks : [],
+        skills: Array.isArray(p.skills) ? p.skills : [],
+        resources: Array.isArray(p.resources) ? p.resources : [],
+        certifications: Array.isArray(p.certifications) ? p.certifications : [],
+        milestones: Array.isArray(p.milestones) ? p.milestones : []
+      }))
+    : [];
 
   const totalTasks = phases.reduce((acc, p) => acc + (p.tasks?.length || 0), 0);
-  const doneTasks = completedTasks.length;
+  const doneTasks = phases.reduce((acc, p) => acc + (p.tasks?.filter(t => completedTasks.includes(t.id)).length || 0), 0);
   const overallProgress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
   // Compute active phase
@@ -231,7 +264,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
     for (let i = 0; i < phases.length; i++) {
       const tasks = phases[i].tasks || [];
       const done = tasks.filter(t => completedTasks.includes(t.id)).length;
-      if (done < tasks.length || tasks.length === 0) return i;
+      if (tasks.length > 0 && done < tasks.length) return i;
     }
     return phases.length - 1 >= 0 ? phases.length - 1 : 0;
   }, [phases, completedTasks]);
@@ -244,18 +277,17 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
 
     const tasks = activePhase.tasks || [];
     
-    // 1. Try to find resource by next incomplete task
-    const nextTask = tasks.find(t => !completedTasks.includes(t.id));
-    if (nextTask) {
+        const nextTask = tasks.find(t => !completedTasks.includes(t.id));
+    if (nextTask && nextTask.title) {
       const matchingKey = Object.keys(roadmapResources).find(k => 
         nextTask.title.toLowerCase().includes(k.toLowerCase())
       );
       if (matchingKey) return roadmapResources[matchingKey];
     }
 
-    // 2. Try to find resource by phase skills
-    if (activePhase.skills && activePhase.skills.length > 0) {
+        if (activePhase.skills && activePhase.skills.length > 0) {
       for (const skill of activePhase.skills) {
+        if (!skill) continue;
         const matchingKey = Object.keys(roadmapResources).find(k => 
           skill.toLowerCase().includes(k.toLowerCase())
         );
@@ -263,9 +295,8 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
       }
     }
 
-    // 3. Try to find resource by phase title
-    const matchingPhaseKey = Object.keys(roadmapResources).find(k => 
-      activePhase.title.toLowerCase().includes(k.toLowerCase())
+        const matchingPhaseKey = Object.keys(roadmapResources).find(k => 
+      activePhase.title && activePhase.title.toLowerCase().includes(k.toLowerCase())
     );
     if (matchingPhaseKey) return roadmapResources[matchingPhaseKey];
 
@@ -274,6 +305,8 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
 
   const [showResetModal, setShowResetModal] = useState(false);
   const [showProgressResetModal, setShowProgressResetModal] = useState(false);
+  
+  const resetModalRef = useModalBehavior(showResetModal, () => setShowResetModal(false));
 
   // Expand the active phase by default
   const [expandedPhases, setExpandedPhases] = useState({});
@@ -282,7 +315,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
     setExpandedPhases({ [activePhaseIdx]: true });
   }, [activePhaseIdx]);
 
-  const lastUpdated = updatedAt?.toDate ? updatedAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Recently';
+  const lastUpdated = typeof updatedAt?.toDate === 'function' ? updatedAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Recently';
 
   const togglePhase = (idx) => {
     setExpandedPhases(prev => ({ ...prev, [idx]: !prev[idx] }));
@@ -303,7 +336,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
       {/* ── HEADER CARD ── */}
       <div className="relative bg-gradient-to-br from-[#6246EA] to-[#4B30C4] rounded-2xl p-6 overflow-hidden text-white shadow-[0_10px_40px_rgba(98,70,234,0.3)]">
         <div className="absolute top-0 right-0 w-2/3 h-full opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(ellipse at top right, rgba(255,255,255,0.4) 0%, transparent 70%)' }}></div>
-        <div className="absolute -bottom-24 -right-10 w-96 h-96 border-[40px] border-white/5 rounded-full blur-xl pointer-events-none"></div>
+        <div className="max-w-full absolute -bottom-24 -right-10 w-96 h-96 border-[40px] border-white/5 rounded-full blur-xl pointer-events-none"></div>
 
         <div className="relative flex flex-col md:flex-row items-center gap-6 mb-6 z-10">
           <ProgressRing pct={overallProgress} size={86} stroke={6} />
@@ -335,6 +368,11 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
           </div>
         </div>
 
+        {/* Accessibility Announcement for Progress */}
+        <div aria-live="polite" className="sr-only">
+          {overallProgress > 0 ? `Roadmap progress updated to ${overallProgress}%` : ''}
+        </div>
+
         {/* Stats Strip */}
         <div className="relative bg-white rounded-2xl p-3 px-5 flex flex-wrap items-center justify-between gap-3 z-10 shadow-lg text-slate-800">
           <div className="flex items-center gap-3 flex-1 min-w-[120px]">
@@ -361,8 +399,15 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
 
       {/* ── RESET MODAL ── */}
       {showResetModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-[24px] p-6 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setShowResetModal(false)}>
+          <div 
+            ref={resetModalRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            className="bg-white rounded-[24px] p-6 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-200 outline-none"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mb-4 text-red-500">
               <Target size={24} />
             </div>
@@ -417,10 +462,8 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
           {phases.map((p, i) => {
             const isActive = i === activePhaseIdx;
             const tks = p.tasks || [];
-            const isDone = tks.length > 0 && tks.every(t => completedTasks.includes(t.id));
+            const isDone = tks.length === 0 ? true : tks.every(t => completedTasks.includes(t.id));
             
-// eslint-disable-next-line no-unused-vars
-            const isNextDone = i < phases.length - 1 && phases[i+1]?.tasks?.length > 0 && phases[i+1].tasks.every(t => completedTasks.includes(t.id));
             const isPathActive = isDone || (i < activePhaseIdx);
             
             const iconBg = isDone ? 'bg-[#6C4CF1]' : isActive ? 'bg-[#6C4CF1]' : 'bg-white';
@@ -441,7 +484,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
                   <div className="text-center mt-1 w-24">
                     <p className={`text-[12px] sm:text-[11px] font-bold ${isActive ? 'text-[#6C4CF1]' : 'text-slate-600'}`}>{p.title}</p>
                     <p className={`text-[11px] sm:text-[10px] font-extrabold ${isDone ? 'text-[#6C4CF1]' : 'text-slate-400'}`}>
-                      {tks.length > 0 ? Math.round((tks.filter(t => completedTasks.includes(t.id)).length / tks.length) * 100) : 0}%
+                      {tks.length > 0 ? Math.round((tks.filter(t => completedTasks.includes(t.id)).length / tks.length) * 100) : 100}%
                     </p>
                   </div>
                 </div>

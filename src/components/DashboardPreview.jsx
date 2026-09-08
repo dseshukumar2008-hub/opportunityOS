@@ -2,7 +2,7 @@ import {
 // eslint-disable-next-line no-unused-vars
   LayoutDashboard, Search, Bell, FileText, 
   GitBranch, Target, BarChart3, Settings,
-// eslint-disable-next-line no-unused-vars
+ 
 // eslint-disable-next-line no-unused-vars
   TrendingUp, Rocket, ChevronRight, Briefcase, Code2, Sparkles, FileCheck, Brain
 } from 'lucide-react';
@@ -61,8 +61,8 @@ export default function DashboardPreview() {
               <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Career Intelligence</h2>
             </div>
             <div className="flex items-center gap-3">
-              <button className="text-slate-400 hover:text-slate-600 transition-colors"><Search size={16}/></button>
-              <button className="text-slate-400 hover:text-slate-600 transition-colors"><Bell size={16}/></button>
+              <button aria-label="Search" className="text-slate-400 hover:text-slate-600 transition-colors"><Search size={16}/></button>
+              <button aria-label="Notifications" className="text-slate-400 hover:text-slate-600 transition-colors"><Bell size={16}/></button>
               <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 shadow-sm border border-white"></div>
             </div>
           </div>

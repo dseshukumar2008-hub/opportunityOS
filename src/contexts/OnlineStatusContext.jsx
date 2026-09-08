@@ -1,10 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 const OnlineStatusContext = createContext();
 
 // Status levels
-export const STATUS = {
+const STATUS = {
   ONLINE: 'online',
   AWAY: 'away',
   OFFLINE: 'offline',
@@ -34,8 +34,12 @@ function formatLastSeen(isoString) {
 export function OnlineStatusProvider({ children }) {
   // 
   const [myStatus, setMyStatus] = useState(() => {
-    const saved = localStorage.getItem('oppOs_my_status');
-    return saved ? JSON.parse(saved).status : STATUS.ONLINE;
+    try {
+      const saved = localStorage.getItem('oppOs_my_status');
+      return saved ? JSON.parse(saved).status : STATUS.ONLINE;
+    } catch {
+      return STATUS.ONLINE;
+    }
   });
 
   const [myLastActive, setMyLastActive] = useState(() => new Date().toISOString());
@@ -49,15 +53,22 @@ export function OnlineStatusProvider({ children }) {
     }));
   }, [myStatus, myLastActive]);
 
+  const lastActiveThrottleRef = useRef(Date.now());
   const resetAwayTimer = useCallback(() => {
     clearTimeout(awayTimerRef.current);
-    if (myStatus !== STATUS.ONLINE) setMyStatus(STATUS.ONLINE);
-    setMyLastActive(new Date().toISOString());
+    setMyStatus(prev => (prev !== STATUS.ONLINE ? STATUS.ONLINE : prev));
+    
+    // Throttle React state updates to at most once per 60 seconds
+    const now = Date.now();
+    if (now - lastActiveThrottleRef.current > 60000) {
+      setMyLastActive(new Date(now).toISOString());
+      lastActiveThrottleRef.current = now;
+    }
 
     awayTimerRef.current = setTimeout(() => {
       setMyStatus(STATUS.AWAY);
     }, AWAY_TIMEOUT_MS);
-  }, [myStatus]);
+  }, []);
 
   // Track activity events
   useEffect(() => {
@@ -76,15 +87,11 @@ export function OnlineStatusProvider({ children }) {
   }, [resetAwayTimer]);
 
   // 
-  const [userStatuses, setUserStatuses] = useState(INITIAL_STATUSES);
+  const [userStatuses] = useState(INITIAL_STATUSES);
 
-  // Simulate some status changes over time (optional realism)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setUserStatuses(prev => ({ ...prev })); // trigger re-render for "last seen" strings
-    }, 60 * 1000); // refresh last-seen text every minute
-    return () => clearInterval(interval);
-  }, []);
+  // Note: userStatuses is currently empty — no server heartbeat is implemented.
+  // When real presence data is available, this interval can be restored to refresh
+  // "last seen" text. Until then it is removed to avoid unnecessary re-renders.
 
   // 
   const getUserStatus = useCallback((name) => {
@@ -101,16 +108,18 @@ export function OnlineStatusProvider({ children }) {
     resetAwayTimer();
   }, [resetAwayTimer]);
 
+  const contextValue = useMemo(() => ({
+    myStatus,
+    myLastActive,
+    getUserStatus,
+    setOffline,
+    setOnline,
+    formatLastSeen,
+    STATUS,
+  }), [myStatus, myLastActive, getUserStatus, setOffline, setOnline]);
+
   return (
-    <OnlineStatusContext.Provider value={{
-      myStatus,
-      myLastActive,
-      getUserStatus,
-      setOffline,
-      setOnline,
-      formatLastSeen,
-      STATUS,
-    }}>
+    <OnlineStatusContext.Provider value={contextValue}>
       {children}
     </OnlineStatusContext.Provider>
   );

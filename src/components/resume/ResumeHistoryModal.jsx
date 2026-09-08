@@ -3,26 +3,31 @@ import { X, History, RotateCcw, Clock } from 'lucide-react';
 import { useResume } from '../../contexts/ResumeContext';
 import toast from 'react-hot-toast';
 import ConfirmationModal from '../common/ConfirmationModal';
+import { useModalBehavior } from '../../hooks/useModalBehavior';
 
 export default function ResumeHistoryModal({ isOpen, onClose }) {
   const { activeResumeId, restoreSnapshot, saveResume } = useResume();
   const [snapshots, setSnapshots] = useState([]);
 
-  // Confirmation Modal state
   const [snapshotToRestore, setSnapshotToRestore] = useState(null);
   const [isRestoring, setIsRestoring] = useState(false);
+  const modalRef = useModalBehavior(isOpen, onClose, false, isRestoring);
 
   useEffect(() => {
     if (isOpen && activeResumeId) {
       // Load snapshots from local storage for the active resume
       const key = `resume_snapshots_${activeResumeId}`;
       const saved = localStorage.getItem(key);
-      if (saved) {
-// eslint-disable-next-line react-hooks/set-state-in-effect
-        setSnapshots(JSON.parse(saved).reverse());
-      } else {
-        setSnapshots([]);
-      }
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            setSnapshots(parsed.reverse());
+          } else {
+            setSnapshots([]);
+          }
+        } catch {
+          setSnapshots([]);
+        }
     }
   }, [isOpen, activeResumeId]);
 
@@ -53,10 +58,12 @@ export default function ResumeHistoryModal({ isOpen, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
+        ref={modalRef}
+        tabIndex={-1}
         role="dialog" 
         aria-modal="true" 
         aria-labelledby="history-modal-title"
-        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200 outline-none"
       >
         
         {/* Header */}

@@ -92,8 +92,37 @@ export const templateProvider = {
           strategicRoadmap: ["Reconnect", "Regenerate insights"]
         };
         break;
+      case 'Resume Enhancement':
+        responseData = { enhancedText: "Offline Mode: Unable to enhance text." };
+        break;
+      case 'ATS Target Role Scan':
+        responseData = { atsScore: 0, skillsDetected: [], missingSkills: [], summary: "Offline Mode: Unable to perform ATS scan.", strengths: [], improvements: [], atsRating: "Poor" };
+        break;
+      case 'Dynamic Skill Gap':
+        responseData = { targetRole: "Offline", readinessScore: 0, skillGapPercentage: 100, currentSkills: [], skillBreakdown: { strong: 0, moderate: 0, missing: 0 }, nextSkill: { name: "Reconnect", priority: "High", time: "0", impact: "High", reason: "Network required" }, missingSkills: { high: [], medium: [], low: [] }, learningPath: [], aiAdvice: "Offline mode.", consistencyTip: "Offline" };
+        break;
+      case 'Project Recommendations':
+        responseData = [
+          { title: "Offline Project", description: "Network connection required for AI recommendations.", technologies: [], whyThisProject: "Offline mode." }
+        ];
+        break;
+      case 'GitHub Analysis':
+        responseData = { _fallbackMode: true, githubScore: 0, analysisSummary: ["Offline mode enabled. Cannot perform AI analysis."], overallAssessment: "Network connection unavailable.", careerMatch: { frontend: 0, backend: 0, aiTools: 0, cloudDevOps: 0 }, strengths: [], weaknesses: [], recommendations: [] };
+        break;
+      case 'Copilot Chat':
+        responseData = { response: "I'm operating in offline mode. Please check your network connection." };
+        break;
+      case 'Readiness Analysis':
+        responseData = { strengths: ["Offline Mode"], weaknesses: ["Network required"], recommendations: ["Check connection"] };
+        break;
+      case 'Evaluate Candidate Fit':
+        responseData = { matchScore: 0, fitAnalysis: "Offline mode", strengths: [], concerns: ["Network required"], recommendation: "Reject" };
+        break;
+      case 'Opportunity Match Extraction':
+        responseData = { requiredSkills: [], tools: [], requiredExperienceYears: 0, requiredEducation: "Offline" };
+        break;
       default:
-        responseData = { message: "Offline template response for " + feature };
+        responseData = { _fallbackMode: true, message: "Offline template response for " + feature };
     }
 
     const responseTime = Date.now() - startTime;

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { collection, doc, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
-export function normalizeUserProfile(raw = {}, fallbackId = '') {
+function normalizeUserProfile(raw = {}, fallbackId = '') {
   const id = raw.id || raw.uid || raw.userId || fallbackId;
   const name =
     raw.name ||
@@ -108,38 +108,3 @@ export function useUserDirectory() {
   return { users, usersById, loading, error };
 }
 
-export function useUserProfileRecord(userId) {
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(Boolean(userId));
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (!userId || userId === 'me') {
-// eslint-disable-next-line react-hooks/set-state-in-effect
-      setProfile(null);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    setLoading(true);
-    const unsubscribe = onSnapshot(
-      doc(db, 'users', userId),
-      (snapshot) => {
-        setProfile(snapshot.exists() ? normalizeUserProfile({ id: snapshot.id, ...snapshot.data() }, snapshot.id) : null);
-        setError(null);
-        setLoading(false);
-      },
-      (err) => {
-        console.error('User profile listener error:', err);
-        setProfile(null);
-        setError(err);
-        setLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [userId]);
-
-  return { profile, loading, error };
-}

@@ -1,4 +1,4 @@
-export const SKILL_DICTIONARY = {
+const SKILL_DICTIONARY = {
   Programming: ['Python', 'Java', 'JavaScript', 'TypeScript', 'C', 'C++', 'C#', 'Ruby', 'Go', 'Rust', 'PHP', 'Swift', 'Kotlin', 'R', 'Dart'],
   Frontend: ['HTML', 'CSS', 'React', 'Angular', 'Vue', 'Next.js', 'Svelte', 'Tailwind', 'Bootstrap', 'Redux', 'Material-UI', 'Framer Motion'],
   Backend: ['Node.js', 'Express', 'Django', 'Flask', 'Spring Boot', 'Laravel', 'Ruby on Rails', 'FastAPI', 'REST', 'GraphQL', 'gRPC'],
@@ -81,12 +81,9 @@ export function extractTextMetrics(text) {
 
   // 8. Missing Keywords (Local logic)
   const coreKeywords = ['Git', 'Database', 'API', 'Testing'];
-  let localMissingKeywords = [];
-  coreKeywords.forEach(kw => {
-    if (!extractedSkills.has(kw) && !extractedSkills.has(kw.toUpperCase()) && !lowerText.includes(kw.toLowerCase())) {
-      localMissingKeywords.push(kw);
-    }
-  });
+  const localMissingKeywords = coreKeywords.filter(kw => 
+    !extractedSkills.has(kw) && !lowerText.includes(kw.toLowerCase())
+  );
 
   return {
     profileType,
@@ -110,95 +107,3 @@ export function extractTextMetrics(text) {
   };
 }
 
-export function generateRuleBasedFallback(text) {
-  const metrics = extractTextMetrics(text);
-  
-  // Calculate basic ATS Score via the imported engine later, or build a local summary
-  
-  const strengths = [];
-  const weaknesses = [];
-  const improvements = [];
-
-  // Generate Strengths
-  if (metrics.extractedSkills.length > 5) {
-    strengths.push(`Strong technical foundation with ${metrics.extractedSkills.length} skills detected.`);
-  }
-  if (metrics.hasEducation) strengths.push("Education section is clearly present.");
-  if (metrics.hasExperience) strengths.push("Professional experience section detected.");
-  if (metrics.hasGitHub) strengths.push("GitHub link included, good for technical roles.");
-
-  // Generate Improvements based on ACTUAL content
-  if (!metrics.hasGitHub) {
-    weaknesses.push("Missing GitHub or code repository link.");
-    improvements.push({
-      area: "Projects",
-      priority: "HIGH",
-      title: "Add GitHub Link",
-      description: "Include a link to your GitHub profile or specific project repositories so recruiters can view your code."
-    });
-  }
-
-
-  if (metrics.quantifiedAchievements === 0) {
-    weaknesses.push("Lack of quantified achievements.");
-    improvements.push({
-      area: "Experience",
-      priority: "HIGH",
-      title: "Add Quantified Achievements",
-      description: "Use numbers, percentages, or metrics to describe the impact of your work (e.g., 'Improved performance by 20%')."
-    });
-  }
-
-  if (!metrics.hasExperience && metrics.profileType !== 'student' && metrics.profileType !== 'internship') {
-    weaknesses.push("No professional work experience detected.");
-  } else if (!metrics.hasExperience) {
-    // Explicitly don't add to weaknesses for student/interns
-  }
-
-  if (metrics.projectsCount === 0) {
-    weaknesses.push("No explicit Projects section detected.");
-    improvements.push({
-      area: "Projects",
-      priority: "MEDIUM",
-      title: "Add Project Details",
-      description: "Create a dedicated 'Projects' section highlighting 2-3 key technical projects you've built."
-    });
-  }
-
-  if (metrics.extractedSkills.length === 0) {
-    weaknesses.push("No technical skills detected.");
-    improvements.push({
-      area: "Skills",
-      priority: "HIGH",
-      title: "Add a Skills Section",
-      description: "List your programming languages, frameworks, and tools in a clearly labeled 'Skills' section."
-    });
-  }
-
-  return {
-    rawMetrics: {
-      numberOfSkills: metrics.extractedSkills.length,
-      numberOfProjects: metrics.projectsCount,
-      yearsOfExperience: metrics.hasExperience ? 2 : 0, // Fallback guess
-      quantifiedAchievements: metrics.quantifiedAchievements,
-      hasSummary: metrics.hasSummary,
-      hasEducation: metrics.educationCount > 0,
-      missingCrucialKeywords: metrics.extractedSkills.length < 3 ? 3 : 0,
-      formattingErrors: 0
-    },
-    summary: "Basic rule-based analysis generated based on document text.",
-    strengths,
-    weaknesses,
-    missingKeywords: [],
-    extractedSkills: metrics.extractedSkills,
-    recommendedSkills: [],
-    improvements,
-    careerSuggestions: ["Update your resume based on the highlighted improvements to increase your ATS match rate."],
-    qualityScores: {
-      accuracy: 6, // Rule-based is inherently lower quality than AI
-      relevance: 8,
-      personalization: 7,
-      consistency: 10
-    }
-  };
-}

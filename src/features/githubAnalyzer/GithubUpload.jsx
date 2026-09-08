@@ -41,7 +41,15 @@ export default function GithubUpload({ onAnalyze, loading }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const trimmedUsername = username.trim();
+    let trimmedUsername = username.trim();
+    
+    // Auto-extract username if they pasted a full URL
+    if (trimmedUsername.includes('github.com/')) {
+      const parts = trimmedUsername.split('github.com/');
+      if (parts.length > 1) {
+        trimmedUsername = parts[1].split('/')[0].split('?')[0];
+      }
+    }
     if (!trimmedUsername) {
       setError('Please enter a GitHub username.');
       return;
@@ -54,18 +62,23 @@ export default function GithubUpload({ onAnalyze, loading }) {
       const result = await onAnalyze(trimmedUsername, targetRole);
       
       if (result && !result.success) {
+        if (result.error === 'CANCELLED') {
+          return; // Early return so we don't clear loading state, as a new request is running
+        }
+        
         if (result.error === 'USER_NOT_FOUND') {
           setError('GitHub user not found. Please check the username and try again.');
+        } else if (result.error === 'RATE_LIMIT') {
+          setError('GitHub API rate limit reached. Please try again later.');
         } else {
-          // If it fails for another reason, we can set a generic error or rely on parent's toast
-          setError('');
+          setError(result.error || 'Failed to analyze GitHub profile. Please try again.');
         }
       }
-    } catch (_e) {
+    } catch {
       setError('An error occurred. Please try again.');
-    } finally {
-      setIsValidating(false);
     }
+    
+    setIsValidating(false);
   };
 
   return (
@@ -75,7 +88,7 @@ export default function GithubUpload({ onAnalyze, loading }) {
       <div className="flex flex-col lg:flex-row items-center justify-between gap-6 mb-6">
         {/* Left: Text Content */}
         <div className="flex-1 space-y-3 text-center lg:text-left">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#F4F2FF] text-[#6D5DF6] rounded-full text-[13px] font-bold tracking-wide">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#F4F2FF] text-[#6C4CF1] rounded-full text-[13px] font-bold tracking-wide">
             <Sparkles size={16} /> OpportunityOS GitHub Analyzer
           </div>
           <div className="flex items-center justify-between gap-4">
@@ -85,7 +98,7 @@ export default function GithubUpload({ onAnalyze, loading }) {
             <button 
               type="button"
               onClick={() => setShowHowItWorks(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 text-[#6D5DF6] hover:bg-indigo-100 transition-colors text-sm font-bold shadow-sm shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 text-[#6C4CF1] hover:bg-indigo-100 transition-colors text-sm font-bold shadow-sm shrink-0"
             >
               <Info size={16} /> How It Works
             </button>
@@ -98,7 +111,7 @@ export default function GithubUpload({ onAnalyze, loading }) {
         {/* Right: Decorative Illustration */}
         <div className="relative w-full max-w-[400px] lg:max-w-[420px] h-[220px] hidden sm:block shrink-0">
           {/* Faint Window Outline */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[180px] bg-white border border-slate-100 rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.02)] overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-full w-[340px] h-[180px] bg-white border border-slate-100 rounded-2xl shadomax-w-full w-[0_8px_30px_rgba(0,0,0,0.02)] overflow-hidden">
             <div className="h-8 border-b border-slate-50 flex items-center px-4 gap-1.5 bg-slate-50/50">
               <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
               <div className="w-2.5 h-2.5 rounded-full bg-slate-200"></div>
@@ -112,15 +125,15 @@ export default function GithubUpload({ onAnalyze, loading }) {
           </div>
 
           {/* Main GitHub Bubble */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120px] h-[120px] rounded-full bg-gradient-to-br from-[#6D5DF6] to-[#5542F6] flex items-center justify-center shadow-[0_0_60px_rgba(109,93,246,0.25)] z-10 border-4 border-white">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120px] h-[120px] rounded-full bg-gradient-to-br from-[#6C4CF1] to-[#5542F6] flex items-center justify-center shadow-[0_0_60px_rgba(109,93,246,0.25)] z-10 border-4 border-white">
             <svg viewBox="0 0 24 24" width="60" height="60" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" className="text-white relative z-20">
               <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path>
               <path d="M9 18c-4.51 2-5-2-7-2"></path>
             </svg>
             
             {/* Glow rings */}
-            <div className="absolute inset-0 rounded-full border border-[#6D5DF6]/20 scale-[1.3]"></div>
-            <div className="absolute inset-0 rounded-full border border-[#6D5DF6]/10 scale-[1.6]"></div>
+            <div className="absolute inset-0 rounded-full border border-[#6C4CF1]/20 scale-[1.3]"></div>
+            <div className="absolute inset-0 rounded-full border border-[#6C4CF1]/10 scale-[1.6]"></div>
           </div>
 
           {/* Decorative Badges */}
@@ -157,10 +170,11 @@ export default function GithubUpload({ onAnalyze, loading }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
             {/* Username Field */}
             <div className="space-y-1.5">
-              <label className="flex items-center gap-1.5 text-[13px] font-bold text-slate-700">
+              <label htmlFor="github-username" className="flex items-center gap-1.5 text-[13px] font-bold text-slate-700">
                 <User size={14} className="text-slate-400" /> GitHub Username
               </label>
               <input
+                id="github-username"
                 type="text"
                 value={username}
                 onChange={(e) => {
@@ -171,12 +185,15 @@ export default function GithubUpload({ onAnalyze, loading }) {
                 className={`w-full px-4 py-2.5 bg-white border rounded-xl focus:bg-slate-50 focus:ring-4 transition-all outline-none font-medium text-slate-900 placeholder:text-slate-400 ${
                   error 
                     ? 'border-red-300 focus:border-red-400 focus:ring-red-50' 
-                    : 'border-slate-200 focus:border-[#6D5DF6] focus:ring-[#6D5DF6]/10'
+                    : 'border-slate-200 focus:border-[#6C4CF1] focus:ring-[#6C4CF1]/10'
                 }`}
                 required
+                maxLength={39}
+                aria-invalid={error ? 'true' : 'false'}
+                aria-describedby={error ? 'github-username-error' : undefined}
               />
               {error && (
-                <p className="text-red-500 text-[13px] font-medium mt-1.5 flex items-center gap-1.5">
+                <p id="github-username-error" role="alert" className="text-red-500 text-[13px] font-medium mt-1.5 flex items-center gap-1.5">
                   <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                   {error}
                 </p>
@@ -185,14 +202,15 @@ export default function GithubUpload({ onAnalyze, loading }) {
 
             {/* Target Role Field */}
             <div className="space-y-1.5">
-              <label className="flex items-center gap-1.5 text-[13px] font-bold text-slate-700">
-                <Target size={14} className="text-[#6D5DF6]" /> Target Role
+              <label htmlFor="github-target-role" className="flex items-center gap-1.5 text-[13px] font-bold text-slate-700">
+                <Target size={14} className="text-[#6C4CF1]" /> Target Role
               </label>
               <div className="relative">
                 <select
+                  id="github-target-role"
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:bg-slate-50 focus:border-[#6D5DF6] focus:ring-4 focus:ring-[#6D5DF6]/10 transition-all outline-none font-medium text-slate-900 appearance-none"
+                  className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:bg-slate-50 focus:border-[#6C4CF1] focus:ring-4 focus:ring-[#6C4CF1]/10 transition-all outline-none font-medium text-slate-900 appearance-none"
                 >
                   {ROLES.map(role => (
                     <option key={role} value={role}>{role}</option>
@@ -208,10 +226,13 @@ export default function GithubUpload({ onAnalyze, loading }) {
           </div>
 
           <div className="pt-1">
+            <div aria-live="polite" className="sr-only">
+              {loading ? 'Analyzing GitHub profile, please wait...' : isValidating ? 'Checking GitHub...' : ''}
+            </div>
             <button
               type="submit"
               disabled={loading || isValidating || !username.trim()}
-              className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#6D5DF6] to-[#5542F6] text-white px-8 py-3 rounded-xl text-[15px] font-bold hover:shadow-[0_8px_20px_rgba(109,93,246,0.25)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+              className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#6C4CF1] to-[#5542F6] text-white px-8 py-3 rounded-xl text-[15px] font-bold hover:shadow-[0_8px_20px_rgba(109,93,246,0.25)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
             >
               {loading || isValidating ? (
                 <>

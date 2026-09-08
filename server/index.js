@@ -17,7 +17,9 @@ app.use(cors({
     if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      // Log the blocked origin for debugging but don't throw an Error (which causes 500)
+      console.warn(`[CORS] Blocked origin: ${origin}`);
+      callback(null, false);
     }
   }
 }));

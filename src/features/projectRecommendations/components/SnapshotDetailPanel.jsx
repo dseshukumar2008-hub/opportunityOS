@@ -99,7 +99,7 @@ export default function SnapshotDetailPanel({ activeSnapshot }) {
 
         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
           <div>
-            <h5 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 text-emerald-600 flex items-center gap-1">
+            <h5 className="text-[11px] font-extrabold uppercase tracking-wider mb-2 text-emerald-600 flex items-center gap-1">
               <CheckCircle2 size={11} /> Unlocked
             </h5>
             <div className="flex flex-wrap gap-1">
@@ -114,7 +114,7 @@ export default function SnapshotDetailPanel({ activeSnapshot }) {
             </div>
           </div>
           <div>
-            <h5 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 text-amber-600 flex items-center gap-1">
+            <h5 className="text-[11px] font-extrabold uppercase tracking-wider mb-2 text-amber-600 flex items-center gap-1">
               <ShieldAlert size={11} /> Missing
             </h5>
             <div className="flex flex-wrap gap-1">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useProfile } from '../contexts/ProfileContext';
 
@@ -8,15 +8,37 @@ import UserAvatar from '../components/ui/UserAvatar';
 import { useNavigate, useLocation, Outlet} from 'react-router-dom';
 import {
   LayoutDashboard, FileEdit, BarChart3, User, LogOut, Menu,
-  ChevronDown, Bot, Map, Target, Sparkles, Code, Gamepad2
+  ChevronDown, Bot, Map, Target, Sparkles, Code, Gamepad2,
+  FileSearch, Compass, Flag, Lightbulb
 } from 'lucide-react';
 
 import OpportunityOSCopilot from '../components/copilot/OpportunityOSCopilot';
 import { useResume } from '../contexts/ResumeContext';
-import { useGoals } from '../contexts/GoalContext';
+
 import FloatingOnboarding from '../components/onboarding/FloatingOnboarding';
 import { getUserFullName, getUserFirstName } from '../utils/userUtils';
 
+const NavItem = ({ item, isActive, navigate, setIsSidebarOpen }) => {
+  const Icon = item.icon;
+  return (
+    <button
+      onClick={() => {
+        if (item.path === '/resume-review') {
+          localStorage.removeItem('resumeAnalyzerTab');
+          localStorage.removeItem('resumeAnalyzerShowResults');
+        }
+        navigate(item.path);
+        setIsSidebarOpen(false);
+      }}
+      className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
+        isActive ? 'bg-[#6C4CF1]/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+      }`}
+    >
+      <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
+      <span className="flex-1 text-left">{item.name}</span>
+    </button>
+  );
+};
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
@@ -31,9 +53,8 @@ export default function DashboardLayout() {
   const profileDropdownRef = useRef(null);
 
   const { resumeData, getResumeStrength } = useResume();
-  const { goals } = useGoals();
 
-  const studentContext = {
+  const studentContext = useMemo(() => ({
     user: {
       name: getUserFullName(user, profile),
       email: user?.email
@@ -41,10 +62,8 @@ export default function DashboardLayout() {
     profile,
     resume: resumeData,
     atsScore: getResumeStrength ? getResumeStrength() : 0,
-    skillGapResults: [],
-    goals
-  };
-
+    skillGapResults: []
+  }), [user, profile, resumeData, getResumeStrength]);
   useEffect(() => {
 
     function handleClickOutside(event) {
@@ -96,7 +115,7 @@ export default function DashboardLayout() {
       `}>
         {/* Sidebar Header */}
         <div className="h-16 flex items-center px-6 border-b border-slate-100">
-          <button aria-label="Go to Home" className="flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 rounded-lg p-1 -ml-1" onClick={() => navigate('/')}>
+          <button aria-label="Go to Home" className="flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 rounded-lg p-1 -ml-1" onClick={() => navigate('/dashboard')}>
             <div className="relative flex items-center justify-center w-7 h-7">
               <div className="absolute inset-0 border-[3px] border-indigo-600 rounded-full opacity-50"></div>
               <div className="absolute inset-1 border-[3px] border-indigo-600 rounded-full opacity-80"></div>
@@ -109,25 +128,21 @@ export default function DashboardLayout() {
         {/* Sidebar Content */}
         <div className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-0.5 scrollbar-hide">
 
-          {/* Main */}
+          {/* Dashboard Section */}
+          <div className="mb-1 px-4">
+            <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Overview</p>
+          </div>
           {[
             { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-          ].map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
-            return (
-              <button
-                key={item.name}
-                onClick={() => { navigate(item.path); setIsSidebarOpen(false); }}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
-                  isActive ? 'bg-[#6C4CF1]/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-              >
-                <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
-                <span className="flex-1 text-left">{item.name}</span>
-              </button>
-            );
-          })}
+          ].map(item => (
+            <NavItem 
+              key={item.name} 
+              item={item} 
+              isActive={location.pathname === item.path || location.pathname.startsWith(item.path + '/')} 
+              navigate={navigate} 
+              setIsSidebarOpen={setIsSidebarOpen} 
+            />
+          ))}
 
           {/* Career Development Section */}
           <div className="mt-3 mb-1 px-4">
@@ -135,58 +150,38 @@ export default function DashboardLayout() {
           </div>
           {[
             { name: 'Resume Builder', path: '/resume-builder', icon: FileEdit },
-            { name: 'Resume Analyzer', path: '/resume-review', icon: Bot },
+            { name: 'Resume Analyzer', path: '/resume-review', icon: FileSearch },
+            { name: 'GitHub Analyzer', path: '/github-analyzer', icon: Code },
 
-            { name: 'GitHub Analyzer', path: '/github-analyzer', icon: Sparkles },
-          ].map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            return (
-              <button
-                key={item.name}
-                onClick={() => { 
-                  if (item.path === '/resume-review') {
-                    localStorage.removeItem('resumeAnalyzerTab');
-                    localStorage.removeItem('resumeAnalyzerShowResults');
-                  }
-                  navigate(item.path); 
-                  setIsSidebarOpen(false); 
-                }}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
-                  isActive ? 'bg-[#6C4CF1]/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-              >
-                <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
-                <span className="flex-1 text-left">{item.name}</span>
-              </button>
-            );
-          })}
+          ].map(item => (
+            <NavItem 
+              key={item.name} 
+              item={item} 
+              isActive={location.pathname === item.path || location.pathname.startsWith(item.path + '/')} 
+              navigate={navigate} 
+              setIsSidebarOpen={setIsSidebarOpen} 
+            />
+          ))}
 
           {/* Growth & Planning Section */}
           <div className="mt-3 mb-1 px-4">
             <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Growth & Planning</p>
           </div>
           {[
-            { name: 'Career Explorer', path: '/career-explorer', icon: Target },
+
+            { name: 'Career Explorer', path: '/career-explorer', icon: Compass },
             { name: 'Skill Gap Analysis', path: '/skill-gap', icon: Target },
             { name: 'Career Roadmap', path: '/career-roadmap', icon: Map },
-            { name: 'Project Recommendations', path: '/project-recommendations', icon: Code },
-          ].map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            return (
-              <button
-                key={item.name}
-                onClick={() => { navigate(item.path); setIsSidebarOpen(false); }}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
-                  isActive ? 'bg-[#6C4CF1]/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-              >
-                <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
-                <span className="flex-1 text-left">{item.name}</span>
-              </button>
-            );
-          })}
+            { name: 'Project Ideas', path: '/project-recommendations', icon: Lightbulb },
+          ].map(item => (
+            <NavItem 
+              key={item.name} 
+              item={item} 
+              isActive={location.pathname === item.path || location.pathname.startsWith(item.path + '/')} 
+              navigate={navigate} 
+              setIsSidebarOpen={setIsSidebarOpen} 
+            />
+          ))}
 
           {/* AI Guidance Section */}
           <div className="mt-3 mb-1 px-4">
@@ -195,22 +190,15 @@ export default function DashboardLayout() {
           {[
             { name: 'Career Coach', path: '/career-coach', icon: Bot },
             { name: 'Analytics',  path: '/analytics',  icon: BarChart3 },
-          ].map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path;
-            return (
-              <button
-                key={item.name}
-                onClick={() => { navigate(item.path); setIsSidebarOpen(false); }}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
-                  isActive ? 'bg-[#6C4CF1]/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-              >
-                <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
-                <span className="flex-1 text-left">{item.name}</span>
-              </button>
-            );
-          })}
+          ].map(item => (
+            <NavItem 
+              key={item.name} 
+              item={item} 
+              isActive={location.pathname === item.path || location.pathname.startsWith(item.path + '/')} 
+              navigate={navigate} 
+              setIsSidebarOpen={setIsSidebarOpen} 
+            />
+          ))}
 
           {/* Engagement Section */}
           <div className="mt-3 mb-1 px-4">
@@ -218,22 +206,16 @@ export default function DashboardLayout() {
           </div>
           {[
             { name: 'Skill Arcade', path: '/skill-arcade', icon: Gamepad2 },
-          ].map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
-            return (
-              <button
-                key={item.name}
-                onClick={() => { navigate(item.path); setIsSidebarOpen(false); }}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
-                  isActive ? 'bg-[#6C4CF1]/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-              >
-                <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
-                <span className="flex-1 text-left">{item.name}</span>
-              </button>
-            );
-          })}
+          ].map(item => (
+            <NavItem 
+              key={item.name} 
+              item={item} 
+              isActive={location.pathname === item.path || location.pathname.startsWith(item.path + '/')} 
+              navigate={navigate} 
+              setIsSidebarOpen={setIsSidebarOpen} 
+            />
+          ))}
+
 
         </div>
 
@@ -267,6 +249,7 @@ export default function DashboardLayout() {
                 <div className="relative">
                   <UserAvatar
                     src={profile?.avatar_url || profile?.avatarUrl || profile?.photoURL || user?.photoURL}
+                    name={profile?.name || profile?.firstName || user?.displayName}
                     alt="User Avatar"
                     className="w-8 h-8 rounded-full border border-slate-200 bg-slate-100"
                   />

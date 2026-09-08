@@ -2,7 +2,7 @@
 // Skeleton Primitives
 // ─────────────────────────────────────────────────────────────────
 
-export function SkeletonBase({ className = '', ...props }) {
+function SkeletonBase({ className = '', ...props }) {
   return (
     <div
       className={`animate-pulse bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200 bg-[length:400%_100%] ${className}`}
@@ -12,19 +12,19 @@ export function SkeletonBase({ className = '', ...props }) {
   );
 }
 
-export function SkeletonLine({ className = '', w = 'w-full', h = 'h-4', rounded = 'rounded-md', ...props }) {
+function SkeletonLine({ className = '', w = 'w-full', h = 'h-4', rounded = 'rounded-md', ...props }) {
   return <SkeletonBase className={`${w} ${h} ${rounded} ${className}`} {...props} />;
 }
 
-export function SkeletonCircle({ className = '', size = 'w-10 h-10', ...props }) {
+function SkeletonCircle({ className = '', size = 'w-10 h-10', ...props }) {
   return <SkeletonBase className={`rounded-full ${size} shrink-0 ${className}`} {...props} />;
 }
 
-export function SkeletonRect({ className = '', w = 'w-full', h = 'h-[120px]', rounded = 'rounded-2xl', ...props }) {
+function SkeletonRect({ className = '', w = 'w-full', h = 'h-[120px]', rounded = 'rounded-2xl', ...props }) {
   return <SkeletonBase className={`${w} ${h} ${rounded} ${className}`} {...props} />;
 }
 
-export function SkeletonCard({ className = '', children, ...props }) {
+function SkeletonCard({ className = '', children, ...props }) {
   return (
     <div className={`bg-white border border-slate-100 shadow-sm rounded-2xl p-6 ${className}`} {...props}>
       {children}
@@ -37,7 +37,7 @@ export function SkeletonCard({ className = '', children, ...props }) {
 // ─────────────────────────────────────────────────────────────────
 
 /** Dashboard: stat row + widget grid */
-export function DashboardSkeleton() {
+function DashboardSkeleton() {
   return (
     <div className="space-y-6 p-4 lg:p-6 max-w-[1400px] mx-auto">
       {/* Header */}
@@ -97,7 +97,7 @@ export function DashboardSkeleton() {
 }
 
 /** Opportunities: filter sidebar + card grid */
-export function OpportunitiesSkeleton() {
+function OpportunitiesSkeleton() {
   return (
     <div className="flex gap-6 p-4 lg:p-6">
       {/* Filter sidebar */}
@@ -149,7 +149,7 @@ export function OpportunitiesSkeleton() {
 }
 
 /** Team Finder: filter tabs + team cards */
-export function TeamsSkeleton() {
+function TeamsSkeleton() {
   return (
     <div className="p-4 lg:p-6 max-w-[1200px] mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -197,11 +197,11 @@ export function TeamsSkeleton() {
 }
 
 /** Messages: sidebar + chat area */
-export function MessagesSkeleton() {
+function MessagesSkeleton() {
   return (
     <div className="flex h-full overflow-hidden">
       {/* Sidebar */}
-      <div className="w-[350px] border-r border-slate-200 bg-white flex flex-col p-4 space-y-4 shrink-0">
+      <div className="max-w-full w-[350px] border-r border-slate-200 bg-white flex flex-col p-4 space-y-4 shrink-0">
         <div className="space-y-1">
           <SkeletonLine w="w-32" h="h-6" />
           <SkeletonLine w="w-48" h="h-3" />
@@ -245,7 +245,7 @@ export function MessagesSkeleton() {
 }
 
 /** Analytics: stat cards + charts */
-export function AnalyticsSkeleton() {
+function AnalyticsSkeleton() {
   return (
     <div className="p-4 lg:p-6 max-w-7xl mx-auto space-y-8">
       <div className="space-y-2">
@@ -279,7 +279,7 @@ export function AnalyticsSkeleton() {
 }
 
 /** Career Roadmap: header + progress + skill grid */
-export function CareerRoadmapSkeleton() {
+function CareerRoadmapSkeleton() {
   return (
     <div className="max-w-[1200px] mx-auto px-4 py-8 space-y-8">
       {/* Header */}
@@ -337,7 +337,7 @@ export function CareerRoadmapSkeleton() {
 }
 
 /** Goals: stat row + goal cards */
-export function GoalsSkeleton() {
+function GoalsSkeleton() {
   return (
     <div className="max-w-[1200px] mx-auto px-4 py-8 space-y-8">
       <div className="flex items-end justify-between gap-6">

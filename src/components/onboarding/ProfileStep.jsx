@@ -10,7 +10,7 @@ export default function ProfileStep({ onNext, onBack, data, updateData }) {
   const handleDateClick = () => {
     if (dateInputRef.current) {
       if (typeof dateInputRef.current.showPicker === 'function') {
-        try { dateInputRef.current.showPicker(); } catch (_e) { dateInputRef.current.focus(); dateInputRef.current.click(); }
+        try { dateInputRef.current.showPicker(); } catch { dateInputRef.current.focus(); dateInputRef.current.click(); }
       } else {
         dateInputRef.current.focus();
         dateInputRef.current.click();
@@ -51,6 +51,7 @@ export default function ProfileStep({ onNext, onBack, data, updateData }) {
           </label>
           <div className="relative group w-full">
             <div 
+              role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDateClick(); } }}
               onClick={handleDateClick}
               className={`relative flex items-center bg-gradient-to-b from-[#ffffff] to-[#fcfcff] border rounded-[18px] transition-all duration-200 h-[68px] cursor-pointer px-6 ${isError ? 'border-red-400' : isFocused ? 'border-[#C4B5FD] shadow-[0_0_0_4px_rgba(124,58,237,0.08)]' : 'border-[#E8EAF5] hover:border-[#C4B5FD]'}`}
             >

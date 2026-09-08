@@ -5,14 +5,21 @@ export default function ResumeSmartSuggestions({ suggestions, currentScore, pote
   const [showAll, setShowAll] = useState(false);
 
   if (!suggestions || suggestions.length === 0) {
+    // Only show a "perfect" message if the score genuinely warrants it.
+    // If the score is below 90, the action plan being empty is a data gap, not a success.
+    const isPerfect = typeof currentScore === 'number' && currentScore >= 90;
     return (
-      <div className="mt-8 bg-emerald-50 border border-emerald-100 rounded-2xl p-8 flex flex-col items-center justify-center text-center">
-        <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-4 text-emerald-600">
+      <div className={`mt-8 border rounded-2xl p-8 flex flex-col items-center justify-center text-center ${isPerfect ? 'bg-emerald-50 border-emerald-100' : 'bg-amber-50 border-amber-100'}`}>
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${isPerfect ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
           <CheckCircle2 size={24} />
         </div>
-        <h3 className="text-lg font-bold text-emerald-800 mb-2">Your resume looks perfect!</h3>
-        <p className="text-sm font-medium text-emerald-600/80 max-w-sm">
-          We couldn't find any critical areas for improvement. Your formatting, keyword density, and section details are highly optimized.
+        <h3 className={`text-lg font-bold mb-2 ${isPerfect ? 'text-emerald-800' : 'text-amber-800'}`}>
+          {isPerfect ? 'Your resume is highly optimized!' : 'No specific action items generated'}
+        </h3>
+        <p className={`text-sm font-medium max-w-sm ${isPerfect ? 'text-emerald-600/80' : 'text-amber-700/80'}`}>
+          {isPerfect
+            ? 'We couldn\'t find any critical areas for improvement. Your formatting, keyword density, and section details are highly optimized.'
+            : 'The AI did not return specific action steps for this resume. Review the ATS Score and Suggestions tabs for identified issues and missing keywords.'}
         </p>
       </div>
     );

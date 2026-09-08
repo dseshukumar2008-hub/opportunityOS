@@ -91,6 +91,7 @@ export default function ResumeStep({ onNext, onBack }) {
               className="hidden"
             />
             <div 
+              role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDropzoneClick(); } }}
               onClick={handleDropzoneClick}
               className={`
                 flex-1 w-full min-h-[280px] bg-white/60 backdrop-blur-xl border-2 border-dashed 

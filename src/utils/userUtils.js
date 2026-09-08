@@ -1,3 +1,12 @@
+const extractNameFromEmail = (email) => {
+  // eslint-disable-next-line no-useless-escape
+  const namePart = email.split('@')[0].split(/[\._0-9]/)[0];
+  if (namePart && namePart.length > 1) {
+    return namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
+  }
+  return null;
+};
+
 export const getUserFirstName = (user, profile = null) => {
   if (user?.displayName) {
     return user.displayName; // use the exact displayName
@@ -12,12 +21,8 @@ export const getUserFirstName = (user, profile = null) => {
     return user.name.split(' ')[0];
   }
   if (user?.email) {
-    // Try to extract a clean first name from email by removing numbers/symbols
-// eslint-disable-next-line no-useless-escape
-    const namePart = user.email.split('@')[0].split(/[\._0-9]/)[0];
-    if (namePart && namePart.length > 1) {
-      return namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
-    }
+    const extracted = extractNameFromEmail(user.email);
+    if (extracted) return extracted;
   }
   return null; // Return null so we can fallback to just "Welcome back! 👋"
 };
@@ -36,11 +41,41 @@ export const getUserFullName = (user, profile = null) => {
     return user.name;
   }
   if (user?.email) {
-// eslint-disable-next-line no-useless-escape
-    const namePart = user.email.split('@')[0].split(/[\._0-9]/)[0];
-    if (namePart && namePart.length > 1) {
-      return namePart.charAt(0).toUpperCase() + namePart.slice(1).toLowerCase();
-    }
+    const extracted = extractNameFromEmail(user.email);
+    if (extracted) return extracted;
   }
   return 'User'; // Generic fallback
+};
+
+export const calculateProfileCompletion = (profile, hasResume) => {
+  const fieldMapping = {
+    name: profile?.name || profile?.profile?.fullName,
+    email: profile?.email,
+    bio: profile?.bio || profile?.about?.bio,
+    college: profile?.college || profile?.education?.university,
+    branch: profile?.branch || profile?.education?.branch,
+    location: profile?.location || profile?.city || profile?.profile?.location || profile?.country
+  };
+
+  let filled = 0;
+  const missingProfileItems = [];
+  Object.entries(fieldMapping).forEach(([field, value]) => {
+    if (value) {
+      filled++;
+    } else {
+      missingProfileItems.push(field);
+    }
+  });
+  
+  if (!hasResume) missingProfileItems.push('resume');
+  if (!profile?.skills || (profile.skills || []).length === 0) missingProfileItems.push('skills');
+
+  const totalFields = Object.keys(fieldMapping).length + 2;
+  let totalFilled = filled;
+  if (hasResume) totalFilled++;
+  if (profile?.skills?.length > 0) totalFilled++;
+  
+  const percentage = Math.round((totalFilled / totalFields) * 100);
+
+  return { percentage, missingProfileItems };
 };

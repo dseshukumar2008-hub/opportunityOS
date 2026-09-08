@@ -5,14 +5,14 @@ import { Sparkles, Compass, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { useCareer } from '../../contexts/CareerContext';
-import { generateProjectRecommendations } from '../../services/projectRecommendationEngine';
+import { geminiService } from '../../services/geminiService';
 import { toast } from 'react-hot-toast';
 import { useRef } from 'react';
 
 import ContextualBackButton from '../../components/navigation/ContextualBackButton';
 import ProjectRecommendationCard from './ProjectRecommendationCard';
 import LoadingState from './LoadingState';
-import EmptyState from './EmptyState';
+import ProjectWizard from './ProjectWizard';
 import HowItWorksModal from './HowItWorksModal';
 
 export default function ProjectRecommendationPage() {
@@ -31,6 +31,7 @@ export default function ProjectRecommendationPage() {
   const isMounted = useRef(true);
 
   useEffect(() => {
+    isMounted.current = true;
     return () => { isMounted.current = false; };
   }, []);
 
@@ -46,10 +47,12 @@ export default function ProjectRecommendationPage() {
       return;
     }
 
-    let parsedMissingSkills = missingSkillsStr ? missingSkillsStr.split(',') : [];
+    // Attempt to get missing skills from context first, otherwise fallback to profile
+    let parsedMissingSkills = missingSkillsStr 
+      ? missingSkillsStr.split(',') 
+      : (profile?.missingSkills || []);
     
     if (careerContext?.targetRole) {
-// eslint-disable-next-line react-hooks/set-state-in-effect
       setTargetRole(careerContext.targetRole);
       
       if (parsedMissingSkills.length > 0) {
@@ -57,6 +60,10 @@ export default function ProjectRecommendationPage() {
       }
     } else if (profile?.careerGoal) {
       setTargetRole(profile.careerGoal);
+      
+      if (parsedMissingSkills.length > 0) {
+        setMissingSkills(parsedMissingSkills);
+      }
     }
     
     if (profile?.specialization) {
@@ -87,11 +94,12 @@ export default function ProjectRecommendationPage() {
         currentExcluded = [...currentExcluded, ...currentTitles];
       }
 
-      const newRecs = await generateProjectRecommendations({
+      const newRecs = await geminiService.generateProjectRecommendations({
         specialization: spec,
         targetRole: role,
-        missingSkills: skills
-      }, forceRefresh, currentExcluded);
+        missingSkills: skills,
+        excludedProjects: currentExcluded
+      });
       
       if (!isMounted.current) return;
       
@@ -118,6 +126,9 @@ export default function ProjectRecommendationPage() {
   return (
     <div className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
       <ContextualBackButton />
+      <div aria-live="polite" className="sr-only">
+        {loading ? 'Generating personalized project recommendations, please wait...' : ''}
+      </div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-slate-100">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-[#6D4AFF] text-white flex items-center justify-center shadow-sm">
@@ -209,7 +220,7 @@ export default function ProjectRecommendationPage() {
             ))}
           </div>
         ) : (
-          <EmptyState 
+          <ProjectWizard 
             specialization={specialization}
             setSpecialization={setSpecialization}
             targetRole={targetRole}

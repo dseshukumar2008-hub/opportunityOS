@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Bot, X, Send, Sparkles, Loader2 } from 'lucide-react';
-import { db } from '../../config/firebase';
+import { db, auth } from '../../config/firebase';
 import { collection, query, orderBy, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../contexts/AuthContext';
 import { geminiService } from '../../services/geminiService';
@@ -14,15 +14,54 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+  const historyLoadedRef = useRef(false);
   const [queryCache, setQueryCache] = useState({});
 
+  const loadHistory = async () => {
+    // Guard: ensure the Firebase Auth token is ready before firing any Firestore request.
+    // Without this, Firestore requests sent during the React-context/SDK auth sync window
+    // arrive unauthenticated and are denied with "Missing or insufficient permissions."
+    if (!auth.currentUser) {
+      console.warn('[Copilot] loadHistory skipped — auth.currentUser not ready yet.');
+      return;
+    }
+    try {
+      const q = query(
+        collection(db, 'users', user.uid, 'copilot_messages'),
+        orderBy('createdAt', 'asc')
+      );
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+      if (data && data.length > 0) {
+        setMessages(data);
+      } else {
+        const welcome = {
+          id: 'welcome',
+          role: 'assistant',
+          content: `Hi! I'm your OpportunityOS AI Assistant. I can help you explore the platform, understand its features, and answer general career questions. For personalized advice based on your profile and career data, try the Career Copilot.`
+        };
+        setMessages([welcome]);
+      }
+    } catch (err) {
+      console.error('Failed to load copilot history', err);
+    }
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
   
   useEffect(() => {
-    if (user && isOpen) {
+    // Only load history once per session. Reopening the panel must not trigger a repeat fetch.
+    // Use user?.uid (not just user) so this only fires once both the React context
+    // and the Firebase SDK auth state are confirmed non-null.
+    if (user?.uid && isOpen && !historyLoadedRef.current) {
+      historyLoadedRef.current = true;
       loadHistory();
     }
 // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, isOpen]);
+  }, [user?.uid, isOpen]);
 
   useEffect(() => {
     scrollToBottom();
@@ -38,33 +77,9 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  const loadHistory = async () => {
-    try {
-      const q = query(
-        collection(db, 'users', user.id, 'copilot_messages'),
-        orderBy('createdAt', 'asc')
-      );
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      if (data && data.length > 0) {
-        setMessages(data);
-      } else {
-        const welcome = {
-          id: 'welcome',
-          role: 'assistant',
-          content: `Hi! I’m your OpportunityOS AI Assistant. I can help you explore the platform, understand its features, and answer general career questions. For personalized advice based on your profile and career data, try the Career Copilot.`
-        };
-        setMessages([welcome]);
-      }
-    } catch (err) {
-      console.error('Failed to load copilot history', err);
-    }
-  };
-
   const saveMessage = async (role, content) => {
     try {
-      const docRef = await addDoc(collection(db, 'users', user.id, 'copilot_messages'), {
+      const docRef = await addDoc(collection(db, 'users', user.uid, 'copilot_messages'), {
         role,
         content,
         createdAt: serverTimestamp()
@@ -74,10 +89,6 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
       console.error('Failed to save message', err);
       return { id: Date.now().toString(), role, content };
     }
-  };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const handleSubmit = async (e) => {
@@ -279,9 +290,11 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
           <form onSubmit={handleSubmit} className="relative">
             <input
               type="text"
+              aria-label="Ask Copilot a question"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask Copilot..."
+              maxLength={1000}
               className="w-full pl-4 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#6C4CF1] focus:ring-4 focus:ring-[#6C4CF1]/10 transition-all"
             />
             <button

@@ -1,5 +1,5 @@
 import { useEffect,  useState } from 'react';
-import { Briefcase, Send, Users, UserPlus, MessageSquare, FileText, Target, CheckCircle, TrendingUp } from 'lucide-react';
+import { Briefcase, Send, Users, UserPlus, MessageSquare, FileText, Target, CheckCircle, TrendingUp, TrendingDown } from 'lucide-react';
 
 // ── Inline count-up hook ──────────────────────────────────────────
 function useCountUp(end, duration = 1800) {
@@ -110,18 +110,7 @@ const METRICS = [
     trend: '+18% since onboarding',
     trendUp: true,
   },
-  {
-    label: 'Goals Completed',
-    numericValue: 3402,
-    display: (v) => fmt(v),
-    suffix: '',
-    icon: CheckCircle,
-    color: 'text-purple-500',
-    bg: 'bg-purple-50',
-    border: 'border-purple-100',
-    trend: '76% completion rate',
-    trendUp: true,
-  },
+
 ];
 
 function MetricCard({ metric, index }) {
@@ -138,8 +127,8 @@ function MetricCard({ metric, index }) {
         <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${metric.bg}`}>
           <Icon size={22} className={metric.color} />
         </div>
-        <div className={`flex items-center gap-1 text-[11px] font-bold ${metric.trendUp ? 'text-emerald-600' : 'text-red-500'} bg-emerald-50 px-2 py-1 rounded-full`}>
-          <TrendingUp size={10} />
+        <div className={`flex items-center gap-1 text-[11px] font-bold ${metric.trendUp ? 'text-emerald-600 bg-emerald-50' : 'text-red-600 bg-red-50'} px-2 py-1 rounded-full`}>
+          {metric.trendUp ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
           {metric.trend}
         </div>
       </div>

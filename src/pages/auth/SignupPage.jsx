@@ -3,6 +3,7 @@ import { Mail, Lock, User, ArrowRight, AlertCircle, CheckCircle2} from 'lucide-r
 import AuthLayout from './AuthLayout';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { Helmet } from 'react-helmet-async';
 import { analyticsService } from '../../services/analyticsService';
 
 
@@ -20,24 +21,9 @@ export default function SignupPage() {
 
   const { signup } = useAuth();
   const navigate = useNavigate();
+  const from = location.state?.from?.pathname || '/dashboard';
 
-  const getFriendlyErrorMessage = (errorCode) => {
-    switch (errorCode) {
-      case 'auth/email-already-in-use':
-        return 'This email is already registered.';
-      case 'auth/invalid-email':
-        return 'Please enter a valid email address.';
-      case 'auth/weak-password':
-        return 'Password must contain at least 6 characters.';
-      case 'auth/too-many-requests':
-        return 'Too many attempts. Please try again later.';
-      case 'auth/network-request-failed':
-        return 'Network error. Please check your internet connection.';
-      default:
-        return 'Something went wrong. Please try again.';
-    }
-  };
-
+  
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -47,11 +33,17 @@ export default function SignupPage() {
     if (isLoading) return;
     setError('');
 
-    if (!formData.name.trim()) {
+    const trimmedName = formData.name.trim();
+    const trimmedEmail = formData.email.trim();
+
+    if (!trimmedName) {
       setError('Please enter your full name.');
       return;
     }
-    if (!formData.email || !formData.email.includes('@')) {
+    
+    // Robust email regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
       setError('Please enter a valid email address.');
       return;
     }
@@ -68,17 +60,17 @@ export default function SignupPage() {
     
     try {
       const userType = 'student';
-      await signup(formData.email, formData.password, formData.name, userType);
+      await signup(trimmedEmail, formData.password, trimmedName, userType);
       analyticsService.trackEvent('Sign Up', { userType });
       setSuccess(true);
-      setTimeout(() => navigate('/dashboard'), 2000);
+      setTimeout(() => navigate(from, { replace: true }), 2000);
     } catch (err) {
       console.error("Signup Error:", err);
       const errorCode = err.code || '';
       if (err.message.includes('User already registered') || errorCode === 'auth/email-already-in-use') {
          setError('This email is already registered.');
       } else {
-         setError(getFriendlyErrorMessage(errorCode));
+         setError('An error occurred during signup. Please try again.');
       }
     } finally {
       setIsLoading(false);
@@ -96,7 +88,7 @@ export default function SignupPage() {
           <p className="text-slate-600 mb-8">
             Your account has been successfully created. Logging you in...
           </p>
-          <Link to="/dashboard" className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#6C4CF1] hover:bg-indigo-700 transition-colors">
+          <Link to={from} replace className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#6C4CF1] hover:bg-indigo-700 transition-colors">
             Go to Dashboard
           </Link>
         </div>
@@ -105,28 +97,34 @@ export default function SignupPage() {
   }
 
   return (
-    <AuthLayout>
-      <div className="flex flex-col items-center mb-8">
-        <h2 className="text-center text-3xl font-bold tracking-tight text-slate-900">
-          Create your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-slate-600">
-          Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
-            Sign in instead
-          </Link>
-        </p>
-      </div>
+    <>
+      <Helmet>
+        <title>Sign Up - OpportunityOS</title>
+        <meta name="description" content="Create your free OpportunityOS account and unlock AI-powered career tools to build resumes, analyze skill gaps, and achieve your goals." />
+        <link rel="canonical" href="https://opportunityos.app/signup" />
+      </Helmet>
+      <AuthLayout>
+        <div className="flex flex-col items-center mb-8">
+          <h2 className="text-center text-3xl font-bold tracking-tight text-slate-900">
+            Create your account
+          </h2>
+          <p className="mt-2 text-center text-sm text-slate-600">
+            Already have an account?{' '}
+            <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
+              Sign in instead
+            </Link>
+          </p>
+        </div>
 
-      <div className="bg-white py-8 px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-2xl sm:px-10 border border-slate-100">
-        <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+        <div className="bg-white py-8 px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-2xl sm:px-10 border border-slate-100">
+          <form className="space-y-5" onSubmit={handleSubmit} noValidate>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-              <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={16} />
-              <p className="text-sm text-red-600 font-medium">{error}</p>
-            </div>
-          )}
+            {error && (
+              <div id="signup-error" role="alert" className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={16} />
+                <p className="text-sm text-red-600 font-medium">{error}</p>
+              </div>
+            )}
 
           <div>
             <label htmlFor="name" className="block text-sm font-semibold text-slate-900 mb-1.5">
@@ -140,10 +138,14 @@ export default function SignupPage() {
                 id="name"
                 name="name"
                 type="text"
+                autoComplete="name"
                 required
+                maxLength={50}
                 disabled={isLoading}
                 value={formData.name}
                 onChange={handleChange}
+                aria-invalid={error.includes('name') ? 'true' : 'false'}
+                aria-describedby={error ? 'signup-error' : undefined}
                 className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('name') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="John Doe"
               />
@@ -164,9 +166,12 @@ export default function SignupPage() {
                 type="email"
                 autoComplete="email"
                 required
+                maxLength={100}
                 disabled={isLoading}
                 value={formData.email}
                 onChange={handleChange}
+                aria-invalid={error.includes('email') ? 'true' : 'false'}
+                aria-describedby={error ? 'signup-error' : undefined}
                 className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('email') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="you@university.edu"
               />
@@ -185,10 +190,14 @@ export default function SignupPage() {
                 id="password"
                 name="password"
                 type="password"
+                autoComplete="new-password"
                 required
+                maxLength={128}
                 disabled={isLoading}
                 value={formData.password}
                 onChange={handleChange}
+                aria-invalid={error.includes('Password') || error.includes('characters') ? 'true' : 'false'}
+                aria-describedby={error ? 'signup-error' : undefined}
                 className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('Password') || error.includes('characters') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="••••••••"
               />
@@ -207,10 +216,14 @@ export default function SignupPage() {
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
+                autoComplete="new-password"
                 required
+                maxLength={128}
                 disabled={isLoading}
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                aria-invalid={error.includes('match') ? 'true' : 'false'}
+                aria-describedby={error ? 'signup-error' : undefined}
                 className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('match') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="••••••••"
               />
@@ -233,6 +246,7 @@ export default function SignupPage() {
           </p>
         </form>
       </div>
-    </AuthLayout>
+      </AuthLayout>
+    </>
   );
 }

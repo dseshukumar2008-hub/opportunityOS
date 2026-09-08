@@ -24,10 +24,10 @@ export default function AnalyticsSkeleton() {
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         <Skeleton.Card className="xl:col-span-2 h-[400px] flex flex-col">
           <Skeleton.Line w="w-48" h="h-6" className="mb-8" />
-          <div className="flex-1 flex items-end gap-2 px-8">
-             {[...Array(12)].map((_, i) => (
-                <Skeleton.Base key={i} className="flex-1 rounded-t-sm" style={{ height: `${Math.max(20, Math.random() * 100)}%` }} />
-             ))}
+      <div className="flex-1 flex items-end gap-2 px-8">
+         {[65, 40, 80, 55, 90, 35, 70, 50, 85, 45, 75, 60].map((h, i) => (
+            <Skeleton.Base key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}%` }} />
+         ))}
           </div>
         </Skeleton.Card>
 

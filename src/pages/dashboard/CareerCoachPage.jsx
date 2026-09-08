@@ -7,6 +7,8 @@ import { useCopilotMemory } from '../../hooks/useCopilotMemory';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 import { geminiService } from '../../services/geminiService';
 
+
+
 const QUICK_PROMPTS = [
   { icon: FileText, label: 'Resume Tips', prompt: 'Give me 5 actionable tips to improve my resume for tech roles.' },
   { icon: TrendingUp, label: 'Career Path', prompt: 'What career path should I take to become a Senior Software Engineer?' },
@@ -22,12 +24,12 @@ const MessageBubble = React.memo(function MessageBubble({ message }) {
   return (
     <div className={`flex gap-3 mb-6 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
       {!isUser && (
-        <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#6C4CF1] to-indigo-500 flex items-center justify-center shrink-0 shadow-md shadow-indigo-200">
+        <div className="w-9 h-9 rounded-2xl bg-[#6C4CF1] flex items-center justify-center shrink-0 shadow-sm">
           <Sparkles size={16} className="text-white" />
         </div>
       )}
       <div className={`max-w-[75%] rounded-[20px] px-5 py-4 shadow-sm ${isUser
-          ? 'bg-gradient-to-br from-[#6C4CF1] to-indigo-500 text-white rounded-tr-sm'
+          ? 'bg-[#6C4CF1] text-white rounded-tr-sm'
           : 'bg-white border border-slate-100 text-slate-800 rounded-tl-sm'
         }`}>
         {message.content.split('\n').map((line, i) => {
@@ -59,7 +61,7 @@ const MessageBubble = React.memo(function MessageBubble({ message }) {
 function TypingIndicator() {
   return (
     <div className="flex gap-3 mb-6">
-      <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-[#6C4CF1] to-indigo-500 flex items-center justify-center shrink-0 shadow-md shadow-indigo-200">
+      <div className="w-9 h-9 rounded-2xl bg-[#6C4CF1] flex items-center justify-center shrink-0 shadow-sm">
         <Sparkles size={16} className="text-white" />
       </div>
       <div className="bg-white border border-slate-100 rounded-[20px] rounded-tl-sm px-5 py-4 shadow-sm">
@@ -98,24 +100,35 @@ export default function CareerCoachPage() {
   const firstName = profile?.name?.split(' ')[0] || user?.displayName?.split(' ')[0] || 'there';
 
   // Derive visible messages
-  const initialMessage = {
+  const initialMessage = React.useMemo(() => ({
     role: 'assistant',
     content: `👋 Hi ${firstName}! I'm your **AI Career Copilot**, powered by OpportunityOS Intelligence.\n\nI can help you with:\n- 📄 **Resume optimization** and ATS improvements\n- 📈 **Career planning** and skill gap analysis\n- 💼 **Job search strategies** and salary negotiation\n- 🤝 **Networking tips** and LinkedIn optimization\n\nWhat would you like to work on today?`,
     timestamp: new Date().toISOString(),
-  };
+  }), [firstName]);
 
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  const messages = historyMessages.length > 0 ? historyMessages : [initialMessage];
+ 
+  const messages = [initialMessage, ...historyMessages];
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+  }, [historyMessages.length, isTyping]);
+
+  useEffect(() => {
+    if (!isTyping) {
+      inputRef.current?.focus();
+    }
+  }, [isTyping]);
 
   const sendMessage = async (text, isGoalGeneration = false) => {
-    if (!text.trim() && !isGoalGeneration) return;
+    if ((!text.trim() && !isGoalGeneration) || isTyping) return;
 
     if (!isGoalGeneration) {
-      await addMessage({ role: 'user', content: text });
+      // Non-blocking: Firestore persistence should not block the AI request.
+      // If auth is not yet ready or Firestore rejects the write, the AI call
+      // should still proceed so the user gets a response.
+      addMessage({ role: 'user', content: text }).catch(err =>
+        console.warn('[CareerCoach] Failed to persist user message:', err)
+      );
     }
     setInput('');
     setIsTyping(true);
@@ -141,14 +154,35 @@ export default function CareerCoachPage() {
 
       let responseText = result.response || result.personalizedAdvice || "I'm sorry, I couldn't process that.";
 
-      if (isGoalGeneration && result.weeklyGoals) {
+      if (isGoalGeneration && Array.isArray(result?.weeklyGoals) && Array.isArray(result?.dailyActions)) {
         responseText = `**🎯 Your Weekly Goals:**\n${result.weeklyGoals.map(g => `- ${g}`).join('\n')}\n\n**⚡ Daily Actions:**\n${result.dailyActions.map(a => `- ${a}`).join('\n')}\n\n${responseText}`;
       }
 
-      await addMessage({ role: 'assistant', content: responseText });
+      // Non-blocking: display response immediately; persist to Firestore in background
+      addMessage({ role: 'assistant', content: responseText }).catch(err =>
+        console.warn('[CareerCoach] Failed to persist assistant message:', err)
+      );
     } catch (err) {
       console.error("AI Coach Error:", err);
-      await addMessage({ role: 'assistant', content: "I'm having trouble connecting right now. Please try again in a moment!" });
+      // Classify error accurately so users see the right message
+      let msg;
+      const errType = err?.type;
+      const errMsg = err?.originalMessage || err?.message || '';
+      if (errType === 'AI_AUTH_ERROR' || errMsg.toLowerCase().includes('authenticated')) {
+        msg = 'Authentication required. Please refresh the page and try again.';
+      } else if (errType === 'AI_NETWORK_ERROR' || errMsg.toLowerCase().includes('network') || errMsg.toLowerCase().includes('reach')) {
+        msg = 'I could not reach the AI service. Please check your internet connection and try again.';
+      } else if (errType === 'AI_TIMEOUT') {
+        msg = 'The request timed out. Please try again.';
+      } else if (errType === 'AI_RATE_LIMIT' || errType === 'AI_QUOTA_EXHAUSTED') {
+        msg = 'The AI service is temporarily at capacity. Please try again in a moment.';
+      } else {
+        msg = "I'm having trouble connecting right now. Please try again in a moment!";
+      }
+      // Non-blocking: persist error response; don't let Firestore failure hide the UI error
+      addMessage({ role: 'assistant', content: msg }).catch(e =>
+        console.warn('[CareerCoach] Failed to persist error message:', e)
+      );
     } finally {
       setIsTyping(false);
     }
@@ -156,6 +190,7 @@ export default function CareerCoachPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (isTyping || !input.trim()) return;
     sendMessage(input);
   };
 
@@ -167,13 +202,13 @@ export default function CareerCoachPage() {
       {/* ── Header ── */}
       <div className="shrink-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#6C4CF1] to-indigo-500 flex items-center justify-center shadow-md shadow-indigo-200">
+          <div className="w-11 h-11 rounded-2xl bg-[#6C4CF1] flex items-center justify-center shadow-sm">
             <Sparkles size={20} className="text-white" />
           </div>
           <div>
             <h1 className="text-[18px] font-black text-slate-900 leading-tight">AI Career Copilot</h1>
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
               <p className="text-[12px] font-bold text-slate-500">Powered by OpportunityOS Intelligence</p>
             </div>
           </div>
@@ -189,6 +224,9 @@ export default function CareerCoachPage() {
             <MessageBubble key={i} message={msg} />
           ))}
 
+          <div aria-live="polite" className="sr-only">
+            {isTyping ? 'Generating AI response...' : ''}
+          </div>
           {isTyping && <TypingIndicator />}
 
           {/* Quick Prompts */}
@@ -199,10 +237,11 @@ export default function CareerCoachPage() {
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {QUICK_PROMPTS.map((prompt, i) => (
-                  <button
+                  <button aria-label="Send message"
                     key={i}
                     onClick={() => sendMessage(prompt.prompt)}
-                    className="flex items-center gap-3 p-4 bg-white border border-slate-200 hover:border-indigo-200 hover:shadow-md rounded-2xl text-left transition-all group"
+                    disabled={isTyping}
+                    className="flex items-center gap-3 p-4 bg-white border border-slate-200 hover:border-indigo-200 hover:shadow-md rounded-2xl text-left transition-all group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-slate-200 disabled:hover:shadow-none"
                   >
                     <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 group-hover:bg-indigo-100 transition-colors">
                       <prompt.icon size={16} className="text-indigo-600" />
@@ -230,6 +269,7 @@ export default function CareerCoachPage() {
               <input
                 ref={inputRef}
                 type="text"
+                aria-label="Ask your career coach a question"
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 placeholder="Ask your career coach anything…"
@@ -245,7 +285,7 @@ export default function CareerCoachPage() {
             <button
               type="submit"
               disabled={!input.trim() || isTyping}
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#6C4CF1] to-indigo-500 text-white flex items-center justify-center hover:from-indigo-600 hover:to-indigo-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-indigo-200 shrink-0"
+              className="w-12 h-12 rounded-2xl bg-[#6C4CF1] text-white flex items-center justify-center hover:bg-[#5a4add] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm shrink-0"
             >
               <Send size={18} />
             </button>

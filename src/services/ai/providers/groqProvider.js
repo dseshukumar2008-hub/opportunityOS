@@ -5,6 +5,6 @@ export const groqProvider = createApiProvider('groq', (options) => {
     systemInstruction: options.systemInstruction || null,
     temperature: options.temperature !== undefined ? options.temperature : 0.3,
     maxTokens: options.maxTokens,
-    model: 'llama-3.3-70b-versatile'
+    model: 'llama3-70b-8192'
   };
 });

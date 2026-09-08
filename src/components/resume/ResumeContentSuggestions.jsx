@@ -71,7 +71,7 @@ export default function ResumeContentSuggestions({ results }) {
                 </p>
               </div>
               <div className="p-5 relative group">
-                <span className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                <span className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-2 flex items-center gap-1">
                   AI Improved
                 </span>
                 <p className="text-sm text-slate-800 font-medium leading-relaxed mb-6">
@@ -111,7 +111,7 @@ export default function ResumeContentSuggestions({ results }) {
                     </p>
                   </div>
                   <div className="p-5 relative group">
-                    <span className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                    <span className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-2 flex items-center gap-1">
                       Impact-Driven Rewrite
                     </span>
                     <p className="text-sm text-slate-800 font-medium leading-relaxed mb-6 whitespace-pre-wrap">

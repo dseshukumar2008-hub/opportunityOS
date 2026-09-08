@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { Mail, ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react';
 import AuthLayout from './AuthLayout';
 import { Link } from 'react-router-dom';
+import { getFriendlyErrorMessage } from '../../utils/errorUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../../config/firebase';
+import { Helmet } from 'react-helmet-async';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -22,21 +24,7 @@ export default function ForgotPasswordPage() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-  const getFriendlyErrorMessage = (errorCode) => {
-    switch (errorCode) {
-      case 'auth/invalid-email':
-        return 'Please enter a valid email address.';
-      case 'auth/user-not-found':
-        return 'No account found with this email.';
-      case 'auth/too-many-requests':
-        return 'Too many attempts. Please try again later.';
-      case 'auth/network-request-failed':
-        return 'Network error. Please check your internet connection.';
-      default:
-        return 'Something went wrong. Please try again.';
-    }
-  };
-
+  
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     if (isLoading) return;
@@ -61,8 +49,14 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <AuthLayout>
-      <div className="bg-white py-8 px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-2xl sm:px-10 border border-slate-100 overflow-hidden relative">
+    <>
+      <Helmet>
+        <title>Forgot Password - OpportunityOS</title>
+        <meta name="description" content="Reset your password to regain access to your OpportunityOS account." />
+        <link rel="canonical" href="https://opportunityos.app/forgot-password" />
+      </Helmet>
+      <AuthLayout>
+        <div className="bg-white py-8 px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-2xl sm:px-10 border border-slate-100 overflow-hidden relative">
         <AnimatePresence mode="wait">
           {success ? (
             <motion.div 
@@ -88,6 +82,12 @@ export default function ForgotPasswordPage() {
               </div>
               
               <div className="w-full space-y-3">
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 mb-4 text-left">
+                    <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={16} />
+                    <p className="text-sm text-red-600 font-medium">{error}</p>
+                  </div>
+                )}
                 <Link to="/login" className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#6C4CF1] hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 transition-all">
                   <ArrowLeft size={16} />
                   Back to Login
@@ -124,7 +124,7 @@ export default function ForgotPasswordPage() {
 
               <form className="space-y-6" onSubmit={handleSubmit}>
                 {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                  <div id="forgot-password-error" role="alert" className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
                     <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={16} />
                     <p className="text-sm text-red-600 font-medium">{error}</p>
                   </div>
@@ -147,6 +147,8 @@ export default function ForgotPasswordPage() {
                       disabled={isLoading}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      aria-invalid={error ? 'true' : 'false'}
+                      aria-describedby={error ? 'forgot-password-error' : undefined}
                       className={`block w-full pl-10 pr-3 py-2.5 border ${error ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                       placeholder="you@university.edu"
                     />
@@ -175,5 +177,6 @@ export default function ForgotPasswordPage() {
         </AnimatePresence>
       </div>
     </AuthLayout>
+    </>
   );
 }

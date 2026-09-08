@@ -1,4 +1,4 @@
-import { useState} from 'react';
+import { useState, useEffect } from 'react';
 import { useResume } from '../../contexts/ResumeContext';
 import { 
   User, 
@@ -20,12 +20,24 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { geminiService } from '../../services/geminiService';
+import { parseSkillsString } from '../../utils/formatUtils';
 
 const AI_ACTIONS = [
   { id: 'enhance', label: 'Enhance with AI', icon: Wand2 },
   { id: 'ats', label: 'ATS Optimize', icon: CheckCircle2 },
   { id: 'shorten', label: 'Shorten', icon: ChevronUp },
   { id: 'professional', label: 'Make More Professional', icon: Briefcase }
+];
+
+const sections = [
+  { id: 'Personal Info', title: 'Personal Information', icon: User, description: 'Add your basic personal details.' },
+  { id: 'Summary', title: 'Professional Summary', icon: FileText, description: 'Write a compelling overview of your career.' },
+  { id: 'Education', title: 'Education', icon: GraduationCap, description: 'Add your educational background.' },
+  { id: 'Skills', title: 'Skills', icon: Code, description: 'Add your technical and professional skills.' },
+  { id: 'Projects', title: 'Projects', icon: FolderGit2, description: 'Add the projects you have worked on.' },
+  { id: 'Experience', title: 'Experience', icon: Briefcase, description: 'Add your work and internship experience.' },
+  { id: 'Certifications', title: 'Certifications', icon: Award, description: 'Add your certifications and achievements.' },
+  { id: 'Workshops', title: 'Workshops & Training', icon: BookOpen, description: 'Add your workshops and training programs.' }
 ];
 
 export default function ResumeFormPanel() {
@@ -55,7 +67,7 @@ export default function ResumeFormPanel() {
       const enhanced = await geminiService.enhanceResumeText(currentValue, contextType, actionType);
       setAiDrafts(prev => ({ ...prev, [id]: enhanced }));
       toast.success('AI generation complete!');
-    } catch (_e) {
+    } catch {
       toast.error('Failed to enhance text.');
     } finally {
       setEnhancingField(null);
@@ -87,18 +99,6 @@ export default function ResumeFormPanel() {
       return next;
     });
   };
-
-
-  const sections = [
-    { id: 'Personal Info', title: 'Personal Information', icon: User, description: 'Add your basic personal details.' },
-    { id: 'Summary', title: 'Professional Summary', icon: FileText, description: 'Write a compelling overview of your career.' },
-    { id: 'Education', title: 'Education', icon: GraduationCap, description: 'Add your educational background.' },
-    { id: 'Skills', title: 'Skills', icon: Code, description: 'Add your technical and professional skills.' },
-    { id: 'Projects', title: 'Projects', icon: FolderGit2, description: 'Add the projects you have worked on.' },
-    { id: 'Experience', title: 'Experience', icon: Briefcase, description: 'Add your work and internship experience.' },
-    { id: 'Certifications', title: 'Certifications', icon: Award, description: 'Add your certifications and achievements.' },
-    { id: 'Workshops', title: 'Workshops & Training', icon: BookOpen, description: 'Add your workshops and training programs.' }
-  ];
 
   const handleNext = () => {
     const currentIndex = sections.findIndex(s => s.id === activeSection);
@@ -181,10 +181,11 @@ export default function ResumeFormPanel() {
       <div className="flex flex-col gap-4 mt-6 pb-2">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <label className="text-[13px] font-bold text-slate-800">Professional Summary</label>
+            <label htmlFor="summary" className="text-[13px] font-bold text-slate-800">Professional Summary</label>
             {renderAiButton('summary', 'summary-1', summary, 'professional summary')}
           </div>
           <textarea 
+            id="summary"
             rows={5}
             value={summary}
             onChange={(e) => updatePersonalInfo({ summary: e.target.value })}
@@ -207,8 +208,9 @@ export default function ResumeFormPanel() {
     <div className="flex flex-col gap-6 mt-6 pb-2">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
         <div className="flex flex-col gap-2">
-          <label className="text-[13px] font-bold text-slate-800">Full Name <span className="text-red-500">*</span></label>
+          <label htmlFor="fullName" className="text-[13px] font-bold text-slate-800">Full Name <span className="text-red-500">*</span></label>
           <input 
+            id="fullName"
             type="text" 
             value={resumeData?.personalInfo?.fullName || ''}
             onChange={(e) => updatePersonalInfo({ fullName: e.target.value })}
@@ -217,8 +219,9 @@ export default function ResumeFormPanel() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-[13px] font-bold text-slate-800">Email <span className="text-red-500">*</span></label>
+          <label htmlFor="email" className="text-[13px] font-bold text-slate-800">Email <span className="text-red-500">*</span></label>
           <input 
+            id="email"
             type="email" 
             value={resumeData?.personalInfo?.email || ''}
             onChange={(e) => updatePersonalInfo({ email: e.target.value })}
@@ -227,8 +230,9 @@ export default function ResumeFormPanel() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-[13px] font-bold text-slate-800">Phone <span className="text-red-500">*</span></label>
+          <label htmlFor="phone" className="text-[13px] font-bold text-slate-800">Phone <span className="text-red-500">*</span></label>
           <input 
+            id="phone"
             type="tel" 
             value={resumeData?.personalInfo?.phone || ''}
             onChange={(e) => updatePersonalInfo({ phone: e.target.value })}
@@ -237,8 +241,9 @@ export default function ResumeFormPanel() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-[13px] font-bold text-slate-800">Location <span className="text-red-500">*</span></label>
+          <label htmlFor="location" className="text-[13px] font-bold text-slate-800">Location <span className="text-red-500">*</span></label>
           <input 
+            id="location"
             type="text" 
             value={resumeData?.personalInfo?.location || ''}
             onChange={(e) => updatePersonalInfo({ location: e.target.value })}
@@ -247,8 +252,9 @@ export default function ResumeFormPanel() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-[13px] font-bold text-slate-800">LinkedIn</label>
+          <label htmlFor="linkedin" className="text-[13px] font-bold text-slate-800">LinkedIn</label>
           <input 
+            id="linkedin"
             type="url" 
             value={resumeData?.personalInfo?.linkedin || ''}
             onChange={(e) => updatePersonalInfo({ linkedin: e.target.value })}
@@ -257,8 +263,9 @@ export default function ResumeFormPanel() {
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label className="text-[13px] font-bold text-slate-800">GitHub</label>
+          <label htmlFor="github" className="text-[13px] font-bold text-slate-800">GitHub</label>
           <input 
+            id="github"
             type="url" 
             value={resumeData?.personalInfo?.github || ''}
             onChange={(e) => updatePersonalInfo({ github: e.target.value })}
@@ -268,8 +275,9 @@ export default function ResumeFormPanel() {
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <label className="text-[13px] font-bold text-slate-800">Portfolio</label>
+        <label htmlFor="portfolio" className="text-[13px] font-bold text-slate-800">Portfolio</label>
         <input 
+          id="portfolio"
           type="url" 
           value={resumeData.personalInfo.portfolio}
           onChange={(e) => updatePersonalInfo({ portfolio: e.target.value })}
@@ -293,7 +301,7 @@ export default function ResumeFormPanel() {
       {resumeData.education.map((edu) => (
         <div key={edu.id} className="p-5 border border-slate-200 rounded-xl bg-white shadow-sm relative group">
           <button 
-            onClick={() => removeArrayItem('education', edu.id)}
+            onClick={() => { if (window.confirm('Are you sure you want to remove this entry?')) removeArrayItem('education', edu.id); }}
             className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors"
           >
             <Trash2 size={18} />
@@ -354,7 +362,19 @@ export default function ResumeFormPanel() {
     </div>
   );
 
-  const [skillsText, setSkillsText] = useState(resumeData.skills.join(', '));
+  const [skillsText, setSkillsText] = useState(() => (resumeData.skills || []).join(', '));
+
+  useEffect(() => {
+    setSkillsText(prev => {
+      const currentParsed = parseSkillsString(prev);
+      const incoming = resumeData.skills || [];
+      // Only update local string if the incoming array differs from what we're currently typing
+      if (currentParsed.join(',') !== incoming.join(',')) {
+        return incoming.join(', ');
+      }
+      return prev;
+    });
+  }, [resumeData.skills]);
 
   const renderSkillsForm = () => (
     <div className="flex flex-col gap-4 mt-6 pb-2">
@@ -365,7 +385,7 @@ export default function ResumeFormPanel() {
           value={skillsText}
           onChange={(e) => {
             setSkillsText(e.target.value);
-            updateSkills(e.target.value.split(',').map(s => s.trim()).filter(Boolean));
+            updateSkills(parseSkillsString(e.target.value));
           }}
           placeholder="React, JavaScript, TypeScript, Node.js..."
           className="px-4 py-3 rounded-xl border border-slate-200 text-[14px] text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
@@ -381,7 +401,7 @@ export default function ResumeFormPanel() {
     <div className="flex flex-col gap-4 mt-6 pb-2">
       {resumeData.projects.map((proj) => (
         <div key={proj.id} className="p-5 border border-slate-200 rounded-xl bg-white shadow-sm relative group">
-          <button onClick={() => removeArrayItem('projects', proj.id)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors">
+          <button onClick={() => { if (window.confirm('Are you sure you want to remove this entry?')) removeArrayItem('projects', proj.id); }} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors">
             <Trash2 size={18} />
           </button>
           <div className="flex flex-col gap-5">
@@ -447,7 +467,7 @@ export default function ResumeFormPanel() {
     <div className="flex flex-col gap-4 mt-6 pb-2">
       {resumeData.experience.map((exp) => (
         <div key={exp.id} className="p-5 border border-slate-200 rounded-xl bg-white shadow-sm relative group">
-          <button onClick={() => removeArrayItem('experience', exp.id)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors">
+          <button onClick={() => { if (window.confirm('Are you sure you want to remove this entry?')) removeArrayItem('experience', exp.id); }} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors">
             <Trash2 size={18} />
           </button>
           <div className="flex flex-col gap-5">
@@ -512,7 +532,7 @@ export default function ResumeFormPanel() {
     <div className="flex flex-col gap-4 mt-6 pb-2">
       {resumeData.certifications.map((cert) => (
         <div key={cert.id} className="p-5 border border-slate-200 rounded-xl bg-white shadow-sm relative group">
-          <button onClick={() => removeArrayItem('certifications', cert.id)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors">
+          <button onClick={() => { if (window.confirm('Are you sure you want to remove this entry?')) removeArrayItem('certifications', cert.id); }} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors">
             <Trash2 size={18} />
           </button>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -566,7 +586,7 @@ export default function ResumeFormPanel() {
     <div className="flex flex-col gap-4 mt-6 pb-2">
       {(resumeData.workshops || []).map((ws) => (
         <div key={ws.id} className="p-5 border border-slate-200 rounded-xl bg-white shadow-sm relative group">
-          <button onClick={() => removeArrayItem('workshops', ws.id)} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors">
+          <button onClick={() => { if (window.confirm('Are you sure you want to remove this entry?')) removeArrayItem('workshops', ws.id); }} className="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition-colors">
             <Trash2 size={18} />
           </button>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">

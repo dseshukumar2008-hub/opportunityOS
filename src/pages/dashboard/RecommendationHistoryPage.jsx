@@ -3,12 +3,13 @@ import { useRecommendationHistory } from '../../hooks/useRecommendationHistory';
 import { 
   History, TrendingUp, Calendar, ArrowUpRight, ChevronRight, 
   Award, Search, SlidersHorizontal, Grid, List, Clock, Sparkles, Trophy, 
-// eslint-disable-next-line no-unused-vars
   Briefcase, CheckSquare, ArrowUpDown, RefreshCcw
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import MatchTrendChart from '../../features/projectRecommendations/components/MatchTrendChart';
 import SnapshotDetailPanel from '../../features/projectRecommendations/components/SnapshotDetailPanel';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
+import { formatDateShort } from '../../utils/formatUtils';
 
 export default function RecommendationHistoryPage() {
   const { history, clearHistory } = useRecommendationHistory();
@@ -18,9 +19,10 @@ export default function RecommendationHistoryPage() {
   const [layoutMode, setLayoutMode] = useState('timeline'); // 'timeline' | 'grid' | 'summary'
   
   const [selectedSnapshotId, setSelectedSnapshotId] = useState(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const sortedByDateDesc = useMemo(() => {
-    return [...(history || [])].sort((a, b) => new Date(b.date) - new Date(a.date));
+    return [...(history || [])].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
   }, [history]);
 
   const oldestSnapshot = sortedByDateDesc.length > 0 ? sortedByDateDesc[sortedByDateDesc.length - 1] : null;
@@ -36,9 +38,9 @@ export default function RecommendationHistoryPage() {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(snap => 
-        snap.topRecommendation.toLowerCase().includes(q) ||
-        (snap.improvements && snap.improvements.some(imp => imp.toLowerCase().includes(q))) ||
-        (snap.skillsAdded && snap.skillsAdded.some(s => s.toLowerCase().includes(q)))
+        snap.topRecommendation?.toLowerCase()?.includes(q) ||
+        (snap.improvements && snap.improvements.some(imp => imp?.toLowerCase()?.includes(q))) ||
+        (snap.skillsAdded && snap.skillsAdded.some(s => s?.toLowerCase()?.includes(q)))
       );
     }
 
@@ -53,8 +55,8 @@ export default function RecommendationHistoryPage() {
     }
 
     result.sort((a, b) => {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
+      const dateA = new Date(a.date || 0).getTime() || 0;
+      const dateB = new Date(b.date || 0).getTime() || 0;
       if (sortBy === 'newest') return dateB - dateA;
       if (sortBy === 'oldest') return dateA - dateB;
       if (sortBy === 'highest_score') return b.averageMatchScore - a.averageMatchScore;
@@ -72,33 +74,14 @@ export default function RecommendationHistoryPage() {
     return found || processedSnapshots[0];
   }, [processedSnapshots, selectedSnapshotId]);
 
-  // SVG Chart Setup (100x40 SVG grid scaled representation)
-  const chartHeight = 80;
-  const chartWidth = 500;
-  const padding = 20;
-  
   const chronologicalHistory = useMemo(() => {
-    return [...(history || [])].sort((a, b) => new Date(a.date) - new Date(b.date));
+    return [...(history || [])].sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
   }, [history]);
-
-  const safeHistory = history || [];
-  const minScore = safeHistory.length > 0 ? Math.max(0, Math.min(...safeHistory.map(h => h.averageMatchScore)) - 10) : 0;
-  const maxScore = safeHistory.length > 0 ? Math.min(100, Math.max(...safeHistory.map(h => h.averageMatchScore)) + 10) : 100;
-  const range = maxScore - minScore || 1;
-
-  const points = useMemo(() => {
-    if (chronologicalHistory.length === 0) return '';
-    return chronologicalHistory.map((h, i) => {
-      const x = (i / Math.max(1, chronologicalHistory.length - 1)) * (chartWidth - padding * 2) + padding;
-      const y = chartHeight - padding - ((h.averageMatchScore - minScore) / range) * (chartHeight - padding * 2);
-      return `${x},${y}`;
-    }).join(' ');
-  }, [chronologicalHistory, minScore, range]);
 
   if (!history || history.length === 0) {
     return (
       <div className="max-w-[1200px] mx-auto p-6 md:p-8 flex flex-col items-center justify-center min-h-[500px]">
-        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-6 animate-pulse">
+        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-6">
           <History size={24} className="text-slate-400" />
         </div>
         <h2 className="text-[20px] font-extrabold text-slate-900 mb-2">No recommendation history available.</h2>
@@ -123,13 +106,13 @@ export default function RecommendationHistoryPage() {
             Recommendation History
           </h1>
           <p className="text-[15px] text-slate-500 mt-2 font-medium">
-            Monitor and review the evolution of your match scores, skills gap completions, and role recommendations.
+            Monitor and review the evolution of your match scores, skill gap completions, and role recommendations.
           </p>
         </div>
         
         <div className="flex items-center gap-3">
           <button 
-            onClick={clearHistory}
+            onClick={() => setShowClearConfirm(true)}
             className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-[13px] font-bold transition-all flex items-center gap-1.5"
           >
             <RefreshCcw size={14} />
@@ -141,7 +124,7 @@ export default function RecommendationHistoryPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         
         <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
           <div className="flex justify-between items-start mb-4">
@@ -171,28 +154,12 @@ export default function RecommendationHistoryPage() {
           <div className="flex items-center gap-2">
             <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full transition-all duration-1000" 
+                className="h-full bg-[#6C4CF1] rounded-full transition-all duration-1000" 
                 style={{ width: `${newestSnapshot.atsScore || 85}%` }}
               />
             </div>
             <span className="text-[12px] font-bold text-slate-600">{newestSnapshot.atsScore >= 80 ? 'Optimal' : 'Needs Work'}</span>
           </div>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <p className="text-[12px] font-bold text-slate-400 uppercase tracking-wide">Goals Completed</p>
-              <h3 className="text-[28px] font-black text-slate-900 mt-1">{newestSnapshot.goalsCompleted || 8} Achievements</h3>
-            </div>
-            <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500">
-              <Trophy size={18} />
-            </div>
-          </div>
-          <p className="text-[12px] text-slate-500 font-medium flex items-center gap-1">
-            <CheckSquare size={14} className="text-emerald-500" />
-            Active skill gaps bridged on target roadmaps
-          </p>
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
@@ -230,17 +197,10 @@ export default function RecommendationHistoryPage() {
             chronologicalHistory={chronologicalHistory}
             activeSnapshot={activeSnapshot}
             setSelectedSnapshotId={setSelectedSnapshotId}
-            minScore={minScore}
-            maxScore={maxScore}
-            range={range}
-            chartWidth={chartWidth}
-            chartHeight={chartHeight}
-            padding={padding}
-            points={points}
           />
         </div>
 
-        <div className="bg-gradient-to-br from-[#6D5DF6] to-[#5a4add] rounded-2xl p-6 shadow-md text-white flex flex-col justify-between relative overflow-hidden">
+        <div className="bg-[#6C4CF1] rounded-2xl p-6 shadow-md text-white flex flex-col justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 p-6 opacity-[0.07] translate-x-4 -translate-y-4">
             <Award size={180} />
           </div>
@@ -256,7 +216,7 @@ export default function RecommendationHistoryPage() {
               You increased your average match rate by a massive <span className="font-extrabold text-white text-[15px]">{scoreImprovement}%</span> over the last 90 days. This improvement resulted from optimizing your skills.
             </p>
           </div>
-          <div className="flex items-center justify-between mt-6 bg-white/10 backdrop-blur-sm px-4 py-3 rounded-xl border border-white/15">
+          <div className="flex items-center justify-between mt-6 bg-white/10 px-4 py-3 rounded-xl border border-white/15">
             <span className="text-[13px] font-bold text-indigo-100">Baseline Score: {oldestSnapshot.averageMatchScore}%</span>
             <ArrowUpRight size={16} className="text-emerald-300" />
             <span className="text-[16px] font-black text-white">Current: {newestSnapshot.averageMatchScore}%</span>
@@ -366,8 +326,7 @@ export default function RecommendationHistoryPage() {
                 
                 {processedSnapshots.map((snapshot) => {
                   const isActive = snapshot.id === activeSnapshot?.id;
-                  const dateObj = new Date(snapshot.date);
-                  const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                  const formattedDate = formatDateShort(snapshot.date);
                   
                   return (
                     <button 
@@ -427,8 +386,7 @@ export default function RecommendationHistoryPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {processedSnapshots.map((snapshot) => {
                 const isActive = snapshot.id === activeSnapshot?.id;
-                const dateObj = new Date(snapshot.date);
-                const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const formattedDate = formatDateShort(snapshot.date);
 
                 return (
                   <button 
@@ -477,7 +435,7 @@ export default function RecommendationHistoryPage() {
           ) : (
             <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left border-collapse min-w-[700px]">
                   <thead>
                     <tr className="bg-slate-50/50 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wide">
                       <th className="py-4 px-6">Snapshot Date</th>
@@ -508,7 +466,7 @@ export default function RecommendationHistoryPage() {
                             <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-[#6D5DF6]' : 'bg-slate-300'}`} />
                             {formattedDate}
                           </td>
-                          <td className="py-4 px-6 font-extrabold text-slate-800">{snapshot.topRecommendation}</td>
+                          <td className="py-4 px-6 font-extrabold text-slate-800 whitespace-nowrap">{snapshot.topRecommendation}</td>
                           <td className="py-4 px-6 text-center">
                             <span className={`px-2 py-0.5 rounded-md text-[12px] font-black ${
                               snapshot.averageMatchScore >= 80 ? 'bg-emerald-50 text-emerald-600' : 'bg-indigo-50 text-[#6D5DF6]'
@@ -534,6 +492,17 @@ export default function RecommendationHistoryPage() {
         </div>
 
       </div>
+      <ConfirmationModal
+        isOpen={showClearConfirm}
+        onClose={() => setShowClearConfirm(false)}
+        onConfirm={() => {
+          clearHistory();
+          setShowClearConfirm(false);
+        }}
+        title="Reset Baseline History?"
+        message="Are you sure you want to clear your recommendation history? This will delete all saved snapshots and reset your growth baseline. This action cannot be undone."
+        confirmText="Reset Baseline"
+      />
     </div>
   );
 }

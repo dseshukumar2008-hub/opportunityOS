@@ -17,14 +17,6 @@ export function getProvider(name) {
   return providers.get(name);
 }
 
-// Allows changing provider priority dynamically without changing app features
-export function setProviderPriority(priorityList) {
-  providerPriority = priorityList;
-}
-
-export function getProviderPriority() {
-  return providerPriority;
-}
 
 export function getDefaultProvider() {
   // Find the first registered provider that exists in the priority list

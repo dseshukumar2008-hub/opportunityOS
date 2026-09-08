@@ -25,25 +25,6 @@ export default function HeroSection() {
           Build your profile, improve your resume, discover your skill gaps, and grow with personalized career guidance.
         </p>
 
-        {/* Opportunity Pills */}
-        <div className="grid grid-cols-2 xl:flex xl:flex-nowrap gap-3 xl:gap-4 mb-6 xl:mb-8 w-full">
-          <div className="w-full xl:flex-1 flex items-center justify-start gap-2 bg-white border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-[13px] font-semibold text-slate-700 cursor-default overflow-hidden">
-            <div className="shrink-0 w-5 h-5 xl:w-6 xl:h-6 bg-indigo-100 text-indigo-600 rounded flex items-center justify-center"><FileText size={12}/></div>
-            <span className="truncate">Resume Analysis</span>
-          </div>  
-          <div className="w-full xl:flex-1 flex items-center justify-start gap-2 bg-white border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-[13px] font-semibold text-slate-700 cursor-default overflow-hidden">
-            <div className="shrink-0 w-5 h-5 xl:w-6 xl:h-6 bg-purple-100 text-purple-600 rounded flex items-center justify-center"><Brain size={12}/></div>
-            <span className="truncate">AI Career Coach</span>
-          </div>
-          <div className="w-full xl:flex-1 flex items-center justify-start gap-2 bg-white border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-[13px] font-semibold text-slate-700 cursor-default overflow-hidden">
-            <div className="shrink-0 w-5 h-5 xl:w-6 xl:h-6 bg-emerald-100 text-emerald-600 rounded flex items-center justify-center"><Target size={12}/></div>
-            <span className="truncate">Skill Matching</span>
-          </div>
-          <div className="w-full xl:flex-1 flex items-center justify-start gap-2 bg-white border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-lg text-xs xl:text-[13px] font-semibold text-slate-700 cursor-default overflow-hidden">
-            <div className="shrink-0 w-5 h-5 xl:w-6 xl:h-6 bg-blue-100 text-blue-600 rounded flex items-center justify-center"><LayoutDashboard size={12}/></div>
-            <span className="truncate">Career Dashboard</span>
-          </div>
-        </div>
 
         {/* Buttons */}
         <div className="flex items-center gap-4 mb-6 xl:mb-8">
@@ -56,16 +37,7 @@ export default function HeroSection() {
 
         </div>
 
-        {/* Social Proof */}
-        <div className="flex items-center gap-4">
-          <div className="flex -space-x-3">
-            <img src="https://i.pravatar.cc/100?img=1" alt="Avatar" className="w-8 h-8 xl:w-10 xl:h-10 rounded-full border-2 border-white object-cover" />
-            <img src="https://i.pravatar.cc/100?img=2" alt="Avatar" className="w-8 h-8 xl:w-10 xl:h-10 rounded-full border-2 border-white object-cover" />
-            <img src="https://i.pravatar.cc/100?img=3" alt="Avatar" className="w-8 h-8 xl:w-10 xl:h-10 rounded-full border-2 border-white object-cover" />
-            <img src="https://i.pravatar.cc/100?img=4" alt="Avatar" className="w-8 h-8 xl:w-10 xl:h-10 rounded-full border-2 border-white object-cover" />
-          </div>
-          <p className="text-xs xl:text-sm text-slate-600 font-medium">Join 25,000+ students building their future</p>
-        </div>
+
       </div>
 
       {/* Right Column: Dashboard Mockup */}

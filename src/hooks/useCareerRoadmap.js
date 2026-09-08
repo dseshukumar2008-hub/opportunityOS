@@ -5,7 +5,6 @@ import { auth, db } from '../config/firebase';
 import { useProfile } from '../contexts/ProfileContext';
 import { useActivity } from '../contexts/ActivityContext';
 import { analyticsService } from '../services/analyticsService';
-import { getTemplateRoadmap } from '../data/roadmapTemplates';
 import { generate as aiGenerate } from '../services/ai/aiProvider';
 
 const INITIAL = {
@@ -174,33 +173,31 @@ export function useCareerRoadmap() {
   const { profile, mergeProfileData } = useProfile();
   const { addActivity } = useActivity();
   const uidRef = useRef(null);
-  const dispatch$ = useRef(dispatch);
-  dispatch$.current = dispatch;
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
         uidRef.current = null;
-        dispatch$.current({ type: 'NO_USER' });
+        dispatch({ type: 'NO_USER' });
         return;
       }
 
       const uid = firebaseUser.uid;
       uidRef.current = uid;
-      dispatch$.current({ type: 'FETCH_START', uid });
+      dispatch({ type: 'FETCH_START', uid });
 
       try {
         const snap = await getDoc(doc(db, 'career_roadmaps', uid));
         if (snap.exists()) {
-          dispatch$.current({ type: 'FETCH_OK', data: snap.data() });
+          dispatch({ type: 'FETCH_OK', data: snap.data() });
         } else {
-          dispatch$.current({ type: 'NO_ROADMAP' });
+          dispatch({ type: 'NO_ROADMAP' });
         }
       } catch (err) {
         if (err.code === 'permission-denied') {
-          dispatch$.current({ type: 'NO_ROADMAP' });
+          dispatch({ type: 'NO_ROADMAP' });
         } else {
-          dispatch$.current({ type: 'FETCH_ERROR', error: `Could not load roadmap (${err.message})` });
+          dispatch({ type: 'FETCH_ERROR', error: `Could not load roadmap (${err.message})` });
         }
       }
     });
@@ -210,13 +207,10 @@ export function useCareerRoadmap() {
 
   const generate = useCallback(async (wizardData) => {
     const uid = uidRef.current;
-    if (!uid) return dispatch$.current({ type: 'GEN_ERROR', error: 'Not authenticated.' });
+    if (!uid) return dispatch({ type: 'GEN_ERROR', error: 'Not authenticated.' });
 
-    dispatch$.current({ type: 'GEN_START' });
+    dispatch({ type: 'GEN_START' });
 
-    const maxRetries = 3;
-    const retryDelays = [3000, 6000, 9000];
-    let attempt = 0;
     let parsed = null;
     let fallbackUsed = false;
 
@@ -233,30 +227,20 @@ export function useCareerRoadmap() {
       }
     };
 
-    while (attempt <= maxRetries && !parsed) {
-      try {
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Generation timeout')), 65000)
-        );
-        const response = await Promise.race([aiGenerate(request), timeoutPromise]);
-        
-        if (!response.success) {
-          throw response.error;
-        }
-        
-        parsed = response.data;
-      } catch (err) {
-        console.error(`[Roadmap Gen] Attempt ${attempt + 1} failed:`, err);
-        if (attempt < maxRetries) {
-          const delay = retryDelays[attempt];
-          await new Promise(res => setTimeout(res, delay));
-        }
-        attempt++;
+    try {
+      const response = await aiGenerate(request);
+      
+      if (!response.success) {
+        throw response.error;
       }
+      
+      parsed = response.data;
+    } catch (err) {
+      console.error(`[Roadmap Gen] Generation failed:`, err);
     }
 
     if (!parsed) {
-      dispatch$.current({ type: 'GEN_ERROR', error: 'Failed to generate a roadmap. Please try again later.' });
+      dispatch({ type: 'GEN_ERROR', error: 'Failed to generate a roadmap. Please try again later.' });
       return;
     }
 
@@ -280,12 +264,14 @@ export function useCareerRoadmap() {
       };
 
       await setDoc(doc(db, 'career_roadmaps', uid), docData);
-      dispatch$.current({ type: 'GEN_OK', data: { ...docData, createdAt: new Date() } });
+      dispatch({ type: 'GEN_OK', data: { ...docData, createdAt: new Date() } });
       
+      const actualTotalTasks = (parsed.phases || []).reduce((acc, p) => acc + (p.tasks?.length || 0), 0);
+
       await mergeProfileData({ 
         targetRole: wizardData.targetCareer,
         hasRoadmap: true,
-        roadmapProgress: { totalTasks: 25, completedTasks: 0 } 
+        roadmapProgress: { totalTasks: actualTotalTasks, completedTasks: 0 } 
       });
 
       if (addActivity) {
@@ -304,9 +290,9 @@ export function useCareerRoadmap() {
       }
     } catch (saveErr) {
       console.error('[Roadmap Gen] Save Error:', saveErr);
-      dispatch$.current({ type: 'GEN_ERROR', error: 'Failed to save roadmap to database.' });
+      dispatch({ type: 'GEN_ERROR', error: 'Failed to save roadmap to database.' });
     }
-  }, [profile, mergeProfileData]);
+  }, [profile, mergeProfileData, addActivity]);
 
   const toggleTask = useCallback(async (taskId, done) => {
     const uid = uidRef.current;
@@ -316,13 +302,16 @@ export function useCareerRoadmap() {
     const next = done ? [...new Set([...prev, taskId])] : prev.filter(id => id !== taskId);
 
     const updated = { ...state.roadmap, completedTasks: next };
-    dispatch$.current({ type: 'TASK_UPDATE', roadmap: updated });
+    dispatch({ type: 'TASK_UPDATE', roadmap: updated });
 
     try {
+      const actualTotalTasks = (state.roadmap.roadmapData?.phases || []).reduce((acc, p) => acc + (p.tasks?.length || 0), 0);
+      const validCompleted = (state.roadmap.roadmapData?.phases || []).reduce((acc, p) => acc + (p.tasks?.filter(t => next.includes(t.id)).length || 0), 0);
+
       await updateDoc(doc(db, 'career_roadmaps', uid), { completedTasks: next, updatedAt: serverTimestamp() });
       
       await mergeProfileData({ 
-        roadmapProgress: { totalTasks: 25, completedTasks: next.length } 
+        roadmapProgress: { totalTasks: actualTotalTasks, completedTasks: validCompleted } 
       });
       
       if (done) {
@@ -339,7 +328,7 @@ export function useCareerRoadmap() {
     } catch (err) {
       console.error('Failed to update task:', err);
     }
-  }, [state.roadmap]);
+  }, [state.roadmap, mergeProfileData]);
 
   const reset = useCallback(async () => {
     const uid = uidRef.current;
@@ -350,7 +339,7 @@ export function useCareerRoadmap() {
         console.error('Failed to delete roadmap:', err);
       }
     }
-    dispatch$.current({ type: 'RESET' });
+    dispatch({ type: 'RESET' });
   }, []);
 
   return { state, generate, toggleTask, reset };

@@ -2,9 +2,35 @@
  * Utility to deeply analyze GitHub portfolio and calculate metrics.
  */
 
-export async function fetchContributionHeatmap(username) {
+async function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 10000, signal, ...customOptions } = options;
+  
+  // Use the provided signal if it exists, otherwise create a new one
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  
+  // If the parent aborts, abort our internal controller too
+  const onAbort = () => controller.abort();
+  if (signal) {
+    if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+    signal.addEventListener('abort', onAbort);
+  }
+
   try {
-    const res = await fetch(`https://github-contributions-api.jasonbarry.com/v1/${username}`);
+    const response = await fetch(resource, {
+      ...customOptions,
+      signal: controller.signal
+    });
+    return response;
+  } finally {
+    clearTimeout(id);
+    if (signal) signal.removeEventListener('abort', onAbort);
+  }
+}
+
+export async function fetchContributionHeatmap(username, signal) {
+  try {
+    const res = await fetchWithTimeout(`https://github-contributions-api.jasonbarry.com/v1/${username}`, { signal });
     if (!res.ok) throw new Error("Heatmap fetch failed");
     const data = await res.json();
     
@@ -52,7 +78,7 @@ export async function fetchContributionHeatmap(username) {
     
     try {
       // Fallback: fetch recent events (up to 90 days, but max 100 events per page)
-      const evRes = await fetch(`https://api.github.com/users/${username}/events?per_page=100`);
+      const evRes = await fetchWithTimeout(`https://api.github.com/users/${username}/events?per_page=100`, { signal });
       if (evRes.ok) {
         const events = await evRes.json();
         const now = new Date();
@@ -81,7 +107,7 @@ export async function fetchContributionHeatmap(username) {
 }
 
 // Deeply fetch data for Top 5 repositories
-export async function fetchDeepGithubData(username, allRepos) {
+export async function fetchDeepGithubData(username, allRepos, signal) {
   // Sort by stars, then forks, then updated
   const sortedRepos = [...allRepos].sort((a, b) => {
     if (b.stargazers_count !== a.stargazers_count) return b.stargazers_count - a.stargazers_count;
@@ -96,6 +122,18 @@ export async function fetchDeepGithubData(username, allRepos) {
 
   await Promise.allSettled(top5.map(async (repo) => {
     try {
+      if (!repo.default_branch) {
+        deepAnalysis.push({
+          repoName: repo.name,
+          readme: "",
+          packageJson: null,
+          requirementsTxt: null,
+          hasActions: false,
+          hasDocker: false
+        });
+        return;
+      }
+      
       let readme = "";
       let packageJson = null;
       let requirementsTxt = null;
@@ -103,7 +141,7 @@ export async function fetchDeepGithubData(username, allRepos) {
       let hasDocker = false;
 
       // Fetch Tree (limit to 1 level for speed, or recursive if small)
-      const treeRes = await fetch(`https://api.github.com/repos/${username}/${repo.name}/git/trees/${repo.default_branch}?recursive=1`, { headers });
+      const treeRes = await fetchWithTimeout(`https://api.github.com/repos/${username}/${repo.name}/git/trees/${repo.default_branch}?recursive=1`, { headers, signal });
       if (treeRes.ok) {
         const treeData = await treeRes.json();
         const files = treeData.tree || [];
@@ -114,19 +152,19 @@ export async function fetchDeepGithubData(username, allRepos) {
 
         // If package.json exists, fetch it
         if (filePaths.includes('package.json')) {
-          const pkgRes = await fetch(`https://raw.githubusercontent.com/${username}/${repo.name}/${repo.default_branch}/package.json`);
+          const pkgRes = await fetchWithTimeout(`https://raw.githubusercontent.com/${username}/${repo.name}/${repo.default_branch}/package.json`, { signal });
           if (pkgRes.ok) packageJson = await pkgRes.text();
         }
         
         // If requirements.txt exists, fetch it
         if (filePaths.includes('requirements.txt')) {
-          const reqRes = await fetch(`https://raw.githubusercontent.com/${username}/${repo.name}/${repo.default_branch}/requirements.txt`);
+          const reqRes = await fetchWithTimeout(`https://raw.githubusercontent.com/${username}/${repo.name}/${repo.default_branch}/requirements.txt`, { signal });
           if (reqRes.ok) requirementsTxt = await reqRes.text();
         }
       }
 
       // Fetch README
-      const readmeRes = await fetch(`https://raw.githubusercontent.com/${username}/${repo.name}/${repo.default_branch}/README.md`);
+      const readmeRes = await fetchWithTimeout(`https://raw.githubusercontent.com/${username}/${repo.name}/${repo.default_branch}/README.md`, { signal });
       if (readmeRes.ok) {
         readme = await readmeRes.text();
       }
@@ -147,8 +185,7 @@ export async function fetchDeepGithubData(username, allRepos) {
   return deepAnalysis;
 }
 
-// eslint-disable-next-line no-unused-vars
-export function calculateLocalGithubMetrics(githubData, userData, targetRole) {
+export function calculateLocalGithubMetrics(githubData, userData) {
   let stars = 0;
   let repoCount = githubData.length;
   let languageCounts = {};

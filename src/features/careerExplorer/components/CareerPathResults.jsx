@@ -69,7 +69,7 @@ export default function CareerPathResults({ userProfile, onRetake, resumeData, p
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Real-Time Career Match Engine</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Recommended Career Paths</h2>
           <p className="text-slate-500 mt-1">
             Calculated instantly from your Resume, GitHub, LinkedIn, and Onboarding profile.
           </p>

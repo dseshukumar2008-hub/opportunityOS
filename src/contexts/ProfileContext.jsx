@@ -1,8 +1,9 @@
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '../config/firebase';
 import { doc, onSnapshot, setDoc, getDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
+import { getErrorMessage } from '../utils/errorUtils';
 
 const ProfileContext = createContext({});
 
@@ -37,9 +38,9 @@ export const ProfileProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user?.uid]);
 
-  const updateProfile = async (updates) => {
+  const updateProfile = useCallback(async (updates) => {
     if (!user) return { error: 'No user logged in' };
 
     try {
@@ -53,12 +54,12 @@ export const ProfileProvider = ({ children }) => {
       return { data: { ...profile, ...updates }, error: null };
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error(error.message || 'Failed to update profile');
+      toast.error(getErrorMessage(error, 'Failed to update profile. Please try again.'));
       return { data: null, error };
     }
-  };
+  }, [user, profile]);
 
-  const mergeProfileData = async (updates) => {
+  const mergeProfileData = useCallback(async (updates) => {
     if (!user) return { error: 'No user logged in' };
     try {
       const docRef = doc(db, 'users', user.uid);
@@ -78,9 +79,9 @@ export const ProfileProvider = ({ children }) => {
       console.error('Error merging profile data:', error);
       return { error };
     }
-  };
+  }, [user]);
 
-  const fetchUserProfile = async (userId) => {
+  const fetchUserProfile = useCallback(async (userId) => {
     try {
       const docRef = doc(db, 'users', userId);
       const docSnap = await getDoc(docRef);
@@ -93,7 +94,7 @@ export const ProfileProvider = ({ children }) => {
     } catch (err) {
       return { data: null, error: err };
     }
-  };
+  }, []);
 
   const value = useMemo(() => ({
     profile,
@@ -101,8 +102,7 @@ export const ProfileProvider = ({ children }) => {
     updateProfile,
     mergeProfileData,
     fetchUserProfile
-// eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [profile, loading]); // Functions don't strictly need to be in deps unless they use state, but we'll stick to this. Actually, wait, functions recreate on render, so if we omit them, we're fine, but eslint might complain. Let's just use them or omit them since they depend on `user` state which changes rarely.
+  }), [profile, loading, updateProfile, mergeProfileData, fetchUserProfile]); 
 
   return (
     <ProfileContext.Provider value={value}>

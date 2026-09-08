@@ -1,107 +1,125 @@
 import { useState, useCallback } from 'react';
-
-const STORAGE_KEY = 'oppOs_recHistory';
+import { useAuth } from '../contexts/AuthContext';
 
 const INITIAL_HISTORY = [];
 
-export function useRecommendationHistory() {
-  const [history, setHistory] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      } else {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_HISTORY));
-        return INITIAL_HISTORY;
+const loadHistory = (key) => {
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        // Filter out malformed records (e.g. missing averageMatchScore which would cause UI crashes)
+        return parsed.filter(item => 
+          item && 
+          item.id && 
+          typeof item.averageMatchScore === 'number'
+        );
       }
-    } catch (err) {
-      console.warn('Failed to parse recommendation history from local storage:', err);
-      return INITIAL_HISTORY;
     }
-  });
+    return INITIAL_HISTORY;
+  } catch (err) {
+    console.warn('Failed to parse recommendation history from local storage:', err);
+    return INITIAL_HISTORY;
+  }
+};
+
+export function useRecommendationHistory() {
+  const { user } = useAuth();
+  const storageKey = user?.id ? `oppOs_recHistory_${user.id}` : 'oppOs_recHistory_anonymous';
+
+  const [history, setHistory] = useState(() => loadHistory(storageKey));
+  const [prevStorageKey, setPrevStorageKey] = useState(storageKey);
+
+  if (storageKey !== prevStorageKey) {
+    setPrevStorageKey(storageKey);
+    setHistory(loadHistory(storageKey));
+  }
 
   const saveHistory = useCallback((newHistory) => {
     setHistory(newHistory);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
+      localStorage.setItem(storageKey, JSON.stringify(newHistory));
     } catch (err) {
       console.warn('Failed to save recommendation history to local storage:', err);
     }
-  }, []);
+  }, [storageKey]);
 
   const addSnapshot = useCallback((averageMatchScore, topRecommendation, recommendationCount) => {
-    const lastSnapshot = history[history.length - 1];
-    
-    // Only add if there's a meaningful change (e.g., score went up or top rec changed)
-    if (
-      lastSnapshot && 
-      lastSnapshot.averageMatchScore === averageMatchScore && 
-      lastSnapshot.topRecommendationId === topRecommendation.id
-    ) {
-      return false; // No snapshot needed
-    }
+    setHistory(prevHistory => {
+      const lastSnapshot = prevHistory[prevHistory.length - 1];
+      const topRecId = topRecommendation.id || 'opp-custom';
+      
+      // Only add if there's a meaningful change (e.g., score went up or top rec changed)
+      if (
+        lastSnapshot && 
+        lastSnapshot.averageMatchScore === averageMatchScore && 
+        lastSnapshot.topRecommendationId === topRecId
+      ) {
+        return prevHistory; // No snapshot needed
+      }
 
-    // Determine simulated improvements based on score changes
-    const improvements = [];
-    const skillsAdded = [];
-    const skillsMissing = ['GraphQL', 'Docker', 'AWS'];
-    
-    if (lastSnapshot) {
-      if (averageMatchScore > lastSnapshot.averageMatchScore) {
-        improvements.push('Improved overall match scores');
+      const improvements = [];
+      const skillsAdded = [];
+      const skillsMissing = [];
+      
+      const topRecTitle = topRecommendation.title || topRecommendation;
+      
+      if (lastSnapshot) {
+        if (averageMatchScore > lastSnapshot.averageMatchScore) {
+          improvements.push('Improved overall match scores');
+        } else {
+          improvements.push('Updated baseline snapshot');
+        }
         
-        // Randomly simulate reasons for the jump
-        const possibleReasons = [
-          'Added missing skills to resume',
-          'Improved ATS resume layout score',
-          'Completed professional certifications',
-          'Increased user profile completeness',
-          'Participated in collaborative team projects'
-        ];
-        improvements.push(possibleReasons[Math.floor(Math.random() * possibleReasons.length)]);
-        skillsAdded.push('Advanced JavaScript', 'Tailwind CSS');
+        if (topRecId !== lastSnapshot.topRecommendationId) {
+          improvements.push(`Unlocked higher match for ${topRecTitle}`);
+        }
       } else {
-        improvements.push('Updated baseline snapshot');
+        improvements.push('Initial baseline established');
+      }
+
+      const currentAts = lastSnapshot ? lastSnapshot.atsScore : 70;
+      const currentApps = lastSnapshot ? lastSnapshot.applicationsSubmitted : 0;
+      const currentGoals = lastSnapshot ? lastSnapshot.goalsCompleted : 0;
+
+      const newSnapshot = {
+        id: `snap-${Date.now()}`,
+        date: new Date().toISOString(),
+        averageMatchScore,
+        atsScore: currentAts,
+        topRecommendation: topRecTitle,
+        topRecommendationId: topRecId,
+        recommendationCount: recommendationCount || 1,
+        improvements,
+        skillsAdded,
+        skillsMissing,
+        applicationsSubmitted: currentApps,
+        goalsCompleted: currentGoals,
+        matchBreakdown: { 
+          skills: Math.round(averageMatchScore * 1.02), 
+          experience: Math.round(averageMatchScore * 0.95), 
+          formatting: Math.round(averageMatchScore * 1.08) 
+        },
+        recommendedRoles: [
+          { role: topRecTitle, score: averageMatchScore, type: 'Internship' },
+          { role: 'Frontend Developer', score: Math.max(50, averageMatchScore - 5), type: 'Full-time' }
+        ]
+      };
+
+      const newHistory = [...prevHistory, newSnapshot];
+      
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(newHistory));
+      } catch (err) {
+        console.warn('Failed to save recommendation history to local storage:', err);
       }
       
-      if (topRecommendation.id !== lastSnapshot.topRecommendationId) {
-        improvements.push(`Unlocked higher match for ${topRecommendation.title || topRecommendation}`);
-      }
-    } else {
-      improvements.push('Initial baseline established');
-    }
-
-    const currentAts = lastSnapshot ? Math.min(95, lastSnapshot.atsScore + 4) : 70;
-    const currentApps = lastSnapshot ? lastSnapshot.applicationsSubmitted + 1 : 1;
-    const currentGoals = lastSnapshot ? lastSnapshot.goalsCompleted + 1 : 1;
-
-    const newSnapshot = {
-      id: `snap-${Date.now()}`,
-      date: new Date().toISOString(),
-      averageMatchScore,
-      atsScore: currentAts,
-      topRecommendation: topRecommendation.title || topRecommendation,
-      topRecommendationId: topRecommendation.id || 'opp-custom',
-      recommendationCount,
-      improvements,
-      skillsAdded,
-      skillsMissing,
-      applicationsSubmitted: currentApps,
-      goalsCompleted: currentGoals,
-      matchBreakdown: { 
-        skills: Math.round(averageMatchScore * 1.02), 
-        experience: Math.round(averageMatchScore * 0.95), 
-        formatting: Math.round(averageMatchScore * 1.08) 
-      },
-      recommendedRoles: [
-        { role: topRecommendation.title || topRecommendation, score: averageMatchScore, type: 'Internship' },
-        { role: 'Frontend Developer', score: Math.max(50, averageMatchScore - 5), type: 'Full-time' }
-      ]
-    };
-
-    saveHistory([...history, newSnapshot]);
+      return newHistory;
+    });
+    
     return true;
-  }, [history, saveHistory]);
+  }, [storageKey]);
 
   const clearHistory = useCallback(() => {
     saveHistory(INITIAL_HISTORY);

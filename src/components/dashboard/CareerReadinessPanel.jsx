@@ -1,4 +1,4 @@
-import { Award, Zap, Target, Users, Briefcase, Medal, LineChart } from 'lucide-react';
+import { Award, Zap, Target, Users, Medal, LineChart } from 'lucide-react';
 import { useCareerReadiness } from '../../hooks/useCareerReadiness';
 import { Link } from 'react-router-dom';
 

@@ -2,6 +2,24 @@ import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 // We'll initialize the worker lazily inside extractTextFromFile
 
+export const validateResumeFile = (file) => {
+  const validTypes = [
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ];
+  
+  const fileName = file.name || '';
+  const hasValidExtension = fileName.toLowerCase().endsWith('.pdf') || fileName.toLowerCase().endsWith('.docx');
+  
+  if (!validTypes.includes(file.type) && !hasValidExtension) {
+    return { isValid: false, error: 'Only PDF and DOCX files are allowed.' };
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    return { isValid: false, error: 'Your resume exceeds the 10 MB upload limit. Please compress your PDF or remove unnecessary images before uploading.' };
+  }
+  return { isValid: true };
+};
+
 export const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
     if (!file) {
@@ -56,11 +74,17 @@ export const extractTextFromFile = async (file) => {
               }
               const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
               let extractedText = '';
-              for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const textContent = await page.getTextContent();
-                const pageText = textContent.items.map(item => item.str).join(' ');
-                extractedText += pageText + ' ';
+              try {
+                for (let i = 1; i <= pdf.numPages; i++) {
+                  const page = await pdf.getPage(i);
+                  const textContent = await page.getTextContent();
+                  const pageText = textContent.items.map(item => item.str).join(' ');
+                  extractedText += pageText + ' ';
+                }
+              } finally {
+                if (pdf && pdf.destroy) {
+                  await pdf.destroy();
+                }
               }
               text = extractedText;
             } catch (pdfErr) {

@@ -1,12 +1,8 @@
 import { Map, CheckCircle2, Circle, FileText, Code, User, Lightbulb } from 'lucide-react';
-import { useUserProfile } from '../../hooks/useUserProfile';
-import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
 export default function CareerJourneyWidget({ userState }) {
-// eslint-disable-next-line no-unused-vars
-  const { hasProfile, hasResume } = userState || {};
-  const { profile } = useUserProfile(); // To check if skills are added
+  const { profile, hasProfile, hasResume } = userState || {};
   
   const hasProjects = false; // Project saving has been removed
 

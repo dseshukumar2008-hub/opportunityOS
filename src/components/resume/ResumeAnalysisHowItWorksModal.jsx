@@ -27,6 +27,7 @@ export default function ResumeAnalysisHowItWorksModal({ isOpen, onClose }) {
             How AI Resume Analysis Works
           </h2>
           <button 
+            aria-label="Close modal"
             onClick={onClose}
             className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors bg-white hover:bg-slate-100 p-1 rounded-full shadow-sm"
           >

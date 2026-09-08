@@ -85,3 +85,16 @@
   0% { left: -100%; }
   100% { left: 200%; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  *:not(.animate-spin):not(.preserve-motion),
+  *:not(.animate-spin):not(.preserve-motion)::before,
+  *:not(.animate-spin):not(.preserve-motion)::after {
+    animation-delay: -1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-delay: 0s !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}

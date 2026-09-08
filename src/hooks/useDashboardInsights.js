@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useUserProfile } from './useUserProfile';
 import { useResumeInsights } from './useResumeInsights';
 import { useCareerReadiness } from './useCareerReadiness';
+import { calculateProfileCompletion } from '../utils/userUtils';
 
 export function useDashboardInsights() {
   const { profile, isLoading: isProfileLoading } = useUserProfile();
@@ -9,8 +10,7 @@ export function useDashboardInsights() {
   const { score: readinessScore, breakdown } = useCareerReadiness();
 
   const insights = useMemo(() => {
-    // 1. Next Best Action
-// eslint-disable-next-line no-useless-assignment
+    // eslint-disable-next-line no-useless-assignment
     let nextBestAction = null;
 // eslint-disable-next-line no-useless-assignment
     let nextBestActionCta = null;
@@ -46,40 +46,13 @@ export function useDashboardInsights() {
       nextBestActionIcon = "Zap";
     }
 
-    // 2. Profile Completion
-    const fieldMapping = {
-      name: profile?.profile?.fullName || profile?.name,
-      email: profile?.email,
-      bio: profile?.about?.bio || profile?.bio,
-      college: profile?.education?.university || profile?.college,
-      branch: profile?.education?.branch || profile?.branch,
-      location: profile?.profile?.location || profile?.location
-    };
+        const { percentage: profileCompletionPct, missingProfileItems } = calculateProfileCompletion(profile, hasResume);
 
-    let filled = 0;
-    const missingProfileItems = [];
-    Object.entries(fieldMapping).forEach(([field, value]) => {
-      if (value) {
-        filled++;
-      } else {
-        missingProfileItems.push(field);
-      }
-    });
-    
-    if (!hasResume) missingProfileItems.push('resume');
-    if (!profile?.skills || (profile.skills || []).length === 0) missingProfileItems.push('skills');
-
-    // Calculate total fields to evaluate completion
-    const totalFields = Object.keys(fieldMapping).length + 2;
-    let totalFilled = filled;
-    if (hasResume) totalFilled++;
-    if (profile?.skills?.length > 0) totalFilled++;
-    const profileCompletionPct = Math.round((totalFilled / totalFields) * 100);
-
-    // 5. Skill Gap Analysis
-    // Aggregate required skills from top 5 recommendations
+        // Aggregate required skills from top 5 recommendations
     const requiredByOps = {};
-    const userSkillsSet = new Set((profile?.skills || []).map(s => s.toLowerCase()));
+    const rawSkills = profile?.skills || [];
+    const skillsArray = Array.isArray(rawSkills) ? rawSkills : (typeof rawSkills === 'string' ? rawSkills.split(',') : []);
+    const userSkillsSet = new Set(skillsArray.map(s => s.trim().toLowerCase()).filter(Boolean));
     if (profile?.resumeSkills) {
       profile.resumeSkills.forEach(s => userSkillsSet.add(s.toLowerCase()));
     }
@@ -111,6 +84,11 @@ export function useDashboardInsights() {
       careerReadiness: {
         score: readinessScore,
         breakdown
+      },
+
+      resume: {
+        hasInsights: hasResume,
+        atsScore
       }
     };
   }, [profile, hasResume, atsScore, readinessScore, breakdown]);

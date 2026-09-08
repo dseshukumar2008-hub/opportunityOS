@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Mail, Lock, ArrowRight, AlertCircle, Loader2, Check } from 'lucide-react';
 import AuthLayout from './AuthLayout';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { getFriendlyErrorMessage } from '../../utils/errorUtils';
 import { useAuth } from '../../contexts/AuthContext';
+import { useModalBehavior } from '../../hooks/useModalBehavior';
 import toast from 'react-hot-toast';
 import { fetchSignInMethodsForEmail } from 'firebase/auth';
 import { auth } from '../../config/firebase';
+import { Helmet } from 'react-helmet-async';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -15,28 +18,14 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
+  const modalRef = useModalBehavior(showNoAccountModal, () => setShowNoAccountModal(false));
+
   const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/dashboard';
 
-  const getFriendlyErrorMessage = (errorCode) => {
-    switch (errorCode) {
-      case 'auth/invalid-credential':
-        return 'Incorrect email or password.';
-      case 'auth/user-not-found':
-        return 'No account found with this email.';
-      case 'auth/wrong-password':
-        return 'Incorrect password.';
-      case 'auth/invalid-email':
-        return 'Please enter a valid email address.';
-      case 'auth/too-many-requests':
-        return 'Too many attempts. Please try again later.';
-      case 'auth/network-request-failed':
-        return 'Network error. Please check your internet connection.';
-      default:
-        return 'Something went wrong. Please try again.';
-    }
-  };
-
+  
   const handleGoogleLogin = async () => {
     if (isGoogleLoading || isLoading) return;
     setError(null);
@@ -45,7 +34,7 @@ export default function LoginPage() {
     try {
       await loginWithGoogle();
       toast.success('Successfully logged in with Google!');
-      navigate('/dashboard');
+      navigate(from, { replace: true });
     } catch (err) {
       console.error("Google Login error:", err);
       if (err.code === 'auth/popup-blocked') {
@@ -67,7 +56,11 @@ export default function LoginPage() {
     if (isLoading || isGoogleLoading) return;
     setError(null);
     
-    if (!email || !email.includes('@')) {
+    const trimmedEmail = email.trim();
+    
+    // Robust email regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
       setError({ message: 'Please enter a valid email address.' });
       return;
     }
@@ -79,8 +72,8 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      await login(email, password);
-      navigate('/dashboard');
+      await login(trimmedEmail, password);
+      navigate(from, { replace: true });
     } catch (err) {
       console.error("Login error:", err);
       const errorCode = err.code || '';
@@ -92,7 +85,7 @@ export default function LoginPage() {
         err.message === 'Invalid login credentials'
       ) {
         try {
-          const methods = await fetchSignInMethodsForEmail(auth, email);
+          const methods = await fetchSignInMethodsForEmail(auth, trimmedEmail);
           if (methods.length > 0) {
             setError({
               title: "Incorrect Password",
@@ -116,8 +109,14 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthLayout>
-      <div className="flex flex-col items-center mb-8">
+    <>
+      <Helmet>
+        <title>Login - OpportunityOS</title>
+        <meta name="description" content="Sign in to OpportunityOS to access your AI career copilot, resume builder, and personalized career tracking tools." />
+        <link rel="canonical" href="https://opportunityos.app/login" />
+      </Helmet>
+      <AuthLayout>
+        <div className="flex flex-col items-center mb-8">
         <h2 className="text-center text-3xl font-bold tracking-tight text-slate-900">
           Welcome back
         </h2>
@@ -133,7 +132,7 @@ export default function LoginPage() {
         <form className="space-y-6" onSubmit={handleSubmit}>
           
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+            <div id="login-error" role="alert" className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
               <AlertCircle className="text-red-500 shrink-0 mt-0.5" size={16} />
               <div className="flex flex-col">
                 {error.title && <span className="text-sm text-red-800 font-bold">{error.title}</span>}
@@ -156,9 +155,12 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
+                maxLength={100}
                 disabled={isLoading || isGoogleLoading}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                aria-invalid={error && !email ? 'true' : 'false'}
+                aria-describedby={error ? 'login-error' : undefined}
                 className={`block w-full pl-10 pr-3 py-2.5 border ${error && !email ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="you@university.edu"
               />
@@ -186,9 +188,12 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
+                maxLength={128}
                 disabled={isLoading || isGoogleLoading}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                aria-invalid={error && !password ? 'true' : 'false'}
+                aria-describedby={error ? 'login-error' : undefined}
                 className={`block w-full pl-10 pr-3 py-2.5 border ${error && !password ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="••••••••"
               />
@@ -238,8 +243,15 @@ export default function LoginPage() {
       </div>
 
       {showNoAccountModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-          <div className="bg-white/90 backdrop-blur-xl rounded-[24px] shadow-2xl border border-white/50 w-full max-w-md overflow-hidden relative animate-in fade-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md" onClick={() => setShowNoAccountModal(false)}>
+          <div 
+            ref={modalRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            className="bg-white rounded-[24px] shadow-2xl border border-slate-100 w-full max-w-md overflow-hidden relative animate-in fade-in zoom-in-95 duration-300 outline-none"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Ambient glow */}
 
             
@@ -271,7 +283,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/signup', { state: { email } })}
-                  className="w-full py-3.5 px-4 text-sm font-bold text-white bg-gradient-to-r from-[#6C4CF1] to-[#8168f8] rounded-xl shadow-[0_8px_16px_rgba(108,76,241,0.25)] hover:shadow-[0_12px_20px_rgba(108,76,241,0.3)] hover:-translate-y-0.5 transition-all duration-200"
+                  className="w-full py-3.5 px-4 text-sm font-bold text-white bg-[#6C4CF1] hover:bg-[#5a4add] rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                 >
                   Create Free Account
                 </button>
@@ -288,5 +300,6 @@ export default function LoginPage() {
         </div>
       )}
     </AuthLayout>
+    </>
   );
 }

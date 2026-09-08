@@ -38,12 +38,16 @@ const ModernResume = ({ data, isPdfMode }) => {
           {personalInfo?.fullName || 'Full Name'}
         </h1>
         <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5 text-[12px]" style={{ color: textLight }}>
-          {personalInfo?.email && <span>{personalInfo.email}</span>}
-          {personalInfo?.phone && <span>| {personalInfo.phone}</span>}
-          {personalInfo?.location && <span>| {personalInfo.location}</span>}
-          {personalInfo?.linkedin && <span>| {formatUrl(personalInfo.linkedin)}</span>}
-          {personalInfo?.github && <span>| {formatUrl(personalInfo.github)}</span>}
-          {personalInfo?.portfolio && <span>| {formatUrl(personalInfo.portfolio)}</span>}
+          {[
+            personalInfo?.email,
+            personalInfo?.phone,
+            personalInfo?.location,
+            formatUrl(personalInfo?.linkedin),
+            formatUrl(personalInfo?.github),
+            formatUrl(personalInfo?.portfolio)
+          ].filter(Boolean).map((item, i, arr) => (
+            <span key={i}>{item}{i < arr.length - 1 ? ' |' : ''}</span>
+          ))}
         </div>
       </div>
 
@@ -92,7 +96,7 @@ const ModernResume = ({ data, isPdfMode }) => {
                   {exp.responsibilities && (
                     <ul className="list-disc pl-5 flex flex-col gap-1 mt-1">
                       {String(exp.responsibilities).split('\n').filter(Boolean).map((line, i) => (
-                        <li key={i} className="pl-1 leading-relaxed">{line.replace(/^- /, '')}</li>
+                        <li key={i} className="pl-1 leading-relaxed">{line.trim().replace(/^[-•*]\s*/, '')}</li>
                       ))}
                     </ul>
                   )}
@@ -111,15 +115,15 @@ const ModernResume = ({ data, isPdfMode }) => {
                 <div key={proj.id || idx}>
                   <div className="flex justify-between items-baseline font-bold" style={{ color: textDarker }}>
                     <span>
-                      {proj.title} 
-                      {proj.techStack && <span className="font-normal italic"> | {proj.techStack}</span>}
+                      {proj.title}
+                      {proj.techStack && <span className="font-normal italic">{proj.title ? ' | ' : ''}{proj.techStack}</span>}
                     </span>
                     <span className="font-normal">{formatUrl(proj.link)}</span>
                   </div>
                   {proj.description && (
                     <ul className="list-disc pl-5 mt-1 flex flex-col gap-1">
                       {String(proj.description).split('\n').filter(Boolean).map((line, i) => (
-                        <li key={i} className="pl-1 leading-relaxed">{line.replace(/^- /, '')}</li>
+                        <li key={i} className="pl-1 leading-relaxed">{line.trim().replace(/^[-•*]\s*/, '')}</li>
                       ))}
                     </ul>
                   )}
@@ -136,7 +140,7 @@ const ModernResume = ({ data, isPdfMode }) => {
             <div className="flex flex-col gap-2">
               {workshops.map((ws, idx) => (
                 <div key={ws.id || idx} className="flex justify-between items-baseline">
-                  <span><span className="font-bold">{ws.title}</span> <span className="italic">| {ws.issuer}</span></span>
+                  <span><span className="font-bold">{ws.title}</span> {ws.issuer && <span className="italic">{ws.title ? ' | ' : ''}{ws.issuer}</span>}</span>
                   <span>{ws.year}</span>
                 </div>
               ))}
@@ -151,7 +155,7 @@ const ModernResume = ({ data, isPdfMode }) => {
             <div className="flex flex-col gap-2">
               {certifications.map((cert, idx) => (
                 <div key={cert.id || idx} className="flex justify-between items-baseline">
-                  <span><span className="font-bold">{cert.title}</span> <span className="italic">| {cert.issuer}</span></span>
+                  <span><span className="font-bold">{cert.title}</span> {cert.issuer && <span className="italic">{cert.title ? ' | ' : ''}{cert.issuer}</span>}</span>
                   <span>{cert.year}</span>
                 </div>
               ))}
@@ -190,12 +194,16 @@ const ProfessionalResume = ({ data, isPdfMode }) => {
           {personalInfo?.fullName || 'Full Name'}
         </h1>
         <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5 text-[12px]" style={{ color: textLight }}>
-          {personalInfo?.email && <span>{personalInfo.email}</span>}
-          {personalInfo?.phone && <span>| {personalInfo.phone}</span>}
-          {personalInfo?.location && <span>| {personalInfo.location}</span>}
-          {personalInfo?.linkedin && <span>| {formatUrl(personalInfo.linkedin)}</span>}
-          {personalInfo?.github && <span>| {formatUrl(personalInfo.github)}</span>}
-          {personalInfo?.portfolio && <span>| {formatUrl(personalInfo.portfolio)}</span>}
+          {[
+            personalInfo?.email,
+            personalInfo?.phone,
+            personalInfo?.location,
+            formatUrl(personalInfo?.linkedin),
+            formatUrl(personalInfo?.github),
+            formatUrl(personalInfo?.portfolio)
+          ].filter(Boolean).map((item, i, arr) => (
+            <span key={i}>{item}{i < arr.length - 1 ? ' |' : ''}</span>
+          ))}
         </div>
       </div>
 
@@ -244,7 +252,7 @@ const ProfessionalResume = ({ data, isPdfMode }) => {
                   {exp.responsibilities && (
                     <ul className="list-disc pl-5 flex flex-col gap-1 mt-1">
                       {String(exp.responsibilities).split('\n').filter(Boolean).map((line, i) => (
-                        <li key={i} className="pl-1 leading-relaxed">{line.replace(/^- /, '')}</li>
+                        <li key={i} className="pl-1 leading-relaxed">{line.trim().replace(/^[-•*]\s*/, '')}</li>
                       ))}
                     </ul>
                   )}
@@ -263,15 +271,15 @@ const ProfessionalResume = ({ data, isPdfMode }) => {
                 <div key={proj.id || idx}>
                   <div className="flex justify-between items-baseline font-bold" style={{ color: textDarker }}>
                     <span>
-                      {proj.title} 
-                      {proj.techStack && <span className="font-normal italic"> | {proj.techStack}</span>}
+                      {proj.title}
+                      {proj.techStack && <span className="font-normal italic">{proj.title ? ' | ' : ''}{proj.techStack}</span>}
                     </span>
                     <span className="font-normal">{formatUrl(proj.link)}</span>
                   </div>
                   {proj.description && (
                     <ul className="list-disc pl-5 mt-1 flex flex-col gap-1">
                       {String(proj.description).split('\n').filter(Boolean).map((line, i) => (
-                        <li key={i} className="pl-1 leading-relaxed">{line.replace(/^- /, '')}</li>
+                        <li key={i} className="pl-1 leading-relaxed">{line.trim().replace(/^[-•*]\s*/, '')}</li>
                       ))}
                     </ul>
                   )}
@@ -288,7 +296,7 @@ const ProfessionalResume = ({ data, isPdfMode }) => {
             <div className="flex flex-col gap-2">
               {workshops.map((ws, idx) => (
                 <div key={ws.id || idx} className="flex justify-between items-baseline">
-                  <span><span className="font-bold">{ws.title}</span> <span className="italic">| {ws.issuer}</span></span>
+                  <span><span className="font-bold">{ws.title}</span> {ws.issuer && <span className="italic">{ws.title ? ' | ' : ''}{ws.issuer}</span>}</span>
                   <span>{ws.year}</span>
                 </div>
               ))}
@@ -303,7 +311,7 @@ const ProfessionalResume = ({ data, isPdfMode }) => {
             <div className="flex flex-col gap-2">
               {certifications.map((cert, idx) => (
                 <div key={cert.id || idx} className="flex justify-between items-baseline">
-                  <span><span className="font-bold">{cert.title}</span> <span className="italic">| {cert.issuer}</span></span>
+                  <span><span className="font-bold">{cert.title}</span> {cert.issuer && <span className="italic">{cert.title ? ' | ' : ''}{cert.issuer}</span>}</span>
                   <span>{cert.year}</span>
                 </div>
               ))}
@@ -342,12 +350,16 @@ const MinimalResume = ({ data, isPdfMode }) => {
           {personalInfo?.fullName || 'Full Name'}
         </h1>
         <div className="flex flex-wrap justify-center gap-x-3 gap-y-1.5 text-[12px]" style={{ color: textLight }}>
-          {personalInfo?.email && <span>{personalInfo.email}</span>}
-          {personalInfo?.phone && <span>| {personalInfo.phone}</span>}
-          {personalInfo?.location && <span>| {personalInfo.location}</span>}
-          {personalInfo?.linkedin && <span>| {formatUrl(personalInfo.linkedin)}</span>}
-          {personalInfo?.github && <span>| {formatUrl(personalInfo.github)}</span>}
-          {personalInfo?.portfolio && <span>| {formatUrl(personalInfo.portfolio)}</span>}
+          {[
+            personalInfo?.email,
+            personalInfo?.phone,
+            personalInfo?.location,
+            formatUrl(personalInfo?.linkedin),
+            formatUrl(personalInfo?.github),
+            formatUrl(personalInfo?.portfolio)
+          ].filter(Boolean).map((item, i, arr) => (
+            <span key={i}>{item}{i < arr.length - 1 ? ' |' : ''}</span>
+          ))}
         </div>
       </div>
 
@@ -396,7 +408,7 @@ const MinimalResume = ({ data, isPdfMode }) => {
                   {exp.responsibilities && (
                     <ul className="list-disc pl-5 flex flex-col gap-1 mt-1">
                       {String(exp.responsibilities).split('\n').filter(Boolean).map((line, i) => (
-                        <li key={i} className="pl-1 leading-relaxed">{line.replace(/^- /, '')}</li>
+                        <li key={i} className="pl-1 leading-relaxed">{line.trim().replace(/^[-•*]\s*/, '')}</li>
                       ))}
                     </ul>
                   )}
@@ -415,15 +427,15 @@ const MinimalResume = ({ data, isPdfMode }) => {
                 <div key={proj.id || idx}>
                   <div className="flex justify-between items-baseline font-bold" style={{ color: textDarker }}>
                     <span>
-                      {proj.title} 
-                      {proj.techStack && <span className="font-normal italic"> | {proj.techStack}</span>}
+                      {proj.title}
+                      {proj.techStack && <span className="font-normal italic">{proj.title ? ' | ' : ''}{proj.techStack}</span>}
                     </span>
                     <span className="font-normal">{formatUrl(proj.link)}</span>
                   </div>
                   {proj.description && (
                     <ul className="list-disc pl-5 mt-1 flex flex-col gap-1">
                       {String(proj.description).split('\n').filter(Boolean).map((line, i) => (
-                        <li key={i} className="pl-1 leading-relaxed">{line.replace(/^- /, '')}</li>
+                        <li key={i} className="pl-1 leading-relaxed">{line.trim().replace(/^[-•*]\s*/, '')}</li>
                       ))}
                     </ul>
                   )}
@@ -440,7 +452,7 @@ const MinimalResume = ({ data, isPdfMode }) => {
             <div className="flex flex-col gap-2">
               {workshops.map((ws, idx) => (
                 <div key={ws.id || idx} className="flex justify-between items-baseline">
-                  <span><span className="font-bold">{ws.title}</span> <span className="italic">| {ws.issuer}</span></span>
+                  <span><span className="font-bold">{ws.title}</span> {ws.issuer && <span className="italic">{ws.title ? ' | ' : ''}{ws.issuer}</span>}</span>
                   <span>{ws.year}</span>
                 </div>
               ))}
@@ -455,7 +467,7 @@ const MinimalResume = ({ data, isPdfMode }) => {
             <div className="flex flex-col gap-2">
               {certifications.map((cert, idx) => (
                 <div key={cert.id || idx} className="flex justify-between items-baseline">
-                  <span><span className="font-bold">{cert.title}</span> <span className="italic">| {cert.issuer}</span></span>
+                  <span><span className="font-bold">{cert.title}</span> {cert.issuer && <span className="italic">{cert.title ? ' | ' : ''}{cert.issuer}</span>}</span>
                   <span>{cert.year}</span>
                 </div>
               ))}
@@ -573,7 +585,20 @@ const ResumePreviewPanel = forwardRef((props, ref) => {
     skills: ['JavaScript (ES6+)', 'TypeScript', 'Python', 'Go', 'React.js', 'Node.js', 'Next.js', 'Express', 'PostgreSQL', 'MongoDB', 'Redis', 'Docker', 'Kubernetes', 'AWS (S3, EC2, Lambda)', 'Git / GitHub', 'CI/CD']
   };
 
-  const useDemo = true;
+  const filterEmptyItems = (arr, fields) => {
+    if (!Array.isArray(arr)) return [];
+    return arr.filter(item => fields.some(f => typeof item[f] === 'string' && item[f].trim()));
+  };
+
+  const actualEdu = filterEmptyItems(resumeData?.education, ['school', 'degree', 'year', 'cgpa']);
+  const actualExp = filterEmptyItems(resumeData?.experience, ['company', 'role', 'duration', 'responsibilities']);
+  const actualProj = filterEmptyItems(resumeData?.projects, ['title', 'techStack', 'description', 'link']);
+  const actualCert = filterEmptyItems(resumeData?.certifications, ['title', 'issuer', 'year']);
+  const actualWs = filterEmptyItems(resumeData?.workshops, ['title', 'issuer', 'year']);
+  const actualSkills = Array.isArray(resumeData?.skills) ? resumeData.skills.filter(s => typeof s === 'string' && s.trim()) : [];
+
+  const isEmpty = !hasValidString(resumeData?.personalInfo?.fullName) && actualEdu.length === 0 && actualExp.length === 0;
+  const useDemo = isEmpty;
 
   const currentData = {
     personalInfo: {
@@ -587,16 +612,14 @@ const ResumePreviewPanel = forwardRef((props, ref) => {
       portfolio: hasValidString(resumeData?.personalInfo?.portfolio) ? resumeData.personalInfo.portfolio : (useDemo ? demoData.personalInfo.portfolio : ''),
       summary: hasValidString(resumeData?.personalInfo?.summary) ? resumeData.personalInfo.summary : (useDemo ? demoData.personalInfo.summary : '')
     },
-    education: hasValidArray(resumeData?.education) ? resumeData.education : (useDemo ? demoData.education : []),
-    skills: hasValidArray(resumeData?.skills) ? resumeData.skills : (useDemo ? demoData.skills : []),
-    projects: hasValidArray(resumeData?.projects) ? resumeData.projects : (useDemo ? demoData.projects : []),
-    experience: hasValidArray(resumeData?.experience) ? resumeData.experience : (useDemo ? demoData.experience : []),
-    certifications: hasValidArray(resumeData?.certifications) ? resumeData.certifications : (useDemo ? demoData.certifications : []),
-    workshops: hasValidArray(resumeData?.workshops) ? resumeData.workshops : (useDemo ? demoData.workshops : [])
+    education: actualEdu.length > 0 ? actualEdu : (useDemo ? demoData.education : []),
+    skills: actualSkills.length > 0 ? actualSkills : (useDemo ? demoData.skills : []),
+    projects: actualProj.length > 0 ? actualProj : (useDemo ? demoData.projects : []),
+    experience: actualExp.length > 0 ? actualExp : (useDemo ? demoData.experience : []),
+    certifications: actualCert.length > 0 ? actualCert : (useDemo ? demoData.certifications : []),
+    workshops: actualWs.length > 0 ? actualWs : (useDemo ? demoData.workshops : [])
   };
 
-// eslint-disable-next-line no-unused-vars
-  const isEmpty = !hasValidString(resumeData?.personalInfo?.fullName) && !hasValidArray(resumeData?.education) && !hasValidArray(resumeData?.experience);
   const selectedTemplate = activeTemplate.toLowerCase();
 
   const renderTemplate = () => {

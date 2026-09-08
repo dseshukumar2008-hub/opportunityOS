@@ -1,5 +1,5 @@
 import { CheckCircle2, AlertCircle,  Sparkles, RefreshCw, ChevronRight,  Target, Award, TrendingUp, Briefcase, Activity } from 'lucide-react';
-
+import { Link } from 'react-router-dom';
 function CircularScore({ score }) {
   const r = 36;
   const strokeDasharray = 2 * Math.PI * r;
@@ -54,7 +54,7 @@ export default function ResumeAnalysisResults({ results, onReset }) {
   const extractedSkills = results.extractedSkills || [];
   const missingKeywords = results.missingKeywords || [];
   
-  const suggestedRole = results.suggestedRole || 'Not Specified';
+  const suggestedRole = results.suggestedRole && results.suggestedRole.trim() ? results.suggestedRole.trim() : 'Could not be inferred';
   const summary = results.summary || 'Resume analysis completed.';
   const strengths = results.strengths || [];
   const areasForGrowth = results.areasForGrowth || [];
@@ -68,14 +68,14 @@ export default function ResumeAnalysisResults({ results, onReset }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
           <Sparkles className="text-indigo-500" size={20} />
-          Hybrid Analysis Complete
+          Analysis Complete
         </h2>
         <button 
           onClick={onReset}
           className="flex items-center justify-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors bg-white px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 shadow-sm"
         >
           <RefreshCw size={14} />
-          Analyze Another
+          New Analysis
         </button>
       </div>
 
@@ -146,7 +146,10 @@ export default function ResumeAnalysisResults({ results, onReset }) {
              </div>
              <h3 className="text-[15px] font-bold text-slate-900 tracking-tight">Current Strengths</h3>
            </div>
-           <ul className="space-y-4 flex-1">
+         <ul className="space-y-4 flex-1">
+             {strengths.length === 0 && (
+               <li className="text-sm font-medium text-slate-400">No specific strengths were detected. Add more detail to your resume to improve this.</li>
+             )}
              {strengths.slice(0, 6).map((str, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <CheckCircle2 size={18} className="text-emerald-500 mt-0.5 shrink-0" />
@@ -216,7 +219,7 @@ export default function ResumeAnalysisResults({ results, onReset }) {
           <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
             <Target size={16} />
           </div>
-          <h3 className="text-[15px] font-bold text-slate-900 tracking-tight">Action Plan</h3>
+          <h3 className="text-[15px] font-bold text-slate-900 tracking-tight">Quick Action Plan</h3>
         </div>
         
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -262,6 +265,16 @@ export default function ResumeAnalysisResults({ results, onReset }) {
                ))}
              </ul>
            </div>
+        </div>
+
+        {/* Action Links */}
+        <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row gap-4">
+           <Link to="/skill-gap" className="flex-1 bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 rounded-xl py-3 px-4 font-bold transition-colors flex items-center justify-center gap-2 text-sm shadow-sm">
+             <Target size={16} /> Explore Skill Gaps
+           </Link>
+           <Link to="/arcade" className="flex-1 bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-100 rounded-xl py-3 px-4 font-bold transition-colors flex items-center justify-center gap-2 text-sm shadow-sm">
+             <Activity size={16} /> Practice Missing Skills
+           </Link>
         </div>
       </div>
 

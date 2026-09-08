@@ -1,4 +1,4 @@
-import  { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { db } from '../config/firebase';
 import { doc, onSnapshot, setDoc, deleteDoc } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
@@ -51,7 +51,7 @@ export const CareerProvider = ({ children }) => {
     return () => unsubscribe();
   }, [user?.id]);
 
-  const updateCareerContext = async (updates) => {
+  const updateCareerContext = useCallback(async (updates) => {
     if (!user?.id) return;
     try {
       const docRef = doc(db, 'users', user.id, 'career', 'context');
@@ -59,9 +59,9 @@ export const CareerProvider = ({ children }) => {
     } catch (error) {
       console.error('[CareerContext] Update Error:', error);
     }
-  };
+  }, [user?.id]);
 
-  const clearCareerContext = async () => {
+  const clearCareerContext = useCallback(async () => {
     if (!user?.id) return;
     try {
       const docRef = doc(db, 'users', user.id, 'career', 'context');
@@ -69,10 +69,17 @@ export const CareerProvider = ({ children }) => {
     } catch (error) {
       console.error('[CareerContext] Clear Error:', error);
     }
-  };
+  }, [user?.id]);
+
+  const contextValue = useMemo(() => ({
+    careerContext,
+    updateCareerContext,
+    clearCareerContext,
+    isLoading
+  }), [careerContext, updateCareerContext, clearCareerContext, isLoading]);
 
   return (
-    <CareerContext.Provider value={{ careerContext, updateCareerContext, clearCareerContext, isLoading }}>
+    <CareerContext.Provider value={contextValue}>
       {children}
     </CareerContext.Provider>
   );

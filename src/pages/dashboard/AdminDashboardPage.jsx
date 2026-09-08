@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../config/firebase';
-import { collection, query, where, getDocs, doc,  setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc,  setDoc, serverTimestamp, updateDoc, getCountFromServer } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { ShieldAlert, CheckCircle2, XCircle,  Building2, Briefcase, MapPin, Clock, BarChart3, Users, FileText, Map, Target, MessageSquare } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, XCircle,  Building2, Briefcase, MapPin, Clock, Users, FileText, Map, Target, MessageSquare } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
+import { getErrorMessage } from '../../utils/errorUtils';
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
@@ -13,30 +14,30 @@ export default function AdminDashboardPage() {
   const [pendingOpps, setPendingOpps] = useState([]);
   const [metrics, setMetrics] = useState({
     totalUsers: 0,
-    activeUsers: 0,
     resumeAnalyses: 0,
     roadmapsGenerated: 0,
     matchAnalyses: 0,
     careerCoach: 0
   });
+
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Modal state
   const [actionOpportunity, setActionOpportunity] = useState(null); // { opp, action: 'approve' | 'reject' }
+
   const fetchMetrics = async () => {
     try {
-      const snapshot = await getDocs(collection(db, 'telemetry_events'));
-      const events = snapshot.docs.map(doc => doc.data());
+      const usersSnap = await getCountFromServer(collection(db, 'users'));
       
-      const uniqueUsers = new Set(events.filter(e => e.userId && e.userId !== 'anonymous').map(e => e.userId)).size;
-      
+      const resumeSnap = await getCountFromServer(query(collection(db, 'telemetry_events'), where('eventName', '==', 'Resume Analysis Completed')));
+      const roadmapSnap = await getCountFromServer(query(collection(db, 'telemetry_events'), where('eventName', '==', 'Roadmap Created')));
+      const matchSnap = await getCountFromServer(query(collection(db, 'telemetry_events'), where('eventName', '==', 'Match Analysis Completed')));
+      const coachSnap = await getCountFromServer(query(collection(db, 'telemetry_events'), where('eventName', '==', 'Message Sent')));
+
       setMetrics({
-        totalUsers: uniqueUsers, // Approximated by active users in telemetry
-        activeUsers: uniqueUsers,
-        resumeAnalyses: events.filter(e => e.eventName === 'Resume Analysis Completed').length,
-        roadmapsGenerated: events.filter(e => e.eventName === 'Roadmap Created').length,
-        matchAnalyses: events.filter(e => e.eventName === 'Match Analysis Completed').length,
-        careerCoach: events.filter(e => e.eventName === 'Message Sent').length,
+        totalUsers: usersSnap.data().count,
+        resumeAnalyses: resumeSnap.data().count,
+        roadmapsGenerated: roadmapSnap.data().count,
+        matchAnalyses: matchSnap.data().count,
+        careerCoach: coachSnap.data().count,
       });
     } catch (error) {
       console.error('Error fetching metrics:', error);
@@ -57,7 +58,7 @@ export default function AdminDashboardPage() {
       setPendingOpps(opps);
     } catch (error) {
       console.error('Error fetching pending opportunities:', error);
-      toast.error('Failed to load pending opportunities');
+      toast.error(getErrorMessage(error, 'Failed to load pending opportunities'));
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +127,7 @@ export default function AdminDashboardPage() {
       }
     } catch (error) {
       console.error(`Error ${action}ing opportunity:`, error);
-      toast.error(`Failed to ${action} opportunity`);
+      toast.error(getErrorMessage(error, `Failed to ${action} opportunity`));
     } finally {
       setIsConfirming(false);
       setActionOpportunity(null);
@@ -153,20 +154,13 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col">
           <div className="flex items-center gap-2 text-slate-500 mb-2">
             <Users size={16} />
             <span className="text-xs font-bold uppercase tracking-wider">Total Users</span>
           </div>
           <span className="text-2xl font-black text-slate-900">{metrics.totalUsers}</span>
-        </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-          <div className="flex items-center gap-2 text-slate-500 mb-2">
-            <BarChart3 size={16} />
-            <span className="text-xs font-bold uppercase tracking-wider">Active</span>
-          </div>
-          <span className="text-2xl font-black text-indigo-600">{metrics.activeUsers}</span>
         </div>
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col">
           <div className="flex items-center gap-2 text-slate-500 mb-2">
@@ -241,7 +235,7 @@ export default function AdminDashboardPage() {
                           )}
                           <span className="flex items-center gap-1">
                             <Clock size={14} className="text-slate-400" />
-                            Submitted: {opp.createdAt?.toDate().toLocaleDateString() || 'Recently'}
+                            Submitted: {opp.createdAt?.toDate?.()?.toLocaleDateString() || 'Recently'}
                           </span>
                         </div>
                       </div>

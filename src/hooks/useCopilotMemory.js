@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
-import { db } from '../config/firebase';
-import { collection, doc, getDocs, setDoc, orderBy, query, limit, serverTimestamp } from 'firebase/firestore';
+import { db, auth } from '../config/firebase';
+import { collection, doc, getDocs, addDoc, setDoc, orderBy, query, limit, serverTimestamp } from 'firebase/firestore';
+import { getErrorMessage } from '../utils/errorUtils';
 
 export function useCopilotMemory() {
   const { user } = useAuth();
@@ -14,11 +16,16 @@ export function useCopilotMemory() {
         setLoading(false);
         return;
       }
+      
+      // Guard against race condition with Firebase SDK auth state
+      if (!auth.currentUser) {
+        console.warn("[CareerCoach] loadHistory skipped — auth.currentUser not ready yet.");
+        return;
+      }
 
       try {
-        const chatsRef = collection(db, 'users', user.uid, 'career_coach_chats');
-        // Fetch last 50 messages
-        const q = query(chatsRef, orderBy('timestamp', 'asc'), limit(50));
+        const chatsRef = collection(db, "users", user.uid, "career_coach_chats");
+        const q = query(chatsRef, orderBy("timestamp", "asc"), limit(50));
         const snapshot = await getDocs(q);
         
         if (!snapshot.empty) {
@@ -36,33 +43,40 @@ export function useCopilotMemory() {
     }
 
     loadHistory();
-  }, [user]);
+  }, [user?.uid]);
 
   const addMessage = async (messageObj) => {
-    // Optimistic update
     const tempId = Math.random().toString(36).substring(7);
     const newMessage = { ...messageObj, id: tempId, timestamp: new Date().toISOString() };
-    setMessages(prev => [...prev, newMessage]);
+    
+    // Capture previous state for rollback
+    let previousMessages = [];
+    setMessages(prev => {
+      previousMessages = [...prev];
+      return [...prev, newMessage];
+    });
 
     if (user?.uid) {
+      if (!auth.currentUser) {
+         toast.error("Still connecting to server. Please try again.");
+         return;
+      }
       try {
-        const chatsRef = collection(db, 'users', user.uid, 'career_coach_chats');
-        const docRef = doc(chatsRef, tempId); // In a real app we'd let Firestore auto-gen ID, but optimistic UI needs ID
-        await setDoc(docRef, {
+        const chatsRef = collection(db, "users", user.uid, "career_coach_chats");
+        await addDoc(chatsRef, {
           role: messageObj.role,
           content: messageObj.content,
           timestamp: serverTimestamp()
         });
       } catch (err) {
         console.error("Error saving message:", err);
+        toast.error(getErrorMessage(err, "Failed to save message. Please try again."));
       }
     }
   };
 
   const clearMemory = async () => {
     setMessages([]);
-    // Note: Actually deleting from Firestore requires batch delete which we can skip for now
-    // or just rely on a new session ID approach.
   };
 
   return { messages, addMessage, clearMemory, loading };

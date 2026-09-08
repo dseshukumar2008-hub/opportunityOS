@@ -1,11 +1,10 @@
-import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import SkillSprintGame from './SkillSprintGame';
-import * as SkillArcadeContext from '../../../contexts/SkillArcadeContext';
+
 
 vi.mock('../../../contexts/SkillArcadeContext', () => ({
-  useSkillArcade: vi.fn()
+  useSkillArcade: vi.fn(() => ({ stats: {}, toggleSavedBugHunterQuestion: vi.fn() }))
 }));
 
 vi.mock('../../../contexts/AuthContext', () => ({
@@ -63,9 +62,9 @@ describe('SkillSprintGame', () => {
       await vi.advanceTimersByTimeAsync(1500);
     });
 
-    // Game should end. 2 questions * 100 points = 200 points
+    // Game should end. 2 questions * 10 points = 20 points
     expect(screen.getByText('Game Over!')).toBeTruthy();
-    expect(screen.getByText('200')).toBeTruthy();
+    expect(screen.getByText('20')).toBeTruthy();
   });
 
   it('ends game when timer reaches zero', async () => {
@@ -92,5 +91,53 @@ describe('SkillSprintGame', () => {
 
     expect(screen.getByText('Game Over!')).toBeTruthy();
     expect(screen.getByText('0')).toBeTruthy();
+  });
+
+  it('preserves visual state during final question transition', async () => {
+    let resolveCompletion;
+    const completionPromise = new Promise(resolve => { resolveCompletion = resolve; });
+    
+    mockHandleGameCompletion.mockImplementationOnce(() => completionPromise);
+
+    render(<SkillSprintGame onClose={vi.fn()} />);
+
+    // Answer Q1 correctly
+    const optionA = screen.getAllByText('A')[0].closest('button');
+    fireEvent.click(optionA);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+
+    // Answer Q2 correctly (final question)
+    const optionC = screen.getAllByText('C')[0].closest('button');
+    fireEvent.click(optionC);
+
+    // Fast forward completion delay (600ms) 
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(600);
+    });
+
+    // Verify option is still selected while waiting for results
+    expect(optionC.getAttribute('aria-pressed')).toBe('true');
+    expect(mockHandleGameCompletion).toHaveBeenCalled();
+
+    // Resolve network request
+    await act(async () => {
+      resolveCompletion({
+        sessionId: 'test',
+        game: 'Skill Sprint',
+        score: 20,
+        accuracy: '100%',
+        isCorrectArray: [true, true],
+        streak: 2,
+        xpEarned: 20
+      });
+      // Allow re-renders
+      await Promise.resolve();
+    });
+
+    // Game should be over
+    expect(screen.getByText('Game Over!')).toBeTruthy();
   });
 });

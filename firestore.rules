@@ -7,6 +7,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return isAuthed() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.user_type == 'admin';
+    }
+
     // Teams collection
     match /teams/{teamId} {
       allow read: if isAuthed();
@@ -27,7 +33,7 @@ service cloud.firestore {
     }
 
     match /messages/{msgId} {
-      allow read: if isAuthed();
+      allow read: if isAuthed() && (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.receiverId);
       allow create: if isAuthed() && request.auth.uid == request.resource.data.senderId;
       allow update, delete: if isAuthed() && request.auth.uid == resource.data.senderId;
     }
@@ -46,6 +52,24 @@ service cloud.firestore {
         allow read, write: if isAuthed() && request.auth.uid == userId;
       }
       match /interviewSessions/{docId} {
+        allow read, write: if isAuthed() && request.auth.uid == userId;
+      }
+      match /goals/{docId} {
+        allow read, write: if isAuthed() && request.auth.uid == userId;
+      }
+      match /career_coach_chats/{docId} {
+        allow read, write: if isAuthed() && request.auth.uid == userId;
+      }
+      match /copilot_messages/{docId} {
+        allow read, write: if isAuthed() && request.auth.uid == userId;
+      }
+      match /achievements/{docId} {
+        allow read, write: if isAuthed() && request.auth.uid == userId;
+      }
+      match /match_resume/{docId} {
+        allow read, write: if isAuthed() && request.auth.uid == userId;
+      }
+      match /career/{docId} {
         allow read, write: if isAuthed() && request.auth.uid == userId;
       }
     }
@@ -132,14 +156,14 @@ service cloud.firestore {
 
     match /opportunities/{oppId} {
       allow read: if isAuthed();
-      allow create: if isAuthed() && request.auth.uid == request.resource.data.authorId;
-      allow update, delete: if isAuthed() && request.auth.uid == resource.data.authorId;
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.authorId || isAdmin());
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.authorId || isAdmin());
     }
 
     match /pending_opportunities/{oppId} {
       allow read: if isAuthed();
-      allow create: if isAuthed() && request.auth.uid == request.resource.data.authorId;
-      allow update, delete: if isAuthed() && request.auth.uid == resource.data.authorId;
+      allow create: if isAuthed() && (request.auth.uid == request.resource.data.authorId || isAdmin());
+      allow update, delete: if isAuthed() && (request.auth.uid == resource.data.authorId || isAdmin());
     }
 
     match /saved_opportunities/{docId} {

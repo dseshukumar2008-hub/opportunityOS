@@ -1,15 +1,6 @@
 import { Link } from 'react-router-dom';
 import { FileText, Sparkles, TrendingUp, Target } from 'lucide-react';
-import { useUserProfile } from '../../hooks/useUserProfile';
-import { useDashboardInsights } from '../../hooks/useDashboardInsights';
-import { useResumeInsights } from '../../hooks/useResumeInsights';
 
-// eslint-disable-next-line no-unused-vars
-function getScoreColor(score) {
-  if (score >= 80) return { text: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', ring: 'bg-emerald-500', label: 'Excellent' };
-  if (score >= 60) return { text: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', ring: 'bg-amber-500', label: 'Good' };
-  return { text: 'text-red-500', bg: 'bg-red-50', border: 'border-red-200', ring: 'bg-red-400', label: 'Needs Work' };
-}
 
 function StatPill({ icon: Icon, label, value, subtext, color = 'indigo', to }) {
   const colorMap = {
@@ -41,18 +32,9 @@ function StatPill({ icon: Icon, label, value, subtext, color = 'indigo', to }) {
 }
 
 export default function DashboardKPIsWidget({ userState }) {
-// eslint-disable-next-line no-unused-vars
-  const { profile, isLoading: profileLoading } = useUserProfile();
-  const {
-    careerReadiness,
-    profileCompletion,
-    isLoading: insightsLoading,
-  } = useDashboardInsights();
-  const { atsScore, hasInsights } = useResumeInsights();
-
-  const isLoading = profileLoading || insightsLoading;
-
-  const { hasProfile, hasResume, isNewUser } = userState || {};
+  const { insights, hasProfile, isNewUser } = userState || {};
+  const { careerReadiness, profileCompletion, resume, isLoading } = insights || {};
+  const { atsScore, hasInsights } = resume || {};
 
   const resumeScore = hasInsights ? atsScore : 0;
   const aiScore = isNewUser ? 0 : (careerReadiness?.score ?? 0);
@@ -60,19 +42,19 @@ export default function DashboardKPIsWidget({ userState }) {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[...Array(3)].map((_, i) => <div key={i} className="card-standard h-28 animate-pulse" />)}
       </div>
     );
   }
 
-  const profileDisplay = hasProfile ? `${completion}%` : 'Not started';
-  const resumeDisplay = hasInsights ? `${resumeScore}%` : 'Not analyzed';
-  const readinessDisplay = isNewUser ? 'Getting started' : `${aiScore}%`;
+  const profileDisplay = hasProfile ? `${completion}%` : '0%';
+  const resumeDisplay = hasInsights ? `${resumeScore}%` : 'N/A';
+  const readinessDisplay = isNewUser ? 'N/A' : `${aiScore}%`;
 
-  const profileSubtext = hasProfile ? (completion >= 80 ? "Great" : "Complete profile") : null;
-  const resumeSubtext = hasInsights ? (resumeScore >= 70 ? "Good" : "Needs work") : null;
-  const readinessSubtext = isNewUser ? null : (aiScore >= 70 ? "Ready" : "Needs work");
+  const profileSubtext = hasProfile ? (completion >= 80 ? "Great" : "Complete profile") : "Not started";
+  const resumeSubtext = hasInsights ? (resumeScore >= 70 ? "Good" : "Needs work") : "Not analyzed";
+  const readinessSubtext = isNewUser ? "Getting started" : (aiScore >= 70 ? "Ready" : "Needs work");
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -81,7 +63,7 @@ export default function DashboardKPIsWidget({ userState }) {
 
       {/* Resume Score */}
       <StatPill icon={FileText} label="Resume Score (ATS)" value={resumeDisplay} subtext={resumeSubtext} color="violet" to="/resume-review" />
-      
+
       {/* Career Readiness Score */}
       <StatPill icon={Sparkles} label="Career Readiness" value={readinessDisplay} subtext={readinessSubtext} color="emerald" to="/career-coach" />
     </div>

@@ -229,6 +229,6 @@ export const generateRoadmapPDF = async (roadmap, profile, progressData) => {
   });
   
   // Download the PDF
-  const safeTitle = targetCareer.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+  const safeTitle = targetCareer.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'career';
   doc.save(`roadmap-${safeTitle}.pdf`);
 };

@@ -28,7 +28,7 @@ const JOURNEY_STEPS = [
   { step: '04', label: 'Get Recommendations', sub: '90%+ match accuracy', icon: Lightbulb, color: 'bg-amber-500' },
   { step: '05', label: 'Join Teams', sub: 'Hackathons & projects', icon: Users, color: 'bg-blue-500' },
   { step: '06', label: 'Grow Network', sub: 'Build peer connections', icon: Globe, color: 'bg-teal-500' },
-  { step: '07', label: 'Track Progress', sub: 'Goals & analytics', icon: Target, color: 'bg-pink-500' },
+  { step: '07', label: 'Track Progress', sub: 'Performance & analytics', icon: Target, color: 'bg-pink-500' },
   { step: '08', label: 'Land Opportunities', sub: 'The career you deserve', icon: Rocket, color: 'bg-rose-500' },
 ];
 
@@ -111,8 +111,8 @@ export default function PresentationPage() {
         <div className="relative bg-[#1a0f4f] rounded-3xl p-10 md:p-16 text-white mb-12 overflow-hidden shadow-xl">
           {/* Background decoration */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#6C4CF1] rounded-full opacity-20 blur-3xl" />
-            <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-indigo-500 rounded-full opacity-10 blur-3xl" />
+            <div className="max-w-full absolute -top-24 -right-24 w-96 h-96 bg-[#6C4CF1] rounded-full opacity-20 blur-3xl" />
+            <div className="max-w-full absolute -bottom-24 -left-24 w-80 h-80 bg-indigo-500 rounded-full opacity-10 blur-3xl" />
             {/* Grid pattern */}
             <div className="absolute inset-0 opacity-5"
               style={{
@@ -134,7 +134,7 @@ export default function PresentationPage() {
               </div>
               <h2 className="text-4xl md:text-5xl font-black mb-4 leading-tight">
                 Career Development<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#a78bfa] to-[#60a5fa]">
+                <span className="text-indigo-400">
                   Reimagined
                 </span>
               </h2>
@@ -154,7 +154,7 @@ export default function PresentationPage() {
               ].map((stat, i) => {
                 const Icon = stat.icon;
                 return (
-                  <div key={i} className="bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-4 text-center">
+                  <div key={i} className="bg-white/10  border border-white/10 rounded-2xl p-4 text-center">
                     <Icon size={16} className="text-slate-400 mx-auto mb-1" />
                     <div className="text-[22px] font-black text-white">{stat.value}</div>
                     <div className="text-[11px] font-medium text-slate-400">{stat.label}</div>
@@ -186,20 +186,20 @@ export default function PresentationPage() {
 
         {/* ── SECTION 3: Career Growth Highlight ── */}
         <div className="bg-[#6C4CF1] rounded-3xl p-10 md:p-12 text-white mb-12 shadow-md relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+          <div className="absolute top-0 right-0 max-w-full w-[400px] h-[400px] bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-1 h-7 bg-emerald-400 rounded-full" />
               <h2 className="text-[22px] font-black">Career Growth Outcomes</h2>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 { value: '+14 pts', label: 'Avg ATS Improvement', color: 'text-emerald-300' },
                 { value: '+18%', label: 'Career Readiness Growth', color: 'text-emerald-300' },
                 { value: '91%', label: 'Recommendation Accuracy', color: 'text-amber-300' },
-                { value: '76%', label: 'Goal Completion Rate', color: 'text-blue-300' },
+
               ].map((stat, i) => (
-                <div key={i} className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
+                <div key={i} className="bg-white/10  rounded-2xl p-5 border border-white/10">
                   <div className={`text-[36px] font-black leading-none mb-2 ${stat.color}`}>{stat.value}</div>
                   <div className="text-[13px] font-semibold text-indigo-200">{stat.label}</div>
                 </div>
@@ -267,7 +267,7 @@ export default function PresentationPage() {
             <div className="absolute top-0 right-0 w-48 h-48 bg-[#6C4CF1] rounded-full opacity-10 blur-3xl" />
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                <div className="w-2 h-2 bg-emerald-400 rounded-full " />
                 <h2 className="text-[18px] font-black text-white">Live Platform Highlights</h2>
               </div>
               <div className="space-y-3">

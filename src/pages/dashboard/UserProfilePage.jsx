@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { getRelativeTime } from '../../utils/formatUtils';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { useResume } from '../../contexts/ResumeContext';
@@ -18,6 +19,8 @@ import {
 import { useActivity } from '../../contexts/ActivityContext';
 import { useEffect } from 'react';
 import { useUserDirectory } from '../../hooks/useUserDirectory';
+import toast from 'react-hot-toast';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
 
 // 
 function SectionHeader({ icon: Icon, title }) {
@@ -61,16 +64,6 @@ function StatCard({ icon: Icon, label, value, color }) {
   );
 }
 
-const timeAgo = (isoString) => {
-  if (!isoString) return '';
-  const date = new Date(isoString);
-  const now = new Date();
-  const diff = Math.floor((now - date) / 60000);
-  if (diff < 60) return `${Math.max(1, diff)}m ago`;
-  if (diff < 1440) return `${Math.floor(diff / 60)}h ago`;
-  return `${Math.floor(diff / 1440)}d ago`;
-};
-
 // 
 export default function UserProfilePage() {
   const navigate = useNavigate();
@@ -95,6 +88,10 @@ export default function UserProfilePage() {
     const { getUserActivities } = useActivity();
 
   const [fetchedProfile, setFetchedProfile] = useState(null);
+  const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   // Resolve which user we're viewing
   const isOwnProfile = !userId || userId === 'me' || userId === user?.id || userId === user?.email;
@@ -104,10 +101,15 @@ export default function UserProfilePage() {
       const directoryUser = allUsers.find(u => u.id === userId);
       if (!directoryUser) {
         let isMounted = true;
+        setIsLoadingProfile(true);
         fetchUserProfile(userId).then(res => {
-          if (isMounted && res?.data) setFetchedProfile(res.data);
+          if (isMounted) {
+            if (res?.data) setFetchedProfile(res.data);
+            setIsLoadingProfile(false);
+          }
         }).catch(err => {
           console.error("Failed to fetch profile:", err);
+          if (isMounted) setIsLoadingProfile(false);
         });
         return () => { isMounted = false; };
       }
@@ -124,27 +126,42 @@ export default function UserProfilePage() {
   const myConnectionCount = getConnectionCount();
   const viewedUserConnectionCount = targetUserId ? getConnectionCount(targetUserId) : myConnectionCount;
 
-  const handleConnect = () => {
-    if (!targetUserId) return;
-    sendConnectionRequest(targetUserId);
+  const handleConnect = async () => {
+    if (!targetUserId || isConnecting) return;
+    setIsConnecting(true);
+    await sendConnectionRequest(targetUserId);
+    setIsConnecting(false);
       };
 
-  const handleAccept = () => {
-    if (!incomingRequestId) return;
-    acceptConnectionRequest(incomingRequestId);
+  const handleAccept = async () => {
+    if (!incomingRequestId || isConnecting) return;
+    setIsConnecting(true);
+    await acceptConnectionRequest(incomingRequestId);
+    setIsConnecting(false);
       };
 
-  const handleReject = () => {
-    if (!incomingRequestId) return;
-    rejectConnectionRequest(incomingRequestId);
+  const handleReject = async () => {
+    if (!incomingRequestId || isConnecting) return;
+    setIsConnecting(true);
+    await rejectConnectionRequest(incomingRequestId);
+    setIsConnecting(false);
       };
 
   const handleDisconnect = () => {
+    setShowDisconnectConfirm(true);
+  };
+
+  const handleConfirmDisconnect = async () => {
     const conn = connections.find(
       c => (c.userId1 === (user?.id || 'me') && c.userId2 === targetUserId) ||
         (c.userId1 === targetUserId && c.userId2 === (user?.id || 'me'))
     );
-    if (conn) removeConnection(conn.id);
+    if (conn) {
+      setIsDisconnecting(true);
+      await removeConnection(conn.id);
+      setIsDisconnecting(false);
+    }
+    setShowDisconnectConfirm(false);
   };
 
   // ── Pull all data from contexts ─────────────────────────────
@@ -189,7 +206,18 @@ export default function UserProfilePage() {
   };
 
   // ── Message handler ─────────────────────────────────────────
-  const handleMessage = () => navigate('/messages');
+  const handleMessage = () => toast.success('Messaging feature is coming soon!');
+
+  if (isLoadingProfile && !isOwnProfile && !fetchedProfile) {
+    return (
+      <div className="bg-[#F8FAFC] min-h-screen flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+          <p className="text-[14px] font-bold text-slate-500">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#F8FAFC] pb-20 font-sans p-4 lg:p-6">
@@ -198,7 +226,7 @@ export default function UserProfilePage() {
         {/* ── HERO CARD ─────────────────────────────────────────── */}
         <div className="relative bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden mb-6">
           {/* Banner */}
-          <div className="h-36 bg-gradient-to-br from-[#6C4CF1] via-indigo-600 to-violet-500" />
+          <div className="h-36 bg-[#6C4CF1]" />
 
           <div className="px-6 sm:px-8 pb-6 -mt-16 relative">
             {/* Avatar */}
@@ -243,23 +271,23 @@ export default function UserProfilePage() {
               <div className="flex items-center gap-2 flex-wrap pb-2">
                 {/* Own profile: show connections link */}
                 {isOwnProfile ? (
-                  <button
-                    onClick={() => navigate('/network/connections')}
-                    className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-white border border-[#6C4CF1]/30 text-[#6C4CF1] hover:bg-indigo-50 transition-all"
+                  <div
+                    className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-white border border-slate-200 text-slate-600"
                   >
-                    <Link2 size={15} />
+                    <Link2 size={15} className="text-[#6C4CF1]" />
                     {myConnectionCount} Connection{myConnectionCount !== 1 ? 's' : ''}
-                  </button>
+                  </div>
                 ) : (
                   <>
                     {/* Not connected */}
                     {relationship === 'none' && (
                       <button
                         onClick={handleConnect}
-                        className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-[#6C4CF1] text-white border-transparent hover:bg-indigo-700 shadow-[0_2px_10px_rgba(108,76,241,0.25)] transition-all"
+                        disabled={isConnecting}
+                        className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-[#6C4CF1] text-white border-transparent hover:bg-indigo-700 shadow-[0_2px_10px_rgba(108,76,241,0.25)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <UserPlus size={15} />
-                        Connect
+                        {isConnecting ? 'Connecting...' : 'Connect'}
                       </button>
                     )}
                     {/* Request sent */}
@@ -277,14 +305,16 @@ export default function UserProfilePage() {
                       <>
                         <button
                           onClick={handleAccept}
-                          className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-[#6C4CF1] text-white hover:bg-indigo-700 shadow-[0_2px_10px_rgba(108,76,241,0.25)] transition-all"
+                          disabled={isConnecting}
+                          className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-[#6C4CF1] text-white hover:bg-indigo-700 shadow-[0_2px_10px_rgba(108,76,241,0.25)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <UserCheck size={15} />
-                          Accept
+                          {isConnecting ? 'Accepting...' : 'Accept'}
                         </button>
                         <button
                           onClick={handleReject}
-                          className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-white border border-slate-200 text-slate-700 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all"
+                          disabled={isConnecting}
+                          className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-white border border-slate-200 text-slate-700 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <UserX size={15} />
                           Reject
@@ -305,13 +335,15 @@ export default function UserProfilePage() {
                     )}
                   </>
                 )}
-                <button
-                  onClick={handleMessage}
-                  className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
-                >
-                  <MessageSquare size={15} />
-                  Message
-                </button>
+                {!isOwnProfile && (
+                  <button
+                    onClick={handleMessage}
+                    className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+                  >
+                    <MessageSquare size={15} />
+                    Message
+                  </button>
+                )}
                 {(isOwnProfile && resumeData.personalInfo.fullName) && (
                   <button
                     onClick={() => navigate('/resume-builder')}
@@ -328,17 +360,17 @@ export default function UserProfilePage() {
             {(github || linkedin || portfolio) && (
               <div className="flex items-center gap-3 mt-5 flex-wrap">
                 {linkedin && (
-                  <a href={linkedin} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-[#6C4CF1] transition-colors">
+                  <a href={linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-[#6C4CF1] transition-colors">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg> LinkedIn
                   </a>
                 )}
                 {github && (
-                  <a href={github} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-[#6C4CF1] transition-colors">
+                  <a href={github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-[#6C4CF1] transition-colors">
                     <GitBranch size={14} /> GitHub
                   </a>
                 )}
                 {portfolio && (
-                  <a href={portfolio} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-[#6C4CF1] transition-colors">
+                  <a href={portfolio} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-[#6C4CF1] transition-colors">
                     <Globe size={14} /> Portfolio
                   </a>
                 )}
@@ -379,7 +411,7 @@ export default function UserProfilePage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-[13px] text-slate-400 font-medium">No skills added yet. Update your Create Resume tool.</p>
+                <p className="text-[13px] text-slate-400 font-medium">No skills added yet. Build your resume or update your profile to highlight your skills.</p>
               )}
             </Card>
 
@@ -476,7 +508,7 @@ export default function UserProfilePage() {
                           <p className="text-[11px] font-medium text-slate-500 truncate">{act.description}</p>
                         </div>
                         {act.timestamp && (
-                          <span className="text-[11px] font-medium text-slate-400 shrink-0">{timeAgo(act.timestamp)}</span>
+                          <span className="text-[11px] font-medium text-slate-400 shrink-0">{getRelativeTime(act.timestamp)}</span>
                         )}
                       </div>
                     );
@@ -591,6 +623,15 @@ export default function UserProfilePage() {
           </div>
         </div>
       </div>
+      <ConfirmationModal
+        isOpen={showDisconnectConfirm}
+        onClose={() => setShowDisconnectConfirm(false)}
+        onConfirm={handleConfirmDisconnect}
+        title="Disconnect User?"
+        message={`Are you sure you want to disconnect from ${fullName}? You will need to send another connection request to reconnect.`}
+        confirmText="Disconnect"
+        isLoading={isDisconnecting}
+      />
     </div>
   );
 }

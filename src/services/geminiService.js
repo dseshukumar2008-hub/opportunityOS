@@ -1,8 +1,9 @@
 import { analyticsService } from './analyticsService';
+import { createRecommendation } from '../types/ProjectRecommendation';
 
 import { generate } from './ai/aiProvider';
 
-async function callGemini(prompt, systemInstruction = '', inlineDataItems = [], temperature = 0.3, featureName = 'Unknown', timeout = 30000) {
+async function callGemini(prompt, systemInstruction = '', inlineDataItems = [], temperature = 0.3, featureName = 'Unknown', timeout = 15000, abortSignal = null) {
   const request = {
     providerName: 'gemini',
     feature: featureName,
@@ -12,7 +13,8 @@ async function callGemini(prompt, systemInstruction = '', inlineDataItems = [], 
       systemInstruction,
       temperature,
       inlineDataItems,
-      timeoutMs: timeout
+      timeoutMs: timeout,
+      signal: abortSignal
     }
   };
   
@@ -31,19 +33,19 @@ export const geminiService = {
 
   async enhanceResumeText(text, contextType, actionType = 'enhance') {
     analyticsService.trackEvent('Resume Text Enhancement Started', { actionType });
-    try {
-      let instructions = '';
-      if (actionType === 'ats') {
-        instructions = 'Rewrite the following text to maximize ATS compatibility by integrating relevant industry keywords and standard formatting while preserving the original meaning.';
-      } else if (actionType === 'shorten') {
-        instructions = 'Shorten the following text to make it extremely concise and punchy without losing key achievements or context.';
-      } else if (actionType === 'professional') {
-        instructions = 'Rewrite the following text using highly professional business language and powerful action verbs.';
-      } else {
-        instructions = 'Rewrite the following text to make it highly professional, impactful, and ATS-friendly. Use strong action verbs and ensure it highlights achievements and metrics if present.';
-      }
+            let instructions;
 
-      const prompt = `You are an expert technical resume writer.
+            if (actionType === 'ats') {
+      instructions = 'Rewrite the following text to maximize ATS compatibility by integrating relevant industry keywords and standard formatting while preserving the original meaning.';
+    } else if (actionType === 'shorten') {
+      instructions = 'Shorten the following text to make it extremely concise and punchy without losing key achievements or context.';
+    } else if (actionType === 'professional') {
+      instructions = 'Rewrite the following text using highly professional business language and powerful action verbs.';
+    } else {
+      instructions = 'Rewrite the following text to make it highly professional, impactful, and ATS-friendly. Use strong action verbs and ensure it highlights achievements and metrics if present.';
+    }
+
+    const prompt = `You are an expert technical resume writer.
 ${instructions}
 (Context: ${contextType})
 
@@ -56,16 +58,13 @@ CRITICAL INSTRUCTIONS:
 
 Output JSON format:
 {
-  "enhancedText": "The fully enhanced text string"
+"enhancedText": "The fully enhanced text string"
 }`;
 
-      const result = await callGemini(prompt, "You are an expert resume writer. Output JSON only.", [], 0.3, 'Resume Enhancement');
-      analyticsService.trackEvent('Resume Text Enhancement Completed');
-      return result.enhancedText;
-    } catch (error) {
-      console.error('Gemini Enhance Text Error:', error);
-      throw error;
-    }
+    const result = await callGemini(prompt, "You are an expert resume writer. Output JSON only.", [], 0.3, 'Resume Enhancement');
+    analyticsService.trackEvent('Resume Text Enhancement Completed');
+    return result.enhancedText;
+  
   },
 
   async scanResumeAgainstTargetRole(resumeText, targetRole) {
@@ -150,7 +149,7 @@ Return JSON only in this format:
     }
   },
 
-  async analyzeResume(dataOrFile, extractedText = '', profileType = 'experienced') {
+  async analyzeResume(dataOrFile, extractedText = '', profileType = 'experienced', abortSignal = null) {
     analyticsService.trackEvent('Resume Analysis Started');
     try {
       const inlineDataItems = [];
@@ -198,9 +197,7 @@ Return JSON only in this format:
       
       OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
       
-      console.log('[Resume Analyzer] Gemini request started');
-      const result = await callGemini(prompt, "You are an expert ATS and Resume Analyzer. Count resume facts accurately.", inlineDataItems, 0.0, 'Resume Analysis');
-      console.log('[Resume Analyzer] Gemini response received');
+      const result = await callGemini(prompt, "You are an expert ATS and Resume Analyzer. Count resume facts accurately.", inlineDataItems, 0.2, 'Resume Analysis', 25000, abortSignal);
       
       // We do not calculate ATS here anymore; it's done before calling this in useResumeAnalysis.
       
@@ -309,58 +306,7 @@ Return JSON only in this format:
     }
   },
 
-  async analyzeOpportunityMatch(userProfileContext, opportunityText, resumeData) {
-    analyticsService.trackEvent('Match Analysis Started');
-    try {
-      // Step 1: Extract deterministic requirements from opportunity (with strict caching)
-      const cacheKey = `opp_match_cache_${opportunityText.trim().substring(0, 100).replace(/[^a-zA-Z0-9]/g, '')}_${opportunityText.length}`;
-      let reqsResult;
-      
-      const cached = localStorage.getItem(cacheKey);
-      if (cached) {
-        reqsResult = JSON.parse(cached);
-      } else {
-        const extractPrompt = `Extract requirements from the job description.
 
-DESCRIPTION:
-${opportunityText}
-
-JSON FORMAT:
-{
-  "requiredSkills": ["skill1", "skill2"],
-  "tools": ["tool1", "tool2"],
-  "requiredExperienceYears": 2,
-  "requiredEducation": "Bachelor's Degree"
-}`;
-        
-        // Use 60000ms timeout for Match Engine to prevent premature timeout
-        reqsResult = await callGemini(extractPrompt, "You are a precise data extractor.", [], 0.0, 'Opportunity Match Extraction', 60000);
-        
-        // Inject opportunity text for local deterministic checks
-        reqsResult.opportunityText = opportunityText;
-        
-        localStorage.setItem(cacheKey, JSON.stringify(reqsResult));
-      }
-      
-      // Step 2: Calculate Deterministic Score locally
-      const { calculateMatchScore } = await import('../utils/matchScoringEngine');
-      const deterministicResult = calculateMatchScore(resumeData || userProfileContext, reqsResult);
-
-      // Return results directly from deterministic engine
-      analyticsService.trackEvent('Match Analysis Completed');
-      return {
-        currentMatchScore: deterministicResult.currentMatchScore,
-        potentialMatchScore: deterministicResult.potentialMatchScore,
-        strengths: deterministicResult.strengths,
-        missingSkills: deterministicResult.missingSkills,
-        recommendations: deterministicResult.recommendations || []
-      };
-    } catch (error) {
-      console.error('Gemini Opportunity Match Error:', error);
-      analyticsService.trackError('Opportunity Match Feature Error', error);
-      throw error;
-    }
-  },
 
   async evaluateCandidateFit(candidateData, opportunityData) {
     try {
@@ -393,7 +339,7 @@ JSON FORMAT:
     }
   },
 
-  async chatWithCopilot({ mode, contextData, isGeneralAssistant, history, message, generateGoals = false }) {
+  async chatWithCopilot({ mode, contextData, isGeneralAssistant, history, message }) {
     try {
       let prompt = `Chat Context: Mode=${mode}\n`;
       
@@ -421,28 +367,15 @@ JSON FORMAT:
         2. Do not provide generic advice. Be highly specific to their profile context.
         3. Keep responses conversational but strictly career-focused.`;
       }
+
+      prompt += `
       
-      if (generateGoals) {
-        prompt += `
-        4. Generate actionable weekly goals and daily actions based on their current career readiness and skill gaps.
-        
-        Required JSON format:
-        {
-          "weeklyGoals": ["Goal 1", "Goal 2"],
-          "dailyActions": ["Action 1", "Action 2"],
-          "personalizedAdvice": "Your conversational response here"
-        }`;
-      } else {
-        prompt += `
-        
-        
-        Required JSON format:
-        {
-          "response": "Your conversational response here"
+      Required JSON format:
+      {
+        "response": "Your conversational response here"
       }
-        
-        OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
-      }
+      
+      OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
       
       const systemInstruction = isGeneralAssistant 
         ? "You are OpportunityOS Copilot, a helpful general platform assistant and career guide."
@@ -450,11 +383,7 @@ JSON FORMAT:
         
       const result = await callGemini(prompt, systemInstruction, [], 0.3, 'Copilot Chat');
       
-      // Provide fallback values if omitted
-      if (generateGoals) {
-        if (!Array.isArray(result.weeklyGoals)) result.weeklyGoals = [];
-        if (!Array.isArray(result.dailyActions)) result.dailyActions = [];
-      }
+
       
       
       return result;
@@ -472,7 +401,6 @@ JSON FORMAT:
     const cacheKey = `sg_cache_${JSON.stringify(payload).length}_${payload.targetRole?.replace(/[^a-zA-Z0-9]/g, '')}`;
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
-      console.log('[Skill Gap] Using cached result');
       return JSON.parse(cached);
     }
     
@@ -542,7 +470,7 @@ Generate a highly personalized Skill Gap Analysis for the user targeting the rol
 
 OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
 
-      const result = await callGemini(prompt, "You are a master career AI. Output only valid JSON.", inlineDataItems, 0.3, 'Dynamic Skill Gap', 60000);
+      const result = await callGemini(prompt, "You are a master career AI. Output only valid JSON.", inlineDataItems, 0.3, 'Dynamic Skill Gap', 25000);
       
       sessionStorage.setItem(cacheKey, JSON.stringify(result));
       analyticsService.trackEvent('Dynamic Skill Gap Completed');
@@ -601,9 +529,29 @@ For each project return:
 Return JSON only. Format as an array of the above object.
 OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
 
-      const result = await callGemini(prompt, "You are an expert technology mentor. Output valid JSON only.", [], 0.3, 'Project Recommendations');
+      let rawProjects = await callGemini(prompt, "You are an expert technology mentor. Output valid JSON only.", [], 0.3, 'Project Recommendations');
+      
+      if (rawProjects && !Array.isArray(rawProjects) && typeof rawProjects === 'object') {
+        const keys = Object.keys(rawProjects);
+        if (keys.length === 1 && Array.isArray(rawProjects[keys[0]])) {
+          rawProjects = rawProjects[keys[0]];
+        }
+      }
+
+      if (!Array.isArray(rawProjects)) {
+        throw new Error("Invalid response from Gemini API");
+      }
+
+      const formattedProjects = rawProjects.map(proj => createRecommendation({
+        title: proj?.title || "Untitled Project",
+        description: proj?.description || "A recommended project to build your skills.",
+        technologies: Array.isArray(proj?.technologies) ? proj.technologies : [],
+        whyThisProject: proj?.whyThisProject || "This project is highly recommended for your target role.",
+        isMock: false
+      }));
+
       analyticsService.trackEvent('Project Recommendations Completed');
-      return result;
+      return formattedProjects;
     } catch (error) {
       console.error('Gemini Project Recommendations Error:', error);
       analyticsService.trackError('Project Recommendations Error', error);
@@ -613,7 +561,7 @@ OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fenc
 
 
 
-  async analyzeGithubPortfolio(username, githubData, targetRole, localMetrics) {
+  async analyzeGithubPortfolio(username, githubData, targetRole, localMetrics, abortSignal = null) {
     analyticsService.trackEvent('GitHub Analysis Started');
     try {
       const prompt = `You are a senior engineering manager and expert technical recruiter.
@@ -668,9 +616,7 @@ Required JSON Schema:
 OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
 
       // Use longer timeout as this is a heavy reasoning task (passing deep repo data)
-      console.log("[geminiService] Sending prompt to callGemini...");
-      const result = await callGemini(prompt, "You are an expert tech recruiter. Output valid JSON only.", [], 0.3, 'GitHub Analysis', 60000);
-      console.log("[geminiService] callGemini returned:", result);
+      const result = await callGemini(prompt, "You are an expert tech recruiter. Output valid JSON only.", [], 0.3, 'GitHub Analysis', 25000, abortSignal);
       
       if (result && result._fallbackMode) {
         console.warn("[geminiService] Result has _fallbackMode = true");

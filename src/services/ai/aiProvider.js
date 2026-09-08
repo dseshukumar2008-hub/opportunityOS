@@ -10,9 +10,7 @@ import { templateProvider } from './providers/templateProvider';
 import { aiLogger } from './aiLogger';
 import { providerHealth } from './providerHealth';
 import { aiCache } from './aiCache';
-import { AIErrorTypes } from './aiErrors';
-import { contextEngine } from './context/contextEngine';
-import { memoryManager } from './context/memoryManager';
+import { AIErrorTypes, AIError } from './aiErrors';
 
 // Register providers
 registerProvider('gemini', geminiProvider);
@@ -22,9 +20,10 @@ registerProvider('template', templateProvider);
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function executeWithRetry(provider, request) {
+async function executeWithRetry(provider, request, isFallback = false) {
   let attempt = 1;
-  while (attempt <= 3) {
+  const maxAttempts = isFallback ? 1 : 2; // Fast-fail fallbacks, 2 attempts max for primary
+  while (attempt <= maxAttempts) {
     try {
       return await provider.generate(request);
     } catch (error) {
@@ -32,9 +31,9 @@ async function executeWithRetry(provider, request) {
         error.type === AIErrorTypes.AI_NETWORK_ERROR ||
         error.type === AIErrorTypes.AI_RATE_LIMIT ||
         error.type === AIErrorTypes.AI_SERVER_ERROR ||
-        error.type === AIErrorTypes.AI_TIMEOUT;
+        (!isFallback && error.type === AIErrorTypes.AI_TIMEOUT);
 
-      if (!isRetryEligible || attempt === 3 || error.type === AIErrorTypes.AI_QUOTA_EXHAUSTED) {
+      if (!isRetryEligible || attempt === maxAttempts || error.type === AIErrorTypes.AI_QUOTA_EXHAUSTED) {
         throw error;
       }
       
@@ -46,40 +45,92 @@ async function executeWithRetry(provider, request) {
   }
 }
 
+async function executeAndProcess(providerName, modelUsed, request, isFallback) {
+  const provider = getProvider(providerName);
+  if (!provider) {
+    throw new Error(`Provider ${providerName} not found.`);
+  }
+
+  const { feature = 'UnknownFeature' } = request;
+  const startTime = Date.now();
+
+  try {
+    const rawResponse = await executeWithRetry(provider, request, isFallback);
+    const endTime = Date.now();
+    
+    aiLogger.logRequest({
+      feature,
+      provider: providerName,
+      model: modelUsed,
+      startTime,
+      endTime,
+      success: true,
+      errorType: null,
+      fallbackOccurred: isFallback
+    });
+    
+    providerHealth.recordSuccess(providerName, endTime - startTime);
+    
+    const normalizedResponse = normalizeResponse(rawResponse, providerName, modelUsed);
+    
+    if (normalizedResponse && normalizedResponse.data && !normalizedResponse.error) {
+      aiCache.set(request, normalizedResponse);
+    }
+    
+    return normalizedResponse;
+  } catch (error) {
+    providerHealth.recordFailure(providerName, error);
+    aiLogger.logRequest({
+      feature,
+      provider: providerName,
+      model: modelUsed,
+      startTime,
+      endTime: Date.now(),
+      success: false,
+      errorType: error.type || (isFallback ? 'FALLBACK_ERROR' : 'UNKNOWN_ERROR'),
+      fallbackOccurred: isFallback
+    });
+    throw error;
+  }
+}
+
 export async function generate(request) {
   const startTime = Date.now();
   const { providerName, feature = 'UnknownFeature' } = request;
   
   // Context injection
-  const safeParse = (key) => {
-    try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
-  };
+  if (!request.options) request.options = {};
+  
+  if (request.options.injectGlobalContext) {
+    const safeParse = (key) => {
+      try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+    };
 
-  const resumeData = safeParse('resumeData') || {};
-  const careerData = safeParse('oppOs_career_context') || {};
+    const resumeData = safeParse('resumeData') || {};
+    const careerData = safeParse('oppOs_career_context') || {};
 
-  const rawContextData = {
-    resume: resumeData,
-    skills: resumeData.skills || [],
-    projects: resumeData.projects || [],
-    careerGoal: careerData,
-    careerRoadmap: safeParse('oppOs_roadmap') || null,
-    memorySummary: memoryManager.summarizeMemory()
-  };
+    const aiContext = {
+      profile: resumeData.profile || null,
+      resume: resumeData,
+      careerGoal: careerData,
+      skills: resumeData.skills || [],
+      projects: resumeData.projects || [],
+      careerRoadmap: safeParse('oppOs_roadmap') || null,
+      achievements: resumeData.achievements || [],
+      memorySummary: null
+    };
 
-  const aiContext = contextEngine.buildContext(rawContextData);
-
-  const contextString = `
+    const contextString = `
 <OPPORTUNITY_OS_CONTEXT>
 ${JSON.stringify(aiContext)}
 </OPPORTUNITY_OS_CONTEXT>
 `;
 
-  if (!request.options) request.options = {};
-  if (request.options.systemInstruction) {
-    request.options.systemInstruction = request.options.systemInstruction + '\n' + contextString;
-  } else {
-    request.options.systemInstruction = contextString;
+    if (request.options.systemInstruction) {
+      request.options.systemInstruction = request.options.systemInstruction + '\n' + contextString;
+    } else {
+      request.options.systemInstruction = contextString;
+    }
   }
   
   // 1. Check Cache
@@ -115,48 +166,24 @@ ${JSON.stringify(aiContext)}
       errorType: 'PROVIDER_NOT_FOUND',
       fallbackOccurred: false
     });
-    return createErrorResponse(error, request.providerName || 'gemini', 'unknown');
+    return createErrorResponse(error, targetProviderName, 'unknown');
   }
 
-  try {
-    // Try the primary provider with Smart Retry Engine
-    const rawResponse = await executeWithRetry(primaryProvider, request);
-    
-    const modelUsed = primaryProvider.name === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-2.5-flash';
-    const endTime = Date.now();
-    
-    aiLogger.logRequest({
-      feature,
-      provider: primaryProvider.name,
-      model: modelUsed,
-      startTime,
-      endTime,
-      success: true,
-      errorType: null,
-      fallbackOccurred: false
-    });
-    
-    providerHealth.recordSuccess(primaryProvider.name, endTime - startTime);
-    
-    const normalizedResponse = normalizeResponse(rawResponse, primaryProvider.name, modelUsed);
-    
-    // Only cache successful, non-empty responses
-    if (normalizedResponse && normalizedResponse.content && !normalizedResponse.error) {
-      aiCache.set(request, normalizedResponse);
-    }
-    
-    return normalizedResponse;
-  } catch (primaryError) {
-    providerHealth.recordFailure(primaryProvider.name, primaryError);
+  const primaryModel = primaryProvider.name === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-2.5-flash';
 
+  try {
+    return await executeAndProcess(primaryProvider.name, primaryModel, request, false);
+  } catch (primaryError) {
     const isFallbackEligible = 
       primaryError.type === AIErrorTypes.AI_NETWORK_ERROR ||
       primaryError.type === AIErrorTypes.AI_RATE_LIMIT ||
       primaryError.type === AIErrorTypes.AI_QUOTA_EXHAUSTED ||
       primaryError.type === AIErrorTypes.AI_SERVER_ERROR ||
-      primaryError.type === AIErrorTypes.AI_TIMEOUT;
+      primaryError.type === AIErrorTypes.AI_TIMEOUT ||
+      primaryError.type === AIErrorTypes.AI_PARSE_ERROR ||
+      primaryError.type === AIErrorTypes.AI_UNKNOWN_ERROR;
       
-    if (isFallbackEligible && primaryProvider.name === 'gemini') {
+    if (isFallbackEligible) {
       const fallbacks = [
         { name: 'groq', model: 'llama-3.3-70b-versatile' },
         { name: 'openrouter', model: 'deepseek/deepseek-chat-v3-0324' },
@@ -164,69 +191,32 @@ ${JSON.stringify(aiContext)}
       ];
 
       for (const fb of fallbacks) {
-        const provider = getProvider(fb.name);
-        if (!provider) continue;
+        if (fb.name === primaryProvider.name) continue;
         
         console.warn(`[AIProvider] Attempting fallback to ${fb.name}...`);
-        const fbStartTime = Date.now();
         
         try {
-          const fbResponse = await provider.generate(request);
-          const fbEndTime = Date.now();
-          
-          aiLogger.logRequest({
-            feature,
-            provider: fb.name,
-            model: fb.model,
-            startTime: fbStartTime,
-            endTime: fbEndTime,
-            success: true,
-            errorType: null,
-            fallbackOccurred: true
-          });
-          providerHealth.recordSuccess(fb.name, fbEndTime - fbStartTime);
-          
-          const normFb = normalizeResponse(fbResponse, fb.name, fb.model);
-          if (normFb && normFb.content && !normFb.error) {
-            aiCache.set(request, normFb);
-          }
-          return normFb;
+          return await executeAndProcess(fb.name, fb.model, request, true);
         } catch (fbError) {
           console.error(`[AIProvider] ${fb.name} fallback failed:`, fbError.message);
-          aiLogger.logRequest({
-            feature,
-            provider: fb.name,
-            model: fb.model,
-            startTime: fbStartTime,
-            endTime: Date.now(),
-            success: false,
-            errorType: fbError.type || 'FALLBACK_ERROR',
-            fallbackOccurred: true
-          });
-          providerHealth.recordFailure(fb.name, fbError);
           // continue to next fallback
         }
       }
       
       // If all fallbacks fail, surface a clean error to the user instead of raw JSON
       if (primaryError.type === AIErrorTypes.AI_QUOTA_EXHAUSTED || primaryError.type === AIErrorTypes.AI_RATE_LIMIT) {
-        primaryError.message = 'All AI providers are currently at capacity. Please wait a few minutes and try again.';
+        const capacityError = new AIError(
+          primaryError.type,
+          'All AI providers are currently at capacity. Please wait a few minutes and try again.',
+          primaryError.provider,
+          primaryError.status
+        );
+        return createErrorResponse(capacityError, primaryProvider.name, primaryModel);
       }
-      throw primaryError;
+      return createErrorResponse(primaryError, primaryProvider.name, primaryModel);
     }
     
-    aiLogger.logRequest({
-      feature,
-      provider: primaryProvider.name,
-      model: primaryProvider.name === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-2.5-flash',
-      startTime,
-      endTime: Date.now(),
-      success: false,
-      errorType: primaryError.type || 'UNKNOWN_ERROR',
-      fallbackOccurred: false
-    });
-    
     // Not eligible for fallback, or not gemini
-    return createErrorResponse(primaryError, primaryProvider.name, 'unknown');
+    return createErrorResponse(primaryError, primaryProvider.name, primaryModel);
   }
 }

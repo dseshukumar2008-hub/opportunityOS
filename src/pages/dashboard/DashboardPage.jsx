@@ -3,11 +3,13 @@ import { WidgetErrorBoundary } from '../../components/common/GlobalErrorBoundary
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useResume } from '../../contexts/ResumeContext';
 import { useActivity } from '../../contexts/ActivityContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 import DashboardHeroWidget from '../../components/dashboard/DashboardHeroWidget';
 import DashboardKPIsWidget from '../../components/dashboard/DashboardKPIsWidget';
 import DashboardNextActionWidget from '../../components/dashboard/DashboardNextActionWidget';
 import RecommendedForYouWidget from '../../components/dashboard/RecommendedForYouWidget';
+import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 
 import { HeroSkeleton, KPISkeleton, AnalyticsWidgetSkeleton } from '../../components/dashboard/skeletons/DashboardSkeletons';
 
@@ -19,7 +21,10 @@ export default function DashboardPage() {
   const { profile, isLoading: profileLoading } = useUserProfile();
   const { resumes, loading: resumeLoading } = useResume();
   const { activities, loading: activityLoading } = useActivity();
-
+  const { user } = useAuth();
+  
+  const insights = useDashboardInsights();
+  
   const isLoading = profileLoading || resumeLoading || activityLoading;
 
   // If loading, show skeletons
@@ -43,6 +48,10 @@ export default function DashboardPage() {
   const isNewUser = !hasProfile && !hasResume && !hasActivity;
 
   const userState = {
+    user,
+    profile,
+    insights,
+    activities,
     hasProfile,
     hasResume,
     hasActivity,

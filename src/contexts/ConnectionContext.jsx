@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   collection,
   addDoc,
@@ -361,32 +361,39 @@ export function ConnectionProvider({ children }) {
     }
   }, []);
 
+  const contextValue = useMemo(() => ({
+    connections,
+    requests,
+    currentUserId,
+    loading: loading || usersLoading,
+    users,
+    usersById,
+    usersLoading,
+    usersError,
+    getRelationship,
+    getIncomingRequestId,
+    getMutualCount,
+    getMyConnections,
+    getIncomingRequests,
+    getSentRequests,
+    getConnectionCount,
+    sendConnectionRequest,
+    acceptConnectionRequest,
+    rejectConnectionRequest,
+    removeConnection,
+    withdrawRequest,
+  }), [
+    connections, requests, currentUserId, loading, usersLoading, 
+    users, usersById, usersError,
+    getRelationship, getIncomingRequestId, getMutualCount, getMyConnections,
+    getIncomingRequests, getSentRequests, getConnectionCount,
+    sendConnectionRequest, acceptConnectionRequest, rejectConnectionRequest,
+    removeConnection, withdrawRequest
+  ]);
+
   // 
   return (
-    <ConnectionContext.Provider
-      value={{
-        connections,
-        requests,
-        currentUserId,
-        loading: loading || usersLoading,
-        users,
-        usersById,
-        usersLoading,
-        usersError,
-        getRelationship,
-        getIncomingRequestId,
-        getMutualCount,
-        getMyConnections,
-        getIncomingRequests,
-        getSentRequests,
-        getConnectionCount,
-        sendConnectionRequest,
-        acceptConnectionRequest,
-        rejectConnectionRequest,
-        removeConnection,
-        withdrawRequest,
-      }}
-    >
+    <ConnectionContext.Provider value={contextValue}>
       {children}
     </ConnectionContext.Provider>
   );

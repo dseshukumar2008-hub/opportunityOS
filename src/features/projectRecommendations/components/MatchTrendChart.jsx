@@ -1,17 +1,22 @@
-import React from 'react';
 
 export default function MatchTrendChart({ 
   chronologicalHistory, 
   activeSnapshot, 
-  setSelectedSnapshotId, 
-  minScore, 
-  maxScore, 
-  range, 
-  chartWidth = 500, 
-  chartHeight = 80, 
-  padding = 20, 
-  points 
+  setSelectedSnapshotId 
 }) {
+  const chartWidth = 500; 
+  const chartHeight = 80; 
+  const padding = 20;
+  
+  const minScore = chronologicalHistory.length > 0 ? Math.max(0, Math.min(...chronologicalHistory.map(h => h.averageMatchScore)) - 10) : 0;
+  const maxScore = chronologicalHistory.length > 0 ? Math.min(100, Math.max(...chronologicalHistory.map(h => h.averageMatchScore)) + 10) : 100;
+  const range = maxScore - minScore || 1;
+  
+  const points = chronologicalHistory.length === 0 ? '' : chronologicalHistory.map((h, i) => {
+    const x = (i / Math.max(1, chronologicalHistory.length - 1)) * (chartWidth - padding * 2) + padding;
+    const y = chartHeight - padding - ((h.averageMatchScore - minScore) / range) * (chartHeight - padding * 2);
+    return `${x},${y}`;
+  }).join(' ');
   return (
     <div className="h-[200px] w-full border border-slate-50 bg-slate-50/50 rounded-2xl p-4 flex items-center justify-center relative overflow-visible">
       <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-full overflow-visible">

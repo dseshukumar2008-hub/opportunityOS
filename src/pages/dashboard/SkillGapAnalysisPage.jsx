@@ -23,23 +23,36 @@ export default function SkillGapAnalysisPage() {
     return params.get('targetRole') || sessionStorage.getItem('sg_role') || '';
   });
   const [selectedSources, setSelectedSources] = useState(() => {
-    return JSON.parse(sessionStorage.getItem('sg_sources') || '[]');
+    try {
+      const val = sessionStorage.getItem('sg_sources');
+      return val ? JSON.parse(val) : [];
+    } catch {
+      return [];
+    }
   });
   const [inputData, setInputData] = useState(() => {
-    return JSON.parse(sessionStorage.getItem('sg_input') || '{}');
+    try {
+      const val = sessionStorage.getItem('sg_input');
+      return val ? JSON.parse(val) : {};
+    } catch {
+      return {};
+    }
   });
   const [analysisData, setAnalysisData] = useState(() => {
-    return JSON.parse(sessionStorage.getItem('sg_analysis') || 'null');
+    try {
+      const val = sessionStorage.getItem('sg_analysis');
+      return val ? JSON.parse(val) : null;
+    } catch {
+      return null;
+    }
   });
   const [showHowItWorks, setShowHowItWorks] = useState(false);
 
-  useEffect(() => {
-    sessionStorage.setItem('sg_step', currentStep);
-    sessionStorage.setItem('sg_role', targetRole);
-    sessionStorage.setItem('sg_sources', JSON.stringify(selectedSources));
-    sessionStorage.setItem('sg_input', JSON.stringify(inputData));
-    sessionStorage.setItem('sg_analysis', JSON.stringify(analysisData));
-  }, [currentStep, targetRole, selectedSources, inputData, analysisData]);
+  useEffect(() => { sessionStorage.setItem('sg_step', currentStep); }, [currentStep]);
+  useEffect(() => { sessionStorage.setItem('sg_role', targetRole); }, [targetRole]);
+  useEffect(() => { sessionStorage.setItem('sg_sources', JSON.stringify(selectedSources)); }, [selectedSources]);
+  useEffect(() => { sessionStorage.setItem('sg_input', JSON.stringify(inputData)); }, [inputData]);
+  useEffect(() => { sessionStorage.setItem('sg_analysis', JSON.stringify(analysisData)); }, [analysisData]);
   const { profile } = useProfile();
   const { careerContext } = useCareer();
 

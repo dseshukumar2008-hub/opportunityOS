@@ -22,16 +22,9 @@ import toast from 'react-hot-toast';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useResume } from '../../contexts/ResumeContext';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
+import { getRelativeTime } from '../../utils/formatUtils';
 
-const getRelativeTime = (timestamp) => {
-  const diff = Math.floor((Date.now() - timestamp) / 60000);
-  if (diff < 1) return 'Just now';
-  if (diff < 60) return `${diff} min ago`;
-  const hours = Math.floor(diff / 60);
-  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-  const days = Math.floor(hours / 24);
-  return `${days} day${days > 1 ? 's' : ''} ago`;
-};
 
 export default function ResumeBuilderPage() {
   const { id } = useParams();
@@ -176,7 +169,7 @@ export default function ResumeBuilderPage() {
     toast.loading('Generating PDF...', { id: 'pdf-toast' });
     
     const userName = resumeData?.personalInfo?.fullName?.trim() || 'User';
-    const cleanName = userName.replace(/[^a-zA-Z0-9]/g, '_');
+    const cleanName = userName.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '') || 'My';
     const filename = `${cleanName}_Resume.pdf`;
 
     try {
@@ -212,10 +205,28 @@ export default function ResumeBuilderPage() {
       });
       
       const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      let position = 0;
+      
+      if (pdfHeight <= pageHeight) {
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      } else {
+        while (position < pdfHeight) {
+          pdf.addImage(imgData, 'PNG', 0, -position, pdfWidth, pdfHeight);
+          position += pageHeight;
+          if (position < pdfHeight) {
+            pdf.addPage();
+          }
+        }
+      }
+      
       pdf.save(filename);
+      
+      // Memory cleanup
+      canvas.width = 0;
+      canvas.height = 0;
       
       toast.success('PDF downloaded successfully!', { id: 'pdf-toast' });
     } catch (err) {
@@ -437,8 +448,13 @@ export default function ResumeBuilderPage() {
 
       {/* Preview Modal */}
       {isPreviewModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-8">
-          <div className="bg-slate-100 w-full max-w-5xl h-full rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-8"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="preview-modal-title"
+        >
+          <div className="bg-slate-100 w-full max-w-5xl h-full rounded-2xl shadow-2xl flex flex-col overflow-hidden duration-200">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200 shrink-0">
               <div className="flex items-center gap-3">
@@ -446,11 +462,12 @@ export default function ResumeBuilderPage() {
                   <Eye size={20} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h2 className="text-[16px] font-bold text-slate-900">Resume Preview</h2>
+                  <h2 id="preview-modal-title" className="text-[16px] font-bold text-slate-900">Resume Preview</h2>
                   <p className="text-[12px] font-medium text-slate-500">Live preview of your configured resume</p>
                 </div>
               </div>
               <button 
+                aria-label="Close Preview"
                 onClick={() => setIsPreviewModalOpen(false)}
                 className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
               >
@@ -472,36 +489,14 @@ export default function ResumeBuilderPage() {
         onClose={() => setIsHistoryModalOpen(false)} 
       />
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-6">
-              <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
-                <Trash2 size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Delete Resume</h3>
-              <p className="text-[14px] text-slate-600 mb-6">
-                Are you sure you want to delete "{currentResume?.title || 'Untitled Resume'}"? This action cannot be undone.
-              </p>
-              <div className="flex items-center gap-3 justify-end">
-                <button 
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="px-4 py-2 text-[13px] font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={handleDeleteConfirm}
-                  className="px-4 py-2 text-[13px] font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors"
-                >
-                  Yes, Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Resume"
+        message={`Are you sure you want to delete "${currentResume?.title || 'Untitled Resume'}"? This action cannot be undone.`}
+        confirmText="Delete Resume"
+      />
     </div>
   );
 }

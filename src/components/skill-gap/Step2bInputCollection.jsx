@@ -128,7 +128,7 @@ export default function Step2bInputCollection({ sources, onSubmit, onBack, initi
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
+                role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }} onClick={() => fileInputRef.current?.click()}
               >
                 <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-3">
                   <UploadCloud className="text-blue-500" size={24} />
@@ -203,7 +203,7 @@ export default function Step2bInputCollection({ sources, onSubmit, onBack, initi
                 onDragOver={handleDragOverLinkedin}
                 onDragLeave={handleDragLeaveLinkedin}
                 onDrop={handleDropLinkedin}
-                onClick={() => linkedinInputRef.current?.click()}
+                role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); linkedinInputRef.current?.click(); } }} onClick={() => linkedinInputRef.current?.click()}
               >
                 <div className="w-12 h-12 rounded-full bg-sky-50 flex items-center justify-center mb-3">
                   <UploadCloud className="text-sky-600" size={24} />

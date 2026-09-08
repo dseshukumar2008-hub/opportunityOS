@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
-import { FileText, Briefcase, Code, ArrowRight } from 'lucide-react';
-import { useDashboardInsights } from '../../hooks/useDashboardInsights';
+import { FileText, Code, ArrowRight, Target } from 'lucide-react';
 
 export default function RecommendedForYouWidget({ userState }) {
-  const { isNewUser } = userState || {};
-  const { recommendations } = useDashboardInsights(); // Assuming recommendations exist
+  const { isNewUser, insights } = userState || {};
+  const recommendations = insights?.recommendations; // Note: useDashboardInsights doesn't return recommendations currently, but this handles it safely.
 
 // eslint-disable-next-line no-useless-assignment
   let actions = [];
@@ -38,8 +37,8 @@ export default function RecommendedForYouWidget({ userState }) {
     actions = recommendations?.length > 0 ? recommendations : [
       { 
         icon: FileText, 
-        title: 'Improve Your Resume', 
-        description: 'Get a higher ATS score and stand out to recruiters.', 
+        title: userState?.hasResume ? 'Improve Your Resume' : 'Create Your Resume', 
+        description: userState?.hasResume ? 'Get a higher ATS score and stand out to recruiters.' : 'Build or upload a resume to get feedback.', 
         path: '/resume-review', 
         color: 'indigo' 
       },
@@ -65,13 +64,15 @@ export default function RecommendedForYouWidget({ userState }) {
     emerald: { icon: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', hover: 'hover:border-emerald-300' },
     amber:   { icon: 'text-amber-600',   bg: 'bg-amber-50',   border: 'border-amber-100',   hover: 'hover:border-amber-300' },
     rose:    { icon: 'text-rose-600',    bg: 'bg-rose-50',    border: 'border-rose-100',    hover: 'hover:border-rose-300' },
-    violet:  { icon: 'text-violet-600',  bg: 'bg-violet-50',  border: 'border-violet-100',  hover: 'hover:border-violet-300' },
-  };
+    violet:  { icon: 'text-violet-600',  bg: 'bg-violet-50',  border: 'border-violet-100',  hover: 'hover:border-violet-300' } };
 
   return (
     <div className="w-full">
-      <div className="mb-4 px-1">
-        <h3 className="text-[16px] font-black text-slate-900">Recommended for You</h3>
+      <div className="flex items-center gap-3 mb-5 px-1">
+        <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+          <Target size={16} className="text-indigo-600" />
+        </div>
+        <h3 className="text-[16px] font-bold text-slate-900">Recommended for You</h3>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -1,8 +1,5 @@
 import { useMemo } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useUserProfile } from '../../hooks/useUserProfile';
-import { useDashboardInsights } from '../../hooks/useDashboardInsights';
-import { TrendingUp, Zap, Target, Rocket } from 'lucide-react';
+import { TrendingUp, Zap, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getUserFirstName } from '../../utils/userUtils';
 
@@ -38,16 +35,14 @@ function ScoreRing({ score, size = 140 }) {
 }
 
 export default function DashboardHeroWidget({ userState }) {
-  const { user } = useAuth();
-  const { profile, isLoading: profileLoading } = useUserProfile();
-  const { careerReadiness, isLoading: insightsLoading } = useDashboardInsights();
+  const { user, profile, insights, hasProfile, isNewUser } = userState || {};
+  const careerReadiness = insights?.careerReadiness;
 
   const greeting = useMemo(() => getGreeting(), []);
-  const isLoading = profileLoading || insightsLoading;
+  const isLoading = insights?.isLoading;
   const firstName = getUserFirstName(user, profile);
   
   // Dynamic Content logic based on userState
-  const { hasProfile, isNewUser } = userState || {};
 
   const aiScore = isNewUser ? 0 : (careerReadiness?.score ?? 0);
   const nextMilestone = aiScore < 70 ? 70 : aiScore < 85 ? 85 : 100;
@@ -67,12 +62,6 @@ export default function DashboardHeroWidget({ userState }) {
         {/* Left: Score Ring */}
         <div className="flex flex-col items-center justify-center shrink-0">
           <ScoreRing score={aiScore} size={150} />
-          {!isNewUser && aiScore > 0 && (
-            <div className="flex items-center gap-1.5 mt-4 bg-emerald-50 border border-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[12px] font-bold">
-              <TrendingUp size={12} />
-              ↑ 8% this week
-            </div>
-          )}
         </div>
 
         {/* Center: Greeting + Progress */}
@@ -119,14 +108,6 @@ export default function DashboardHeroWidget({ userState }) {
                 </Link>
               </>
             )}
-          </div>
-        </div>
-
-        {/* Right: Illustration */}
-        <div className="hidden lg:flex items-center justify-center shrink-0 w-[220px]">
-          <div className="relative w-full h-[160px] bg-gradient-to-br from-indigo-50 to-violet-50 rounded-2xl border border-indigo-100 flex items-center justify-center overflow-hidden">
-            <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-indigo-100/40 blur-xl" />
-            <Rocket size={72} className="text-[#6C4CF1] opacity-90 mb-2 ml-8" strokeWidth={1.5} />
           </div>
         </div>
 

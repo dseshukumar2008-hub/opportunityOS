@@ -11,11 +11,24 @@ import {
   LayoutTemplate
 } from 'lucide-react';
 import { useResume } from '../../contexts/ResumeContext';
-import toast from 'react-hot-toast';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
+import { formatDateShort } from '../../utils/formatUtils';
+
+const getAtsScore = (resume) => {
+  let score = 0;
+  const pi = resume.personal_info || {};
+  if (pi.fullName) score += 5;
+  if (pi.email) score += 5;
+  if (resume.education?.length) score += 20;
+  if (resume.skills?.length > 3) score += 15;
+  if (resume.projects?.length) score += 20;
+  if (resume.experience?.length) score += 25;
+  if (resume.certifications?.length) score += 10;
+  return Math.min(score, 100);
+};
 
 export default function ResumeDashboardPage() {
-  const { resumes, createResume, deleteResume, renameResume } = useResume();
+  const { resumes, createResume, deleteResume, renameResume, loading } = useResume();
   const navigate = useNavigate();
   
   const [activeMenuId, setActiveMenuId] = useState(null);
@@ -25,27 +38,6 @@ export default function ResumeDashboardPage() {
   // Confirmation Modal state
   const [resumeToDelete, setResumeToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const formatDate = (timestamp) => {
-    if (!timestamp) return 'Just now';
-    const d = new Date(timestamp);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
-  const getAtsScore = (resume) => {
-    // Basic heuristic or fetch from resume data if saved there
-    // Since it's dynamic based on content, let's roughly estimate from completed sections
-    let score = 0;
-    const pi = resume.personal_info || {};
-    if (pi.fullName) score += 5;
-    if (pi.email) score += 5;
-    if (resume.education?.length) score += 20;
-    if (resume.skills?.length > 3) score += 15;
-    if (resume.projects?.length) score += 20;
-    if (resume.experience?.length) score += 25;
-    if (resume.certifications?.length) score += 10;
-    return Math.min(score, 100);
-  };
 
   const handleRenameSubmit = async (id) => {
     if (renameValue.trim()) {
@@ -64,9 +56,8 @@ export default function ResumeDashboardPage() {
     setIsDeleting(true);
     try {
       await deleteResume(resumeToDelete.id);
-      toast.success('Resume deleted successfully');
     } catch {
-      toast.error('Failed to delete resume');
+      // ResumeContext handles the error toast
     } finally {
       setIsDeleting(false);
       setResumeToDelete(null);
@@ -101,7 +92,14 @@ export default function ResumeDashboardPage() {
         </button>
       </div>
 
-      {resumes.length === 0 ? (
+      {loading && resumes.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-slate-200 p-12 flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-8 h-8 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+            <p className="text-sm font-medium text-slate-500">Loading your resumes...</p>
+          </div>
+        </div>
+      ) : resumes.length === 0 ? (
         <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
           <div className="w-20 h-20 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mb-6">
             <FileText size={40} />
@@ -231,7 +229,7 @@ export default function ResumeDashboardPage() {
                 <div className="px-6 py-4 bg-white border-t border-slate-100 flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-[12px] font-medium text-slate-500">
                     <Clock size={14} />
-                    Edited {formatDate(resume.updated_at)}
+                    Edited {formatDateShort(resume.updated_at)}
                   </div>
                   <button 
                     onClick={(e) => { e.stopPropagation(); openResume(resume.id); }}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Briefcase, RefreshCw, AlertCircle, Clock, Target, Flame, Zap, Code, Bot } from 'lucide-react';
+import { Briefcase, RefreshCw, AlertCircle, Clock, Target, Flame, Code } from 'lucide-react';
 
 function CircularProgress({ pct, color = '#6C4CF1', trackColor = '#F1F5F9', textColor = 'text-slate-900' }) {
   const size = 120;
@@ -23,49 +23,19 @@ function CircularProgress({ pct, color = '#6C4CF1', trackColor = '#F1F5F9', text
   );
 }
 
-function DonutChart({ strong, moderate, missing }) {
-  const size = 180;
-  const stroke = 24;
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const total = strong + moderate + missing;
-  
-  const pctStrong = total > 0 ? strong / total : 0;
-  const pctModerate = total > 0 ? moderate / total : 0;
-  const pctMissing = total > 0 ? missing / total : 0;
-
-  const offStrong = 0;
-  const offModerate = pctStrong * c;
-  const offMissing = (pctStrong + pctModerate) * c;
-
-  return (
-    <div className="relative flex items-center justify-center w-full max-w-[160px] aspect-square mx-auto">
-      <svg viewBox={`0 0 ${size} ${size}`} className="-rotate-90 w-full h-auto">
-        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#F1F5F9" strokeWidth={stroke}/>
-        {total > 0 && (
-          <>
-            <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#EF4444" strokeWidth={stroke} strokeDasharray={`${pctMissing * c} ${c}`} strokeDashoffset={-offMissing} />
-            <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#F59E0B" strokeWidth={stroke} strokeDasharray={`${pctModerate * c} ${c}`} strokeDashoffset={-offModerate} />
-            <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#10B981" strokeWidth={stroke} strokeDasharray={`${pctStrong * c} ${c}`} strokeDashoffset={-offStrong} />
-          </>
-        )}
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-[24px] font-black text-slate-900 leading-none">{total}</span>
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Skills</span>
-      </div>
-    </div>
-  );
-}
 
 export default function Step4Dashboard({ data, onReset }) {
   const [showAllSkills, setShowAllSkills] = useState(false);
   const { 
     targetRole = "Unknown Role", readinessScore = 0, skillGapPercentage = 0, currentSkills = [], 
-    skillBreakdown = { strong: 0, moderate: 0, missing: 0 }, 
     missingSkills: rawMissingSkills, 
     learningPath = [] 
   } = data || {};
+
+  const skillBreakdown = {
+    strong: Number(data?.skillBreakdown?.strong || 0),
+    moderate: Number(data?.skillBreakdown?.moderate || 0),
+    missing: Number(data?.skillBreakdown?.missing || 0) };
 
   // Normalize missingSkills to ensure it's always the expected object format, even if legacy flat array
   const missingSkills = Array.isArray(rawMissingSkills) 
@@ -376,9 +346,6 @@ export default function Step4Dashboard({ data, onReset }) {
 // Icon Helpers
 function CheckCircle2Icon({ className }) {
   return <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>;
-}
-function EditIcon({ className }) {
-  return <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>;
 }
 function Sparkles({ className, size=24 }) {
   return <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>;

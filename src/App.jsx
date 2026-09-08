@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { Toaster, ToastBar, toast } from 'react-hot-toast';
 import { X } from 'lucide-react';
 import { AuthProvider } from './contexts/AuthContext';
@@ -11,9 +11,10 @@ import { ResumeProvider } from './contexts/ResumeContext';
 import { TeamProvider } from './contexts/TeamContext';
 
 import { ActivityProvider } from './contexts/ActivityContext';
-import { GoalProvider } from './contexts/GoalContext';
-import { AchievementProvider } from './contexts/AchievementContext';
+
 import ProtectedRoute from './components/routing/ProtectedRoute';
+import GuestRoute from './components/routing/GuestRoute';
+import AdminRoute from './components/routing/AdminRoute';
 import { OnlineStatusProvider } from './contexts/OnlineStatusContext';
 import { ConnectionProvider } from './contexts/ConnectionContext';
 import { ProfileProvider } from './contexts/ProfileContext';
@@ -48,10 +49,10 @@ const UserProfilePage = lazy(() => import('./pages/dashboard/UserProfilePage'));
 
 const RecommendationHistoryPage = lazy(() => import('./pages/dashboard/RecommendationHistoryPage'));
 const CareerRoadmapPage = lazy(() => import('./pages/dashboard/CareerRoadmapPage'));
-const GoalsPage = lazy(() => import('./pages/dashboard/GoalsPage'));
+
 const CareerCoachPage = lazy(() => import('./pages/dashboard/CareerCoachPage'));
 const SkillGapAnalysisPage = lazy(() => import('./pages/dashboard/SkillGapAnalysisPage'));
-const MatchEnginePage = lazy(() => import('./pages/dashboard/MatchEnginePage'));
+
 const ProjectRecommendationPage = lazy(() => import('./features/projectRecommendations/ProjectRecommendationPage'));
 
 const GithubAnalyzerPage = lazy(() => import('./features/githubAnalyzer/GithubAnalyzerPage'));
@@ -117,17 +118,15 @@ export default function App() {
           </Toaster>
 
           <Routes>
-            {/* Public Route */}
-            <Route path="/" element={<Suspense fallback={<PageLoader />}><LandingPage /></Suspense>} />
-
             <Route path="/presentation" element={<Suspense fallback={<PresentationSkeleton />}><PresentationPage /></Suspense>} />
 
-            {/* Guest Routes */}
-            <Route path="/login" element={<Suspense fallback={<PageLoader />}><LoginPage /></Suspense>} />
-            <Route path="/signup" element={<Suspense fallback={<PageLoader />}><SignupPage /></Suspense>} />
-            <Route path="/forgot-password" element={<Suspense fallback={<PageLoader />}><ForgotPasswordPage /></Suspense>} />
-
-
+            {/* Guest Routes (Redirect to dashboard if already authenticated) */}
+            <Route element={<GuestRoute />}>
+              <Route path="/" element={<Suspense fallback={<PageLoader />}><LandingPage /></Suspense>} />
+              <Route path="/login" element={<Suspense fallback={<PageLoader />}><LoginPage /></Suspense>} />
+              <Route path="/signup" element={<Suspense fallback={<PageLoader />}><SignupPage /></Suspense>} />
+              <Route path="/forgot-password" element={<Suspense fallback={<PageLoader />}><ForgotPasswordPage /></Suspense>} />
+            </Route>
 
             {/* Student Protected Routes */}
             <Route element={<ProtectedRoute />}>
@@ -138,19 +137,15 @@ export default function App() {
                       <ResumeProvider>
                           <OnlineStatusProvider>
                             <ProfileProvider>
-                              <GoalProvider>
-                                <AchievementProvider>
-                                  <CareerProvider>
-                                    <SkillArcadeProvider>
+                                <CareerProvider>
+                                  <SkillArcadeProvider>
                                       <Suspense fallback={<DashboardSkeleton />}>
                                         <DashboardLayout />
                                       </Suspense>
-                                    </SkillArcadeProvider>
-                                  </CareerProvider>
-                                </AchievementProvider>
-                              </GoalProvider>
-                            </ProfileProvider>
-                          </OnlineStatusProvider>
+                                  </SkillArcadeProvider>
+                                </CareerProvider>
+                              </ProfileProvider>
+                            </OnlineStatusProvider>
                         </ResumeProvider>
                       </ConnectionProvider>
                   </TeamProvider>
@@ -158,17 +153,19 @@ export default function App() {
               }>
                 <Route element={<RouteErrorBoundary><Suspense fallback={<PageLoader />}><Outlet /></Suspense></RouteErrorBoundary>}>
                   <Route path="/dashboard" element={<Suspense fallback={<DashboardSkeleton />}><DashboardPage /></Suspense>} />
-                  <Route path="/admin" element={<Suspense fallback={<PageLoader />}><AdminDashboardPage /></Suspense>} />
+                  <Route element={<AdminRoute />}>
+                    <Route path="/admin" element={<Suspense fallback={<PageLoader />}><AdminDashboardPage /></Suspense>} />
+                  </Route>
                   <Route path="/analytics" element={<Suspense fallback={<AnalyticsSkeleton />}><AnalyticsPage /></Suspense>} />
                   <Route path="/recommendations/history" element={<RecommendationHistoryPage />} />
                   <Route path="/career-roadmap" element={<CareerRoadmapPage />} />
                   <Route path="/career-explorer" element={<Suspense fallback={<PageLoader />}><CareerExplorerPage /></Suspense>} />
                   <Route path="/skill-gap" element={<Suspense fallback={<PageLoader />}><SkillGapAnalysisPage /></Suspense>} />
-                  <Route path="/match-engine" element={<Suspense fallback={<PageLoader />}><MatchEnginePage /></Suspense>} />
+
                   <Route path="/project-recommendations" element={<Suspense fallback={<PageLoader />}><ProjectRecommendationPage /></Suspense>} />
 
                   <Route path="/github-analyzer" element={<Suspense fallback={<PageLoader />}><GithubAnalyzerPage /></Suspense>} />
-                  <Route path="/goals" element={<GoalsPage />} />
+
                   <Route path="/resume-builder" element={<Suspense fallback={<PageLoader />}><ResumeDashboardPage /></Suspense>} />
                   <Route path="/resume-builder/:id" element={<Suspense fallback={<ResumeBuilderSkeleton />}><ResumeBuilderPage /></Suspense>} />
                   <Route path="/resume-review" element={<Suspense fallback={<ResumeReviewSkeleton />}><ResumeReviewPage /></Suspense>} />
@@ -181,6 +178,9 @@ export default function App() {
                 </Route>
               </Route>
             </Route>
+            
+            {/* Catch-all Route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

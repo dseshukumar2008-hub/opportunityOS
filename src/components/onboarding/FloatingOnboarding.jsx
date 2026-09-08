@@ -1,9 +1,10 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
+import { useModalBehavior } from '../../hooks/useModalBehavior';
 import { db } from '../../config/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import { User, GraduationCap, Code2, Target, FileText, UploadCloud} from 'lucide-react';
 
@@ -17,10 +18,12 @@ import SuccessStep from './SuccessStep';
 
 export default function FloatingOnboarding() {
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { profile, loading } = useProfile();
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  
+  const modalRef = useModalBehavior(isVisible, () => setIsVisible(false), true);
   
   const [currentStep, setCurrentStep] = useState(0);
   const [onboardingData, setOnboardingData] = useState({
@@ -71,43 +74,27 @@ export default function FloatingOnboarding() {
     }
   }, [profile]);
 
+  // Use profile from ProfileContext (already live via onSnapshot) instead of a redundant getDoc
   useEffect(() => {
     if (!user) return;
+    // ProfileContext is still loading — stay in loading state
+    if (loading) return;
+
     const isLocallyCompleted = localStorage.getItem(`onboarding_${user.uid}`) === 'completed';
-    
     if (isLocallyCompleted) {
-// eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(false);
       setIsVisible(false);
       return;
     }
 
-    const checkOnboardingStatus = async () => {
-      try {
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          if (data.onboardingCompleted === true) {
-            localStorage.setItem(`onboarding_${user.uid}`, 'completed');
-            setIsVisible(false);
-          } else {
-            setIsVisible(true);
-          }
-        } else {
-          setIsVisible(true);
-        }
-      } catch (error) {
-        console.error("[ONBOARDING] Error fetching onboarding status:", error);
-        setIsVisible(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkOnboardingStatus();
-  }, [user]);
+    if (profile?.onboardingCompleted === true) {
+      localStorage.setItem(`onboarding_${user.uid}`, 'completed');
+      setIsVisible(false);
+    } else {
+      setIsVisible(true);
+    }
+    setIsLoading(false);
+  }, [user, profile, loading]);
 
   useEffect(() => {
     window.openOnboardingModal = () => {
@@ -118,40 +105,6 @@ export default function FloatingOnboarding() {
       delete window.openOnboardingModal;
     };
   }, []);
-
-  // Lock background scrolling when modal is visible
-  useEffect(() => {
-    if (isVisible) {
-      const scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
-      document.documentElement.style.overflow = 'hidden';
-    } else {
-      const scrollY = document.body.style.top;
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
-    }
-
-    return () => {
-      const scrollY = document.body.style.top;
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
-    };
-  }, [isVisible]);
 
   // Default to step 1 if currentStep is 0 (Welcome step removed)
   useEffect(() => {
@@ -223,34 +176,21 @@ export default function FloatingOnboarding() {
       {/* Premium Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Ambient lighting blobs */}
-        <div className="absolute top-[-10%] left-[-5%] w-[800px] h-[800px] bg-[#E9D5FF]/30 rounded-full blur-[150px]" />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[900px] h-[900px] bg-[#BAE6FD]/20 rounded-full blur-[150px]" />
-        <div className="absolute top-[30%] left-[30%] w-[600px] h-[600px] bg-[#FBCFE8]/15 rounded-full blur-[120px]" />
-        
-        {/* Very subtle grain texture */}
-        <div className="absolute inset-0 opacity-[0.015] mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
+        <div className="absolute top-[-10%] left-[-5%] max-w-full w-[800px] h-[800px] bg-[#E9D5FF]/30 rounded-full blur-[150px]" />
+        <div className="absolute bottom-[-10%] right-[-5%] max-w-full w-[900px] h-[900px] bg-[#BAE6FD]/20 rounded-full blur-[150px]" />
+        <div className="absolute inset-0 bg-[#6C4CF1]/5 rounded-[36px]"></div>
       </div>
 
       {/* Main Glass Card - 16:9 aspect ratio approx */}
-      <div className="w-full max-w-[1200px] h-[85vh] min-h-[675px] bg-white rounded-[36px] border border-white/60 shadow-[0_20px_80px_rgba(124,58,237,0.08)] relative z-10 flex overflow-hidden">
+      <div ref={modalRef} className="w-full max-w-[1200px] h-[85vh] min-h-[675px] bg-white rounded-3xl border border-slate-200 shadow-xl relative z-10 flex overflow-hidden">
         
         {/* LEFT SIDEBAR */}
-        <div className="w-[390px] h-full shrink-0 flex flex-col pt-10 pb-8 px-8 border-r-[1px] border-white/40 bg-gradient-to-b from-white via-[#FCFAFF]/90 to-[#F4F0FF]/90 backdrop-blur-2xl shadow-[inset_1px_1px_0_rgba(255,255,255,0.8),4px_0_24px_rgba(124,58,237,0.03)] relative z-20 overflow-hidden">
+        <div className="max-w-full w-[390px] h-full shrink-0 flex flex-col pt-10 pb-8 px-8 border-r border-slate-100 bg-slate-50 relative z-20 overflow-hidden">
           
-          {/* Subtle background glows */}
-          <div className="absolute top-[50px] left-[20px] w-[200px] h-[200px] bg-[#9333EA]/10 blur-[60px] rounded-full pointer-events-none"></div>
-
-          {/* Radial Dot Texture */}
-          <div className="absolute inset-0 pointer-events-none opacity-20 mix-blend-multiply" 
-               style={{ backgroundImage: 'radial-gradient(circle at center, rgba(124, 58, 237, 0.05) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
-          </div>
-
           {/* Logo */}
           <div className="flex items-center gap-3 mb-12 relative z-10">
             <div className="relative">
-              {/* Subtle purple radial glow specifically behind logo */}
-              <div className="absolute inset-0 bg-[#7C3AED]/30 blur-xl rounded-full scale-150"></div>
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#8B5CF6] flex items-center justify-center text-white font-bold text-xl shadow-[0_4px_12px_rgba(124,58,237,0.3)] shrink-0 relative z-10 border border-white/20">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#8B5CF6] flex items-center justify-center text-white font-bold text-xl shadow-sm shrink-0 relative z-10 border border-white/20">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
               </div>
             </div>
@@ -263,8 +203,8 @@ export default function FloatingOnboarding() {
           {/* Vertical Timeline */}
           <div className="flex-1 flex flex-col justify-center relative z-10">
             <div className="relative">
-              {/* Vertical connector line (Gradient: Purple -> Blue -> Pink) */}
-              <div className="absolute left-[20px] top-[30px] bottom-[30px] w-[2px] bg-gradient-to-b from-[rgba(124,58,237,0.15)] via-[rgba(59,130,246,0.15)] to-[rgba(236,72,153,0.15)] blur-[0.5px] -z-10 rounded-full"></div>
+              {/* Vertical connector line */}
+              <div className="absolute left-[20px] top-[30px] bottom-[30px] w-[2px] bg-slate-200 -z-10 rounded-full"></div>
               
               {[
                 { id: 1, title: 'Personal Details', desc: 'Tell us about yourself', icon: <User size={22} className="text-[#6D5BFF]" strokeWidth={2} /> },
@@ -278,10 +218,17 @@ export default function FloatingOnboarding() {
                 const isPast = currentStep > step.id;
                 
                 return (
-                  <div key={step.id} className={`flex items-center gap-4 relative mb-8 last:mb-0 group cursor-pointer transition-opacity duration-200 ${!isActive && !isPast ? 'opacity-70 hover:opacity-100' : 'opacity-100'}`} onClick={() => currentStep > 0 && currentStep < 7 && setCurrentStep(step.id)}>
+                  <div 
+                    key={step.id} 
+                    role="button"
+                    tabIndex={0}
+                    className={`flex items-center gap-4 relative mb-8 last:mb-0 group cursor-pointer transition-opacity duration-200 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl p-2 -m-2 ${!isActive && !isPast ? 'opacity-70 hover:opacity-100' : 'opacity-100'}`} 
+                    onClick={() => currentStep > 0 && currentStep < 7 && setCurrentStep(step.id)}
+                    onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && currentStep > 0 && currentStep < 7) { e.preventDefault(); setCurrentStep(step.id); } }}
+                  >
                     
                     {isActive && (
-                      <div className="absolute inset-y-[-10px] -inset-x-4 bg-white/60 backdrop-blur-md rounded-[20px] border border-[rgba(255,255,255,0.8)] shadow-[0_12px_30px_rgba(124,58,237,0.15)] transition-transform duration-200 ease-out hover:-translate-y-[2px] -z-10"></div>
+                      <div className="absolute inset-y-[-10px] -inset-x-4 bg-white rounded-xl border border-slate-200 shadow-sm transition-transform duration-200 ease-out hover:-translate-y-[2px] -z-10"></div>
                     )}
 
                     {isPast ? (
@@ -319,7 +266,7 @@ export default function FloatingOnboarding() {
           {/* Right Content Header (Progress) */}
           {currentStep > 0 && currentStep < 7 && (
             <div className="w-full pt-10 px-12 flex items-center justify-between shrink-0">
-              <div className="flex flex-col gap-2.5 w-[300px]">
+              <div className="flex flex-col gap-2.5 max-w-full w-[300px]">
                 <span className="text-[12px] font-bold text-[#6D5BFF] uppercase tracking-wider">
                   STEP {progressStep} OF 6
                 </span>

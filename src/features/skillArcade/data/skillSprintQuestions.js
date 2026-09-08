@@ -100,3 +100,10 @@ export const getRandomSprintQuestions = (count = 15) => {
   
   return finalizedQuestions;
 };
+
+// Clear cache on logout to prevent cross-user leakage
+if (typeof window !== 'undefined') {
+  window.addEventListener('oppOs_logout', () => {
+    usedQuestionIds.clear();
+  });
+}

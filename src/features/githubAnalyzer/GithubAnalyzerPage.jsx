@@ -1,8 +1,7 @@
-import  { useState } from 'react';
+import  { useState, useRef, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { geminiService } from '../../services/geminiService';
 import { useCareer } from '../../contexts/CareerContext';
-import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { useActivity } from '../../contexts/ActivityContext';
 import GithubUpload from './GithubUpload';
@@ -10,20 +9,30 @@ import GithubResults from './GithubResults';
 import { calculateLocalGithubMetrics, fetchDeepGithubData, fetchContributionHeatmap } from '../../utils/githubAnalyzerEngine';
 import ContextualBackButton from '../../components/navigation/ContextualBackButton';
 import { sanitizeForFirestore, findNestedArrays } from '../../utils/firestoreSanitizer';
+import { getErrorMessage } from '../../utils/errorUtils';
 
 export default function GithubAnalyzerPage() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
   const { updateCareerContext } = useCareer();
-  const { updateProfile } = useProfile();
+  const { updateProfile, mergeProfileData } = useProfile();
   const { addActivity } = useActivity();
   const isMounted = useRef(true);
 
+  const abortControllerRef = useRef(null);
+
   useEffect(() => {
-    return () => { isMounted.current = false; };
+    isMounted.current = true;
+    return () => { 
+      isMounted.current = false; 
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+    };
   }, []);
 
   const handleAnalyze = async (username, targetRole) => {
+    if (abortControllerRef.current) abortControllerRef.current.abort();
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
     if (!username || !targetRole) {
       toast.error("Please provide both a GitHub username and a target role.");
       return { success: false, error: 'MISSING_DATA' };
@@ -74,6 +83,11 @@ export default function GithubAnalyzerPage() {
                 console.error("Firestore cache save error:", saveResult.error);
                 // We won't block the UI here, but we log it.
               }
+              
+              const detectedSkills = firestoreSafeAnalysis.technologyAnalysis?.detected || [];
+              if (detectedSkills.length > 0 && mergeProfileData) {
+                await mergeProfileData({ extractedSkills: detectedSkills });
+              }
             } catch (saveError) {
               console.error("Firestore Save Error from cache:", saveError);
             }
@@ -89,7 +103,8 @@ export default function GithubAnalyzerPage() {
           console.warn("Stale or fallback cache detected, fetching fresh.");
           localStorage.removeItem(cacheKey);
         }
-      } catch (_e) {
+      // eslint-disable-next-line no-unused-vars
+      } catch (_) {
         console.warn("Invalid cache data, fetching fresh.");
         localStorage.removeItem(cacheKey);
       }
@@ -97,11 +112,14 @@ export default function GithubAnalyzerPage() {
 
     try {
       const [userResponse, reposResponse] = await Promise.all([
-        fetch(`https://api.github.com/users/${username}`),
-        fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`)
+        fetch(`https://api.github.com/users/${username}`, { signal }),
+        fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { signal })
       ]);
 
       if (!userResponse.ok || !reposResponse.ok) {
+        if (userResponse.status === 403 || reposResponse.status === 403) {
+          throw new Error("GITHUB_RATE_LIMIT");
+        }
         if (userResponse.status === 404 || reposResponse.status === 404) {
           throw new Error("USER_NOT_FOUND");
         }
@@ -109,7 +127,10 @@ export default function GithubAnalyzerPage() {
       }
       
       const userData = await userResponse.json();
-      const repos = await reposResponse.json();
+      const rawRepos = await reposResponse.json();
+      
+      const nonForkRepos = rawRepos.filter(r => !r.fork);
+      const repos = nonForkRepos.length > 0 ? nonForkRepos : rawRepos;
       
       const githubData = repos.map(repo => ({
         name: repo.name,
@@ -120,15 +141,16 @@ export default function GithubAnalyzerPage() {
         forks_count: repo.forks_count,
         updated_at: repo.updated_at,
         created_at: repo.created_at,
+        fork: repo.fork
       }));
 
       // Calculate deterministic metrics locally
-      const localMetrics = calculateLocalGithubMetrics(githubData, userData, targetRole);
+      const localMetrics = calculateLocalGithubMetrics(githubData, userData);
 
       // Deep fetch top 5 repos for AI context and real heatmap
       const [deepAnalysis, heatmapData] = await Promise.all([
-        fetchDeepGithubData(username, repos),
-        fetchContributionHeatmap(username)
+        fetchDeepGithubData(username, repos, signal),
+        fetchContributionHeatmap(username, signal)
       ]);
 
       // Add heatmap to local metrics so it renders
@@ -136,16 +158,9 @@ export default function GithubAnalyzerPage() {
       localMetrics.totalContributions = heatmapData.totalContributions;
       localMetrics.deepAnalysis = deepAnalysis;
 
-      console.log("=== GITHUB ANALYZER DEBUG ===");
-      console.log("1. Target Role:", targetRole);
-      console.log("2. Total Repos analyzed:", githubData.length);
-      console.log("3. Deep Analysis Repo Count:", deepAnalysis.length);
-
       let analysisResult;
       try {
-        console.log("4. Calling geminiService.analyzeGithubPortfolio...");
-        const geminiOutput = await geminiService.analyzeGithubPortfolio(username, githubData, targetRole, localMetrics);
-        console.log("5. Gemini Output received:", geminiOutput);
+        const geminiOutput = await geminiService.analyzeGithubPortfolio(username, githubData, targetRole, localMetrics, signal);
         
         if (geminiOutput._fallbackMode) {
           console.warn("6. FALLBACK MODE TRIGGERED! Throwing error instead of silent fallback.");
@@ -161,13 +176,12 @@ export default function GithubAnalyzerPage() {
             githubScore: geminiOutput.githubScore || 0,
             alignmentScore: avgMatch,
             careerMatch: m,
-            analysisSummary: geminiOutput.analysisSummary || [],
             overallAssessment: geminiOutput.overallAssessment || "",
-            strengths: geminiOutput.strengths || [],
-            weaknesses: geminiOutput.weaknesses || [],
-            recommendations: geminiOutput.recommendations || []
+            analysisSummary: Array.isArray(geminiOutput.analysisSummary) ? geminiOutput.analysisSummary : [],
+            strengths: Array.isArray(geminiOutput.strengths) ? geminiOutput.strengths : [],
+            weaknesses: Array.isArray(geminiOutput.weaknesses) ? geminiOutput.weaknesses : [],
+            recommendations: Array.isArray(geminiOutput.recommendations) ? geminiOutput.recommendations : []
           };
-          console.log("7. Final Analysis Result Object:", analysisResult);
         }
       } catch (geminiError) {
         console.error("6. GEMINI ERROR CAUGHT:", geminiError);
@@ -191,7 +205,6 @@ export default function GithubAnalyzerPage() {
       }
 
       try {
-        console.log("Saving to updateCareerContext...");
         await updateCareerContext(firestoreSafeContext);
       } catch (e) {
         console.warn("Non-fatal error updating career context:", e);
@@ -213,7 +226,6 @@ export default function GithubAnalyzerPage() {
         }
         
         try {
-          console.log("Saving to updateProfile...");
           const saveResult = await updateProfile({ 
             githubAnalysis: { ...firestoreSafeAnalysis, analyzedAt: new Date().toISOString() } 
           });
@@ -221,9 +233,14 @@ export default function GithubAnalyzerPage() {
           if (saveResult && saveResult.error) {
             throw saveResult.error;
           }
+          
+          const detectedSkills = firestoreSafeAnalysis.technologyAnalysis?.detected || [];
+          if (detectedSkills.length > 0 && mergeProfileData) {
+            await mergeProfileData({ extractedSkills: detectedSkills });
+          }
         } catch (saveError) {
           console.error("Firestore Save Error:", saveError);
-          toast.error("Analysis complete, but failed to save to profile. " + (saveError.message || ""));
+          toast.error(getErrorMessage(saveError, "Analysis complete, but failed to save to profile."));
           return { success: false, error: "SAVE_FAILED" };
         }
       }
@@ -243,20 +260,22 @@ export default function GithubAnalyzerPage() {
       }
       return { success: true };
     } catch (error) {
+      if (error.name === 'AbortError') {
+        return { success: false, error: "CANCELLED" };
+      }
       console.error("GitHub Fetch Error:", error);
+      
+      if (error.message === "GITHUB_RATE_LIMIT") {
+        return { success: false, error: "RATE_LIMIT" };
+      }
+      
       if (error.message === "USER_NOT_FOUND") {
-        toast.error(
-          <div>
-            <p className="font-bold mb-1">❌ GitHub user not found</p>
-            <p className="text-sm">Please enter a valid GitHub username and try again.</p>
-          </div>,
-          { duration: 5000, style: { maxWidth: '500px' } }
-        );
         return { success: false, error: "USER_NOT_FOUND" };
       }
+      
       return { success: false, error: error.message };
     } finally {
-      if (isMounted.current) setLoading(false);
+      if (isMounted.current && !signal.aborted) setLoading(false);
     }
   };
 

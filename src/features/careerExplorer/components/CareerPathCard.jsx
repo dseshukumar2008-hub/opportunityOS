@@ -23,7 +23,6 @@ export default function CareerPathCard({ path, simulatedSkills, toggleSimulatedS
   };
 
   const handleCreateRoadmap = () => {
-    console.log("Selected Career:", path.title);
     navigate(`/career-roadmap`, { state: { targetRole: path.title, source: 'careerExplorer' } });
   };
 
@@ -51,7 +50,7 @@ export default function CareerPathCard({ path, simulatedSkills, toggleSimulatedS
         {/* Match Score Ring */}
         <div className="flex flex-col items-center justify-center">
           <div className="relative w-12 h-12 flex items-center justify-center">
-            <svg className="w-full h-full transform -rotate-90">
+            <svg viewBox="0 0 48 48" className="w-full h-full transform -rotate-90">
               <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-100" />
               <circle 
                 cx="24" cy="24" r="20" 
@@ -121,10 +120,10 @@ export default function CareerPathCard({ path, simulatedSkills, toggleSimulatedS
               <button 
                 key={idx} 
                 onClick={() => toggleSimulatedSkill(skill)}
-                className="text-[11px] font-medium px-2 py-1 rounded-md bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+                className="group text-[11px] font-medium px-2 py-1 rounded-md bg-white border border-slate-200 text-slate-600 hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
                 title="Click to simulate learning this skill"
               >
-                <X size={10} className="text-slate-400" />
+                <X size={10} className="text-slate-400 group-hover:text-indigo-500 transition-colors" />
                 {skill}
               </button>
             ))}

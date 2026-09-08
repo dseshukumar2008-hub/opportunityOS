@@ -1,373 +1,439 @@
 [
   {
-    "file": "src\\components\\copilot\\OpportunityOSCopilot.jsx",
-    "line": 227,
-    "variable": "messages",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{(messages || []).length === 0 && !isTyping && ("
+    "id": "bh-js-001",
+    "language": "JavaScript",
+    "difficulty": "Easy",
+    "length": 4,
+    "code": "function calculateTotal(price, quantity) {\n  return price + quantity;\n}\nconsole.log(calculateTotal(10, \"5\"));",
+    "pattern": "Incorrect condition",
+    "question": "What will this code print?",
+    "reason": "In JavaScript, using the '+' operator with a string and a number causes type coercion. The number 10 is implicitly converted to a string, and they are concatenated together to form \"105\", rather than performing mathematical addition."
   },
   {
-    "file": "src\\components\\copilot\\OpportunityOSCopilot.jsx",
-    "line": 237,
-    "variable": "messages",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{(messages || []).map((msg, index) => {"
+    "id": "bh-js-002",
+    "language": "JavaScript",
+    "difficulty": "Easy",
+    "length": 2,
+    "code": "const user = { name: \"Alice\", age: 25 };\nconsole.log(user.email.toLowerCase());",
+    "pattern": "Null value",
+    "question": "What is the likely runtime error here?",
+    "reason": "The code attempts to read an 'email' property that doesn't exist on the 'user' object, which evaluates to 'undefined'. The actual bug occurs when calling .toLowerCase() on 'undefined', throwing a TypeError. It won't fail silently or throw a ReferenceError."
   },
   {
-    "file": "src\\components\\copilot\\OpportunityOSCopilot.jsx",
-    "line": 284,
-    "variable": "messages",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{(messages || []).length <= 1 && ("
+    "id": "bh-js-003",
+    "language": "JavaScript",
+    "difficulty": "Hard",
+    "length": 3,
+    "code": "for (var i = 0; i < 3; i++) {\n  setTimeout(() => console.log(i), 100);\n}",
+    "pattern": "Scope issue",
+    "question": "What will this code print?",
+    "reason": "The loop schedules three timeouts. The bug is using 'var', which creates a single function-scoped variable. By the time the timeouts execute, the loop has already completed and 'i' is 3, so all callbacks print 3. Using 'let' would create a new block-scoped 'i' for each iteration, correctly printing 0, 1, 2."
   },
   {
-    "file": "src\\components\\dashboard\\AICommandCenterWidget.jsx",
-    "line": 12,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const activeApps = (applications || []).filter(a => a.status !== 'Rejected' && a.status !== 'Offer').length;"
+    "id": "bh-js-004",
+    "language": "JavaScript",
+    "difficulty": "Medium",
+    "length": 5,
+    "code": "function removeLast(arr) {\n  const newArr = arr;\n  newArr.pop();\n  return newArr;\n}",
+    "pattern": "Mutation",
+    "question": "What is the logical flaw in this code?",
+    "reason": "The function intends to return a new array without modifying the original. The bug is that objects and arrays in JS are assigned by reference. 'newArr = arr' creates a second pointer to the same array in memory, so 'pop()' mutates the original. Use 'const newArr = [...arr]' to create an actual copy."
   },
   {
-    "file": "src\\components\\dashboard\\AICommandCenterWidget.jsx",
-    "line": 13,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const interviewApps = (applications || []).filter(a => a.status === 'Interview').length;"
+    "id": "bh-js-005",
+    "language": "JavaScript",
+    "difficulty": "Easy",
+    "length": 3,
+    "code": "const numbers = [10, 5, 20, 1];\nnumbers.sort();\nconsole.log(numbers);",
+    "pattern": "Incorrect condition",
+    "question": "What is the output of this array sort?",
+    "reason": "The code attempts to sort an array of numbers. The bug is that JavaScript's default Array.sort() converts elements to strings and compares their UTF-16 code values. Alphabetically, '10' comes before '5'. You must pass a comparator function (a, b) => a - b to sort numbers numerically."
   },
   {
-    "file": "src\\components\\dashboard\\AICopilotSection.jsx",
-    "line": 387,
-    "variable": "recommendations",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{plan.skill_(recommendations || []).map((s, i) => ("
+    "id": "bh-js-006",
+    "language": "JavaScript",
+    "difficulty": "Hard",
+    "length": 14,
+    "code": "class Counter {\n  constructor() {\n    this.count = 0;,\n    takeaway: \"Always review the exact syntax and logic constraints of the language.\",\n    incorrectExplanations: {\n    }\n  }\n  start() {\n    setInterval(function() {\n      this.count++;\n      console.log(this.count);\n    }, 1000);\n  }\n}",
+    "pattern": "Incorrect return",
+    "question": "Why will this counter fail to work as expected?",
+    "reason": "The code tries to increment a class property on a timer. The bug is using a standard function inside 'setInterval'. Standard functions create their own 'this' context (usually the global object). The fix is to use an arrow function () => {}, which inherits 'this' from the surrounding class method."
   },
   {
-    "file": "src\\components\\dashboard\\ApplicationFunnelWidget.jsx",
-    "line": 7,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const totalApplications = (applications || []).length;"
+    "id": "bh-js-007",
+    "language": "JavaScript",
+    "difficulty": "Medium",
+    "length": 5,
+    "code": "async function fetchData() {\n  const data = fetch('https://api.example.com/data');\n  const json = await data.json();\n  return json;\n}",
+    "pattern": "Incorrect return",
+    "question": "What is wrong with this async function?",
+    "reason": "The code attempts to fetch and parse JSON data. The bug is missing 'await' on the fetch() call. 'fetch' immediately returns a Promise, not the Response object. Attempting to call .json() directly on the Promise throws an error. You must await the response first."
   },
   {
-    "file": "src\\components\\dashboard\\ApplicationFunnelWidget.jsx",
-    "line": 8,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const interviewCount = (applications || []).filter(a => a.status === 'Interview').length;"
+    "id": "bh-js-008",
+    "language": "JavaScript",
+    "difficulty": "Easy",
+    "length": 3,
+    "code": "const arr1 = [1, 2, 3];\nconst arr2 = [1, 2, 3];\nconsole.log(arr1 == arr2);",
+    "pattern": "Incorrect return",
+    "question": "What is the output of this equality check?",
+    "reason": "In JavaScript, arrays and objects are compared by reference, not by their internal values. Even though 'arr1' and 'arr2' contain the exact same elements, they point to different memory locations. Therefore, the equality check returns false."
   },
   {
-    "file": "src\\components\\dashboard\\ApplicationFunnelWidget.jsx",
-    "line": 9,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const offerCount = (applications || []).filter(a => a.status === 'Offer').length;"
+    "id": "bh-js-009",
+    "language": "JavaScript",
+    "difficulty": "Easy",
+    "length": 4,
+    "code": "const user = null;\nif (user.isActive) {\n  console.log(\"Welcome back!\");\n}",
+    "pattern": "Incorrect return",
+    "question": "What runtime error will occur here?",
+    "reason": "Attempting to access a property on 'null' or 'undefined' throws a TypeError. The code assumes 'user' is an object. To fix this, you should use optional chaining (user?.isActive) or check if 'user' is truthy first."
   },
   {
-    "file": "src\\components\\dashboard\\CareerCoachWidget.jsx",
-    "line": 59,
-    "variable": "messages",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{(messages || []).length > 0 && ("
+    "id": "bh-js-010",
+    "language": "JavaScript",
+    "difficulty": "Medium",
+    "length": 3,
+    "code": "const strings = [\"1\", \"7\", \"11\"];\nconst numbers = strings.map(parseInt);\nconsole.log(numbers);",
+    "pattern": "Wrong index",
+    "question": "What is the output of this mapping?",
+    "reason": "This is a notorious JS quirk. Array.map() passes three arguments to its callback: (currentValue, index, array). parseInt takes two arguments: (string, radix). So the calls are parseInt('1', 0), parseInt('7', 1), and parseInt('11', 2). This results in 1, NaN, and 3."
   },
   {
-    "file": "src\\components\\dashboard\\CareerCoachWidget.jsx",
-    "line": 94,
-    "variable": "messages",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{(messages || []).length === 0 && !isLoading && ("
+    "id": "bh-js-co-001",
+    "language": "JavaScript",
+    "difficulty": "Medium",
+    "length": 4,
+    "code": "console.log(1);\nsetTimeout(() => console.log(2), 0);\nPromise.resolve().then(() => console.log(3));\nconsole.log(4);",
+    "question": "What is the exact sequence of numbers logged to the console?",
+    "reason": "Synchronous code runs first (1, 4). Then microtasks like Promises (3) execute. Finally, macrotasks like setTimeout (2) execute."
   },
   {
-    "file": "src\\components\\dashboard\\CareerCoachWidget.jsx",
-    "line": 113,
-    "variable": "messages",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{(messages || []).map((msg, i) => ("
+    "id": "bh-js-co-002",
+    "language": "JavaScript",
+    "difficulty": "Easy",
+    "length": 4,
+    "code": "const arr1 = [1, 2, 3];\nconst arr2 = arr1;\narr2.push(4);\nconsole.log(arr1.length);",
+    "question": "What does this code output?",
+    "reason": "Arrays in JavaScript are reference types. Both arr1 and arr2 point to the same array in memory, so mutating arr2 also mutates arr1."
   },
   {
-    "file": "src\\components\\dashboard\\CategoryBreakdownChart.jsx",
-    "line": 6,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const totalApps = (applications || []).length;"
-  },
-  { 
-    "file": "src\\components\\dashboard\\DashboardWidgets.jsx",
-    "line": 17,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "value: (applications || []).length.toString(),"
+    "id": "bh-js-bp-001",
+    "language": "JavaScript",
+    "difficulty": "Easy",
+    "length": 3,
+    "code": "const numbers = [10, 5, 20, 1];\nnumbers.sort();\nconsole.log(numbers);",
+    "question": "What happens when you run this code?",
+    "reason": "By default, the Array `sort()` method converts elements to strings and compares their UTF-16 code unit values. This results in '10' coming before '20', which comes before '5'."
   },
   {
-    "file": "src\\components\\dashboard\\DashboardWidgets.jsx",
-    "line": 29,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "value: (applications || []).filter(a => a.status === 'Interview').length.toString(),"
+    "id": "bh-py-001",
+    "language": "Python",
+    "difficulty": "Easy",
+    "length": 2,
+    "code": "def greet(name):\nprint(f\"Hello, {name}\")",
+    "pattern": "Incorrect return",
+    "question": "What is wrong with this code?",
+    "reason": "The code attempts to define a function. The bug is that Python relies strictly on indentation (whitespace) to define code blocks, not curly braces. The 'print' statement must be indented to be part of the 'greet' function. f-strings are perfectly valid in Python 3.6+."
   },
   {
-    "file": "src\\components\\dashboard\\DashboardWidgets.jsx",
-    "line": 41,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "value: (applications || []).filter(a => a.status === 'Offer').length.toString(),"
+    "id": "bh-py-002",
+    "language": "Python",
+    "difficulty": "Easy",
+    "length": 6,
+    "code": "class Greeter:\n    def say_hello(name):\n        print(f\"Hello, {name}!\")\n\ngreeter = Greeter()\ngreeter.say_hello(\"Alice\")",
+    "pattern": "Incorrect return",
+    "question": "What exception will this raise?",
+    "reason": "In Python, instance methods automatically receive the instance itself as the first argument (conventionally named 'self'). Because 'say_hello' only defines one parameter ('name'), Python throws a TypeError when it tries to pass both the 'greeter' instance and 'Alice'."
   },
   {
-    "file": "src\\components\\dashboard\\PersonalInsights.jsx",
-    "line": 19,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const appliedCount = (applications || []).length;"
+    "id": "bh-py-003",
+    "language": "Python",
+    "difficulty": "Medium",
+    "length": 3,
+    "code": "def add_item(item, lst=[]):\n    lst.append(item)\n    return lst",
+    "pattern": "Incorrect return",
+    "question": "What is the danger of this default argument?",
+    "reason": "The code intends to append an item to a new list if one isn't provided. The bug is that Python evaluates default arguments only once when the function is defined. Because the list is mutable, every subsequent call without the 'lst' argument will append to the exact same shared list in memory."
   },
   {
-    "file": "src\\components\\dashboard\\PersonalInsights.jsx",
-    "line": 20,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const interviewCount = (applications || []).filter(a => a.status === 'Interview').length;"
+    "id": "bh-py-004",
+    "language": "Python",
+    "difficulty": "Easy",
+    "length": 3,
+    "code": "word = \"hello\"\nword[0] = \"H\"\nprint(word)",
+    "pattern": "Null value",
+    "question": "Why will this code fail?",
+    "reason": "The code attempts to capitalize the first letter of a string. The bug is treating the string like a mutable array. In Python, strings are immutable; you cannot reassign specific indices. You must construct a new string entirely (e.g., word.capitalize() or 'H' + word[1:])."
   },
   {
-    "file": "src\\components\\dashboard\\PersonalInsights.jsx",
-    "line": 21,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const offerCount = (applications || []).filter(a => a.status === 'Offer').length;"
+    "id": "bh-py-005",
+    "language": "Python",
+    "difficulty": "Hard",
+    "length": 2,
+    "code": "squares = (x**2 for x in range(5))\nprint(len(squares))",
+    "pattern": "Null value",
+    "question": "What is the result of executing this code?",
+    "reason": "The code tries to print the length of a sequence. The bug is that using parentheses '(x for x...)' creates a generator expression, not a list (which uses brackets '[x for x...]'). Generators lazily compute values on demand and have no predetermined length, so len() throws a TypeError."
   },
   {
-    "file": "src\\components\\dashboard\\StatusDistributionChart.jsx",
-    "line": 6,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const totalApps = (applications || []).length;"
+    "id": "bh-py-006",
+    "language": "Python",
+    "difficulty": "Hard",
+    "length": 5,
+    "code": "x = 10\ndef update_x():\n    x = x + 1\n    return x\nupdate_x()",
+    "pattern": "Scope issue",
+    "question": "What happens when update_x() is called?",
+    "reason": "The code attempts to increment a global variable. The bug lies in Python's scoping rules: because there is an assignment ('x = ...') inside the function, Python treats 'x' entirely as a local variable. It attempts to evaluate 'x + 1' locally before 'x' is assigned, causing an UnboundLocalError. Use 'global x' to fix."
   },
   {
-    "file": "src\\components\\network\\RecommendedConnectionsWidget.jsx",
-    "line": 36,
-    "variable": "recommendations",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "if ((recommendations || []).length === 0) {"
+    "id": "bh-py-007",
+    "language": "Python",
+    "difficulty": "Medium",
+    "length": 4,
+    "code": "data = {\"a\": 1, \"b\": 2, \"c\": 3}\nfor key in data:\n    if data[key] == 2:\n        del data[key]",
+    "pattern": "Incorrect condition",
+    "question": "What exception will this loop raise?",
+    "reason": "In Python, you cannot add or remove items from a dictionary while iterating over its keys. Attempting to do so raises a RuntimeError. A common fix is to iterate over a copy of the keys, e.g., 'for key in list(data.keys()):'."
   },
   {
-    "file": "src\\components\\network\\RecommendedConnectionsWidget.jsx",
-    "line": 69,
-    "variable": "recommendations",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{(recommendations || []).map(user => {"
+    "id": "bh-py-008",
+    "language": "Python",
+    "difficulty": "Medium",
+    "length": 3,
+    "code": "x = 1000\nif x is 1000:\n    print(\"Match\")",
+    "pattern": "Incorrect return",
+    "question": "Why is using 'is' dangerous here?",
+    "reason": "The 'is' operator checks if two variables point to the exact same object in memory. While Python caches small integers (like 1 to 256), larger integers like 1000 may be created as distinct objects, causing 'is' to return false. Always use '==' to check for value equality."
   },
   {
-    "file": "src\\components\\opportunities\\RecommendedForYouSection.jsx",
-    "line": 16,
-    "variable": "recommendations",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const filteredRecommendations = (recommendations || []).filter(opp => {"
+    "id": "bh-py-009",
+    "language": "Python",
+    "difficulty": "Easy",
+    "length": 4,
+    "code": "results = [1, 2, 3]\nnew_data = [4, 5]\nresults.append(new_data)\nprint(len(results))",
+    "pattern": "Wrong index",
+    "question": "What is the output of this code?",
+    "reason": "The 'append' method adds its argument as a single element to the end of the list. By passing a list, 'results' becomes [1, 2, 3, [4, 5]], which has a length of 4. To merge the elements flatly, you should use 'results.extend(new_data)' or the '+=' operator."
   },
   {
-    "file": "src\\components\\opportunities\\SkillGapAnalysis.jsx",
-    "line": 131,
-    "variable": "recommendations",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{!isPerfectMatch && (recommendations || []).length > 0 && ("
+    "id": "bh-py-010",
+    "language": "Python",
+    "difficulty": "Medium",
+    "length": 3,
+    "code": "funcs = [lambda: i for i in range(3)]\nfor f in funcs:\n    print(f())",
+    "pattern": "Data transformation",
+    "question": "What is the output of this code?",
+    "reason": "Python's closures are late-binding. This means that the lambda functions capture the variable 'i' by reference, not by value. When the lambdas are executed in the second loop, the first loop has already completed, and 'i' evaluates to its final value, which is 2."
   },
   {
-    "file": "src\\components\\opportunities\\SkillGapAnalysis.jsx",
-    "line": 139,
-    "variable": "recommendations",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{(recommendations || []).map((rec, i) => ("
+    "id": "bh-py-011",
+    "language": "Python",
+    "difficulty": "Hard",
+    "length": 3,
+    "code": "def process_data(data, cache={}):\n    cache[data] = True\n    return len(cache)",
+    "pattern": "Shared state",
+    "question": "What happens when this function is called multiple times without providing a cache?",
+    "reason": "Default arguments are evaluated once at function definition time. The dictionary provided as the default cache is instantiated once and shared across every invocation that doesn't supply its own dictionary."
   },
   {
-    "file": "src\\contexts\\ApplicationContext.jsx",
-    "line": 153,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "totalCount: (applications || []).length,"
+    "id": "bh-java-001",
+    "language": "Java",
+    "difficulty": "Easy",
+    "length": 8,
+    "code": "public class Main {\n    public void greet() {\n        System.out.println(\"Hello!\");\n    }\n    public static void main(String[] args) {\n        greet();\n    }\n}",
+    "pattern": "Incorrect return",
+    "question": "What is the compiler error here?",
+    "reason": "The 'main' method in Java is static, meaning it belongs to the class itself rather than an instance. The 'greet' method is an instance method. You cannot call an instance method directly from a static context without first creating an instance of the class (e.g., 'new Main().greet()')."
   },
   {
-    "file": "src\\contexts\\GoalContext.jsx",
-    "line": 193,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "newCurrentValue = (applications || []).length;"
+    "id": "bh-java-002",
+    "language": "Java",
+    "difficulty": "Medium",
+    "length": 5,
+    "code": "String a = new String(\"test\");\nString b = new String(\"test\");\nif (a == b) {\n    System.out.println(\"Equal\");\n}",
+    "pattern": "Incorrect condition",
+    "question": "Why will this condition evaluate to false?",
+    "reason": "The code checks if two strings match. The bug is using '==' which, in Java, compares memory addresses, not the actual characters. Because 'new String()' forces the creation of two distinct objects in the heap, they don't match. Always use a.equals(b) to compare string content."
   },
   {
-    "file": "src\\contexts\\GoalContext.jsx",
-    "line": 205,
-    "variable": "teams",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "newCurrentValue = (teams || []).length;"
+    "id": "bh-java-003",
+    "language": "Java",
+    "difficulty": "Easy",
+    "length": 4,
+    "code": "int[] numbers = {1, 2, 3};\nfor (int i = 0; i <= numbers.length; i++) {\n    System.out.println(numbers[i]);\n}",
+    "pattern": "Wrong index",
+    "question": "What runtime exception will this loop throw?",
+    "reason": "The code tries to print every array element. The bug is an off-by-one condition: 'i <= length'. For an array of length 3, the indices are 0, 1, and 2. On the final iteration, 'i' equals 3, and numbers[3] is an out-of-bounds memory access, throwing the exception."
   },
   {
-    "file": "src\\contexts\\GoalContext.jsx",
-    "line": 282,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "(applications || []).length,"
+    "id": "bh-java-004",
+    "language": "Java",
+    "difficulty": "Hard",
+    "length": 6,
+    "code": "List<Integer> list = new ArrayList<>(Arrays.asList(1, 2, 3));\nfor (Integer num : list) {\n    if (num == 2) {\n        list.remove(num);\n    }\n}",
+    "pattern": "Incorrect return",
+    "question": "What happens when executing this code?",
+    "reason": "The code tries to filter out the number 2. The bug is structurally altering a collection (removing an item) while actively iterating through it using an enhanced for-loop. Java iterators are 'fail-fast' and will immediately throw a ConcurrentModificationException. Use an explicit Iterator or removeIf() instead."
   },
   {
-    "file": "src\\contexts\\GoalContext.jsx",
-    "line": 284,
-    "variable": "teams",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "(teams || []).length,"
+    "id": "bh-java-005",
+    "language": "Java",
+    "difficulty": "Medium",
+    "length": 4,
+    "code": "String name = null;\nif (name.equals(\"Alice\")) {\n    System.out.println(\"Hello Alice!\");\n}",
+    "pattern": "Incorrect return",
+    "question": "What runtime exception will occur?",
+    "reason": "Calling any instance method (like .equals()) on a null reference throws a NullPointerException. To avoid this, call .equals() on the known non-null literal instead: '\"Alice\".equals(name)'."
   },
   {
-    "file": "src\\contexts\\MessageContext.jsx",
-    "line": 57,
-    "variable": "messages",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "if ((messages || []).length > 0) {"
+    "id": "bh-java-006",
+    "language": "Java",
+    "difficulty": "Medium",
+    "length": 6,
+    "code": "public class User {\n    private String name;\n    public User(String name) {\n        name = name;\n    }\n}",
+    "pattern": "Scope issue",
+    "question": "What is the flaw in this constructor?",
+    "reason": "Because the parameter name ('name') is identical to the class field, 'name = name;' simply assigns the parameter to itself. The class field remains null. To fix this, use the 'this' keyword: 'this.name = name;'."
   },
   {
-    "file": "src\\contexts\\TeamContext.jsx",
-    "line": 274,
-    "variable": "teams",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "return (teams || []).filter((t) => Array.isArray(t.members) && t.members.includes(currentUserId));"
+    "id": "bh-java-007",
+    "language": "Java",
+    "difficulty": "Medium",
+    "length": 7,
+    "code": "Integer a = 128;\nInteger b = 128;\nif (a == b) {\n    System.out.println(\"Match\");\n} else {\n    System.out.println(\"No Match\");\n}",
+    "pattern": "Incorrect return",
+    "question": "What is the output of this code?",
+    "reason": "This highlights Java's Integer cache pool. Java automatically caches Integer objects for values between -128 and 127. Since 128 is outside this range, 'a' and 'b' refer to two entirely different objects in the heap. The '==' operator compares object references, so it evaluates to false. You should use .equals()."
   },
   {
-    "file": "src\\contexts\\TeamContext.jsx",
-    "line": 284,
-    "variable": "teams",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "return (teams || []).filter((t) => !(Array.isArray(t.members) && t.members.includes(currentUserId)));"
+    "id": "bh-java-008",
+    "language": "Java",
+    "difficulty": "Easy",
+    "length": 3,
+    "code": "String text = \"Hello\";\ntext.concat(\" World\");\nSystem.out.println(text);",
+    "pattern": "Data transformation",
+    "question": "What is the output of this code?",
+    "reason": "Strings in Java are immutable. Calling `concat()` on a String does not modify the original String object; it creates and returns a completely new String object. Because the return value is not assigned back to `text`, the original string remains 'Hello'."
   },
   {
-    "file": "src\\contexts\\TeamContext.jsx",
-    "line": 288,
-    "variable": "teams",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const teamsTotal = (teams || []).length;"
+    "id": "bh-java-009",
+    "language": "Java",
+    "difficulty": "Medium",
+    "length": 7,
+    "code": "String s1 = new String(\"Hello\");\nString s2 = new String(\"Hello\");\nif (s1 == s2) {\n    System.out.print(\"True\");\n} else {\n    System.out.print(\"False\");\n}",
+    "pattern": "Incorrect condition",
+    "question": "What will this code output when run?",
+    "reason": "'s1' and 's2' are created using the 'new' keyword, forcing Java to allocate two distinct objects in heap memory. The '==' operator checks reference equality, not content equality. Since they point to different memory addresses, it prints False."
   },
   {
-    "file": "src\\hooks\\useDashboardInsights.js",
-    "line": 32,
-    "variable": "profile.skills",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "} else if (!profile?.skills || (profile.skills || []).length < 3) {"
+    "id": "bh-cpp-001",
+    "language": "C++",
+    "difficulty": "Easy",
+    "length": 5,
+    "code": "#include <iostream>\nint main() {\n    std::cout << \"Hello World\"\n    return 0;\n}",
+    "pattern": "Incorrect return",
+    "question": "What is wrong with this code?",
+    "reason": "The code attempts to print to stdout. The bug is a missing semicolon; C++ strictly requires semicolons to terminate statements. While 'using namespace std' is common, using explicit 'std::cout' is actually preferred practice."
   },
   {
-    "file": "src\\hooks\\useDashboardInsights.js",
-    "line": 42,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "} else if (!applications || (applications || []).length === 0) {"
+    "id": "bh-cpp-002",
+    "language": "C++",
+    "difficulty": "Medium",
+    "length": 4,
+    "code": "int* createArray() {\n    int arr[5] = {1, 2, 3, 4, 5};\n    return arr;\n}",
+    "pattern": "Incorrect return",
+    "question": "Why is this function dangerous?",
+    "reason": "The code attempts to build and return an array. The bug is that 'arr' is statically allocated on the stack. When the function exits, its stack frame is destroyed. The returned pointer now points to garbage memory (a dangling pointer). It must be dynamically allocated with 'new' or returned inside an object."
   },
   {
-    "file": "src\\hooks\\useDashboardInsights.js",
-    "line": 66,
-    "variable": "profile.skills",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "if (!profile?.skills || (profile.skills || []).length === 0) missingProfileItems.push('skills');"
+    "id": "bh-cpp-003",
+    "language": "C++",
+    "difficulty": "Easy",
+    "length": 4,
+    "code": "int x = 10;\nint y = 20;\nint* ptr = &x;\n*ptr = y;",
+    "pattern": "Incorrect return",
+    "question": "What is the value of x after this code runs?",
+    "reason": "The code manipulates a pointer. 'ptr' holds the memory address of 'x'. The bug (or behavior) is that dereferencing the pointer '*ptr = y' writes the value of 'y' directly into the memory location of 'x'. The original value of 10 is overwritten, so 'x' becomes 20."
   },
   {
-    "file": "src\\hooks\\useMessageNotifications.js",
-    "line": 35,
-    "variable": "teams",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const myTeamIds = (teams || []).filter(t => t.members && t.members.includes(currentUserId)).map(t => t.id);"
+    "id": "bh-cpp-004",
+    "language": "C++",
+    "difficulty": "Medium",
+    "length": 3,
+    "code": "char* str = new char[10];\nstrcpy(str, \"hello\");\ndelete str;",
+    "pattern": "Incorrect return",
+    "question": "What is the issue with how memory is freed?",
+    "reason": "The code manages a dynamic C-string. The bug is using standard 'delete' on a memory block allocated with array syntax ('new char[10]'). This causes undefined behavior and memory leaks, as the compiler doesn't know to call destructors for the entire block. It must be paired with 'delete[]'."
   },
   {
-    "file": "src\\hooks\\useRecommendations.js",
-    "line": 92,
-    "variable": "recommendations",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "if (recommendations && (recommendations || []).length > 0) {"
+    "id": "bh-cpp-005",
+    "language": "C++",
+    "difficulty": "Medium",
+    "length": 5,
+    "code": "void swap(int a, int b) {\n    int temp = a;\n    a = b;\n    b = temp;\n}",
+    "pattern": "Incorrect condition",
+    "question": "Why won't this function actually swap the variables provided by the caller?",
+    "reason": "The code implements a classic swap algorithm. The bug is that C++ passes parameters by value by default. The function successfully swaps its local copies of 'a' and 'b', but the variables in the caller's scope remain untouched. You must pass by reference (int& a, int& b) to modify the caller's variables."
   },
   {
-    "file": "src\\hooks\\useRecommendations.js",
-    "line": 93,
-    "variable": "recommendations",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const totalScore = (recommendations || []).reduce((sum, opp) => sum + (opp.matchData?.score || 0), 0);"
+    "id": "bh-cpp-006",
+    "language": "C++",
+    "difficulty": "Easy",
+    "length": 2,
+    "code": "int arr[3] = {1, 2, 3};\narr[3] = 4;",
+    "pattern": "Wrong index",
+    "question": "What is the consequence of this array assignment?",
+    "reason": "C-style arrays in C++ do not perform bounds checking. The valid indices for a 3-element array are 0, 1, and 2. Writing to index 3 writes to arbitrary memory past the end of the array, causing Undefined Behavior."
   },
   {
-    "file": "src\\hooks\\useRecommendations.js",
-    "line": 94,
-    "variable": "recommendations",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const averageMatchScore = Math.round(totalScore / (recommendations || []).length);"
+    "id": "bh-cpp-007",
+    "language": "C++",
+    "difficulty": "Hard",
+    "length": 6,
+    "code": "std::vector<int> vec = {1, 2, 3};\nfor (auto it = vec.begin(); it != vec.end(); ++it) {\n    if (*it == 2) {\n        vec.erase(it);\n    }\n}",
+    "pattern": "Incorrect return",
+    "question": "Why will this code likely crash?",
+    "reason": "When you call erase() on a vector, all iterators at or after the point of erasure become invalidated. The loop then tries to increment the invalidated iterator (++it), leading to undefined behavior. The fix is to capture the return value of erase(): 'it = vec.erase(it);' and conditionally increment."
   },
   {
-    "file": "src\\hooks\\useRecommendations.js",
-    "line": 97,
-    "variable": "recommendations",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "addSnapshot(averageMatchScore, topRecommendation, (recommendations || []).length);"
+    "id": "bh-cpp-008",
+    "language": "C++",
+    "difficulty": "Easy",
+    "length": 2,
+    "code": "int arr[3] = {1, 2, 3};\narr[3] = 4;",
+    "pattern": "Wrong index",
+    "question": "What is the consequence of this array assignment?",
+    "reason": "C-style arrays in C++ do not perform bounds checking. The valid indices for a 3-element array are 0, 1, and 2. Writing to index 3 writes to arbitrary memory past the end of the array, causing Undefined Behavior."
   },
   {
-    "file": "src\\hooks\\useRecommendedConnections.js",
-    "line": 61,
-    "variable": "teams",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const mutualTeams = (teams || []).filter(t => t.members?.includes(currentUserId) && t.members?.includes(targetUser.id));"
+    "id": "bh-cpp-007",
+    "language": "C++",
+    "difficulty": "Hard",
+    "length": 6,
+    "code": "std::vector<int> vec = {1, 2, 3};\nfor (auto it = vec.begin(); it != vec.end(); ++it) {\n    if (*it == 2) {\n        vec.erase(it);\n    }\n}",
+    "pattern": "Incorrect return",
+    "question": "Why will this code likely crash?",
+    "reason": "When you call erase() on a vector, all iterators at or after the point of erasure become invalidated. The loop then tries to increment the invalidated iterator (++it), leading to undefined behavior. The fix is to capture the return value of erase(): 'it = vec.erase(it);' and conditionally increment."
   },
   {
-    "file": "src\\pages\\dashboard\\AnalyticsPage.jsx",
-    "line": 22,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const totalApplications = (applications || []).length;"
+    "id": "bh-cpp-008",
+    "language": "C++",
+    "difficulty": "Easy",
+    "length": 4,
+    "code": "int i = 0;\nwhile (i++ < 3) {\n    std::cout << i;\n}",
+    "pattern": "Data transformation",
+    "question": "What is the output of this loop?",
+    "reason": "The post-increment operator (i++) evaluates to the current value of 'i', and then increments it. So on the first check, 0 < 3 is evaluated, but by the time the loop body executes and prints 'i', 'i' has already been incremented to 1."
   },
   {
-    "file": "src\\pages\\dashboard\\AnalyticsPage.jsx",
-    "line": 23,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const interviewCount = (applications || []).filter(a => a.status === 'Interview').length;"
-  },
-  {
-    "file": "src\\pages\\dashboard\\AnalyticsPage.jsx",
-    "line": 24,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const offerCount = (applications || []).filter(a => a.status === 'Offer').length;"
-  },
-  {
-    "file": "src\\pages\\dashboard\\ApplicationsPage.jsx",
-    "line": 181,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{(applications || []).filter(a => a.status === 'Interview').length}"
-  },
-  {
-    "file": "src\\pages\\dashboard\\ApplicationsPage.jsx",
-    "line": 239,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": ") : (applications || []).length === 0 ? ("
-  },
-  {
-    "file": "src\\pages\\dashboard\\ApplicationsPage.jsx",
-    "line": 265,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{(applications || []).map((app) => ("
-  },
-  {
-    "file": "src\\pages\\dashboard\\DeadlinesPage.jsx",
-    "line": 196,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "{(applications || []).length === 0 && ("
-  },
-  {
-    "file": "src\\pages\\dashboard\\UserProfilePage.jsx",
-    "line": 192,
-    "variable": "teams",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "const myTeams = (teams || []).filter(t => t.members.includes(currentUserId));"
-  },
-  {
-    "file": "src\\pages\\dashboard\\UserProfilePage.jsx",
-    "line": 378,
-    "variable": "applications",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "<StatCard icon={Briefcase}  label=\"Opportunities Applied\" value={(applications || []).length}          color=\"bg-blue-50 text-blue-600\" />"
-  },
-  {
-    "file": "src\\services\\opportunityAggregator.js",
-    "line": 62,
-    "variable": "opportunities",
-    "rootCause": "Unprotected array operation potentially causing undefined error",
-    "fixApplied": "if ((opportunities || []).length === 0 || isStale) {"
+    "id": "bh-cpp-009",
+    "language": "C++",
+    "difficulty": "Hard",
+    "length": 10,
+    "code": "int* getNumber() {\n    int num = 42;\n    return &num;\n}\n\nint main() {\n    int* ptr = getNumber();\n    std::cout << *ptr;\n    return 0;\n}",
+    "pattern": "Incorrect return",
+    "question": "What happens when this program runs?",
+    "reason": "'num' is allocated on the stack within 'getNumber()'. When the function returns, its stack frame is destroyed. Returning a pointer to 'num' results in a dangling pointer. Dereferencing it in 'main()' causes undefined behavior."
   }
 ]

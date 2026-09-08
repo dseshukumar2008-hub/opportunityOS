@@ -1,17 +1,14 @@
 import { Link } from 'react-router-dom';
 import { Sparkles, FileText, ChevronRight, Target, TrendingUp, CheckCircle2, Circle } from 'lucide-react';
-import { useDashboardInsights } from '../../hooks/useDashboardInsights';
-import { useUserProfile } from '../../hooks/useUserProfile';
 
 export default function DashboardNextActionWidget({ userState }) {
-  const { hasProfile, hasResume, isNewUser } = userState || {};
-  const { plan } = useDashboardInsights();
-  const { profile } = useUserProfile();
+  const { profile, insights, hasProfile, hasResume, isNewUser } = userState || {};
+  const { nextBestAction } = insights || {};
 
-  let title = '';
-  let description = '';
-  let mainAction = null;
-  let subActions = [];
+  let title;
+  let description;
+  let mainAction;
+  let subActions;
 
   if (isNewUser || !hasProfile) {
     title = 'Complete your profile';
@@ -31,9 +28,9 @@ export default function DashboardNextActionWidget({ userState }) {
     ];
   } else {
     // Existing user with meaningful data
-    title = plan?.focus_area || 'Improve your ATS score';
+    title = nextBestAction?.text || 'Improve your ATS score';
     description = 'Optimize your resume with missing keywords and tailored project descriptions.';
-    mainAction = { label: 'Improve Resume', to: '/resume-review' };
+    mainAction = { label: nextBestAction?.cta || 'Improve Resume', to: nextBestAction?.link || '/resume-review' };
     subActions = [
       { label: 'Career Roadmap', to: '/career-roadmap', icon: Target }
     ];
@@ -60,9 +57,11 @@ export default function DashboardNextActionWidget({ userState }) {
 
         
         <div className="relative z-10 flex flex-col h-full">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles size={16} className="text-[#6C4CF1]" />
-            <span className="text-[14px] font-black text-slate-900 tracking-wide">Next Best Action</span>
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+              <Sparkles size={16} className="text-indigo-600" />
+            </div>
+            <h3 className="text-[16px] font-bold text-slate-900">Next Best Action</h3>
           </div>
           
           <Link to={mainAction.to} className="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-3 flex items-center justify-between cursor-pointer hover:bg-slate-100 transition-colors group">
@@ -94,9 +93,11 @@ export default function DashboardNextActionWidget({ userState }) {
 
         
         <div className="relative z-10 flex flex-col h-full">
-          <div className="flex items-center gap-2 mb-3">
-            <TrendingUp size={16} className="text-emerald-500" />
-            <span className="text-[14px] font-black text-slate-900 tracking-wide">Your Career Progress</span>
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+              <TrendingUp size={16} className="text-emerald-600" />
+            </div>
+            <h3 className="text-[16px] font-bold text-slate-900">Career Progress</h3>
           </div>
 
           <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 mb-3 flex items-center gap-4 cursor-default">
@@ -109,7 +110,7 @@ export default function DashboardNextActionWidget({ userState }) {
             </div>
             
             <div>
-              <h4 className="text-[16px] font-bold text-slate-900 mb-0.5">Readiness Score</h4>
+              <h4 className="text-[16px] font-bold text-slate-900 mb-0.5">Setup Progress</h4>
               <p className="text-[13px] text-slate-500 font-medium leading-relaxed max-w-[280px]">
                 {completedCount === steps.length 
                   ? "Your profile is fully optimized!" 

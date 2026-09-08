@@ -226,9 +226,9 @@ export default function OnboardingFlow({ onComplete, initialData }) {
     }
 
     // Fallback UI for any unexpected step
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
-// eslint-disable-next-line no-unused-vars
+ 
+ 
+ 
 // eslint-disable-next-line no-unused-vars
     let title, description, category, options;
     if (step === 2) {

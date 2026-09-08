@@ -9,7 +9,8 @@ import ResumeSmartSuggestions from '../../components/resume/ResumeSmartSuggestio
 import ResumeContentSuggestions from '../../components/resume/ResumeContentSuggestions';
 import ResumeHistory from '../../components/resume/ResumeHistory';
 import ResumeAnalysisHowItWorksModal from '../../components/resume/ResumeAnalysisHowItWorksModal';
-import { Sparkles, FileText, Activity, CheckCircle2, History, Info, Lock } from 'lucide-react';
+import { WidgetErrorBoundary } from '../../components/common/GlobalErrorBoundary';
+import { Sparkles, FileText, Activity, CheckCircle2, Info, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const LOADING_STEPS = [
@@ -23,7 +24,7 @@ const LOADING_STEPS = [
 export default function ResumeReviewPage() {
   const { analyzeResume, resetAnalysis, isAnalyzing, analysisStatus, uploadProgress, progressText, analysisResults } = useResumeAnalysis();
   const { history, addHistory, getBestVersion, compareVersions } = useResumeHistory();
-  const { resumeData, activeResumeId } = useResume();
+  const { resumeData, activeResumeId, getResumeStrength } = useResume();
   const { matchResume } = useMatchResume();
 
   const hasAnalysis = analysisStatus === 'completed' && !!analysisResults;
@@ -96,6 +97,13 @@ export default function ResumeReviewPage() {
       }
     }
 
+    if (!matchResume?.resume_text && activeResumeId && resumeData) {
+      if (getResumeStrength && getResumeStrength() < 15) {
+        toast.error('Your built resume is too empty to analyze. Please fill out more sections in the Resume Builder first.');
+        return;
+      }
+    }
+
     if (!payload || payload.trim().length < 50) {
       toast.error('Your profile needs more details to analyze. Please add more experience or skills, or upload a resume.');
       return;
@@ -117,8 +125,7 @@ export default function ResumeReviewPage() {
     { id: 'Review', label: 'Upload', icon: FileText, hidden: false },
     { id: 'ATS Score', label: 'ATS Score', icon: Activity, hidden: analysisStatus !== 'completed' },
     { id: 'Suggestions', label: 'Suggestions', icon: Sparkles, hidden: analysisStatus !== 'completed' },
-    { id: 'Action Plan', label: 'Action Plan', icon: CheckCircle2, hidden: analysisStatus !== 'completed' },
-    { id: 'History', label: 'History', icon: History, hidden: !hasHistory }
+    { id: 'Action Plan', label: 'Action Plan', icon: CheckCircle2, hidden: analysisStatus !== 'completed' }
   ].filter(tab => !tab.hidden);
 
   return (
@@ -143,7 +150,7 @@ export default function ResumeReviewPage() {
             </button>
           </div>
           <p className="text-[14px] text-[#64748B] leading-snug max-w-2xl">
-            Upload your resume or use your built OpportunityOS profile to get automated feedback on your format, missing skills, and ATS compatibility.
+            Upload a resume or use your profile to get feedback on format, skills, and ATS compatibility.
           </p>
         </div>
 
@@ -204,10 +211,22 @@ export default function ResumeReviewPage() {
                       <p className="text-[13px] text-[#64748B] font-medium m-0">We found an existing resume in your profile.</p>
                       <button
                         onClick={handleAnalyzeExisting}
-                        className="bg-white border border-[#E5E7EB] hover:bg-gray-50 text-[#111827] px-4 py-1.5 rounded-md text-[13px] font-semibold shadow-sm transition-colors flex items-center gap-2 shrink-0"
+                        disabled={isAnalyzing}
+                        className="bg-white border border-[#E5E7EB] hover:bg-gray-50 text-[#111827] px-4 py-1.5 rounded-md text-[13px] font-semibold shadow-sm transition-colors flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Analyze Existing
                       </button>
+                    </div>
+                  )}
+
+
+                  {hasHistory && (
+                    <div className="w-full mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                      <ResumeHistory 
+                        history={history}
+                        getBestVersion={getBestVersion}
+                        compareVersions={compareVersions}
+                      />
                     </div>
                   )}
                 </div>
@@ -218,13 +237,8 @@ export default function ResumeReviewPage() {
                   <div className="relative w-24 h-24 mb-8">
                     <div className="absolute inset-0 border-4 border-indigo-50 rounded-full"></div>
                     <div className="absolute inset-0 border-4 border-[#6D5DF6] rounded-full border-t-transparent animate-spin"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                    </div>
                   </div>
                   <h3 className="text-2xl font-bold text-[#111827] tracking-tight mb-3" aria-live="polite">Analyzing your resume...</h3>
-                  <p className="text-sm font-medium text-[#6D4AFF] animate-pulse" aria-live="polite">
-                    {LOADING_STEPS[loadingStep]}
-                  </p>
                   <p className="text-[15px] font-medium text-[#64748B] max-w-sm leading-relaxed mt-2">
                     We are scanning for ATS compatibility, keyword density, and structural improvements. This will just take a moment.
                   </p>
@@ -244,32 +258,39 @@ export default function ResumeReviewPage() {
             </>
           )}
 
-          {activeTab === 'ATS Score' && analysisStatus === 'completed' && analysisResults && (
-            <ResumeAnalysisResults 
-              results={analysisResults} 
-              onReset={resetAnalysisSession} 
-            />
-          )}
+          <WidgetErrorBoundary>
+            {activeTab === 'ATS Score' && analysisStatus === 'completed' && analysisResults && (
+              <ResumeAnalysisResults 
+                results={analysisResults} 
+                onReset={resetAnalysisSession} 
+              />
+            )}
 
-          {activeTab === 'Suggestions' && analysisStatus === 'completed' && analysisResults && (
-            <ResumeContentSuggestions results={analysisResults} />
-          )}
+            {activeTab === 'Suggestions' && analysisStatus === 'completed' && analysisResults && (
+              <ResumeContentSuggestions results={analysisResults} />
+            )}
 
-          {activeTab === 'Action Plan' && analysisStatus === 'completed' && analysisResults && (
-            <ResumeSmartSuggestions
-              suggestions={analysisResults.improvements || analysisResults.smartSuggestions || []}
-              currentScore={analysisResults.atsScore || analysisResults.overallScore || 0}
-              potentialScore={Math.min(100, (analysisResults.atsScore || analysisResults.overallScore || 0) + ((analysisResults.improvements || analysisResults.smartSuggestions)?.length || 0) * 5)}
-            />
-          )}
+            {activeTab === 'Action Plan' && analysisStatus === 'completed' && analysisResults && (() => {
+              const suggestions = analysisResults.smartSuggestions || [];
+              const currentScore = analysisResults.atsScore || analysisResults.overallScore || 0;
+              // Calculate a realistic potential score based on suggestion priorities
+              const gain = suggestions.reduce((acc, s) => {
+                if (s.priority === 'HIGH') return acc + 10;
+                if (s.priority === 'MEDIUM') return acc + 5;
+                return acc + 2;
+              }, 0);
+              const potentialScore = Math.min(100, currentScore + gain);
+              return (
+                <ResumeSmartSuggestions
+                  suggestions={suggestions}
+                  currentScore={currentScore}
+                  potentialScore={potentialScore}
+                />
+              );
+            })()}
 
-          {activeTab === 'History' && hasHistory && (
-          <ResumeHistory 
-            history={history}
-            getBestVersion={getBestVersion}
-            compareVersions={compareVersions}
-          />
-        )}
+
+          </WidgetErrorBoundary>
       </div>
     </div>
       
@@ -278,10 +299,6 @@ export default function ResumeReviewPage() {
         onClose={() => setShowHowItWorks(false)} 
       />
       
-      {/* Floating Action Button */}
-      <button aria-label="Resume AI Assistant" className="fixed bottom-8 right-8 w-14 h-14 bg-[#6D5DF6] text-white rounded-full flex items-center justify-center shadow-xl shadow-indigo-500/30 hover:bg-[#5a4cd1] transition-transform hover:scale-105 z-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-600">
-        <Sparkles size={24} />
-      </button>
     </div>
     </>
   );

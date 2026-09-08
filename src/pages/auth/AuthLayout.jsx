@@ -63,7 +63,7 @@ export default function AuthLayout({ children }) {
         </div>
 
         {/* Student Success Statistics */}
-        <div className="z-10 bg-indigo-700/40 rounded-2xl p-6 border border-indigo-400/20 backdrop-blur-md mt-auto">
+        <div className="z-10 bg-indigo-900/50 rounded-2xl p-6 mt-auto">
           <div className="flex items-center gap-4 mb-4">
             <div className="flex -space-x-3">
                <img alt="student" className="w-10 h-10 rounded-full border-2 border-indigo-600 bg-slate-100" src="https://api.dicebear.com/7.x/notionists/svg?seed=Alex&backgroundColor=60a5fa" />

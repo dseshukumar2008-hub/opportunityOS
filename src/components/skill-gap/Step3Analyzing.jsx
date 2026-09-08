@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { geminiService } from '../../services/geminiService';
 import { extractTextFromFile, optimizeLargeResumeText } from '../../utils/fileUtils';
@@ -14,14 +14,16 @@ const STEPS = [
 // eslint-disable-next-line no-unused-vars
 export default function Step3Analyzing({ targetRole, sources, inputData, onComplete }) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const hasStartedAnalysis = useRef(false);
 
   useEffect(() => {
+    if (hasStartedAnalysis.current) return;
+    hasStartedAnalysis.current = true;
     let isMounted = true;
 
     async function performAnalysis() {
       try {
-        // Step 0: Extracting Skills...
-        setCurrentStepIndex(0);
+                setCurrentStepIndex(0);
         
         const processFileOrText = async (fileOrText) => {
           if (!fileOrText) return null;
@@ -38,8 +40,7 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
         let resumeData = await processFileOrText(inputData?.resumeFile);
         let linkedinData = await processFileOrText(inputData?.linkedinFile);
 
-        // Step 1: Analyzing GitHub...
-        setCurrentStepIndex(1);
+                setCurrentStepIndex(1);
         
         let githubData = null;
         if (inputData?.githubUrl) {
@@ -79,8 +80,7 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
 
         const report = await geminiService.generateDynamicSkillGapReport(payload);
 
-        // Step 4: Building Path...
-        if (isMounted) {
+                if (isMounted) {
           setCurrentStepIndex(4);
           setTimeout(() => {
             if (isMounted) onComplete(report);

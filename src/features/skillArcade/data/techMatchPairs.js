@@ -1,10 +1,17 @@
-// Large tech pairing bank for Tech Match
+/**
+ * @typedef {Object} TechMatchPair
+ * @property {string} id - Unique identifier for the pair (optional for rendering, used for cache to prevent back-to-back repeats).
+ * @property {string} tech - The technology name (required for rendering, acts as the unique correct answer identifier for the left column).
+ * @property {string} category - The matching category (required for rendering, acts as the unique correct answer identifier for the right column).
+ */
+
+/** @type {TechMatchPair[]} */
 export const techMatchPairs = [
   // Frontend Frameworks & Libraries
   { id: 'tm_1', tech: "React", category: "Frontend Library" },
-  { id: 'tm_2', tech: "Vue.js", category: "Frontend Framework" },
-  { id: 'tm_3', tech: "Angular", category: "Frontend Framework" },
-  { id: 'tm_4', tech: "Svelte", category: "Compiler-based Framework" },
+  { id: 'tm_2', tech: "Vue.js", category: "Progressive JavaScript Framework" },
+  { id: 'tm_3', tech: "Angular", category: "Enterprise Frontend Framework" },
+  { id: 'tm_4', tech: "Svelte", category: "Compiler-Based Framework" },
   { id: 'tm_5', tech: "Next.js", category: "React Meta-Framework" },
   { id: 'tm_6', tech: "Nuxt.js", category: "Vue Meta-Framework" },
 
@@ -55,7 +62,7 @@ export const techMatchPairs = [
   // APIs & Testing
   { id: 'tm_39', tech: "GraphQL", category: "API Query Language" },
   { id: 'tm_40', tech: "Jest", category: "Testing Framework" },
-  { id: 'tm_41', tech: "Cypress", category: "End-to-End Testing" },
+  { id: 'tm_41', tech: "Cypress", category: "End-to-End Testing Framework" },
   { id: 'tm_42', tech: "REST", category: "API Architectural Style" },
   { id: 'tm_43', tech: "Postman", category: "API Development Tool" },
 
@@ -94,3 +101,10 @@ export const getRandomTechPairs = (count = 6) => {
 
   return selected;
 };
+
+// Clear cache on logout to prevent cross-user leakage
+if (typeof window !== 'undefined') {
+  window.addEventListener('oppOs_logout', () => {
+    usedPairIds.clear();
+  });
+}

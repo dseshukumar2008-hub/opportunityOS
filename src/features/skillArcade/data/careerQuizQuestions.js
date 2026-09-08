@@ -5,7 +5,7 @@ export const careerQuizQuestions = [
     question: "Which role is primarily responsible for designing the visual experience of a product?", 
     options: ["UI/UX Designer", "Frontend Developer", "Product Manager", "Data Analyst"], 
     answer: "UI/UX Designer",
-    explanation: "UI/UX Designers focus on creating intuitive user interfaces (visual design) and ensuring a seamless user experience (interaction flow) across digital products."
+    explanation: "UI/UX Designers focus on creating intuitive user interfaces (visual design) and ensuring a smooth user experience (interaction flow) across digital products."
   },
   { 
     id: 'cq_2',
@@ -146,6 +146,69 @@ export const careerQuizQuestions = [
     options: ["Feeling inadequate despite evident success and fearing being exposed as a 'fraud'", "A virus that infects computer networks", "A type of malicious cyber attack", "A framework for managing code modules"],
     answer: "Feeling inadequate despite evident success and fearing being exposed as a 'fraud'",
     explanation: "Imposter Syndrome is a psychological pattern where individuals doubt their accomplishments; it is very common among software engineers and tech professionals."
+  },
+  {
+    id: 'cq_22',
+    question: "Which professional manages a company's search engine ranking strategies?",
+    options: ["SEO Specialist", "Backend Developer", "Systems Analyst", "IT Support"],
+    answer: "SEO Specialist",
+    explanation: "SEO Specialists analyze and implement website changes so they are optimized for search engines, increasing organic traffic."
+  },
+  {
+    id: 'cq_23',
+    question: "What is the primary function of an IT Support Specialist?",
+    options: ["Helping users troubleshoot and resolve hardware or software issues", "Writing production backend code", "Designing marketing logos", "Negotiating software contracts"],
+    answer: "Helping users troubleshoot and resolve hardware or software issues",
+    explanation: "IT Support Specialists are the first line of help for technical issues, ensuring employees or customers can effectively use their software and hardware."
+  },
+  {
+    id: 'cq_24',
+    question: "Which metric is commonly used to track the success of a software product?",
+    options: ["Key Performance Indicators (KPIs)", "Total lines of code written", "Number of meetings attended", "Server hardware cost"],
+    answer: "Key Performance Indicators (KPIs)",
+    explanation: "KPIs are measurable values that demonstrate how effectively a company is achieving key business and product objectives."
+  },
+  {
+    id: 'cq_25',
+    question: "What is a 'stand-up' meeting in software development?",
+    options: ["A short daily meeting to discuss progress and blockers", "A formal performance review", "A coding marathon", "A client pitch presentation"],
+    answer: "A short daily meeting to discuss progress and blockers",
+    explanation: "Stand-ups (or daily scrums) are brief meetings where team members share what they did yesterday, what they will do today, and any obstacles they face."
+  },
+  {
+    id: 'cq_26',
+    question: "If a company wants to migrate their physical servers to AWS, which role is most suited to plan this?",
+    options: ["Cloud Architect", "Frontend Developer", "QA Tester", "Data Entry Clerk"],
+    answer: "Cloud Architect",
+    explanation: "Cloud Architects specialize in designing, managing, and executing cloud adoption strategies and infrastructure migrations."
+  },
+  {
+    id: 'cq_27',
+    question: "Which soft skill is considered crucial for developers working in cross-functional teams?",
+    options: ["Effective communication and empathy", "Typing extremely fast", "Memorizing API endpoints", "Never asking for help"],
+    answer: "Effective communication and empathy",
+    explanation: "Software development is highly collaborative. The ability to communicate clearly and empathize with users, designers, and managers is essential."
+  },
+  {
+    id: 'cq_28',
+    question: "What does a 'Technical Writer' typically do?",
+    options: ["Creates software documentation, user manuals, and API guides", "Writes the core application logic", "Designs the user interface", "Fixes database corruption issues"],
+    answer: "Creates software documentation, user manuals, and API guides",
+    explanation: "Technical Writers translate complex technical concepts into clear, accessible documentation for end-users and other developers."
+  },
+  {
+    id: 'cq_29',
+    question: "What is the purpose of an 'Applicant Tracking System' (ATS)?",
+    options: ["To filter, organize, and score resumes before humans read them", "To track an employee's daily location", "To manage software deployments", "To schedule server maintenance"],
+    answer: "To filter, organize, and score resumes before humans read them",
+    explanation: "An ATS is software used by recruiters and employers to manage the hiring process, heavily relying on keyword matching to filter resumes."
+  },
+  {
+    id: 'cq_30',
+    question: "Which role focuses heavily on ensuring an organization's software complies with data privacy laws like GDPR?",
+    options: ["Data Privacy Officer / Compliance Analyst", "UI/UX Designer", "Frontend Developer", "Graphic Designer"],
+    answer: "Data Privacy Officer / Compliance Analyst",
+    explanation: "Compliance Analysts and DPOs ensure that a company's data handling processes align with legal and regulatory frameworks."
   }
 ];
 
@@ -184,3 +247,10 @@ export const getRandomCareerQuestions = (count = 10) => {
   
   return finalizedQuestions;
 };
+
+// Clear cache on logout to prevent cross-user leakage
+if (typeof window !== 'undefined') {
+  window.addEventListener('oppOs_logout', () => {
+    usedQuestionIds.clear();
+  });
+}

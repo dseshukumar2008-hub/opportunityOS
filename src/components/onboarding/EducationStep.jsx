@@ -106,7 +106,7 @@ export default function EducationStep({ onNext, onBack, data, updateData }) {
               College / University <span className="text-[#7C3AED]">*</span>
             </label>
             <div className="relative group w-full">
-              <div className={`relative flex items-center bg-gradient-to-b from-[#ffffff] to-[#fcfcff] border rounded-[18px] transition-all duration-200 h-[68px] px-6 ${errors.university ? 'border-red-400' : focusedField === 'university' ? 'border-[#C4B5FD] shadow-[0_0_0_4px_rgba(124,58,237,0.08)]' : 'border-[#E8EAF5] hover:border-[#C4B5FD]'}`}>
+              <div className={`relative flex items-center bg-white border rounded-[18px] transition-all duration-200 h-[68px] px-6 ${errors.university ? 'border-red-400' : focusedField === 'university' ? 'border-[#C4B5FD] shadow-sm' : 'border-[#E8EAF5] hover:border-[#C4B5FD]'}`}>
                 <div className="mr-3 flex items-center justify-center pointer-events-none transition-colors duration-200">
                   <Building2 size={22} strokeWidth={2} className={errors.university ? "text-red-500" : focusedField === 'university' ? "text-[#7C3AED]" : "text-[#94A3B8]"} />
                 </div>
@@ -142,7 +142,7 @@ export default function EducationStep({ onNext, onBack, data, updateData }) {
                     whileTap={{ scale: 0.98 }}
                     animate={{ scale: isSelected ? 1.02 : 1 }}
                     onClick={() => handleSelect('degree', deg.id)}
-                    className={`relative flex items-center justify-center px-5 py-3.5 rounded-xl border transition-all duration-200 min-w-[110px] flex-1 sm:flex-none ${isSelected ? 'border-transparent bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white shadow-[0_8px_20px_rgba(124,58,237,0.3)]' : 'border-[#E8EAF5] bg-white hover:border-[#C4B5FD] hover:bg-[#F5F2FF] hover:shadow-md shadow-sm'}`}
+                    className={`relative flex items-center justify-center px-5 py-3.5 rounded-xl border transition-all duration-200 min-w-[110px] flex-1 sm:flex-none ${isSelected ? 'border-transparent bg-[#7C3AED] text-white shadow-sm' : 'border-[#E8EAF5] bg-white hover:border-[#C4B5FD] hover:bg-[#F5F2FF] shadow-sm'}`}
                   >
                     <span className={`text-[14px] font-semibold tracking-wide ${isSelected ? 'text-white' : 'text-[#475569]'}`}>{deg.title}</span>
                     {isSelected && <Check size={16} className="ml-2 text-white" strokeWidth={3} />}
@@ -167,7 +167,7 @@ export default function EducationStep({ onNext, onBack, data, updateData }) {
                     whileTap={{ scale: 0.98 }}
                     animate={{ scale: isSelected ? 1.02 : 1 }}
                     onClick={() => handleSelect('branch', branch.id)}
-                    className={`relative flex items-center justify-center px-4 py-3.5 rounded-xl border transition-all duration-200 w-full ${isSelected ? 'border-transparent bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white shadow-[0_8px_20px_rgba(124,58,237,0.3)]' : 'border-[#E8EAF5] bg-white hover:border-[#C4B5FD] hover:bg-[#F5F2FF] hover:shadow-md shadow-sm'}`}
+                    className={`relative flex items-center justify-center px-4 py-3.5 rounded-xl border transition-all duration-200 w-full ${isSelected ? 'border-transparent bg-[#7C3AED] text-white shadow-sm' : 'border-[#E8EAF5] bg-white hover:border-[#C4B5FD] hover:bg-[#F5F2FF] shadow-sm'}`}
                   >
                     <span className={`text-[13px] font-semibold text-center leading-tight ${isSelected ? 'text-white' : 'text-[#475569]'}`}>{branch.title}</span>
                     {isSelected && <Check size={15} className="ml-1.5 text-white shrink-0" strokeWidth={3} />}
@@ -192,7 +192,7 @@ export default function EducationStep({ onNext, onBack, data, updateData }) {
                     whileTap={{ scale: 0.98 }}
                     animate={{ scale: isSelected ? 1.02 : 1 }}
                     onClick={() => handleSelect('currentYear', year.id)}
-                    className={`relative flex items-center justify-center px-4 py-3.5 rounded-xl border transition-all duration-200 w-full ${isSelected ? 'border-transparent bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white shadow-[0_8px_20px_rgba(124,58,237,0.3)]' : 'border-[#E8EAF5] bg-white hover:border-[#C4B5FD] hover:bg-[#F5F2FF] hover:shadow-md shadow-sm'}`}
+                    className={`relative flex items-center justify-center px-4 py-3.5 rounded-xl border transition-all duration-200 w-full ${isSelected ? 'border-transparent bg-[#7C3AED] text-white shadow-sm' : 'border-[#E8EAF5] bg-white hover:border-[#C4B5FD] hover:bg-[#F5F2FF] shadow-sm'}`}
                   >
                     <span className={`text-[13px] font-semibold text-center leading-tight ${isSelected ? 'text-white' : 'text-[#475569]'}`}>{year.title}</span>
                     {isSelected && <Check size={15} className="ml-1.5 text-white shrink-0" strokeWidth={3} />}
@@ -217,7 +217,7 @@ export default function EducationStep({ onNext, onBack, data, updateData }) {
                       onClick={() => handleSelect('currentSemester', sem)}
                       whileHover={{ y: -2 }}
                       animate={{ scale: isSelected ? 1.02 : 1 }}
-                      className={`w-[46px] h-[46px] rounded-xl flex items-center justify-center text-[15px] font-bold transition-all duration-200 border ${isSelected ? 'bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white border-transparent shadow-[0_8px_20px_rgba(124,58,237,0.3)]' : 'bg-white border-[#E8EAF5] text-[#475569] hover:border-[#C4B5FD] hover:bg-[#F5F2FF] hover:shadow-md shadow-sm'}`}
+                      className={`w-[46px] h-[46px] rounded-xl flex items-center justify-center text-[15px] font-bold transition-all duration-200 border ${isSelected ? 'bg-[#7C3AED] text-white border-transparent shadow-sm' : 'bg-white border-[#E8EAF5] text-[#475569] hover:border-[#C4B5FD] hover:bg-[#F5F2FF] shadow-sm'}`}
                     >
                       {sem}
                     </motion.button>
@@ -231,7 +231,7 @@ export default function EducationStep({ onNext, onBack, data, updateData }) {
                 CGPA / % <span className="text-slate-400 normal-case font-medium">(Optional)</span>
               </label>
               <div className="relative group w-full">
-                <div className={`relative flex items-center bg-gradient-to-b from-[#ffffff] to-[#fcfcff] border rounded-[18px] transition-all duration-200 h-[68px] px-6 ${focusedField === 'cgpa' ? 'border-[#C4B5FD] shadow-[0_0_0_4px_rgba(124,58,237,0.08)]' : 'border-[#E8EAF5] hover:border-[#C4B5FD]'}`}>
+                <div className={`relative flex items-center bg-white border rounded-[18px] transition-all duration-200 h-[68px] px-6 ${focusedField === 'cgpa' ? 'border-[#C4B5FD] shadow-sm' : 'border-[#E8EAF5] hover:border-[#C4B5FD]'}`}>
                   <input
                     type="text"
                     name="cgpa"
@@ -256,7 +256,7 @@ export default function EducationStep({ onNext, onBack, data, updateData }) {
               onClick={onBack}
               className="flex items-center gap-3 text-[#1F2435] font-bold text-[15px] hover:text-[#7C3AED] transition-colors group"
             >
-              <div className="w-[58px] h-[58px] rounded-full border border-white/60 bg-white/40 backdrop-blur-md shadow-[0_2px_8px_rgba(0,0,0,0.04)] flex items-center justify-center group-hover:border-[#C4B5FD] group-hover:shadow-[0_0_15px_rgba(124,58,237,0.15)] transition-all duration-200">
+              <div className="w-[58px] h-[58px] rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center group-hover:border-[#C4B5FD] transition-all duration-200">
                 <ArrowLeft size={22} strokeWidth={2} className="text-slate-600 group-hover:text-[#7C3AED] transition-colors" />
               </div>
               Back
@@ -265,7 +265,7 @@ export default function EducationStep({ onNext, onBack, data, updateData }) {
           
           <button
             onClick={handleNext}
-            className="h-[58px] px-8 bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white rounded-[18px] font-bold text-[16px] shadow-[0_12px_24px_rgba(124,58,237,0.25)] hover:-translate-y-[2px] hover:shadow-[0_16px_32px_rgba(124,58,237,0.35)] active:translate-y-0 active:scale-[0.98] active:shadow-[0_4px_12px_rgba(124,58,237,0.2)] transition-all duration-200 flex items-center justify-center gap-3"
+            className="h-[58px] px-8 bg-[#7C3AED] text-white rounded-[18px] font-bold text-[16px] shadow-sm hover:-translate-y-[2px] active:translate-y-0 active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-3"
           >
             Continue
             <ArrowRight size={22} strokeWidth={2} />

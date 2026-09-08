@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { db } from '../config/firebase';
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where } from 'firebase/firestore';
 import { useAuth } from './AuthContext';
@@ -50,7 +50,7 @@ export function ActivityProvider({ children }) {
         id: doc.id,
         ...doc.data(),
         // Convert Firestore timestamp to ISO string for consistency
-        timestamp: doc.data().timestamp?.toDate().toISOString() || new Date().toISOString()
+        timestamp: doc.data().timestamp?.toDate?.()?.toISOString() || new Date().toISOString()
       }));
       setActivities(fetchedActivities);
       setLoading(false);
@@ -63,7 +63,7 @@ export function ActivityProvider({ children }) {
             const fetched = fallbackSnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
-                timestamp: doc.data().timestamp?.toDate().toISOString() || new Date().toISOString()
+                timestamp: doc.data().timestamp?.toDate?.()?.toISOString() || new Date().toISOString()
             })).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             setActivities(fetched);
             setLoading(false);
@@ -103,8 +103,15 @@ export function ActivityProvider({ children }) {
     return activities.filter(a => a.userId === userId);
   }, [activities]);
 
+  const contextValue = useMemo(() => ({
+    activities,
+    loading,
+    addActivity,
+    getUserActivities
+  }), [activities, loading, addActivity, getUserActivities]);
+
   return (
-    <ActivityContext.Provider value={{ activities, loading, addActivity, getUserActivities }}>
+    <ActivityContext.Provider value={contextValue}>
       {children}
     </ActivityContext.Provider>
   );

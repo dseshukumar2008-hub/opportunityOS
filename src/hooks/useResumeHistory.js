@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { db } from '../config/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { 
-  collection, query, where, orderBy, onSnapshot, 
+  collection, query, where, onSnapshot, 
   addDoc, getDocs, writeBatch, doc
 } from 'firebase/firestore';
 
@@ -25,8 +25,7 @@ export function useResumeHistory() {
     setIsLoading(true);
     const q = query(
       collection(db, 'resume_history'), 
-      where('uid', '==', user.id),
-      orderBy('timestamp', 'asc')
+      where('uid', '==', user.id)
     );
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
@@ -34,6 +33,9 @@ export function useResumeHistory() {
       snapshot.forEach(doc => {
         docs.push({ id: doc.id, ...doc.data() });
       });
+
+      // Sort client-side by timestamp ascending to avoid composite index requirement
+      docs.sort((a, b) => new Date(a.timestamp || 0) - new Date(b.timestamp || 0));
 
       // Migration check: If Firestore is empty, check if there is legacy localStorage history to rescue
       if (docs.length === 0) {
@@ -73,7 +75,7 @@ export function useResumeHistory() {
     });
 
     return () => unsubscribe();
-  }, [user]);
+  }, [user?.id]);
 
   const addHistory = useCallback(async (results, sourceName) => {
     if (!user?.id) return;
@@ -110,8 +112,8 @@ export function useResumeHistory() {
   const getBestVersion = useCallback(() => {
     if (history.length === 0) return null;
     return history.reduce((best, current) => {
-      const currentScore = current.results?.overallScore || 0;
-      const bestScore = best.results?.overallScore || 0;
+      const currentScore = current.results?.atsScore || current.results?.overallScore || 0;
+      const bestScore = best.results?.atsScore || best.results?.overallScore || 0;
       return (currentScore > bestScore) ? current : best;
     }, history[0]);
   }, [history]);
@@ -122,8 +124,8 @@ export function useResumeHistory() {
     
     if (!v1 || !v2) return null;
 
-    const v1Score = v1.results?.overallScore || 0;
-    const v2Score = v2.results?.overallScore || 0;
+    const v1Score = v1.results?.atsScore || v1.results?.overallScore || 0;
+    const v2Score = v2.results?.atsScore || v2.results?.overallScore || 0;
     const scoreDiff = v2Score - v1Score;
 
     const v1Skills = v1.results?.categories?.Skills?.score || 0;

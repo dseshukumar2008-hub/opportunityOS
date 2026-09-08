@@ -4,6 +4,8 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { geminiService } from '../services/geminiService';
 import { toast } from 'react-hot-toast';
+import { validateResumeFile } from '../utils/fileUtils';
+import { getErrorMessage } from '../utils/errorUtils';
 
 export function useMatchResume() {
   const { user } = useAuth();
@@ -48,7 +50,12 @@ export function useMatchResume() {
       return null;
     }
 
-    console.log('[Resume Pipeline] Upload started');
+    const { isValid, error: validationError } = validateResumeFile(file);
+    if (!isValid) {
+      toast.error(validationError);
+      return null;
+    }
+
     setIsUploading(true);
     try {
       // Extract base64
@@ -61,18 +68,14 @@ export function useMatchResume() {
         reader.onload = () => resolve(reader.result.split(',')[1]);
         reader.onerror = error => reject(error);
       });
-      console.log('[Resume Pipeline] Text extraction completed');
 
       // Pass to Gemini for text & skill extraction
-      console.log('[Resume Pipeline] Gemini request started');
       const analysisResult = await geminiService.analyzeResume({
         mimeType: file.type,
         base64: fileBase64
       });
-      console.log('[Resume Pipeline] Gemini response received');
 
       const extractedSkills = analysisResult?.extractedSkills || [];
-      console.log('[Resume Pipeline] Skills parsed', extractedSkills.length);
       
       const resumeText = analysisResult?.summary || "Resume parsed successfully.";
 
@@ -89,16 +92,13 @@ export function useMatchResume() {
       const docRef = doc(db, 'users', user.id, 'match_resume', 'current');
       await setDoc(docRef, payload);
       
-      console.log('[Resume Pipeline] Profile updated');
-      console.log('[Resume Pipeline] Upload completed');
       toast.success('Resume successfully processed and saved.');
       return payload;
     } catch (err) {
       console.error('[Match Resume] Upload Error:', err);
-      toast.error('Error: ' + (err.message || 'Failed to parse and save resume'));
+      toast.error(getErrorMessage(err, 'Failed to process and save resume. Please try again.'));
       return null;
     } finally {
-      console.log('[Resume Pipeline] Loading state cleared');
       setIsUploading(false);
     }
   };

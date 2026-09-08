@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Target, ChevronRight, Code, Bot, BarChart2, Layers, ShieldCheck, Cloud, Infinity, Briefcase, Plus, CheckCircle2, Edit2 } from 'lucide-react';
-import { useGoals } from '../../contexts/GoalContext';
+
 
 const ROLES = [
   { id: 'Software Engineer', title: 'Software Engineer', desc: 'Design, build and maintain scalable software systems.', icon: Code, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F1FE]' },
@@ -9,31 +9,26 @@ const ROLES = [
   { id: 'Full Stack Developer', title: 'Full Stack Developer', desc: 'Work on frontend, backend and databases.', icon: Layers, color: 'text-[#10B981]', bg: 'bg-emerald-50' },
   { id: 'Cyber Security Engineer', title: 'Cyber Security Engineer', desc: 'Protect systems and data from cyber threats.', icon: ShieldCheck, color: 'text-[#EF4444]', bg: 'bg-red-50' },
   { id: 'Cloud Engineer', title: 'Cloud Engineer', desc: 'Design and manage secure cloud infrastructure.', icon: Cloud, color: 'text-[#0EA5E9]', bg: 'bg-sky-50' },
-  { id: 'DevOps Engineer', title: 'DevOps Engineer', desc: 'Automate, deploy and scale applications seamlessly.', icon: Infinity, color: 'text-[#F59E0B]', bg: 'bg-amber-50' },
+  { id: 'DevOps Engineer', title: 'DevOps Engineer', desc: 'Automate, deploy and scale applications easily.', icon: Infinity, color: 'text-[#F59E0B]', bg: 'bg-amber-50' },
   { id: 'Product Manager', title: 'Product Manager', desc: 'Lead product strategy and build user-centric solutions.', icon: Briefcase, color: 'text-[#8B5CF6]', bg: 'bg-purple-50' },
   { id: 'other', title: 'Other / Custom Role', desc: 'Define a custom role and get a tailored analysis.', icon: Plus, color: 'text-slate-500', bg: 'bg-slate-100' },
 ];
 
 export default function Step1TargetRole({ onSubmit, initialRole }) {
-  const { goals } = useGoals();
   const [role, setRole] = useState(initialRole || '');
   const [customRole, setCustomRole] = useState('');
   const customInputRef = useRef(null);
 
   useEffect(() => {
-    if (!initialRole && goals && goals.length > 0) {
-      const activeGoal = goals.find(g => g.isActive) || goals[0];
-      if (activeGoal && activeGoal.targetCareer) {
-        if (ROLES.some(r => r.id === activeGoal.targetCareer)) {
-// eslint-disable-next-line react-hooks/set-state-in-effect
-          setRole(activeGoal.targetCareer);
-        } else {
-          setRole('other');
-          setCustomRole(activeGoal.targetCareer);
-        }
+    if (initialRole) {
+      if (ROLES.some(r => r.id === initialRole)) {
+        setRole(initialRole);
+      } else {
+        setRole('other');
+        setCustomRole(initialRole);
       }
     }
-  }, [initialRole, goals]);
+  }, [initialRole]);
 
   const handleRoleSelect = (id) => {
     if (id === 'other') {
@@ -85,7 +80,7 @@ export default function Step1TargetRole({ onSubmit, initialRole }) {
               return (
                 <div
                   key={r.id}
-                  onClick={() => handleRoleSelect(r.id)}
+                  role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRoleSelect(r.id); } }} onClick={() => handleRoleSelect(r.id)}
                   className={`relative p-3 rounded-xl border-2 transition-all cursor-pointer group flex flex-col min-h-[90px] ${
                     isSelected 
                       ? 'border-[#6C4CF1] bg-[#F8F6FE] shadow-[0_4px_12px_-4px_rgba(108,76,241,0.12)]' 
@@ -146,6 +141,7 @@ export default function Step1TargetRole({ onSubmit, initialRole }) {
               value={customRole}
               onChange={handleCustomRoleChange}
               placeholder="e.g. Robotics Engineer"
+              maxLength={50}
               className={`flex-1 w-full px-3 py-2 rounded-lg border text-[13px] font-semibold outline-none transition-all placeholder:font-medium placeholder:text-slate-400 ${
                 role === 'other'
                   ? 'bg-white border-[#6C4CF1]/30 shadow-sm focus:border-[#6C4CF1] focus:ring-2 focus:ring-[#6C4CF1]/10 text-slate-900'

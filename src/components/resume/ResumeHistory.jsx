@@ -30,13 +30,14 @@ export default function ResumeHistory({ history, getBestVersion, compareVersions
   // Trend Chart logic
   const chartHeight = 150;  
   const maxScore = 100;
-  const minScore = Math.max(0, Math.min(...history.map(h => h.results.overallScore)) - 10);
-  const chartRange = maxScore - minScore;
+  const getScore = (h) => h.results?.atsScore || h.results?.overallScore || 0;
+  const minScore = Math.max(0, Math.min(...history.map(h => getScore(h))) - 10);
+  const chartRange = maxScore - minScore || 1; // prevent divide-by-zero if all scores equal
   const pointWidth = history.length > 1 ? 100 / (history.length - 1) : 100;
 
   const points = history.map((h, i) => {
     const x = history.length > 1 ? i * pointWidth : 50;
-    const y = chartHeight - ((h.results.overallScore - minScore) / chartRange) * chartHeight;
+    const y = chartHeight - ((getScore(h) - minScore) / chartRange) * chartHeight;
     return `${x},${y}`;
   }).join(' ');
 
@@ -76,12 +77,12 @@ export default function ResumeHistory({ history, getBestVersion, compareVersions
                   {/* Points */}
                   {history.map((h, i) => {
                     const x = `${i * pointWidth}%`;
-                    const y = chartHeight - ((h.results.overallScore - minScore) / chartRange) * chartHeight;
+                    const y = chartHeight - ((getScore(h) - minScore) / chartRange) * chartHeight;
                     return (
                       <g key={h.id}>
                         <circle cx={x} cy={y} r="5" fill="#fff" stroke="#4F46E5" strokeWidth="2" />
                         <text x={x} y={y - 15} textAnchor="middle" className="text-xs font-bold fill-indigo-600">
-                          {h.results.overallScore}
+                          {getScore(h)}
                         </text>
                       </g>
                     );
@@ -114,7 +115,7 @@ export default function ResumeHistory({ history, getBestVersion, compareVersions
                 <Trophy size={20} className="text-emerald-100" />
                 <span className="text-sm font-bold tracking-wider uppercase text-emerald-100">Best Version</span>
               </div>
-              <h3 className="text-4xl font-black mb-1">{bestVersion.results.overallScore}<span className="text-xl font-bold text-emerald-200">/100</span></h3>
+              <h3 className="text-4xl font-black mb-1">{getScore(bestVersion)}<span className="text-xl font-bold text-emerald-200">/100</span></h3>
               <p className="text-sm font-medium text-emerald-100 mb-6">
                 Version {bestVersion.versionNumber} • {new Date(bestVersion.timestamp).toLocaleDateString()}
               </p>
@@ -148,7 +149,7 @@ export default function ResumeHistory({ history, getBestVersion, compareVersions
                 className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:border-indigo-500"
               >
                 {history.map(h => (
-                  <option key={h.id} value={h.id}>Version {h.versionNumber} ({h.results.overallScore})</option>
+                  <option key={h.id} value={h.id}>Version {h.versionNumber} ({getScore(h)})</option>
                 ))}
               </select>
             </div>
@@ -165,7 +166,7 @@ export default function ResumeHistory({ history, getBestVersion, compareVersions
                 className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:border-indigo-500"
               >
                 {history.map(h => (
-                  <option key={h.id} value={h.id}>Version {h.versionNumber} ({h.results.overallScore})</option>
+                  <option key={h.id} value={h.id}>Version {h.versionNumber} ({getScore(h)})</option>
                 ))}
               </select>
             </div>

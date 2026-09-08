@@ -75,7 +75,7 @@ export default function EmptyState({
       {/* Decorative rings */}
       <div className="relative mb-8">
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-32 h-32 rounded-full bg-[#6C4CF1]/5 animate-pulse" />
+          <div className="w-32 h-32 rounded-full bg-[#6C4CF1]/5" />
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-24 h-24 rounded-full bg-[#6C4CF1]/8" />

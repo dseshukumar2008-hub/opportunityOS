@@ -23,7 +23,7 @@ import { useActivity } from '../../contexts/ActivityContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useCareerRoadmap } from '../../hooks/useCareerRoadmap';
 
-function timeAgo(dateString) {
+function getRelativeTime(dateString) {
   if (!dateString) return 'Just now';
   const date = new Date(dateString);
   const now = new Date();
@@ -67,7 +67,7 @@ export default function AnalyticsPage() {
   const hasTargetRole = !!(careerContext?.targetRole);
   const hasResume = !!hasInsights;
   const githubScore = profile?.githubAnalysis?.githubScore || careerContext?.githubScore || 0;
-  const hasGithub = !!(githubScore > 0);
+  const hasGithub = !!(profile?.githubAnalysis || githubScore > 0);
 
   const steps = [
     { id: 'profile', completed: hasBasicProfile, title: 'Complete your Profile', desc: 'Add your education, experience and career interests.', path: '/dashboard/settings', icon: User, priority: 'High Priority', color: 'text-indigo-600', bg: 'bg-indigo-50', priorityBg: 'bg-rose-50 text-rose-600' },
@@ -78,7 +78,7 @@ export default function AnalyticsPage() {
   ];
 
   const completedStepsCount = steps.filter(s => s.completed).length;
-  const progressPercentage = (completedStepsCount / 5) * 100;
+  const progressPercentage = steps.length > 0 ? (completedStepsCount / steps.length) * 100 : 0;
   
 
   const hasRoadmap = !!roadmapState?.roadmap;
@@ -168,10 +168,10 @@ export default function AnalyticsPage() {
     {
       id: 4,
       title: 'Skill Coverage',
-      value: !hasSkills ? 'Building Profile' : `${Math.max(0, 100 - ((careerContext?.missingSkills?.length || 5) * 10))}%`,
-      subtext: !hasSkills ? 'Add skills to see your coverage' : (careerContext?.missingSkills?.length > 0 ? 'Needs Improvement' : 'Excellent'),
-      subtextColor: !hasSkills ? 'text-slate-500' : (careerContext?.missingSkills?.length > 0 ? 'text-rose-500' : 'text-emerald-500'),
-      valueClass: !hasSkills ? 'text-[24px]' : 'text-[40px]',
+      value: (!hasSkills || !hasTargetRole) ? 'Building Profile' : `${Math.max(0, 100 - ((careerContext?.missingSkills?.length || 0) * 10))}%`,
+      subtext: (!hasSkills || !hasTargetRole) ? 'Add skills & role to see coverage' : (careerContext?.missingSkills?.length > 0 ? 'Needs Improvement' : 'Excellent'),
+      subtextColor: (!hasSkills || !hasTargetRole) ? 'text-slate-500' : (careerContext?.missingSkills?.length > 0 ? 'text-rose-500' : 'text-emerald-500'),
+      valueClass: (!hasSkills || !hasTargetRole) ? 'text-[24px]' : 'text-[40px]',
       icon: Trophy,
       iconColor: 'text-blue-500',
       iconBg: 'bg-blue-50'
@@ -246,7 +246,7 @@ export default function AnalyticsPage() {
 
   const improvementCards = allPotentialImprovements.slice(0, 3);
 
-  const recentActivities = activities?.slice(0, 5) || [];
+  const recentActivities = Array.isArray(activities) ? activities.slice(0, 5) : [];
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col h-full relative space-y-8 pb-12 p-4 lg:p-8">
@@ -329,7 +329,13 @@ export default function AnalyticsPage() {
             {/* Right Side */}
             <div className="md:pl-12 flex flex-col justify-center">
               <h4 className="text-[15px] font-bold text-slate-900 mb-6">Recommended Next Step</h4>
-              <div className="flex items-center justify-between group cursor-pointer" onClick={() => navigate(nextStep.path)}>
+              <div 
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(nextStep.path)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(nextStep.path); } }}
+                className="flex items-center justify-between group cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#6C4CF1] rounded-xl p-2 -m-2"
+              >
                 <div className="flex items-start gap-4">
                   <div className={`w-14 h-14 rounded-2xl ${nextStep.bg} flex items-center justify-center shrink-0`}>
                     <nextStep.icon className={nextStep.color} size={26} />
@@ -369,8 +375,11 @@ export default function AnalyticsPage() {
                 return (
                   <div 
                     key={index} 
+                    role="button"
+                    tabIndex={0}
                     onClick={() => navigate(card.path)}
-                    className="flex items-center justify-between border-b border-slate-50 pb-6 last:pb-0 last:border-0 cursor-pointer group hover:opacity-80 transition-opacity"
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(card.path); } }}
+                    className="flex items-center justify-between border-b border-slate-50 pb-6 last:pb-0 last:border-0 cursor-pointer group hover:opacity-80 transition-opacity outline-none focus-visible:ring-2 focus-visible:ring-[#6C4CF1] rounded-xl p-2 -m-2"
                   >
                     <div className="flex items-start gap-4">
                         <div className={`w-12 h-12 rounded-full ${card.bg} flex items-center justify-center shrink-0`}>
@@ -428,7 +437,7 @@ export default function AnalyticsPage() {
                           <p className="text-slate-500 text-[14px] truncate">{act.description}</p>
                         </div>
                         <span className="text-slate-400 text-[13px] font-medium whitespace-nowrap pl-4">
-                          {timeAgo(act.timestamp)}
+                          {getRelativeTime(act.timestamp)}
                         </span>
                       </div>
                     );

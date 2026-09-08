@@ -1,15 +1,15 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { useActivity } from './ActivityContext';
-import { auth, db } from '../config/firebase';
+import { db } from '../config/firebase';
 import { collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, where} from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { getResumeStrength, validateSection } from '../utils/resumeValidationUtils';
 
 const ResumeContext = createContext(null);
 
-export const DEFAULT_RESUME_STATE = {
+const DEFAULT_RESUME_STATE = {
   personalInfo: {
     fullName: '',
     email: '',
@@ -35,11 +35,14 @@ export const ResumeProvider = ({ children }) => {
   const [activeResumeId, setActiveResumeId] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  // This state holds the currently active resume in a mutable form for the UI
   const [resumeData, setResumeData] = useState(() => {
     // Try to load a fallback local resume if not logged in or during initial load
-    const saved = localStorage.getItem('resumeData');
-    if (saved) return JSON.parse(saved);
+    try {
+      const saved = localStorage.getItem('resumeData');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to parse local resume data:', e);
+    }
     return { ...DEFAULT_RESUME_STATE };
   });
 
@@ -80,29 +83,41 @@ export const ResumeProvider = ({ children }) => {
       if (data && data.length > 0) {
         setResumes(data);
         // Automatically select the most recently updated resume if none selected
-        if (!activeResumeId || !data.find(r => r.id === activeResumeId)) {
-          setActiveResumeId(data[0].id);
-          setActiveTemplate(data[0].template || 'Modern');
-          
-          setResumeData({
-            personalInfo: data[0].personalInfo || DEFAULT_RESUME_STATE.personalInfo,
-            education: data[0].education || [],
-            skills: data[0].skills || [],
-            projects: data[0].projects || [],
-            experience: data[0].experience || [],
-            certifications: data[0].certifications || [],
-            workshops: data[0].workshops || [],
-            languages: data[0].languages || [],
-            achievements: data[0].achievements || []
-          });
-        }
+        setActiveResumeId(currentId => {
+          if (!currentId || !data.find(r => r.id === currentId)) {
+            setActiveTemplate(data[0].template || 'Modern');
+            setResumeData({
+              personalInfo: data[0].personalInfo || DEFAULT_RESUME_STATE.personalInfo,
+              education: data[0].education || [],
+              skills: data[0].skills || [],
+              projects: data[0].projects || [],
+              experience: data[0].experience || [],
+              certifications: data[0].certifications || [],
+              workshops: data[0].workshops || [],
+              languages: data[0].languages || [],
+              achievements: data[0].achievements || []
+            });
+            return data[0].id;
+          }
+          return currentId;
+        });
       } else {
         setResumes([]);
-        // Check if there is local data to migrate
-        const saved = localStorage.getItem('resumeData');
+        let saved = null;
+        try {
+          saved = localStorage.getItem('resumeData');
+        } catch { /* ignore */ }
+        let parsed = null;
         if (saved) {
+          try {
+            parsed = JSON.parse(saved);
+          } catch (e) {
+            console.warn('Failed to parse local resume data during fetch:', e);
+          }
+        }
+        if (parsed) {
           setHasLocalMigration(true);
-          setResumeData(JSON.parse(saved));
+          setResumeData(parsed);
         } else {
           // Initialize empty state with user info
           setResumeData({
@@ -120,7 +135,7 @@ export const ResumeProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [user, activeResumeId]);
+  }, [user]);
 
   useEffect(() => {
 // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -153,7 +168,17 @@ export const ResumeProvider = ({ children }) => {
     
     setSaveState('Saving...');
     try {
-      const localData = JSON.parse(localStorage.getItem('resumeData'));
+      let localData = null;
+      try {
+        localData = JSON.parse(localStorage.getItem('resumeData'));
+      } catch (e) {
+        console.error('Failed to parse local resume data during migration:', e);
+      }
+      if (!localData) {
+        toast.error('Local resume data is corrupted or empty.');
+        setSaveState('Save failed');
+        return;
+      }
       const resumeId = crypto.randomUUID();
       const newResume = {
         resumeId,
@@ -184,7 +209,7 @@ export const ResumeProvider = ({ children }) => {
       toast.success('Resume successfully migrated to cloud!');
     } catch (err) {
       console.error('Error migrating resume:', err);
-      toast.error(`Failed to migrate resume: ${err.message}`);
+      toast.error('Failed to migrate resume. Please try again.');
       setSaveState('');
     }
   };
@@ -197,7 +222,6 @@ export const ResumeProvider = ({ children }) => {
       return null;
     }
     
-    console.log('[ResumeContext] Creating resume for user:', user.uid);
     setSaveState('Saving...');
     
     try {
@@ -222,11 +246,7 @@ export const ResumeProvider = ({ children }) => {
         updatedAt: new Date().toISOString()
       };
       
-      console.log("User:", auth.currentUser);
-      console.log("Resume Payload:", newResume);
-      
       await setDoc(doc(db, 'resumes', resumeId), newResume);
-      console.log('[ResumeContext] Firestore Response: Success');
 
       setResumes(prev => [newResume, ...prev]);
       
@@ -251,7 +271,7 @@ export const ResumeProvider = ({ children }) => {
       return resumeId;
     } catch (err) {
       console.error('[ResumeContext] Error creating resume in Firestore:', err);
-      toast.error(`Failed to create resume: ${err.message}`);
+      toast.error('Failed to create resume. Please try again.');
       setSaveState('');
       return null;
     }
@@ -285,8 +305,8 @@ export const ResumeProvider = ({ children }) => {
 
         try {
           await deleteDoc(doc(db, 'users', user.uid, 'match_resume', 'current'));
-        } catch (_e) {
-          console.log('No current match to delete');
+        } catch {
+          // No current match to delete
         }
       } catch (cleanupErr) {
         console.warn('Resume secondary cleanup failed', cleanupErr);
@@ -303,7 +323,7 @@ export const ResumeProvider = ({ children }) => {
       toast.success('Resume deleted successfully');
     } catch (err) {
       console.error('Error deleting resume:', err);
-      toast.error(`Failed to delete resume: ${err.message}`);
+      toast.error('Failed to delete resume. Please try again.');
       throw err;
     }
   };
@@ -322,7 +342,7 @@ export const ResumeProvider = ({ children }) => {
       toast.success('Resume renamed');
     } catch (err) {
       console.error('Error renaming resume:', err);
-      toast.error(`Failed to rename resume: ${err.message}`);
+      toast.error('Failed to rename resume. Please try again.');
     }
   };
 
@@ -330,7 +350,11 @@ export const ResumeProvider = ({ children }) => {
   const saveResume = async () => {
     if (!user) {
       // Fallback local persistence if not logged in
-      localStorage.setItem('resumeData', JSON.stringify(resumeData));
+      try {
+        localStorage.setItem('resumeData', JSON.stringify(resumeData));
+      } catch {
+        console.warn('Failed to save fallback local resume:', e);
+      }
       setLastUpdated(Date.now());
       setIsDirty(false);
       return;
@@ -367,9 +391,15 @@ export const ResumeProvider = ({ children }) => {
       
       const dataForState = { ...resumes.find(r => r.id === activeResumeId || r.resumeId === activeResumeId), ...updatedData };
 
+      const key = `resume_snapshots_${activeResumeId}`;
+      let snapshots = [];
       try {
-        const key = `resume_snapshots_${activeResumeId}`;
-        const snapshots = JSON.parse(localStorage.getItem(key) || '[]');
+        snapshots = JSON.parse(localStorage.getItem(key) || '[]');
+      } catch {
+        console.warn('Snapshot history corrupted, starting fresh');
+      }
+
+      try {
         snapshots.push({ timestamp: Date.now(), data: resumeData });
         if (snapshots.length > 10) snapshots.shift(); // Keep last 10 versions
         localStorage.setItem(key, JSON.stringify(snapshots));
@@ -401,15 +431,8 @@ export const ResumeProvider = ({ children }) => {
       await attemptSave();
     } catch (err) {
       console.error('Error saving resume:', err);
-      // Auto retry once after 1 second
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        await attemptSave();
-      } catch (retryErr) {
-        console.error('Retry failed:', retryErr);
-        setSaveState('Save failed');
-        setIsDirty(true);
-      }
+      setSaveState('Save failed');
+      setIsDirty(true);
     } finally {
       isSavingRef.current = false;
       if (saveQueueRef.current) {
@@ -422,7 +445,7 @@ export const ResumeProvider = ({ children }) => {
   // Debounced auto-save hook utility (can be utilized by consuming components)
   // We'll call saveResume directly when needed.
 
-  const getSectionsCompleted = () => {
+  const getSectionsCompleted = useCallback(() => {
     let completed = 0;
     if (validateSection('Personal Info', resumeData)) completed++;
     if (validateSection('Summary', resumeData)) completed++;
@@ -433,11 +456,11 @@ export const ResumeProvider = ({ children }) => {
     if (validateSection('Certifications', resumeData)) completed++;
     if (validateSection('Workshops', resumeData)) completed++;
     return completed;
-  };
+  }, [resumeData]);
 
-  const isSectionComplete = (section) => {
+  const isSectionComplete = useCallback((section) => {
     return validateSection(section, resumeData);
-  };
+  }, [resumeData]);
 
   // Mutable functions trigger state update + auto-save
   useEffect(() => {
@@ -454,86 +477,97 @@ export const ResumeProvider = ({ children }) => {
 // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resumeData, activeTemplate, isDirty, activeResumeId]);
 
-  const handleSetActiveTemplate = (tmpl) => {
+  const handleSetActiveTemplate = useCallback((tmpl) => {
     setIsDirty(true);
     setActiveTemplate(tmpl);
-  };
+  }, []);
 
-  const updatePersonalInfo = (updates) => {
+  const updatePersonalInfo = useCallback((updates) => {
     setIsDirty(true);
     setResumeData(prev => ({
       ...prev,
       personalInfo: { ...prev.personalInfo, ...updates }
     }));
-  };
+  }, []);
 
-  const restoreSnapshot = (snapshotData) => {
+  const restoreSnapshot = useCallback((snapshotData) => {
     setIsDirty(true);
     setResumeData(snapshotData);
-  };
+  }, []);
 
-  const addArrayItem = (section, item) => {
+  const addArrayItem = useCallback((section, item) => {
     setIsDirty(true);
     setResumeData(prev => ({
       ...prev,
       [section]: [...(prev[section] || []), { ...item, id: Date.now().toString() }]
     }));
-  };
+  }, []);
 
-  const updateArrayItem = (section, id, updates) => {
+  const updateArrayItem = useCallback((section, id, updates) => {
     setIsDirty(true);
     setResumeData(prev => ({
       ...prev,
       [section]: prev[section].map(item => item.id === id ? { ...item, ...updates } : item)
     }));
-  };
+  }, []);
 
-  const removeArrayItem = (section, id) => {
+  const removeArrayItem = useCallback((section, id) => {
     setIsDirty(true);
     setResumeData(prev => ({
       ...prev,
       [section]: prev[section].filter(item => item.id !== id)
     }));
-  };
+  }, []);
 
-  const updateSkills = (skillsArray) => {
+  const updateSkills = useCallback((skillsArray) => {
     setIsDirty(true);
     setResumeData(prev => ({
       ...prev,
       skills: skillsArray
     }));
-  };
+  }, []);
+
+  const getResumeStrengthMemo = useCallback(() => getResumeStrength(resumeData), [resumeData]);
+
+  const contextValue = useMemo(() => ({
+    resumes,
+    activeResumeId,
+    loading,
+    saveState,
+    hasLocalMigration,
+    resumeData,
+    activeTemplate,
+    setActiveTemplate: handleSetActiveTemplate,
+    lastUpdated,
+    isDirty,
+    setIsDirty,
+    saveResume,
+    createResume,
+    deleteResume,
+    renameResume,
+    switchResume,
+    migrateLocalResume,
+    getResumeStrength: getResumeStrengthMemo,
+    getSectionsCompleted,
+    isSectionComplete,
+    updatePersonalInfo,
+    addArrayItem,
+    updateArrayItem,
+    removeArrayItem,
+    updateSkills,
+    restoreSnapshot,
+    setResumeData
+  }), [
+    resumes, activeResumeId, loading, saveState, hasLocalMigration, resumeData, 
+    activeTemplate, lastUpdated, isDirty, 
+    handleSetActiveTemplate, saveResume, createResume, deleteResume, renameResume, 
+    switchResume, migrateLocalResume, getResumeStrengthMemo, getSectionsCompleted, 
+    isSectionComplete, updatePersonalInfo, addArrayItem, updateArrayItem, 
+    removeArrayItem, updateSkills, restoreSnapshot
+  ]);
 
   return (
-    <ResumeContext.Provider value={{
-      resumes,
-      activeResumeId,
-      loading,
-      saveState,
-      hasLocalMigration,
-      resumeData,
-      activeTemplate,
-      setActiveTemplate: handleSetActiveTemplate,
-      lastUpdated,
-      isDirty,
-      setIsDirty,
-      saveResume,
-      createResume,
-      deleteResume,
-      renameResume,
-      switchResume,
-      migrateLocalResume,
-      getResumeStrength: () => getResumeStrength(resumeData),
-      getSectionsCompleted,
-      isSectionComplete,
-      updatePersonalInfo,
-      addArrayItem,
-      updateArrayItem,
-      removeArrayItem,
-      updateSkills,
-      restoreSnapshot,
-      setResumeData
-    }}>
+    <ResumeContext.Provider value={contextValue}>
       {children}
     </ResumeContext.Provider>
   );

@@ -66,7 +66,7 @@ export default function SuccessStep({ onFinish, data }) {
         {/* 2. HERO SECTION */}
         <div className="flex flex-col items-center justify-center shrink-0 mt-2 mb-8">
           <motion.div variants={item} className="relative mx-auto mb-5 flex items-center justify-center">
-            <div className="absolute inset-0 bg-[#7C3AED]/10 blur-[30px] rounded-full animate-pulse" />
+            <div className="absolute inset-0 bg-[#7C3AED]/10 blur-[30px] rounded-full" />
             
             <motion.div 
               animate={{ y: [0, -6, 0] }} 
@@ -177,7 +177,7 @@ export default function SuccessStep({ onFinish, data }) {
           <motion.div variants={item} className="w-full flex flex-col items-center">
             <button 
               onClick={onFinish}
-              className="w-full max-w-[360px] h-[56px] bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] hover:from-[#6D28D9] hover:to-[#5B21B6] text-white rounded-[20px] font-bold text-[15px] transition-all shadow-[0_8px_25px_rgba(124,58,237,0.3)] hover:shadow-[0_12px_35px_rgba(124,58,237,0.4)] hover:-translate-y-1 active:translate-y-0 active:scale-[0.98] flex items-center justify-center gap-2.5 group relative overflow-hidden mb-2"
+              className="w-full max-w-[360px] h-[56px] bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-[20px] font-bold text-[15px] transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 active:translate-y-0 active:scale-95 flex items-center justify-center gap-2.5 group relative overflow-hidden mb-2"
             >
               <div className="absolute inset-0 bg-white/20 translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-700 ease-in-out" />
               🚀 Launch My Dashboard 

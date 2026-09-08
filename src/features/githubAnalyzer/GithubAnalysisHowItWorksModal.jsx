@@ -15,18 +15,23 @@ export default function GithubAnalysisHowItWorksModal({ isOpen, onClose }) {
   return (
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200"
+      aria-hidden="true"
       onClick={onClose}
     >
       <div 
         className="bg-white rounded-[24px] w-full max-w-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="github-modal-title"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="relative p-6 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+          <h2 id="github-modal-title" className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
             How GitHub Analysis Works
           </h2>
           <button 
+            aria-label="Close Modal"
             onClick={onClose}
             className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors bg-white hover:bg-slate-100 p-1 rounded-full shadow-sm"
           >

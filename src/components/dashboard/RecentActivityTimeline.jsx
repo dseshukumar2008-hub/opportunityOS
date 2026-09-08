@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useActivity } from '../../contexts/ActivityContext';
+import { getRelativeTime } from '../../utils/formatUtils';
 import { 
 // eslint-disable-next-line no-unused-vars
   Send, 
@@ -22,23 +22,10 @@ import {
 import { Link } from 'react-router-dom';
 
 export default function RecentActivityTimeline({ userState }) {
-  const { activities: rawActivities } = useActivity();
-  const { isNewUser } = userState || {};
+  const { activities: rawActivities = [], isNewUser } = userState || {};
 
   const activities = useMemo(() => {
     let feed = [];
-
-    const getRelativeTime = (timestamp) => {
-      const diffInSeconds = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000);
-      if (diffInSeconds < 60) return 'Just now';
-      const diffInMinutes = Math.floor(diffInSeconds / 60);
-      if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
-      const diffInHours = Math.floor(diffInMinutes / 60);
-      if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
-      const diffInDays = Math.floor(diffInHours / 24);
-      if (diffInDays < 30) return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
-      return new Date(timestamp).toLocaleDateString();
-    };
 
     const iconMap = {
       FileText: FileText,
@@ -47,18 +34,27 @@ export default function RecentActivityTimeline({ userState }) {
       Activity: Activity
     };
 
-    rawActivities.forEach((act) => {
+    rawActivities.forEach((act, idx) => {
       const IconComp = iconMap[act.iconType] || Activity;
       
+      let bgColor = 'bg-indigo-50';
+      let iconColor = 'text-[#6C4CF1]';
+      
+      if (act.color && typeof act.color === 'string') {
+         const parts = act.color.split(' ').filter(Boolean);
+         bgColor = parts.find(p => p.startsWith('bg-')) || bgColor;
+         iconColor = parts.find(p => p.startsWith('text-')) || iconColor;
+      }
+      
       feed.push({
-        id: act.id,
+        id: act.id || `activity-${idx}-${Math.random().toString(36).substr(2, 9)}`,
         type: act.type,
         text: act.title || act.description || act.action || 'Performed an action',
-        date: new Date(act.timestamp).getTime(),
+        date: new Date(act.timestamp || 0).getTime() || 0,
         timeString: getRelativeTime(act.timestamp),
         icon: IconComp,
-        iconColor: act.color ? act.color.split(' ')[1] : 'text-[#6C4CF1]',
-        bgColor: act.color ? act.color.split(' ')[0] : 'bg-indigo-50'
+        iconColor,
+        bgColor
       });
     });
 
@@ -86,9 +82,14 @@ export default function RecentActivityTimeline({ userState }) {
 
   return (
     <div className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full w-full">
-      <div className="mb-6 shrink-0">
-        <h3 className="text-[16px] font-bold text-slate-800 mb-1">Recent Activity</h3>
-        <p className="text-[13px] text-slate-500 font-medium">Your latest actions and updates.</p>
+      <div className="flex items-center gap-3 mb-6 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+          <Activity size={16} className="text-indigo-600" />
+        </div>
+        <div>
+          <h3 className="text-[16px] font-bold text-slate-900 leading-tight">Recent Activity</h3>
+          <p className="text-[12px] text-slate-500 font-medium">Your latest updates</p>
+        </div>
       </div>
       
       <div className="flex-1 relative flex flex-col justify-between">

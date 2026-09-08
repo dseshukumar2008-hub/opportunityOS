@@ -59,7 +59,7 @@ function SelectionCard({ item, selected, onClick }) {
   );
 }
 
-export default function EmptyState({ 
+export default function ProjectWizard({ 
   specialization, 
   setSpecialization, 
   targetRole, 

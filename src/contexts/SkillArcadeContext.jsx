@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import { createContext, useContext, useEffect, useMemo, useCallback } from 'react';
+import { increment } from 'firebase/firestore';
 import { useProfile } from './ProfileContext';
+import { useAuth } from './AuthContext';
 
 const SkillArcadeContext = createContext({});
 
@@ -8,6 +10,7 @@ export const useSkillArcade = () => useContext(SkillArcadeContext);
 const DEFAULT_SKILL_ARCADE_STATE = {
   highScore: 0,
   gamesPlayed: 0,
+  currentStreak: 0,
   bestStreak: 0,
   lastPlayedDate: null,
   recentActivity: [],
@@ -24,56 +27,42 @@ const getTodayString = () => {
 };
 
 export const SkillArcadeProvider = ({ children }) => {
-  const { profile, updateProfile } = useProfile();
-  const [localState, setLocalState] = useState(DEFAULT_SKILL_ARCADE_STATE);
-  const [isInitializing, setIsInitializing] = useState(true);
-
-  // Sync with profile on load
-  useEffect(() => {
-    if (profile) {
-      if (profile.skillArcade) {
-        setLocalState(profile.skillArcade);
-      }
-      setIsInitializing(false);
-    } else {
-      setLocalState(DEFAULT_SKILL_ARCADE_STATE);
-    }
-  }, [profile]);
+  const { profile, updateProfile, loading: profileLoading } = useProfile();
+  const { user } = useAuth();
+  
+  const stats = profile?.skillArcade || DEFAULT_SKILL_ARCADE_STATE;
 
   // Check and reset Daily Challenge if a new calendar day has started
   useEffect(() => {
-    if (isInitializing || !profile) return;
+    if (profileLoading || !profile) return;
     
     const today = getTodayString();
-    const safeState = localState || DEFAULT_SKILL_ARCADE_STATE;
-    const currentChallengeDate = safeState.dailyChallenge?.lastResetDate;
+    const currentChallengeDate = stats.dailyChallenge?.lastResetDate;
 
     if (currentChallengeDate !== today) {
       const updatedState = {
-        ...safeState,
+        ...stats,
         dailyChallenge: {
           lastResetDate: today,
           progress: 0,
           completed: false
         }
       };
-      setLocalState(updatedState);
       
-      // We do not await this, just fire and forget to sync backend
+      // Fire and forget
       updateProfile({ skillArcade: updatedState });
     }
-  }, [localState, isInitializing, profile, updateProfile]);
+  }, [stats.dailyChallenge?.lastResetDate, profileLoading, profile, updateProfile]);
 
   const saveGameState = useCallback(async (gameResult) => {
     // gameResult expects: { game: string, score: number, accuracy: string, isCorrectArray: [boolean] }
     const today = getTodayString();
-    const safeState = localState || DEFAULT_SKILL_ARCADE_STATE;
     
     // Calculate new streak
-    let newStreak = safeState.bestStreak || 0;
+    let newStreak = stats.currentStreak || 0;
     
-    if (safeState.lastPlayedDate) {
-      const lastDateObj = new Date(safeState.lastPlayedDate);
+    if (stats.lastPlayedDate) {
+      const lastDateObj = new Date(stats.lastPlayedDate);
       const lastDate = `${lastDateObj.getFullYear()}-${String(lastDateObj.getMonth() + 1).padStart(2, '0')}-${String(lastDateObj.getDate()).padStart(2, '0')}`;
       
       if (lastDate === today) {
@@ -93,23 +82,38 @@ export const SkillArcadeProvider = ({ children }) => {
       newStreak = 1; // first game ever
     }
 
-    const newHighScore = Math.max(safeState.highScore || 0, gameResult.score || 0);
-    const newGamesPlayed = (safeState.gamesPlayed || 0) + 1;
+    const newHighScore = Math.max(stats.highScore || 0, gameResult.score || 0);
+    const newGamesPlayed = (stats.gamesPlayed || 0) + 1;
+    const newBestStreak = Math.max(stats.bestStreak || 0, newStreak);
+
+    const recordId = gameResult.sessionId || Date.now().toString();
+
+    // Protect against duplicate writes in Strict Mode or from re-renders
+    if (stats.recentActivity?.some(activity => activity.id === recordId)) {
+      return { earnedDailyReward: false, updatedState: stats };
+    }
 
     const activityRecord = {
-      id: Date.now().toString(),
+      id: recordId,
+      userId: user?.uid || null,
       game: gameResult.game,
       score: gameResult.score,
       accuracy: gameResult.accuracy,
       streak: newStreak,
-      playedOn: new Date().toISOString()
+      playedOn: new Date().toISOString(),
+      ...(gameResult.totalQuestions !== undefined && { totalQuestions: gameResult.totalQuestions }),
+      ...(gameResult.questionsSolved !== undefined && { correctAnswers: gameResult.questionsSolved }),
+      ...(gameResult.totalQuestions !== undefined && gameResult.questionsSolved !== undefined && { incorrectAnswers: gameResult.totalQuestions - gameResult.questionsSolved }),
+      ...(gameResult.language && { language: gameResult.language }),
+      ...(gameResult.difficulty && { difficulty: gameResult.difficulty }),
+      ...(gameResult.status && { status: gameResult.status })
     };
 
-    const newRecentActivity = [activityRecord, ...(safeState.recentActivity || [])].slice(0, 50); // Keep last 50
+    const newRecentActivity = [activityRecord, ...(stats.recentActivity || [])].slice(0, 50); // Keep last 50
 
     // Handle daily challenge (Answer 5 Career Questions)
-    let newDailyProgress = safeState.dailyChallenge?.progress || 0;
-    let newDailyCompleted = safeState.dailyChallenge?.completed || false;
+    let newDailyProgress = stats.dailyChallenge?.progress || 0;
+    let newDailyCompleted = stats.dailyChallenge?.completed || false;
     let earnedDailyReward = false;
 
     if (gameResult.game === 'Career Quiz' && !newDailyCompleted) {
@@ -126,32 +130,66 @@ export const SkillArcadeProvider = ({ children }) => {
     const updatedState = {
       highScore: newHighScore,
       gamesPlayed: newGamesPlayed,
-      bestStreak: newStreak,
+      currentStreak: newStreak,
+      bestStreak: newBestStreak,
       lastPlayedDate: new Date().toISOString(),
       recentActivity: newRecentActivity,
       dailyChallenge: {
-        lastResetDate: safeState.dailyChallenge?.lastResetDate || today,
+        lastResetDate: stats.dailyChallenge?.lastResetDate || today,
         progress: newDailyProgress,
         completed: newDailyCompleted
       }
     };
 
-    setLocalState(updatedState);
-    await updateProfile({ skillArcade: updatedState });
-
-    // Handle XP reward if earned
+    let xpToAdd = gameResult.score || 0;
     if (earnedDailyReward) {
-      await updateProfile({ xp: (profile?.xp || 0) + 100 });
+      xpToAdd += 100;
+    }
+
+    let updateResult;
+    if (xpToAdd > 0) {
+      updateResult = await updateProfile({
+        skillArcade: updatedState,
+        xp: increment(xpToAdd)
+      });
+    } else {
+      updateResult = await updateProfile({ skillArcade: updatedState });
+    }
+
+    if (updateResult.error) {
+      throw updateResult.error;
     }
 
     return { earnedDailyReward, updatedState };
-  }, [localState, updateProfile, profile]);
+  }, [stats, updateProfile, profile, user]);
+
+  const toggleSavedBugHunterQuestion = useCallback(async (questionId) => {
+    if (!profile || !user) return;
+    
+    const currentSaved = stats.savedBugHunterQuestions || [];
+    const isSaved = currentSaved.includes(questionId);
+    
+    let newSaved;
+    if (isSaved) {
+      newSaved = currentSaved.filter(id => id !== questionId);
+    } else {
+      newSaved = [...currentSaved, questionId];
+    }
+    
+    await updateProfile({
+      skillArcade: {
+        ...stats,
+        savedBugHunterQuestions: newSaved
+      }
+    });
+  }, [stats, updateProfile, profile, user]);
 
   const value = useMemo(() => ({
-    stats: localState || DEFAULT_SKILL_ARCADE_STATE,
+    stats,
     saveGameState,
-    isInitializing
-  }), [localState, saveGameState, isInitializing]);
+    toggleSavedBugHunterQuestion,
+    isInitializing: profileLoading
+  }), [stats, saveGameState, toggleSavedBugHunterQuestion, profileLoading]);
 
   return (
     <SkillArcadeContext.Provider value={value}>
