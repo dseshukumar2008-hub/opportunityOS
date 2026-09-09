@@ -1,8 +1,3 @@
-/**
- * Reusable response parsing utilities.
- * No provider-specific parsing here.
- */
-
 export function parseJSONResponse(responseString) {
   if (!responseString) return null;
 
@@ -10,14 +5,38 @@ export function parseJSONResponse(responseString) {
     try { return JSON.parse(text); } catch { return null; }
   };
 
-  // Pass 1: Try raw parsing
+
   let parsed = tryParse(responseString);
   if (parsed) return parsed;
 
-  // Pass 2: Try stripping markdown fences manually
+  const firstBrace = responseString.indexOf('{');
+  const firstBracket = responseString.indexOf('[');
+  const lastBrace = responseString.lastIndexOf('}');
+  const lastBracket = responseString.lastIndexOf(']');
+
+  const objStr = firstBrace !== -1 && lastBrace !== -1 ? responseString.substring(firstBrace, lastBrace + 1) : null;
+  const arrStr = firstBracket !== -1 && lastBracket !== -1 ? responseString.substring(firstBracket, lastBracket + 1) : null;
+
+  const isObjectFirst = firstBrace !== -1 && (firstBracket === -1 || firstBrace < firstBracket);
+  const isArrayFirst = firstBracket !== -1 && (firstBrace === -1 || firstBracket < firstBrace);
+
+  if (isObjectFirst) {
+    if (objStr) parsed = tryParse(objStr);
+    if (!parsed && arrStr) parsed = tryParse(arrStr);
+  } else if (isArrayFirst) {
+    if (arrStr) parsed = tryParse(arrStr);
+    if (!parsed && objStr) parsed = tryParse(objStr);
+  } else {
+    if (objStr) parsed = tryParse(objStr);
+    if (!parsed && arrStr) parsed = tryParse(arrStr);
+  }
+
+  if (parsed) return parsed;
+
+
   if (responseString.includes('```')) {
     let blocks = responseString.split('```');
-    for (let i = 1; i < blocks.length; i+=2) {
+    for (let i = 1; i < blocks.length; i += 2) {
       let blockContent = blocks[i].trim();
       if (blockContent.startsWith('json')) blockContent = blockContent.substring(4).trim();
       parsed = tryParse(blockContent);
@@ -25,10 +44,10 @@ export function parseJSONResponse(responseString) {
     }
   }
 
-  // Pass 3: Regex fallback (find anything resembling an object or array)
+
   const cleaned = responseString.replace(/[\s\S]*?(?:```(?:json)?\s*)?({[\s\S]*}|\[[\s\S]*\])[\s\S]*/i, '$1').trim();
   parsed = tryParse(cleaned);
-  
+
   if (!parsed) {
     console.error("[responseParser] Failed to parse JSON. Raw string:", responseString);
   }

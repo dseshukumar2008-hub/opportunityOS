@@ -1,4 +1,4 @@
-import  { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { careerPaths } from '../data/careerPathsDb';
 import CareerPathCard from './CareerPathCard';
 import { RefreshCcw, HelpCircle } from 'lucide-react';
@@ -9,15 +9,14 @@ export default function CareerPathResults({ userProfile, onRetake, resumeData, p
   const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
 
   const toggleSimulatedSkill = (skill) => {
-    setSimulatedSkills(prev => 
-      prev.includes(skill) 
+    setSimulatedSkills(prev =>
+      prev.includes(skill)
         ? prev.filter(s => s !== skill)
         : [...prev, skill]
     );
   };
 
   const recommendedPaths = useMemo(() => {
-    // Collect all words the user selected or has in their profiles
     const userTags = [
       ...userProfile.interests,
       ...userProfile.strengths,
@@ -34,7 +33,6 @@ export default function CareerPathResults({ userProfile, onRetake, resumeData, p
     const simTags = simulatedSkills.map(s => s.toLowerCase());
     const allUserTags = [...userTags, ...simTags];
 
-    // Score each career path based strictly on matched skills vs required skills
     const scoredPaths = careerPaths.map(path => {
       let matchedSkills = [];
       let missingSkills = [];
@@ -49,7 +47,7 @@ export default function CareerPathResults({ userProfile, onRetake, resumeData, p
       });
 
       const totalRequired = path.skillsNeeded.length;
-      let matchScore = totalRequired > 0 
+      let matchScore = totalRequired > 0
         ? Math.round((matchedSkills.length / totalRequired) * 100)
         : 0;
 
@@ -61,7 +59,6 @@ export default function CareerPathResults({ userProfile, onRetake, resumeData, p
       };
     });
 
-    // Sort by score descending and take top 4
     return scoredPaths.sort((a, b) => b.matchScore - a.matchScore).slice(0, 4);
   }, [userProfile, resumeData, profileData, simulatedSkills]);
 
@@ -69,19 +66,19 @@ export default function CareerPathResults({ userProfile, onRetake, resumeData, p
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Recommended Career Paths</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Real-Time Career Match Engine</h2>
           <p className="text-slate-500 mt-1">
             Calculated instantly from your Resume, GitHub, LinkedIn, and Onboarding profile.
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={() => setIsHowItWorksOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] lg:text-xs font-bold text-[#6D5DF6] hover:text-white bg-indigo-50 hover:bg-[#6D5DF6] rounded-lg transition-all"
           >
             <HelpCircle size={14} /> How It Works
           </button>
-          <button 
+          <button
             onClick={onRetake}
             className="flex items-center gap-2 text-[13px] font-bold text-slate-500 hover:text-[#6D5DF6] transition-colors"
           >
@@ -93,17 +90,17 @@ export default function CareerPathResults({ userProfile, onRetake, resumeData, p
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {recommendedPaths.map(path => (
-          <CareerPathCard 
-            key={path.id} 
-            path={path} 
+          <CareerPathCard
+            key={path.id}
+            path={path}
             simulatedSkills={simulatedSkills}
             toggleSimulatedSkill={toggleSimulatedSkill}
           />
         ))}
       </div>
-      <CareerExplorerHowItWorksModal 
-        isOpen={isHowItWorksOpen} 
-        onClose={() => setIsHowItWorksOpen(false)} 
+      <CareerExplorerHowItWorksModal
+        isOpen={isHowItWorksOpen}
+        onClose={() => setIsHowItWorksOpen(false)}
       />
     </div>
   );

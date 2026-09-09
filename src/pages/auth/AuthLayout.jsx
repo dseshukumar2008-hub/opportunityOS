@@ -62,25 +62,7 @@ export default function AuthLayout({ children }) {
           </div>
         </div>
 
-        {/* Student Success Statistics */}
-        <div className="z-10 bg-indigo-900/50 rounded-2xl p-6 mt-auto">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="flex -space-x-3">
-               <img alt="student" className="w-10 h-10 rounded-full border-2 border-indigo-600 bg-slate-100" src="https://api.dicebear.com/7.x/notionists/svg?seed=Alex&backgroundColor=60a5fa" />
-               <img alt="student" className="w-10 h-10 rounded-full border-2 border-indigo-600 bg-slate-100" src="https://api.dicebear.com/7.x/notionists/svg?seed=Sam&backgroundColor=34d399" />
-               <img alt="student" className="w-10 h-10 rounded-full border-2 border-indigo-600 bg-slate-100" src="https://api.dicebear.com/7.x/notionists/svg?seed=Jordan&backgroundColor=f472b6" />
-            </div>
-            <div className="flex flex-col">
-              <div className="flex text-amber-400 gap-0.5">
-                {[1,2,3,4,5].map(i => <Star key={i} size={14} fill="currentColor" />)}
-              </div>
-              <span className="text-sm font-medium mt-1 text-indigo-100">Loved by 25,000+ students</span>
-            </div>
-          </div>
-          <p className="text-sm text-indigo-100 leading-relaxed italic">
-            "OpportunityOS completely changed how I apply for internships. I went from zero responses to 3 offers in a month!"
-          </p>
-        </div>
+
       </div>
 
       {/* Right Side - Form Container */}

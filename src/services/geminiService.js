@@ -8,7 +8,7 @@ async function callGemini(prompt, systemInstruction = '', inlineDataItems = [], 
     providerName: 'gemini',
     feature: featureName,
     prompt: prompt,
-    responseType: 'json', // geminiService always expects JSON
+    responseType: 'json',
     options: {
       systemInstruction,
       temperature,
@@ -17,7 +17,7 @@ async function callGemini(prompt, systemInstruction = '', inlineDataItems = [], 
       signal: abortSignal
     }
   };
-  
+
   const response = await generate(request);
   if (response.error) {
     throw response.error;
@@ -26,16 +26,12 @@ async function callGemini(prompt, systemInstruction = '', inlineDataItems = [], 
 }
 
 export const geminiService = {
-  /**
-   * New strictly formatted ATS scanner logic
-   */
-
 
   async enhanceResumeText(text, contextType, actionType = 'enhance') {
     analyticsService.trackEvent('Resume Text Enhancement Started', { actionType });
-            let instructions;
+    let instructions;
 
-            if (actionType === 'ats') {
+    if (actionType === 'ats') {
       instructions = 'Rewrite the following text to maximize ATS compatibility by integrating relevant industry keywords and standard formatting while preserving the original meaning.';
     } else if (actionType === 'shorten') {
       instructions = 'Shorten the following text to make it extremely concise and punchy without losing key achievements or context.';
@@ -64,7 +60,7 @@ Output JSON format:
     const result = await callGemini(prompt, "You are an expert resume writer. Output JSON only.", [], 0.3, 'Resume Enhancement');
     analyticsService.trackEvent('Resume Text Enhancement Completed');
     return result.enhancedText;
-  
+
   },
 
   async scanResumeAgainstTargetRole(resumeText, targetRole) {
@@ -154,7 +150,7 @@ Return JSON only in this format:
     try {
       const inlineDataItems = [];
       let prompt = `Analyze the following resume data and provide a JSON response:`;
-      
+
       // If dataOrFile is a base64 extracted object
       if (dataOrFile && dataOrFile.base64) {
         inlineDataItems.push({
@@ -162,9 +158,9 @@ Return JSON only in this format:
           data: dataOrFile.base64
         });
         prompt = `Analyze the attached resume document and provide a JSON response. Extract all skills, experiences, and metrics. Calculate an ATS score.`;
-        
+
         if (extractedText) {
-           prompt += `\n\nHere is the locally extracted raw text from the document for reference:\n"""\n${extractedText}\n"""\n\n`;
+          prompt += `\n\nHere is the locally extracted raw text from the document for reference:\n"""\n${extractedText}\n"""\n\n`;
         }
       } else {
         prompt = `Analyze the following resume data and provide a JSON response:
@@ -196,11 +192,11 @@ Return JSON only in this format:
       }
       
       OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
-      
+
       const result = await callGemini(prompt, "You are an expert ATS and Resume Analyzer. Count resume facts accurately.", inlineDataItems, 0.2, 'Resume Analysis', 25000, abortSignal);
-      
+
       // We do not calculate ATS here anymore; it's done before calling this in useResumeAnalysis.
-      
+
       analyticsService.trackEvent('Resume Analysis Completed');
       return result;
     } catch (error) {
@@ -230,7 +226,7 @@ Return JSON only in this format:
       }
       
       OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
-      
+
       const result = await callGemini(prompt, "You are a top-tier Career Coach AI.", [], 0.3, 'Career Coach');
       return result;
     } catch (error) {
@@ -262,7 +258,7 @@ Return JSON only in this format:
       }
       
       OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
-      
+
       const result = await callGemini(prompt, "You are a top-tier Career Coach AI. Output valid JSON only.", [], 0.3, 'Readiness Analysis');
       analyticsService.trackEvent('Readiness Analysis Completed');
       return result;
@@ -295,7 +291,7 @@ Return JSON only in this format:
       }
       
       OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
-      
+
       const result = await callGemini(prompt, "You are an expert Career Coach.", [], 0.3, 'Skill Gap Analysis');
       analyticsService.trackEvent('Skill Gap Analysis Completed');
       return result;
@@ -330,7 +326,7 @@ Return JSON only in this format:
       }
       
       OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
-      
+
       return await callGemini(prompt, "You are an expert AI Career Coach.", [], 0.3, 'Evaluate Candidate Fit');
     } catch (error) {
       console.error('Gemini Candidate Evaluation Error:', error);
@@ -342,7 +338,7 @@ Return JSON only in this format:
   async chatWithCopilot({ mode, contextData, isGeneralAssistant, history, message }) {
     try {
       let prompt = `Chat Context: Mode=${mode}\n`;
-      
+
       if (isGeneralAssistant) {
         prompt += `
         Chat History: ${JSON.stringify(history)}
@@ -376,16 +372,16 @@ Return JSON only in this format:
       }
       
       OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
-      
-      const systemInstruction = isGeneralAssistant 
+
+      const systemInstruction = isGeneralAssistant
         ? "You are OpportunityOS Copilot, a helpful general platform assistant and career guide."
         : "You are OpportunityOS Copilot V2, a highly personalized AI career assistant. You ONLY reason from available profile data.";
-        
-      const result = await callGemini(prompt, systemInstruction, [], 0.3, 'Copilot Chat');
-      
 
-      
-      
+      const result = await callGemini(prompt, systemInstruction, [], 0.3, 'Copilot Chat');
+
+
+
+
       return result;
     } catch (error) {
       console.error('Gemini Copilot Error:', error);
@@ -396,20 +392,20 @@ Return JSON only in this format:
 
   async generateDynamicSkillGapReport(payload) {
     analyticsService.trackEvent('Dynamic Skill Gap Started');
-    
+
     // Check cache based on payload length and target role
     const cacheKey = `sg_cache_${JSON.stringify(payload).length}_${payload.targetRole?.replace(/[^a-zA-Z0-9]/g, '')}`;
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
       return JSON.parse(cached);
     }
-    
+
     try {
       const { targetRole, manualSkills, githubData, resumeData } = payload;
-      
+
       const inlineDataItems = [];
       let resumeContext = "No resume provided.";
-      
+
       if (resumeData) {
         resumeContext = `A resume document was provided with the following extracted text:\n\n${resumeData}\n\nExtract all technical skills, programming languages, tools, frameworks, and experience from it.`;
       }
@@ -471,7 +467,7 @@ Generate a highly personalized Skill Gap Analysis for the user targeting the rol
 OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
 
       const result = await callGemini(prompt, "You are a master career AI. Output only valid JSON.", inlineDataItems, 0.3, 'Dynamic Skill Gap', 25000);
-      
+
       sessionStorage.setItem(cacheKey, JSON.stringify(result));
       analyticsService.trackEvent('Dynamic Skill Gap Completed');
       return result;
@@ -486,7 +482,7 @@ OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fenc
     analyticsService.trackEvent('Project Recommendations Started');
     try {
       const { specialization, targetRole, missingSkills, excludedProjects = [] } = contextData;
-      
+
       const prompt = `You are an expert technology mentor.
 
 Based on the user's specialization, target role, and identified missing skills, generate innovative and industry-relevant project ideas that will help them close their skill gap.
@@ -530,11 +526,17 @@ Return JSON only. Format as an array of the above object.
 OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
 
       let rawProjects = await callGemini(prompt, "You are an expert technology mentor. Output valid JSON only.", [], 0.3, 'Project Recommendations');
-      
+
+      if (rawProjects && rawProjects._fallbackMode) {
+        throw new Error(rawProjects.message || "AI providers are currently unavailable. Please check your network connection.");
+      }
+
       if (rawProjects && !Array.isArray(rawProjects) && typeof rawProjects === 'object') {
-        const keys = Object.keys(rawProjects);
-        if (keys.length === 1 && Array.isArray(rawProjects[keys[0]])) {
-          rawProjects = rawProjects[keys[0]];
+        // Gemini sometimes wraps the array in an object, possibly with extra conversational keys.
+        // We find the first key that contains an array and extract it.
+        const arrayKey = Object.keys(rawProjects).find(key => Array.isArray(rawProjects[key]));
+        if (arrayKey) {
+          rawProjects = rawProjects[arrayKey];
         }
       }
 
@@ -617,7 +619,7 @@ OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fenc
 
       // Use longer timeout as this is a heavy reasoning task (passing deep repo data)
       const result = await callGemini(prompt, "You are an expert tech recruiter. Output valid JSON only.", [], 0.3, 'GitHub Analysis', 25000, abortSignal);
-      
+
       if (result && result._fallbackMode) {
         console.warn("[geminiService] Result has _fallbackMode = true");
         return result; // Pass fallback flag up

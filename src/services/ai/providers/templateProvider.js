@@ -102,9 +102,7 @@ export const templateProvider = {
         responseData = { targetRole: "Offline", readinessScore: 0, skillGapPercentage: 100, currentSkills: [], skillBreakdown: { strong: 0, moderate: 0, missing: 0 }, nextSkill: { name: "Reconnect", priority: "High", time: "0", impact: "High", reason: "Network required" }, missingSkills: { high: [], medium: [], low: [] }, learningPath: [], aiAdvice: "Offline mode.", consistencyTip: "Offline" };
         break;
       case 'Project Recommendations':
-        responseData = [
-          { title: "Offline Project", description: "Network connection required for AI recommendations.", technologies: [], whyThisProject: "Offline mode." }
-        ];
+        responseData = { _fallbackMode: true, message: "AI providers are currently unavailable. Please check your network connection or try again later." };
         break;
       case 'GitHub Analysis':
         responseData = { _fallbackMode: true, githubScore: 0, analysisSummary: ["Offline mode enabled. Cannot perform AI analysis."], overallAssessment: "Network connection unavailable.", careerMatch: { frontend: 0, backend: 0, aiTools: 0, cloudDevOps: 0 }, strengths: [], weaknesses: [], recommendations: [] };

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, Send, FileText, TrendingUp, Briefcase, Code2, Users2, ArrowRight} from 'lucide-react';
+import { Sparkles, Send, FileText, TrendingUp, Briefcase, Code2, Users2, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { useCareerRoadmap } from '../../hooks/useCareerRoadmap';
@@ -21,6 +21,27 @@ const QUICK_PROMPTS = [
 
 const MessageBubble = React.memo(function MessageBubble({ message }) {
   const isUser = message.role === 'user';
+  
+  const validDate = React.useMemo(() => {
+    if (!message.timestamp) return null;
+    try {
+      // Firebase Timestamp object
+      if (typeof message.timestamp.toDate === 'function') {
+        return message.timestamp.toDate();
+      }
+      // Serialized Firebase Timestamp
+      if (message.timestamp.seconds) {
+        return new Date(message.timestamp.seconds * 1000);
+      }
+      // Standard Date parsing (ISO string, number)
+      const d = new Date(message.timestamp);
+      if (!isNaN(d.getTime())) return d;
+    } catch (e) {
+      // Fallthrough
+    }
+    return null;
+  }, [message.timestamp]);
+
   return (
     <div className={`flex gap-3 mb-6 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
       {!isUser && (
@@ -29,8 +50,8 @@ const MessageBubble = React.memo(function MessageBubble({ message }) {
         </div>
       )}
       <div className={`max-w-[75%] rounded-[20px] px-5 py-4 shadow-sm ${isUser
-          ? 'bg-[#6C4CF1] text-white rounded-tr-sm'
-          : 'bg-white border border-slate-100 text-slate-800 rounded-tl-sm'
+        ? 'bg-[#6C4CF1] text-white rounded-tr-sm'
+        : 'bg-white border border-slate-100 text-slate-800 rounded-tl-sm'
         }`}>
         {message.content.split('\n').map((line, i) => {
           // Bold markdown
@@ -45,9 +66,11 @@ const MessageBubble = React.memo(function MessageBubble({ message }) {
             </p>
           );
         })}
-        <p className={`text-[10px] font-medium mt-2 ${isUser ? 'text-white/60' : 'text-slate-400'}`}>
-          {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </p>
+        {validDate && (
+          <p className={`text-[10px] font-medium mt-2 ${isUser ? 'text-white/60' : 'text-slate-400'}`}>
+            {validDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </p>
+        )}
       </div>
       {isUser && (
         <div className="w-9 h-9 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
@@ -84,33 +107,38 @@ export default function CareerCoachPage() {
   const { profile } = useProfile();
   const { state: roadmapState } = useCareerRoadmap();
 
-  // V2 Context
   const { careerReadiness, profileCompletion } = useDashboardInsights();
 
-  // Memory Hook
   const { messages: historyMessages, addMessage } = useCopilotMemory();
 
-  // Local state purely for typing indicator and UI driving
+
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showPrompts, setShowPrompts] = useState(true);
   const messagesEndRef = useRef(null);
+  const scrollContainerRef = useRef(null);
   const inputRef = useRef(null);
+  const hasInteracted = useRef(false);
 
   const firstName = profile?.name?.split(' ')[0] || user?.displayName?.split(' ')[0] || 'there';
 
-  // Derive visible messages
+
   const initialMessage = React.useMemo(() => ({
     role: 'assistant',
     content: `👋 Hi ${firstName}! I'm your **AI Career Copilot**, powered by OpportunityOS Intelligence.\n\nI can help you with:\n- 📄 **Resume optimization** and ATS improvements\n- 📈 **Career planning** and skill gap analysis\n- 💼 **Job search strategies** and salary negotiation\n- 🤝 **Networking tips** and LinkedIn optimization\n\nWhat would you like to work on today?`,
     timestamp: new Date().toISOString(),
   }), [firstName]);
 
- 
+
   const messages = [initialMessage, ...historyMessages];
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (hasInteracted.current && scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [historyMessages.length, isTyping]);
 
   useEffect(() => {
@@ -122,10 +150,10 @@ export default function CareerCoachPage() {
   const sendMessage = async (text, isGoalGeneration = false) => {
     if ((!text.trim() && !isGoalGeneration) || isTyping) return;
 
+    hasInteracted.current = true;
+
     if (!isGoalGeneration) {
-      // Non-blocking: Firestore persistence should not block the AI request.
-      // If auth is not yet ready or Firestore rejects the write, the AI call
-      // should still proceed so the user gets a response.
+
       addMessage({ role: 'user', content: text }).catch(err =>
         console.warn('[CareerCoach] Failed to persist user message:', err)
       );
@@ -135,7 +163,7 @@ export default function CareerCoachPage() {
     setShowPrompts(false);
 
     try {
-      // Build V2 heavy context
+
       const contextData = {
         profile,
         roadmap: roadmapState?.roadmap,
@@ -158,13 +186,12 @@ export default function CareerCoachPage() {
         responseText = `**🎯 Your Weekly Goals:**\n${result.weeklyGoals.map(g => `- ${g}`).join('\n')}\n\n**⚡ Daily Actions:**\n${result.dailyActions.map(a => `- ${a}`).join('\n')}\n\n${responseText}`;
       }
 
-      // Non-blocking: display response immediately; persist to Firestore in background
       addMessage({ role: 'assistant', content: responseText }).catch(err =>
         console.warn('[CareerCoach] Failed to persist assistant message:', err)
       );
     } catch (err) {
       console.error("AI Coach Error:", err);
-      // Classify error accurately so users see the right message
+
       let msg;
       const errType = err?.type;
       const errMsg = err?.originalMessage || err?.message || '';
@@ -179,7 +206,7 @@ export default function CareerCoachPage() {
       } else {
         msg = "I'm having trouble connecting right now. Please try again in a moment!";
       }
-      // Non-blocking: persist error response; don't let Firestore failure hide the UI error
+
       addMessage({ role: 'assistant', content: msg }).catch(e =>
         console.warn('[CareerCoach] Failed to persist error message:', e)
       );
@@ -217,7 +244,10 @@ export default function CareerCoachPage() {
 
 
       {/* ── Messages Area ── */}
-      <div className="flex-1 overflow-y-auto px-4 lg:px-8 py-6 scrollbar-thin scrollbar-thumb-slate-200">
+      <div 
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto px-4 lg:px-8 py-6 scrollbar-thin scrollbar-thumb-slate-200"
+      >
         <div className="max-w-3xl mx-auto">
 
           {messages.map((msg, i) => (
