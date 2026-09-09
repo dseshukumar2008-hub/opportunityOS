@@ -6,6 +6,12 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*_output.txt
+*output.json
+audit_report.json
+lint-results.json
+tsc_output.txt
+vite_build.txt
 
 node_modules
 dist
@@ -28,3 +34,8 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Scratch and Temporary
+scratch/
+dummy_resume.pdf
+test_gemini.js
