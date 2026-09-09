@@ -85,6 +85,16 @@ The Analytics feature helps users understand their overall activity and progress
 
 Users can view selected analytics and track their progress, helping them understand their journey and engagement with the different features of OpportunityOS  
 
+**13) Skill Arcade:**  
+Skill Arcade is a collection of interactive skill based games designed to improve the user experience in a engaging way.  
+
+The Skill Arcade currently includes four games :  
+
+**Skill Sprint:** A 60-second challenge with career, coding, and technology question.  
+**Bug Hunter:** A timed challenge where users find bugs before time runs out.  
+**Tech Stack Mapper:** A challenge where users match technologies to their correct category.  
+**Career Quiz:** A quiz that tests users knowledge about roles and career paths.
+
 **AI Powered Features:**  
 Some features in OpportunityOS require AI analysis, such as Resume Analyzer, GitHub Analyzer, Skill Gap Analysis, Career Roadmap, Project Recommendations, and AI Career Coach. These features may take a few moments to process and generate personalized results. Users are requested to please be patient while the analysis is being completed
 
