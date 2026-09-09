@@ -16,7 +16,14 @@ export default function SkillGapAnalysisPage() {
   const isContextMode = !!location.state?.sourceName;
 
   const [currentStep, setCurrentStep] = useState(() => {
-    return parseInt(sessionStorage.getItem('sg_step') || '1', 10);
+    const saved = parseInt(sessionStorage.getItem('sg_step') || '1', 10);
+    // Step 4 is the live-analysis loading screen — never restore it on page load.
+    // If the app closed/crashed mid-analysis, go back to step 1.
+    if (saved === 4) {
+      sessionStorage.removeItem('sg_step');
+      return 1;
+    }
+    return saved;
   });
   const [targetRole, setTargetRole] = useState(() => {
     const params = new URLSearchParams(location.search);
@@ -48,7 +55,15 @@ export default function SkillGapAnalysisPage() {
   });
   const [showHowItWorks, setShowHowItWorks] = useState(false);
 
-  useEffect(() => { sessionStorage.setItem('sg_step', currentStep); }, [currentStep]);
+  useEffect(() => {
+    // Don't persist the analyzing step — if the page is closed mid-analysis
+    // it would restore to an infinite loading screen.
+    if (currentStep !== 4) {
+      sessionStorage.setItem('sg_step', currentStep);
+    } else {
+      sessionStorage.removeItem('sg_step');
+    }
+  }, [currentStep]);
   useEffect(() => { sessionStorage.setItem('sg_role', targetRole); }, [targetRole]);
   useEffect(() => { sessionStorage.setItem('sg_sources', JSON.stringify(selectedSources)); }, [selectedSources]);
   useEffect(() => { sessionStorage.setItem('sg_input', JSON.stringify(inputData)); }, [inputData]);
@@ -126,6 +141,12 @@ export default function SkillGapAnalysisPage() {
     sessionStorage.removeItem('sg_analysis');
   };
 
+  // Called by Step3Analyzing when the analysis fails — return to step 1 so the
+  // user can retry rather than remaining stuck on the loading screen.
+  const handleAnalysisError = () => {
+    resetAnalysis();
+  };
+
   return (
     <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 bg-transparent min-h-[calc(100vh-64px)]">
       <WidgetErrorBoundary>
@@ -177,7 +198,8 @@ export default function SkillGapAnalysisPage() {
             targetRole={targetRole} 
             sources={selectedSources}
             inputData={inputData}
-            onComplete={handleAnalysisComplete} 
+            onComplete={handleAnalysisComplete}
+            onError={handleAnalysisError}
           />
         )}
 

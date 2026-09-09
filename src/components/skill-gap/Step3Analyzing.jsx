@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { geminiService } from '../../services/geminiService';
 import { extractTextFromFile, optimizeLargeResumeText } from '../../utils/fileUtils';
@@ -11,20 +11,18 @@ const STEPS = [
   "Building Personalized Learning Path..."
 ];
 
-// eslint-disable-next-line no-unused-vars
+
 export default function Step3Analyzing({ targetRole, sources, inputData, onComplete }) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const hasStartedAnalysis = useRef(false);
 
   useEffect(() => {
-    if (hasStartedAnalysis.current) return;
-    hasStartedAnalysis.current = true;
     let isMounted = true;
 
     async function performAnalysis() {
       try {
-                setCurrentStepIndex(0);
-        
+
+        setCurrentStepIndex(0);
+
         const processFileOrText = async (fileOrText) => {
           if (!fileOrText) return null;
           if (typeof fileOrText === 'string') {
@@ -40,8 +38,8 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
         let resumeData = await processFileOrText(inputData?.resumeFile);
         let linkedinData = await processFileOrText(inputData?.linkedinFile);
 
-                setCurrentStepIndex(1);
-        
+        setCurrentStepIndex(1);
+
         let githubData = null;
         if (inputData?.githubUrl) {
           try {
@@ -64,9 +62,9 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
           }
         }
 
-        // Step 2 & 3: Comparing and Calculating (Handled by Gemini AI call)
+
         setCurrentStepIndex(2);
-        
+
         const payload = {
           targetRole,
           manualSkills: inputData?.manualSkills || [],
@@ -75,12 +73,13 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
           resumeData
         };
 
-        // Let the UI show step 3 after a tiny delay so it doesn't get skipped visually
+
         setTimeout(() => { if (isMounted) setCurrentStepIndex(3); }, 1500);
 
         const report = await geminiService.generateDynamicSkillGapReport(payload);
 
-                if (isMounted) {
+
+        if (isMounted) {
           setCurrentStepIndex(4);
           setTimeout(() => {
             if (isMounted) onComplete(report);
@@ -118,14 +117,13 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
         {STEPS.map((step, idx) => {
           const isActive = idx === currentStepIndex;
           const isDone = idx < currentStepIndex;
-          
+
           return (
-            <div 
-              key={step} 
-              className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 ${
-                isActive ? 'bg-indigo-50 border border-indigo-100 scale-105' : 
+            <div
+              key={step}
+              className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 ${isActive ? 'bg-indigo-50 border border-indigo-100 scale-105' :
                 isDone ? 'opacity-80' : 'opacity-40'
-              }`}
+                }`}
             >
               <div className="shrink-0">
                 {isDone ? (
@@ -136,10 +134,9 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
                   <div className="w-6 h-6 rounded-full border-2 border-slate-300" />
                 )}
               </div>
-              <span className={`font-bold ${
-                isActive ? 'text-[#6C4CF1]' : 
+              <span className={`font-bold ${isActive ? 'text-[#6C4CF1]' :
                 isDone ? 'text-slate-700' : 'text-slate-500'
-              }`}>
+                }`}>
                 {step}
               </span>
             </div>
