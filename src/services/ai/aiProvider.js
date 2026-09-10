@@ -1,6 +1,3 @@
-/**
- * Single entry point for every AI request.
- */
 import { getDefaultProvider, getProvider, registerProvider } from './providerRegistry';
 import { normalizeResponse, createErrorResponse } from './responseParser';
 import { geminiProvider } from './providers/geminiProvider';
@@ -12,7 +9,6 @@ import { providerHealth } from './providerHealth';
 import { aiCache } from './aiCache';
 import { AIErrorTypes, AIError } from './aiErrors';
 
-// Register providers
 registerProvider('gemini', geminiProvider);
 registerProvider('groq', groqProvider);
 registerProvider('openrouter', openRouterProvider);
@@ -22,12 +18,12 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function executeWithRetry(provider, request, isFallback = false) {
   let attempt = 1;
-  const maxAttempts = isFallback ? 1 : 2; // Fast-fail fallbacks, 2 attempts max for primary
+  const maxAttempts = isFallback ? 1 : 2;
   while (attempt <= maxAttempts) {
     try {
       return await provider.generate(request);
     } catch (error) {
-      const isRetryEligible = 
+      const isRetryEligible =
         error.type === AIErrorTypes.AI_NETWORK_ERROR ||
         error.type === AIErrorTypes.AI_RATE_LIMIT ||
         error.type === AIErrorTypes.AI_SERVER_ERROR ||
@@ -36,7 +32,7 @@ async function executeWithRetry(provider, request, isFallback = false) {
       if (!isRetryEligible || attempt === maxAttempts || error.type === AIErrorTypes.AI_QUOTA_EXHAUSTED) {
         throw error;
       }
-      
+
       const delay = attempt === 1 ? 2000 : 5000;
       console.warn(`[AIProvider] ${provider.name} failed (Attempt ${attempt}): ${error.message}. Retrying in ${delay}ms...`);
       await sleep(delay);
@@ -57,7 +53,7 @@ async function executeAndProcess(providerName, modelUsed, request, isFallback) {
   try {
     const rawResponse = await executeWithRetry(provider, request, isFallback);
     const endTime = Date.now();
-    
+
     aiLogger.logRequest({
       feature,
       provider: providerName,
@@ -68,15 +64,25 @@ async function executeAndProcess(providerName, modelUsed, request, isFallback) {
       errorType: null,
       fallbackOccurred: isFallback
     });
-    
+
     providerHealth.recordSuccess(providerName, endTime - startTime);
-    
+
     const normalizedResponse = normalizeResponse(rawResponse, providerName, modelUsed);
-    
-    if (normalizedResponse && normalizedResponse.data && !normalizedResponse.error) {
+
+    // Never cache template/offline sentinel responses — they must not be served
+    // from cache on retries, so real providers always get another chance.
+    const isTemplateFallback = providerName === 'template';
+    const _cacheData = normalizedResponse?.data;
+    const isOfflineSentinel =
+      _cacheData?.targetRole === 'Offline' ||
+      _cacheData?._fallbackMode === true ||
+      (_cacheData?.readinessScore === 0 && _cacheData?.skillGapPercentage === 100 &&
+       Array.isArray(_cacheData?.currentSkills) && _cacheData.currentSkills.length === 0);
+
+    if (normalizedResponse && _cacheData && !normalizedResponse.error && !isTemplateFallback && !isOfflineSentinel) {
       aiCache.set(request, normalizedResponse);
     }
-    
+
     return normalizedResponse;
   } catch (error) {
     providerHealth.recordFailure(providerName, error);
@@ -97,10 +103,10 @@ async function executeAndProcess(providerName, modelUsed, request, isFallback) {
 export async function generate(request) {
   const startTime = Date.now();
   const { providerName, feature = 'UnknownFeature' } = request;
-  
-  // Context injection
+
+
   if (!request.options) request.options = {};
-  
+
   if (request.options.injectGlobalContext) {
     const safeParse = (key) => {
       try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
@@ -132,8 +138,7 @@ ${JSON.stringify(aiContext)}
       request.options.systemInstruction = contextString;
     }
   }
-  
-  // 1. Check Cache
+
   const cachedResponse = aiCache.get(request);
   if (cachedResponse) {
     console.log(`[AIProvider] CACHE HIT for feature: ${feature}`);
@@ -149,11 +154,10 @@ ${JSON.stringify(aiContext)}
     });
     return cachedResponse;
   }
-  
-  // Select provider, defaulting to 'gemini'
+
   const targetProviderName = providerName || 'gemini';
   const primaryProvider = getProvider(targetProviderName) || getDefaultProvider();
-  
+
   if (!primaryProvider) {
     const error = new Error(`Provider ${targetProviderName} not found.`);
     aiLogger.logRequest({
@@ -174,7 +178,7 @@ ${JSON.stringify(aiContext)}
   try {
     return await executeAndProcess(primaryProvider.name, primaryModel, request, false);
   } catch (primaryError) {
-    const isFallbackEligible = 
+    const isFallbackEligible =
       primaryError.type === AIErrorTypes.AI_NETWORK_ERROR ||
       primaryError.type === AIErrorTypes.AI_RATE_LIMIT ||
       primaryError.type === AIErrorTypes.AI_QUOTA_EXHAUSTED ||
@@ -182,7 +186,7 @@ ${JSON.stringify(aiContext)}
       primaryError.type === AIErrorTypes.AI_TIMEOUT ||
       primaryError.type === AIErrorTypes.AI_PARSE_ERROR ||
       primaryError.type === AIErrorTypes.AI_UNKNOWN_ERROR;
-      
+
     if (isFallbackEligible) {
       const fallbacks = [
         { name: 'groq', model: 'llama-3.3-70b-versatile' },
@@ -192,18 +196,18 @@ ${JSON.stringify(aiContext)}
 
       for (const fb of fallbacks) {
         if (fb.name === primaryProvider.name) continue;
-        
+
         console.warn(`[AIProvider] Attempting fallback to ${fb.name}...`);
-        
+
         try {
           return await executeAndProcess(fb.name, fb.model, request, true);
         } catch (fbError) {
           console.error(`[AIProvider] ${fb.name} fallback failed:`, fbError.message);
-          // continue to next fallback
+
         }
       }
-      
-      // If all fallbacks fail, surface a clean error to the user instead of raw JSON
+
+
       if (primaryError.type === AIErrorTypes.AI_QUOTA_EXHAUSTED || primaryError.type === AIErrorTypes.AI_RATE_LIMIT) {
         const capacityError = new AIError(
           primaryError.type,
@@ -215,7 +219,7 @@ ${JSON.stringify(aiContext)}
       }
       return createErrorResponse(primaryError, primaryProvider.name, primaryModel);
     }
-    
+
     // Not eligible for fallback, or not gemini
     return createErrorResponse(primaryError, primaryProvider.name, primaryModel);
   }

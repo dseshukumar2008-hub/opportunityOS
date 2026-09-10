@@ -393,11 +393,32 @@ Return JSON only in this format:
   async generateDynamicSkillGapReport(payload) {
     analyticsService.trackEvent('Dynamic Skill Gap Started');
 
-    // Check cache based on payload length and target role
-    const cacheKey = `sg_cache_${JSON.stringify(payload).length}_${payload.targetRole?.replace(/[^a-zA-Z0-9]/g, '')}`;
+    // Build a stable, content-based cache key so different payloads with the
+    // same byte-length cannot collide with each other.
+    const cacheKeySource = `${payload.targetRole || ''}|${JSON.stringify(payload.manualSkills || [])}|${!!payload.githubData}|${!!payload.resumeData}|${!!payload.linkedinData}`;
+    let cacheHash = 0;
+    for (let i = 0; i < cacheKeySource.length; i++) {
+      cacheHash = ((cacheHash << 5) - cacheHash) + cacheKeySource.charCodeAt(i);
+      cacheHash |= 0; // Convert to 32-bit int
+    }
+    const cacheKey = `sg_cache_v2_${cacheHash}`;
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
-      return JSON.parse(cached);
+      try {
+        const parsed = JSON.parse(cached);
+        // Never replay offline/fallback data — if the cached result is an offline sentinel,
+        // clear it and fall through to a fresh AI request.
+        const isOfflineResult =
+          parsed?.targetRole === 'Offline' ||
+          (parsed?.readinessScore === 0 && parsed?.skillGapPercentage === 100 && !parsed?.currentSkills?.length);
+        if (!isOfflineResult) {
+          return parsed;
+        }
+        // Stale offline data — remove and proceed to fresh AI call
+        sessionStorage.removeItem(cacheKey);
+      } catch {
+        sessionStorage.removeItem(cacheKey);
+      }
     }
 
     try {
@@ -467,6 +488,19 @@ Generate a highly personalized Skill Gap Analysis for the user targeting the rol
 OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fences, or any other explanations.`;
 
       const result = await callGemini(prompt, "You are a master career AI. Output only valid JSON.", inlineDataItems, 0.3, 'Dynamic Skill Gap', 25000);
+
+      // Only cache genuine AI-generated results. Never cache offline/fallback sentinel data
+      // (templateProvider returns targetRole:"Offline" when all providers are down).
+      const isOfflineResult =
+        result?.targetRole === 'Offline' ||
+        (result?.readinessScore === 0 && result?.skillGapPercentage === 100 && !result?.currentSkills?.length);
+
+      // If ALL providers failed and only the offline template fired, throw an error so
+      // Step3Analyzing's catch block can surface a proper "Analysis Failed / Retry" message
+      // to the user instead of silently resetting back to step 1 in a loop.
+      if (isOfflineResult) {
+        throw new Error('All AI providers are currently unavailable. Please check your internet connection and try again.');
+      }
 
       sessionStorage.setItem(cacheKey, JSON.stringify(result));
       analyticsService.trackEvent('Dynamic Skill Gap Completed');

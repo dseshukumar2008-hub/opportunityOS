@@ -107,6 +107,16 @@ export const templateProvider = {
       case 'GitHub Analysis':
         responseData = { _fallbackMode: true, githubScore: 0, analysisSummary: ["Offline mode enabled. Cannot perform AI analysis."], overallAssessment: "Network connection unavailable.", careerMatch: { frontend: 0, backend: 0, aiTools: 0, cloudDevOps: 0 }, strengths: [], weaknesses: [], recommendations: [] };
         break;
+      case 'CareerExplorer':
+        responseData = {
+          careers: [
+            { id: 'offline-1', title: 'Software Developer', category: 'Software Engineering', description: 'Build software applications. Offline mode — please reconnect for personalised results.', icon: 'Code', matchScore: 0, skillsNeeded: ['Programming', 'Problem Solving'], matchedSkills: [], missingSkills: ['Programming', 'Problem Solving'], recommendedProjects: ['Personal Portfolio', 'CLI Tool'], timeline: 'Varies' },
+            { id: 'offline-2', title: 'Data Analyst', category: 'Data & AI', description: 'Analyse data to extract insights. Offline mode — please reconnect for personalised results.', icon: 'BarChart3', matchScore: 0, skillsNeeded: ['SQL', 'Excel', 'Statistics'], matchedSkills: [], missingSkills: ['SQL', 'Excel', 'Statistics'], recommendedProjects: ['Sales Dashboard', 'Data Cleaning Script'], timeline: 'Varies' },
+            { id: 'offline-3', title: 'UX/UI Designer', category: 'Design', description: 'Design intuitive user interfaces. Offline mode — please reconnect for personalised results.', icon: 'PenTool', matchScore: 0, skillsNeeded: ['Figma', 'User Research', 'Prototyping'], matchedSkills: [], missingSkills: ['Figma', 'User Research', 'Prototyping'], recommendedProjects: ['Mobile App Mockup', 'Design System'], timeline: 'Varies' },
+            { id: 'offline-4', title: 'Product Manager', category: 'Product & Business', description: 'Drive product strategy and execution. Offline mode — please reconnect for personalised results.', icon: 'Target', matchScore: 0, skillsNeeded: ['Agile', 'Product Strategy', 'Analytics'], matchedSkills: [], missingSkills: ['Agile', 'Product Strategy', 'Analytics'], recommendedProjects: ['PRD Document', 'Competitor Analysis'], timeline: 'Varies' }
+          ]
+        };
+        break;
       case 'Copilot Chat':
         responseData = { response: "I'm operating in offline mode. Please check your network connection." };
         break;
