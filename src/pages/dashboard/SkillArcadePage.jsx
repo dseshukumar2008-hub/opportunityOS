@@ -70,7 +70,7 @@ export default function SkillArcadePage() {
       {/* 1. MAIN PAGE HEADER */}
       <div className="mb-10">
         <h1 className="text-[28px] font-bold text-slate-900 mb-1.5 flex items-center gap-2 tracking-tight">
-          Skill Arcade <span className="text-[#6C4CF1]"><Gamepad2 size={26} /></span>
+          Skill Arcade <span className="text-primary"><Gamepad2 size={26} /></span>
         </h1>
         <p className="text-[14px] text-slate-500 font-medium">
           Learn. Play. Improve. Short challenges to test and sharpen your skills.
@@ -80,10 +80,10 @@ export default function SkillArcadePage() {
       {/* 2. FEATURED CHALLENGE */}
       <h2 className="text-[16px] font-bold text-slate-900 mb-4">Featured Challenge</h2>
       <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-12 flex flex-col md:flex-row items-center gap-6 md:gap-8 relative overflow-hidden">
-        <div className="w-28 h-28 shrink-0 bg-[#EBE8FF] rounded-[20px] flex items-center justify-center relative border border-[#6C4CF1]/20">
-          <Clock size={56} className="text-[#6C4CF1]" strokeWidth={1.5} />
+        <div className="w-28 h-28 shrink-0 bg-[#EBE8FF] rounded-[20px] flex items-center justify-center relative border border-primary/20">
+          <Clock size={56} className="text-primary" strokeWidth={1.5} />
           <div className="absolute inset-0 flex items-center justify-center mt-2">
-            <Zap size={28} className="text-[#6C4CF1] fill-[#6C4CF1]" />
+            <Zap size={28} className="text-primary fill-[#6C4CF1]" />
           </div>
         </div>
         <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
@@ -205,8 +205,8 @@ export default function SkillArcadePage() {
                   <tr key={activity.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors group">
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#EBE8FF] flex items-center justify-center border border-[#6C4CF1]/10" aria-hidden="true">
-                          {activity.game === 'Skill Sprint' && <Clock size={16} className="text-[#6C4CF1]" />}
+                        <div className="w-9 h-9 rounded-xl bg-[#EBE8FF] flex items-center justify-center border border-primary/10" aria-hidden="true">
+                          {activity.game === 'Skill Sprint' && <Clock size={16} className="text-primary" />}
                           {activity.game === 'Tech Match' && <Puzzle size={16} className="text-green-600" />}
                           {activity.game === 'Career Quiz' && <Brain size={16} className="text-blue-600" />}
                           {activity.game === 'Bug Hunter' && <Bug size={16} className="text-red-600" />}
@@ -214,7 +214,7 @@ export default function SkillArcadePage() {
                         <span className="font-bold text-slate-900 text-[14px]">{activity.game}</span>
                       </div>
                     </td>
-                    <td className="py-4 px-6 font-bold text-[#6C4CF1] text-[14px]">{activity.score}</td>
+                    <td className="py-4 px-6 font-bold text-primary text-[14px]">{activity.score}</td>
                     <td className="py-4 px-6 font-bold text-green-500 text-[14px]">{activity.accuracy}</td>
                     <td className="py-4 px-6 text-[13px] font-medium text-slate-500">
                       {formatTimeAgo(activity.playedOn)}
@@ -230,8 +230,8 @@ export default function SkillArcadePage() {
             </table>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-              <div className="w-16 h-16 bg-[#F4F2FF] rounded-full flex items-center justify-center mb-4 border border-[#6C4CF1]/10">
-                <Gamepad2 size={32} strokeWidth={1.5} className="text-[#6C4CF1]" />
+              <div className="w-16 h-16 bg-[#F4F2FF] rounded-full flex items-center justify-center mb-4 border border-primary/10">
+                <Gamepad2 size={32} strokeWidth={1.5} className="text-primary" />
               </div>
               <h3 className="text-[18px] font-bold text-slate-900 mb-2">No games played yet</h3>
               <p className="text-[14px] text-slate-500 max-w-sm leading-relaxed">

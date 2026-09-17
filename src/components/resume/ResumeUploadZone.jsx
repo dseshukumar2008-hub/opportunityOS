@@ -97,7 +97,7 @@ export default function ResumeUploadZone({ onAnalyze, isAnalyzing = false, uploa
         {/* Drop zone */}
       <div
         className={`relative border-2 border-dashed rounded-xl p-5 transition-all duration-200 flex flex-col items-center justify-center min-h-[160px] ${
-          dragActive ? 'border-[#6C4CF1] bg-indigo-50/50 scale-[1.01]' : 'border-[#CBD5E1] bg-[#FAFBFF] hover:bg-[#F1F5F9]/50 hover:border-[#94A3B8]'
+          dragActive ? 'border-primary bg-indigo-50/50 scale-[1.01]' : 'border-[#CBD5E1] bg-[#FAFBFF] hover:bg-[#F1F5F9]/50 hover:border-[#94A3B8]'
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -117,7 +117,7 @@ export default function ResumeUploadZone({ onAnalyze, isAnalyzing = false, uploa
         {!selectedFile ? (
           <div className="flex flex-col items-center pointer-events-none text-center">
             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm border border-[#E5E7EB] mb-3">
-              <UploadCloud size={18} className="text-[#6C4CF1]" />
+              <UploadCloud size={18} className="text-primary" />
             </div>
             <h2 className="text-[15px] font-semibold text-[#111827] mb-1">Click to upload or drag and drop</h2>
             <p className="text-[12px] text-[#64748B] mb-4 max-w-[250px] leading-relaxed">
@@ -170,7 +170,7 @@ export default function ResumeUploadZone({ onAnalyze, isAnalyzing = false, uploa
             <button
               onClick={handleAnalyzeClick}
               disabled={isUploading || isAnalyzing}
-              className="bg-[#6C4CF1] hover:bg-[#5b3fda] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-[14px] px-6 py-2.5 rounded-xl transition-colors flex items-center gap-2"
+              className="bg-primary hover:bg-[#5b3fda] disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-[14px] px-6 py-2.5 rounded-xl transition-colors flex items-center gap-2"
             >
               {isAnalyzing ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />

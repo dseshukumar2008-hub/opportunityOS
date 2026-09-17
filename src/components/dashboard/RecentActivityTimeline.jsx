@@ -38,7 +38,7 @@ export default function RecentActivityTimeline({ userState }) {
       const IconComp = iconMap[act.iconType] || Activity;
       
       let bgColor = 'bg-indigo-50';
-      let iconColor = 'text-[#6C4CF1]';
+      let iconColor = 'text-primary';
       
       if (act.color && typeof act.color === 'string') {
          const parts = act.color.split(' ').filter(Boolean);
@@ -65,7 +65,7 @@ export default function RecentActivityTimeline({ userState }) {
     return (
       <div className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center min-h-[320px] h-fit w-full text-center">
         <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
-          <Activity className="text-[#6C4CF1] opacity-60" size={32} />
+          <Activity className="text-primary opacity-60" size={32} />
         </div>
         <h3 className="text-[16px] font-bold text-slate-800 mb-2">Your activity will appear here</h3>
         <p className="text-[13px] text-slate-500 font-medium mb-6 max-w-[240px]">
@@ -126,7 +126,7 @@ export default function RecentActivityTimeline({ userState }) {
         </div>
 
         <div className="mt-8 flex justify-center">
-          <Link to="/analytics" className="text-[13px] font-bold text-[#6C4CF1] hover:text-indigo-700 flex items-center gap-1 group transition-colors">
+          <Link to="/analytics" className="text-[13px] font-bold text-primary hover:text-indigo-700 flex items-center gap-1 group transition-colors">
             View all activity 
             <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
           </Link>

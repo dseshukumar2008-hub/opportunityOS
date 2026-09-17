@@ -22,12 +22,12 @@ const getButtonClass = (isMatched, isSelected, validationState, isCategory = fal
   if (isSelected) {
     if (validationState === 'correct') return "bg-green-50 border-2 border-green-500 text-green-700 shadow-md transform scale-[1.02]";
     if (validationState === 'wrong') return "bg-red-50 border-2 border-red-500 text-red-700 shadow-md";
-    return "bg-[#F3F0FF] border-2 border-[#6C4CF1] text-[#6C4CF1] shadow-md transform scale-[1.02]";
+    return "bg-[#F3F0FF] border-2 border-primary text-primary shadow-md transform scale-[1.02]";
   }
   if (isCategory) {
-    return "bg-slate-50 border-2 border-slate-200 border-dashed text-slate-600 hover:border-[#6C4CF1]/40 hover:bg-[#F3F0FF]/50 hover:text-slate-800 shadow-sm";
+    return "bg-slate-50 border-2 border-slate-200 border-dashed text-slate-600 hover:border-primary/40 hover:bg-[#F3F0FF]/50 hover:text-slate-800 shadow-sm";
   }
-  return "bg-white border-2 border-slate-200 text-slate-900 hover:border-[#6C4CF1]/40 hover:bg-[#F3F0FF]/50 shadow-sm";
+  return "bg-white border-2 border-slate-200 text-slate-900 hover:border-primary/40 hover:bg-[#F3F0FF]/50 shadow-sm";
 };
 
 export default function TechMatchGame({ onClose }) {
@@ -239,7 +239,7 @@ export default function TechMatchGame({ onClose }) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => initGame()}
-            className="px-6 py-2.5 bg-[#6C4CF1] text-white text-[14px] font-bold rounded-xl hover:bg-[#5b3ce0] transition-colors"
+            className="px-6 py-2.5 bg-primary text-white text-[14px] font-bold rounded-xl hover:bg-[#5b3ce0] transition-colors"
           >
             Try Again
           </button>
@@ -257,7 +257,7 @@ export default function TechMatchGame({ onClose }) {
   if (pairs.length === 0) {
     return (
       <div className="flex justify-center items-center h-full bg-slate-50">
-        <div className="w-8 h-8 border-4 border-[#6C4CF1] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -266,8 +266,8 @@ export default function TechMatchGame({ onClose }) {
     return (
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 py-4 h-full flex flex-col justify-center items-center bg-[#F8FAFC]">
         <div className="bg-white border border-slate-200 rounded-2xl p-8 max-w-lg w-full text-center shadow-sm">
-          <div className="w-16 h-16 bg-[#F3F0FF] rounded-2xl flex items-center justify-center mx-auto mb-6 border border-[#6C4CF1]/20">
-            <Puzzle size={32} className="text-[#6C4CF1] fill-[#6C4CF1]" />
+          <div className="w-16 h-16 bg-[#F3F0FF] rounded-2xl flex items-center justify-center mx-auto mb-6 border border-primary/20">
+            <Puzzle size={32} className="text-primary fill-[#6C4CF1]" />
           </div>
           <h2 className="text-2xl font-bold text-slate-900 mb-2">Tech Stack Mapper</h2>
           <p className="text-[14px] text-slate-600 mb-8 leading-relaxed">
@@ -291,7 +291,7 @@ export default function TechMatchGame({ onClose }) {
           
           <button 
             onClick={startGame}
-            className="w-full bg-[#6C4CF1] text-white font-bold text-[15px] py-3.5 rounded-xl hover:bg-[#5b3ce0] transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-[#6C4CF1] outline-none"
+            className="w-full bg-primary text-white font-bold text-[15px] py-3.5 rounded-xl hover:bg-[#5b3ce0] transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-[#6C4CF1] outline-none"
           >
             Start
           </button>
@@ -323,8 +323,8 @@ export default function TechMatchGame({ onClose }) {
           </button>
           
           <div className="flex items-center gap-4 shrink-0">
-            <div className="w-14 h-14 bg-[#F3F0FF] rounded-2xl flex items-center justify-center shrink-0 border border-[#6C4CF1]/20">
-              <Puzzle size={28} className="text-[#6C4CF1] fill-[#6C4CF1]" />
+            <div className="w-14 h-14 bg-[#F3F0FF] rounded-2xl flex items-center justify-center shrink-0 border border-primary/20">
+              <Puzzle size={28} className="text-primary fill-[#6C4CF1]" />
             </div>
             <div className="min-w-0">
               <h2 className="text-[20px] md:text-[24px] font-bold text-slate-900 leading-tight truncate flex items-center gap-2">Tech Stack Mapper</h2>
@@ -335,9 +335,9 @@ export default function TechMatchGame({ onClose }) {
 
         <div className="flex items-center gap-2 sm:gap-3 shrink-0 md:pr-2">
           {/* Progress */}
-          <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-[#F3F0FF] rounded-lg border border-[#6C4CF1]/20" aria-label={`Validated: ${matchedPairs.length} of ${pairs.length}`}>
-            <ListChecks size={16} className="text-[#6C4CF1] shrink-0 hidden sm:block" />
-            <span className="text-[13px] sm:text-[14px] font-bold text-[#6C4CF1]">{matchedPairs.length} / {pairs.length}</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-[#F3F0FF] rounded-lg border border-primary/20" aria-label={`Validated: ${matchedPairs.length} of ${pairs.length}`}>
+            <ListChecks size={16} className="text-primary shrink-0 hidden sm:block" />
+            <span className="text-[13px] sm:text-[14px] font-bold text-primary">{matchedPairs.length} / {pairs.length}</span>
           </div>
 
           {/* Errors */}
@@ -475,7 +475,7 @@ export default function TechMatchGame({ onClose }) {
           <div className="mt-10 mb-4 w-full flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-500">
             <button
               onClick={onClose}
-              className="flex items-center justify-center gap-2 bg-[#6C4CF1] hover:bg-[#5b3ce0] text-white px-8 py-3.5 rounded-xl font-bold text-[15px] transition-all shadow-md shadow-[#6C4CF1]/20 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#6C4CF1] outline-none"
+              className="flex items-center justify-center gap-2 bg-primary hover:bg-[#5b3ce0] text-white px-8 py-3.5 rounded-xl font-bold text-[15px] transition-all shadow-md shadow-[#6C4CF1]/20 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#6C4CF1] outline-none"
             >
               <ArrowLeft size={18} /> Return to Skill Arcade
             </button>

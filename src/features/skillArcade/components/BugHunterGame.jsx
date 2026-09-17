@@ -149,7 +149,6 @@ export default function BugHunterGame({ onClose }) {
 
   const [showGlossary, setShowGlossary] = useState(false);
 
-
   const [timerAnnouncement, setTimerAnnouncement] = useState('');
   const [feedbackAnnouncement, setFeedbackAnnouncement] = useState('');
 
@@ -469,131 +468,105 @@ export default function BugHunterGame({ onClose }) {
     };
 
     return (
-      <div className="bug-hunter-app flex flex-col w-full h-full max-w-[1100px] mx-auto overflow-y-auto scrollbar-hide py-4 px-2">
-        {/* Main Bug Hunter Container */}
+      <div className="bug-hunter-app flex flex-col w-full h-full max-w-5xl mx-auto overflow-y-auto scrollbar-hide py-6 px-4">
         {isInitializing ? (
-          <div className="flex flex-col items-center justify-center h-full bg-white rounded-3xl shadow-sm border border-slate-200 min-h-[400px]">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-4"></div>
-            <p className="text-slate-600 font-medium">Preparing Bug Hunter...</p>
+          <div className="flex flex-col items-center justify-center h-full bg-white rounded-lg border border-slate-200 min-h-[400px]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#6C4CF1] mb-4"></div>
+            <p className="text-slate-600">Preparing Bug Hunter...</p>
           </div>
         ) : (
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 flex flex-col relative overflow-hidden">
-
+          <div className="bg-white rounded-lg border border-slate-200 p-8 flex flex-col relative overflow-hidden">
+            
             {/* Header */}
-            <div className="flex justify-between items-start mb-8 w-full shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="w-[52px] h-[52px] rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500">
-                  <Bug size={28} />
-                </div>
+            <div className="flex justify-between items-start mb-8 w-full shrink-0 border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <Bug size={24} className="text-rose-500" />
                 <div>
-                  <h2 className="text-[20px] font-bold text-slate-900 tracking-tight leading-tight">Bug Hunter</h2>
-                  <p className="text-[14px] font-medium text-slate-500 mt-0.5">Debug faster. Think sharper.</p>
+                  <h2 className="text-xl font-bold text-slate-900 leading-tight">Bug Hunter</h2>
+                  <p className="text-sm font-normal text-slate-500">Debug faster. Think sharper.</p>
                 </div>
               </div>
-              <div className="flex items-center gap-1 sm:gap-2">
-
-                <button onClick={onClose} aria-label="Close Bug Hunter" className="text-slate-400 hover:text-slate-600 border border-slate-200 hover:bg-slate-50 p-1.5 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[#6C4CF1] rounded-full">
-                  <X size={20} />
-                </button>
-              </div>
+              <button onClick={onClose} aria-label="Close Bug Hunter" className="text-slate-400 hover:text-slate-600 border border-slate-200 bg-white hover:bg-slate-50 p-2 transition-colors rounded-lg">
+                <X size={18} />
+              </button>
             </div>
 
             {/* Main Two-Column Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 shrink-0">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-4 shrink-0">
 
               {/* Left Panel */}
-              <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm flex flex-col justify-between">
+              <div className="bg-white rounded-lg border border-slate-200 p-6 flex flex-col justify-between">
                 <div>
-                  <h1 className="text-[32px] sm:text-[42px] font-extrabold text-slate-900 mb-5 tracking-tight leading-[1.1]">
+                  <h1 className="text-3xl font-bold text-slate-900 mb-6">
                     Find the <span className="text-rose-500">bug.</span><br />
-                    Beat the <span className="text-indigo-600">clock.</span>
+                    Beat the <span className="text-[#6C4CF1]">clock.</span>
                   </h1>
 
-                  <div className="flex items-start justify-between gap-4 mb-8">
-                    <p className="text-[14px] sm:text-[15px] text-slate-600 max-w-[280px] sm:max-w-[300px] leading-relaxed font-medium">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6 mb-8">
+                    <p className="text-base font-normal text-slate-600 leading-relaxed sm:max-w-xs">
                       Test your debugging skills by finding real programming mistakes in short code snippets. Choose the correct answer, earn points, and sharpen your coding instincts.
                     </p>
 
-                    {/* CSS Illustration */}
-                    <div className="hidden sm:block relative w-[210px] h-[140px] bg-[#1E293B] rounded-xl shadow-lg border border-slate-700/50 p-4 mt-[-10px] shrink-0">
-                      <div className="flex gap-1.5 mb-4">
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#EF4444]"></div>
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#EAB308]"></div>
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#22C55E]"></div>
+                    {/* Simple CSS Illustration */}
+                    <div className="hidden sm:block relative w-32 h-24 bg-slate-800 rounded border border-slate-700 p-3 shrink-0">
+                      <div className="flex gap-1 mb-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
                       </div>
-                      <div className="space-y-2 opacity-80">
-                        <div className="w-[80%] h-2 bg-[#60A5FA]/40 rounded-full"></div>
-                        <div className="w-[50%] h-2 bg-[#A78BFA]/40 rounded-full ml-6"></div>
-                        <div className="w-[70%] h-2 bg-[#4ADE80]/40 rounded-full ml-6"></div>
-                        <div className="w-[40%] h-2 bg-[#FACC15]/40 rounded-full ml-10"></div>
-                        <div className="w-[60%] h-2 bg-[#60A5FA]/40 rounded-full"></div>
+                      <div className="space-y-1.5 opacity-80">
+                        <div className="w-[80%] h-1 bg-slate-600 rounded-sm"></div>
+                        <div className="w-[60%] h-1 bg-slate-600 rounded-sm ml-2"></div>
+                        <div className="w-[40%] h-1 bg-slate-600 rounded-sm ml-4"></div>
+                        <div className="w-[70%] h-1 bg-slate-600 rounded-sm"></div>
                       </div>
-                      {/* Magnifying Glass with Bug */}
-                      <div className="absolute -bottom-8 -right-6 flex items-center justify-center z-10 w-28 h-28">
-                        <div className="relative w-[72px] h-[72px] rounded-full border-[6px] border-indigo-600 bg-white/10 backdrop-blur-md shadow-[0_0_25px_rgba(108,76,241,0.4)] flex items-center justify-center">
-                          <Bug size={36} className="text-rose-500 mt-[-2px] ml-[2px]" />
-                        </div>
-                        <div className="absolute bottom-1 right-2 w-[10px] h-10 bg-indigo-600 rounded-full rotate-[-45deg] shadow-lg"></div>
+                      <div className="absolute -bottom-4 -right-2 flex items-center justify-center w-12 h-12 bg-white rounded-full border-2 border-slate-200">
+                        <Bug size={18} className="text-slate-700" />
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-8 pb-8 border-b border-slate-100">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#F5F3FF] flex items-center justify-center shrink-0">
-                        <Clock size={20} className="text-indigo-600" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-slate-900 text-[13px] leading-tight mb-0.5">Timed</span>
-                        <span className="text-slate-500 text-[11px] font-medium">Challenges</span>
-                      </div>
+                  <div className="flex flex-wrap items-center gap-4 sm:gap-6 mb-6 pb-6 border-b border-slate-200">
+                    <div className="flex items-center gap-2">
+                      <Clock size={16} className="text-slate-500" />
+                      <span className="text-sm text-slate-700">Timed Challenges</span>
                     </div>
 
-                    <div className="hidden sm:block w-px h-10 bg-slate-100 mx-2"></div>
+                    <div className="hidden sm:block w-px h-4 bg-slate-200"></div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center shrink-0">
-                        <Target size={20} className="text-rose-500" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-slate-900 text-[13px] leading-tight mb-0.5">{BUG_HUNTER_CONFIG.session.pointsPerQuestion} Points</span>
-                        <span className="text-slate-500 text-[11px] font-medium">per Correct Answer</span>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Target size={16} className="text-slate-500" />
+                      <span className="text-sm text-slate-700">{BUG_HUNTER_CONFIG.session.pointsPerQuestion} Points per Correct Answer</span>
                     </div>
 
-                    <div className="hidden sm:block w-px h-10 bg-slate-100 mx-2"></div>
+                    <div className="hidden sm:block w-px h-4 bg-slate-200"></div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[#FEF9C3] flex items-center justify-center shrink-0">
-                        <Brain size={20} className="text-[#CA8A04]" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-slate-900 text-[13px] leading-tight mb-0.5">Real Coding</span>
-                        <span className="text-slate-500 text-[11px] font-medium">Problems</span>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Brain size={16} className="text-slate-500" />
+                      <span className="text-sm text-slate-700">Real Coding Problems</span>
                     </div>
                   </div>
 
-                  {/* Lower Information Card */}
-                  <div className="bg-indigo-50/50 rounded-2xl p-5 flex items-center gap-4 w-max pr-12 border border-indigo-600/10">
-                    <Lightbulb size={24} className="text-indigo-600 shrink-0" />
-                    <p className="text-[14px] text-slate-700 font-medium leading-snug">
-                      From beginner-friendly mistakes<br />to challenging logic bugs.
+                  {/* Lower Information Box */}
+                  <div className="bg-slate-50 rounded-lg p-3 sm:p-4 flex items-center gap-3 border border-slate-200">
+                    <Lightbulb size={16} className="text-slate-500 shrink-0" />
+                    <p className="text-sm text-slate-700">
+                      From beginner-friendly mistakes to challenging logic bugs.
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Right Panel (Language Selection) */}
-              <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 flex flex-col shadow-sm">
+              <div className="bg-white rounded-lg border border-slate-200 p-6 flex flex-col">
                 <div className="mb-6">
-                  <h3 className="text-[20px] font-bold text-slate-900">Select your language</h3>
-                  <p className="text-[14px] text-slate-500 mt-1 font-medium">Choose the language you want to practice.</p>
+                  <h3 className="text-lg font-bold text-slate-900">Select your language</h3>
+                  <p className="text-sm text-slate-600 mt-1">Choose the language you want to practice.</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-auto">
+                <div className="grid grid-cols-2 gap-3 mb-auto">
                   {languages.map(langObj => {
                     const langName = langObj.name;
                     const isSelected = selectedLanguage === langName;
@@ -604,55 +577,46 @@ export default function BugHunterGame({ onClose }) {
                           setSelectedLanguage(langName);
                           try { localStorage.setItem('bugHunter_pref_language', langName); } catch { /* ignore */ }
                         }}
-                        className={`relative flex flex-col items-center justify-center p-4 sm:p-5 rounded-2xl transition-all outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#6C4CF1] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border-2 ${isSelected
-                          ? 'border-indigo-600 bg-indigo-50/50'
-                          : 'border-slate-100 hover:border-indigo-600/30 bg-white'
-                          } ${langName === 'Random' ? 'sm:col-span-2' : ''}`}
+                        className={`relative flex flex-col items-center justify-center p-4 rounded-lg transition-colors border ${isSelected
+                          ? 'border-2 border-[#6C4CF1] bg-[#F5F3FF]'
+                          : 'border border-slate-200 hover:bg-slate-50 bg-white'
+                          } ${langName === 'Random' ? 'col-span-2' : ''}`}
                       >
                         {isSelected && (
-                          <div className="absolute -top-[10px] -right-[10px] w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-sm border-2 border-white z-10">
-                            <Check size={14} strokeWidth={4} />
+                          <div className="absolute top-2 right-2 text-[#6C4CF1]">
+                            <Check size={14} strokeWidth={3} />
                           </div>
                         )}
-                        {renderLangIcon(langObj)}
-                        <div className="flex flex-col items-center mt-1">
-                          <span className={`font-bold text-[15px] ${isSelected ? 'text-indigo-900' : 'text-slate-900'}`}>
-                            {langName}
-                          </span>
-                          {langName === 'Random' && langObj.description && (
-                            <span className="text-[12px] text-slate-500 font-medium mt-0.5">
-                              {langObj.description}
-                            </span>
-                          )}
+                        <div className="mb-2">
+                          {renderLangIcon(langObj)}
                         </div>
+                        <span className={`text-sm font-semibold ${isSelected ? 'text-[#6C4CF1]' : 'text-slate-700'}`}>
+                          {langName}
+                        </span>
+                        {langName === 'Random' && langObj.description && (
+                          <span className="text-xs text-slate-500 mt-1">
+                            {langObj.description}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
                 </div>
 
-                <div className="mt-6 flex flex-col items-center">
+                <div className="mt-8">
                   <button
                     onClick={() => setGameState('LANGUAGE_SELECTED')}
                     disabled={!selectedLanguage}
-                    className={`w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px] transition-all outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#6C4CF1] ${selectedLanguage
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200'
-                      : 'bg-slate-50 text-slate-400 cursor-not-allowed border border-slate-100'
+                    className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-semibold text-sm transition-colors ${selectedLanguage
+                      ? 'bg-[#6C4CF1] text-white hover:bg-[#5b3fda] shadow-sm'
+                      : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
                       }`}
                   >
-                    {selectedLanguage ? `Continue with ${selectedLanguage}` : 'Continue'} <ArrowRight size={18} />
+                    {selectedLanguage ? `Continue with ${selectedLanguage}` : 'Continue'}
                   </button>
-                  {!selectedLanguage && (
-                    <div className="flex items-center gap-1 mt-3 text-[12px] text-slate-400 font-medium">
-                      Select a language to continue <Info size={12} />
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
-
-
-
-
           </div>
         )}
       </div>
@@ -709,19 +673,19 @@ export default function BugHunterGame({ onClose }) {
     }
 
     return (
-      <div className="flex flex-col h-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+      <div className="flex flex-col h-full bg-white rounded-lg border border-slate-200 p-8">
         <div className="flex justify-between items-start mb-10">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center border border-indigo-100 text-indigo-600">
+            <div className="w-12 h-12 rounded-lg bg-indigo-50 flex items-center justify-center border border-indigo-100 text-[#6C4CF1]">
               <Bug size={24} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900 tracking-tight leading-tight">Choose Difficulty</h2>
-              <p className="text-sm font-medium text-slate-500">Language: {selectedLanguage}</p>
+              <h2 className="text-xl font-bold text-slate-900">Choose Difficulty</h2>
+              <p className="text-sm text-slate-500 mt-1">Language: {selectedLanguage}</p>
             </div>
           </div>
-          <button onClick={() => setGameState('IDLE')} className="text-slate-400 hover:text-slate-600 hover:bg-slate-50 p-2 rounded-full transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
-            <X size={20} />
+          <button onClick={() => setGameState('IDLE')} className="text-slate-400 hover:text-slate-600 border border-slate-200 bg-white hover:bg-slate-50 p-2 rounded-lg transition-colors">
+            <X size={18} />
           </button>
         </div>
 
@@ -731,19 +695,19 @@ export default function BugHunterGame({ onClose }) {
             let icon = null;
             if (diff === 'Easy') {
               desc = 'Common beginner debugging mistakes.';
-              icon = <CheckCircle2 className="text-emerald-500 mb-1" size={24} />;
+              icon = <CheckCircle2 className="text-emerald-500 mb-2" size={24} />;
             }
             else if (diff === 'Medium') {
               desc = 'Multi-step code reasoning.';
-              icon = <Target className="text-amber-500 mb-1" size={24} />;
+              icon = <Target className="text-amber-500 mb-2" size={24} />;
             }
             else if (diff === 'Hard') {
               desc = 'Deeper logic and language behavior.';
-              icon = <Brain className="text-rose-500 mb-1" size={24} />;
+              icon = <Brain className="text-rose-500 mb-2" size={24} />;
             }
             else if (diff === 'Mixed') {
               desc = 'A combination of difficulties.';
-              icon = <Dices className="text-indigo-500 mb-1" size={24} />;
+              icon = <Dices className="text-indigo-500 mb-2" size={24} />;
             }
 
             const isSelected = selectedDifficulty === diff;
@@ -755,19 +719,19 @@ export default function BugHunterGame({ onClose }) {
                   setSelectedDifficulty(diff);
                   try { localStorage.setItem('bugHunter_pref_difficulty', diff); } catch { /* ignore */ }
                 }}
-                className={`relative flex flex-col items-start text-left p-5 sm:p-6 rounded-2xl transition-all outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#6C4CF1] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border-2 ${isSelected
-                  ? 'border-indigo-600 bg-indigo-50/50'
-                  : 'border-slate-100 hover:border-indigo-600/30 bg-white'
+                className={`relative flex flex-col items-start text-left p-5 sm:p-6 rounded-lg transition-colors border ${isSelected
+                  ? 'border-2 border-[#6C4CF1] bg-[#F5F3FF]'
+                  : 'border border-slate-200 hover:bg-slate-50 bg-white'
                   }`}
               >
                 {isSelected && (
-                  <div className="absolute -top-[10px] -right-[10px] w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-sm border-2 border-white z-10">
-                    <Check size={14} strokeWidth={4} />
+                  <div className="absolute top-2 right-2 text-[#6C4CF1]">
+                    <Check size={16} strokeWidth={3} />
                   </div>
                 )}
                 {icon}
                 <div className="flex items-center gap-2 mt-2">
-                  <span className={`font-bold text-[17px] ${isSelected ? 'text-indigo-900' : 'text-slate-900'}`}>{diff}</span>
+                  <span className={`text-base font-semibold ${isSelected ? 'text-[#6C4CF1]' : 'text-slate-700'}`}>{diff}</span>
                   {recommendedDiff === diff && (
                     <span className="text-[10px] font-bold bg-[#F4F2FF] text-[#6C4CF1] px-1.5 py-0.5 rounded uppercase tracking-wide border border-[#E0D4FF]">
                       Recommended
@@ -779,7 +743,7 @@ export default function BugHunterGame({ onClose }) {
                     </span>
                   )}
                 </div>
-                <span className="text-sm text-slate-500 font-medium mt-1 leading-snug">{desc}</span>
+                <span className="text-sm text-slate-500 mt-1">{desc}</span>
               </button>
             );
           })}
@@ -789,12 +753,12 @@ export default function BugHunterGame({ onClose }) {
           <button
             onClick={() => setGameState('CONFIRM_SESSION')}
             disabled={!selectedDifficulty}
-            className={`w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px] transition-all outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#6C4CF1] ${selectedDifficulty
-              ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200'
-              : 'bg-slate-50 text-slate-400 cursor-not-allowed border border-slate-100'
+            className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-semibold text-sm transition-colors ${selectedDifficulty
+              ? 'bg-[#6C4CF1] text-white hover:bg-[#5b3fda] shadow-sm'
+              : 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
               }`}
           >
-            {selectedDifficulty ? 'Continue' : 'Select Difficulty'} <ArrowRight size={18} />
+            {selectedDifficulty ? 'Continue' : 'Select Difficulty'} <ArrowRight size={16} />
           </button>
         </div>
       </div>
@@ -805,44 +769,44 @@ export default function BugHunterGame({ onClose }) {
     const timeLimitMinutes = Math.floor(BUG_HUNTER_CONFIG.session.timerDurationSeconds[selectedDifficulty] / 60);
 
     return (
-      <div className="flex flex-col h-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+      <div className="flex flex-col h-full bg-white rounded-lg border border-slate-200 p-8">
         <div className="flex justify-between items-start mb-10">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center border border-indigo-100 text-indigo-600">
+            <div className="w-12 h-12 rounded-lg bg-indigo-50 flex items-center justify-center border border-indigo-100 text-[#6C4CF1]">
               <Bug size={24} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900 tracking-tight leading-tight">Ready to Hunt?</h2>
-              <p className="text-sm font-medium text-slate-500">Confirm your mission parameters.</p>
+              <h2 className="text-xl font-bold text-slate-900">Ready to Hunt?</h2>
+              <p className="text-sm text-slate-500 mt-1">Confirm your mission parameters.</p>
             </div>
           </div>
-          <button onClick={() => setGameState('IDLE')} className="text-slate-400 hover:text-slate-600 hover:bg-slate-50 p-2 rounded-full transition-colors outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
-            <X size={20} />
+          <button onClick={() => setGameState('IDLE')} className="text-slate-400 hover:text-slate-600 border border-slate-200 bg-white hover:bg-slate-50 p-2 rounded-lg transition-colors">
+            <X size={18} />
           </button>
         </div>
 
-        <div className="max-w-xl mx-auto w-full bg-slate-50 rounded-2xl p-6 border border-slate-100 mb-8">
-          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Mission Briefing</h3>
+        <div className="max-w-xl mx-auto w-full bg-slate-50 rounded-lg p-6 border border-slate-200 mb-8">
+          <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Mission Briefing</h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-              <span className="text-slate-600 font-medium">Target Language</span>
-              <span className="font-bold text-slate-900">{selectedLanguage}</span>
+              <span className="text-slate-600 text-sm">Target Language</span>
+              <span className="font-medium text-slate-900">{selectedLanguage}</span>
             </div>
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-              <span className="text-slate-600 font-medium">Difficulty Level</span>
-              <span className="font-bold text-slate-900">{selectedDifficulty}</span>
+              <span className="text-slate-600 text-sm">Difficulty Level</span>
+              <span className="font-medium text-slate-900">{selectedDifficulty}</span>
             </div>
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-              <span className="text-slate-600 font-medium">Number of Bugs</span>
-              <span className="font-bold text-slate-900">{BUG_HUNTER_CONFIG.session.questionCount}</span>
+              <span className="text-slate-600 text-sm">Number of Bugs</span>
+              <span className="font-medium text-slate-900">{BUG_HUNTER_CONFIG.session.questionCount}</span>
             </div>
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-              <span className="text-slate-600 font-medium">Points per Catch</span>
-              <span className="font-bold text-slate-900">{BUG_HUNTER_CONFIG.session.pointsPerQuestion} Points</span>
+              <span className="text-slate-600 text-sm">Points per Catch</span>
+              <span className="font-medium text-slate-900">{BUG_HUNTER_CONFIG.session.pointsPerQuestion} Points</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-600 font-medium">Time Limit</span>
-              <span className="font-bold text-slate-900">{timeLimitMinutes} Minutes</span>
+              <span className="text-slate-600 text-sm">Time Limit</span>
+              <span className="font-medium text-slate-900">{timeLimitMinutes} Minutes</span>
             </div>
           </div>
         </div>
@@ -850,15 +814,15 @@ export default function BugHunterGame({ onClose }) {
         <div className="flex gap-4 max-w-xl mx-auto w-full mt-auto flex-wrap sm:flex-nowrap">
           <button
             onClick={() => setGameState('LANGUAGE_SELECTED')}
-            className="flex-1 py-4 rounded-xl font-bold text-[15px] bg-white border-2 border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-400"
+            className="flex-1 flex items-center justify-center py-3 px-4 rounded-lg font-semibold text-sm bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors"
           >
             Back
           </button>
           <button
             onClick={() => startGame(selectedLanguage, selectedDifficulty, false, false)}
-            className="flex-1 flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-[15px] bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-600"
+            className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-semibold text-sm bg-[#6C4CF1] text-white hover:bg-[#5b3fda] shadow-sm transition-colors"
           >
-            Hunt <ArrowRight size={18} />
+            Hunt <ArrowRight size={16} />
           </button>
         </div>
       </div>
@@ -887,14 +851,13 @@ export default function BugHunterGame({ onClose }) {
   // RENDER: PLAYING PHASE
   if (questions.length === 0) {
     return (
-      <div className="bug-hunter-app flex flex-col items-center justify-center h-full bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
-
+      <div className="bug-hunter-app flex flex-col items-center justify-center h-full bg-white rounded-lg border border-slate-200 p-8 text-center">
         <Bug size={48} className="text-slate-300 mb-4" />
         <h3 className="text-lg font-bold text-slate-900 mb-2">No Bugs Found</h3>
         <p className="text-slate-500 mb-6">We couldn't find enough bugs for {selectedLanguage} at {selectedDifficulty} difficulty.</p>
         <button
           onClick={() => setGameState('IDLE')}
-          className="bg-red-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-red-700"
+          className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-red-700 transition-colors"
         >
           Try Another Pool
         </button>
@@ -908,9 +871,9 @@ export default function BugHunterGame({ onClose }) {
     <div className="bug-hunter-app flex flex-col min-h-full bg-white">
 
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-slate-50 border-b border-slate-100 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0 gap-2 shadow-sm">
+      <div className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0 gap-2">
         <div className="flex items-center gap-2 sm:gap-3 shrink min-w-0">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-[#6C4CF1] shrink-0">
             <Bug size={18} className="sm:w-5 sm:h-5" />
           </div>
           <div className="min-w-0">
@@ -969,10 +932,10 @@ export default function BugHunterGame({ onClose }) {
       {showGlossary && (
         <div className="absolute inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" aria-hidden="true" onClick={() => setShowGlossary(false)}></div>
-          <div className="relative bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg max-h-full flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+          <div className="relative bg-white rounded-lg shadow-md border border-slate-200 w-full max-w-lg max-h-full flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
+            <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
-                <BookOpen size={18} className="text-indigo-600" />
+                <BookOpen size={18} className="text-[#6C4CF1]" />
                 <h3 className="font-bold text-slate-900 text-lg">Terms Glossary</h3>
               </div>
               <button
@@ -985,8 +948,8 @@ export default function BugHunterGame({ onClose }) {
             <div className="p-5 overflow-y-auto">
               <div className="flex flex-col gap-4">
                 {BUG_HUNTER_GLOSSARY.map((item, idx) => (
-                  <div key={idx} className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    <span className="text-sm font-bold text-indigo-700 block mb-1">{item.term}</span>
+                  <div key={idx} className="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <span className="text-sm font-semibold text-[#6C4CF1] block mb-1">{item.term}</span>
                     <p className="text-sm text-slate-700">{item.definition}</p>
                   </div>
                 ))}
@@ -1070,7 +1033,7 @@ export default function BugHunterGame({ onClose }) {
                 <button
                   onClick={() => setShowHint(true)}
                   disabled={showHint || gameState !== 'PLAYING'}
-                  className="flex items-center gap-1.5 text-sm font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  className="flex items-center gap-1.5 text-sm font-semibold text-[#6C4CF1] bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label="Show hint"
                 >
                   <Lightbulb size={16} strokeWidth={2.5} />
@@ -1091,7 +1054,7 @@ export default function BugHunterGame({ onClose }) {
           )}
 
           {/* Code Snippet Block */}
-          <div className="bg-slate-900 rounded-xl overflow-hidden mb-4 shadow-sm border border-slate-800">
+          <div className="bg-slate-900 rounded-lg overflow-hidden mb-4 border border-slate-800">
             <div className="bg-slate-800/50 px-4 py-2 border-b border-slate-800 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Code2 size={16} className="text-slate-400" />
@@ -1124,11 +1087,11 @@ export default function BugHunterGame({ onClose }) {
                           }`}
                       >
 
-                          <span className={`w-8 md:w-12 shrink-0 text-right pr-3 md:pr-4 select-none font-mono text-[11px] md:text-xs pt-[3px] border-r border-slate-700/50 mr-4 flex items-center justify-end gap-1.5 ${isTargetLine ? 'text-rose-400' : 'text-slate-600 group-hover:text-slate-400'
-                            }`}>
-                            {isTargetLine && <Bug size={10} className="text-rose-400 shrink-0" />}
-                            {i + 1}
-                          </span>
+                        <span className={`w-8 md:w-12 shrink-0 text-right pr-3 md:pr-4 select-none font-mono text-[11px] md:text-xs pt-[3px] border-r border-slate-700/50 mr-4 flex items-center justify-end gap-1.5 ${isTargetLine ? 'text-rose-400' : 'text-slate-600 group-hover:text-slate-400'
+                          }`}>
+                          {isTargetLine && <Bug size={10} className="text-rose-400 shrink-0" />}
+                          {i + 1}
+                        </span>
                         <span className={`whitespace-pre flex-1 ${isTargetLine ? 'text-rose-100 font-semibold' : ''}`}>
                           {line || ' '}
                         </span>
@@ -1164,7 +1127,7 @@ export default function BugHunterGame({ onClose }) {
           {/* Explanation Area */}
           {(gameState === 'FEEDBACK' || gameState === 'ANSWERED') && selectedOption && (
             <div className="mt-4 animate-in fade-in slide-in-from-bottom-2">
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 mb-4">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4">
                 <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-200">
                   <div className={`flex items-center gap-2 font-bold ${selectedOption === currentQ.answer ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {selectedOption === currentQ.answer ? <CheckCircle2 size={20} /> : <XCircle size={20} />}
@@ -1196,10 +1159,10 @@ export default function BugHunterGame({ onClose }) {
                 </div>
 
                 {currentQ.affectedLine && (
-                  <div className="bg-white rounded-xl border border-slate-100 p-4 mb-6">
+                  <div className="bg-white rounded-lg border border-slate-200 p-4 mb-6">
                     <div className="col-span-1 md:col-span-2">
-                      <span className="text-xs font-bold text-slate-400 uppercase">Bug Location: </span>
-                      <span className="text-sm font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">Line {currentQ.affectedLine}</span>
+                      <span className="text-xs font-semibold text-slate-500 uppercase">Bug Location: </span>
+                      <span className="text-sm font-mono text-[#6C4CF1] bg-[#F5F3FF] px-2 py-0.5 rounded">Line {currentQ.affectedLine}</span>
                     </div>
                   </div>
                 )}
@@ -1209,8 +1172,8 @@ export default function BugHunterGame({ onClose }) {
                 {selectedOption !== currentQ.answer && (
                   <>
                     {currentQ.incorrectExplanations && currentQ.incorrectExplanations[selectedOption] && (
-                      <div className="mb-6 bg-white border border-slate-100 p-4 rounded-xl">
-                        <span className="text-sm font-bold text-rose-600 flex items-center gap-1.5 mb-1">
+                      <div className="mb-6 bg-white border border-slate-200 p-4 rounded-lg">
+                        <span className="text-sm font-semibold text-rose-600 flex items-center gap-1.5 mb-1">
                           <X size={16} /> Why wasn't your answer the issue?
                         </span>
                         <p className="text-slate-700 text-sm leading-relaxed">
@@ -1220,8 +1183,8 @@ export default function BugHunterGame({ onClose }) {
                     )}
 
                     {currentQ.takeaway && (
-                      <div className="mb-6 bg-indigo-50/50 border border-indigo-100 p-4 rounded-xl">
-                        <span className="text-sm font-bold text-indigo-700 flex items-center gap-1.5 mb-1">
+                      <div className="mb-6 bg-indigo-50/50 border border-indigo-100 p-4 rounded-lg">
+                        <span className="text-sm font-semibold text-indigo-700 flex items-center gap-1.5 mb-1">
                           <Lightbulb size={16} /> Debugging Takeaway
                         </span>
                         <p className="text-indigo-900 text-sm leading-relaxed">
@@ -1233,10 +1196,10 @@ export default function BugHunterGame({ onClose }) {
                 )}
 
                 {currentQ.correctedCode && (
-                  <div className="bg-emerald-50/50 rounded-xl border border-emerald-100 overflow-hidden mb-6">
+                  <div className="bg-emerald-50/50 rounded-lg border border-emerald-100 overflow-hidden mb-6">
                     <div className="bg-emerald-100/50 px-4 py-2 border-b border-emerald-100 flex items-center gap-2">
                       <Code2 size={16} className="text-emerald-700" />
-                      <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Corrected Code</span>
+                      <span className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">Corrected Code</span>
                     </div>
                     <div className="p-4 overflow-auto max-h-[30vh] outline-none">
                       <pre className="font-mono text-[13px] sm:text-sm text-emerald-900 leading-relaxed w-fit min-w-full">
@@ -1254,11 +1217,11 @@ export default function BugHunterGame({ onClose }) {
             <div className="flex justify-end mb-6 animate-in fade-in zoom-in-95 mt-6">
               <button
                 onClick={handleNext}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-xl font-bold transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#6C4CF1] outline-none"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#6C4CF1] hover:bg-[#5b3fda] text-white px-6 py-3 rounded-lg font-semibold text-sm transition-colors shadow-sm"
               >
-                <span className="font-bold relative z-10">
+                <span className="font-semibold relative z-10">
                   {currentIdx < questions.length - 1 ? 'Next Question' : 'View Results'}
-                </span>  <ArrowRight size={18} />
+                </span>  <ArrowRight size={16} />
               </button>
             </div>
           )}

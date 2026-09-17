@@ -41,13 +41,13 @@ export default function DashboardHeroWidget({ userState }) {
   const greeting = useMemo(() => getGreeting(), []);
   const isLoading = insights?.isLoading;
   const firstName = getUserFirstName(user, profile);
-  
-  // Dynamic Content logic based on userState
+
+
 
   const aiScore = isNewUser ? 0 : (careerReadiness?.score ?? 0);
   const nextMilestone = aiScore < 70 ? 70 : aiScore < 85 ? 85 : 100;
 
-// eslint-disable-next-line no-unused-vars
+
   const readinessLabel = isNewUser ? 'Getting started' : `${aiScore}%`;
   const progressBarWidth = isNewUser ? '0%' : `${Math.min((aiScore / nextMilestone) * 100, 100)}%`;
 
@@ -62,6 +62,12 @@ export default function DashboardHeroWidget({ userState }) {
         {/* Left: Score Ring */}
         <div className="flex flex-col items-center justify-center shrink-0">
           <ScoreRing score={aiScore} size={150} />
+          {!isNewUser && aiScore > 0 && (
+            <div className="flex items-center gap-1.5 mt-4 bg-emerald-50 border border-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[12px] font-bold">
+              <TrendingUp size={12} />
+              ↑ 8% this week
+            </div>
+          )}
         </div>
 
         {/* Center: Greeting + Progress */}
@@ -76,31 +82,16 @@ export default function DashboardHeroWidget({ userState }) {
             {isNewUser ? "Let's get your career profile ready." : "Let's make progress toward your dream career."}
           </p>
 
-          {/* Progress Bar */}
-          <div className="w-full mb-2">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-[12px] font-bold text-slate-600">
-                {isNewUser ? 'Complete profile to view readiness score' : 'Progress to next milestone'}
-              </span>
-              {!isNewUser && <span className="text-[12px] font-bold text-[#6C4CF1]">Next: {nextMilestone}%</span>}
-            </div>
-            <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-[#6C4CF1] to-indigo-400 rounded-full transition-all duration-1000"
-                style={{ width: progressBarWidth }}
-              />
-            </div>
-          </div>
 
           {/* Action Chips */}
           <div className="flex flex-wrap gap-2 mt-5">
             {isNewUser || !hasProfile ? (
-              <Link to="/profile" className="flex items-center gap-1.5 px-4 py-2 bg-[#6C4CF1] text-white rounded-xl text-[12px] font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
+              <Link to="/profile" className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl text-[12px] font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
                 <Target size={13} /> Complete Profile →
               </Link>
             ) : (
               <>
-                <Link to="/resume-review" className="flex items-center gap-1.5 px-4 py-2 bg-[#6C4CF1] text-white rounded-xl text-[12px] font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
+                <Link to="/resume-review" className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl text-[12px] font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
                   <Zap size={13} /> Improve Resume
                 </Link>
                 <Link to="/skill-gap" className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-[12px] font-bold hover:bg-slate-50 transition-colors">

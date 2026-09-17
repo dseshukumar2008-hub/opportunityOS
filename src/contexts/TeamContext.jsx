@@ -103,7 +103,7 @@ export const TeamProvider = ({ children }) => {
         title: `Created Team: ${teamData.name}`,
         description: teamData.category || 'General',
         iconType: 'Users',
-        color: 'bg-indigo-50 text-[#6C4CF1]' });
+        color: 'bg-indigo-50 text-primary' });
 
       toast.success('Team created!');
       return { id: docRef.id, ...teamData };

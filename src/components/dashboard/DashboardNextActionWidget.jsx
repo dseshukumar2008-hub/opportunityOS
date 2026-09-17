@@ -69,7 +69,7 @@ export default function DashboardNextActionWidget({ userState }) {
               <h3 className="text-[16px] font-bold text-slate-900 mb-0.5">{title}</h3>
               <p className="text-[13px] text-slate-500 font-medium leading-relaxed max-w-[340px]">{description}</p>
             </div>
-            <div className="shrink-0 text-slate-400 group-hover:text-[#6C4CF1] transition-colors ml-3">
+            <div className="shrink-0 text-slate-400 group-hover:text-primary transition-colors ml-3">
               <ChevronRight size={20} />
             </div>
           </Link>

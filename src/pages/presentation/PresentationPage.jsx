@@ -61,7 +61,7 @@ export default function PresentationPage() {
             </button>
             <div className="flex items-center gap-3">
               {/* Logo mark */}
-              <div className="w-8 h-8 rounded-lg bg-[#6C4CF1] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                 <Rocket size={16} className="text-white" />
               </div>
               <div>
@@ -79,7 +79,7 @@ export default function PresentationPage() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-1.5 rounded-lg text-[13px] font-bold capitalize transition-all ${
                   activeTab === tab
-                    ? 'bg-[#6C4CF1] text-white'
+                    ? 'bg-primary text-white'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -96,7 +96,7 @@ export default function PresentationPage() {
               <Download size={14} /> Summary
             </button>
             <button
-              className="px-4 py-2 bg-[#6C4CF1] hover:bg-indigo-500 rounded-lg text-[13px] font-bold flex items-center gap-2 transition-colors"
+              className="px-4 py-2 bg-primary hover:bg-indigo-500 rounded-lg text-[13px] font-bold flex items-center gap-2 transition-colors"
               onClick={() => alert('Downloading Analytics CSV...')}
             >
               <TrendingUp size={14} /> Analytics
@@ -111,7 +111,7 @@ export default function PresentationPage() {
         <div className="relative bg-[#1a0f4f] rounded-3xl p-10 md:p-16 text-white mb-12 overflow-hidden shadow-xl">
           {/* Background decoration */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="max-w-full absolute -top-24 -right-24 w-96 h-96 bg-[#6C4CF1] rounded-full opacity-20 blur-3xl" />
+            <div className="max-w-full absolute -top-24 -right-24 w-96 h-96 bg-primary rounded-full opacity-20 blur-3xl" />
             <div className="max-w-full absolute -bottom-24 -left-24 w-80 h-80 bg-indigo-500 rounded-full opacity-10 blur-3xl" />
             {/* Grid pattern */}
             <div className="absolute inset-0 opacity-5"
@@ -125,7 +125,7 @@ export default function PresentationPage() {
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <span className="px-3 py-1 bg-[#6C4CF1]/30 text-[#a78bfa] border border-[#6C4CF1]/30 rounded-full text-[12px] font-bold uppercase tracking-wider">
+                <span className="px-3 py-1 bg-primary/30 text-[#a78bfa] border border-primary/30 rounded-full text-[12px] font-bold uppercase tracking-wider">
                   Automated Analysis Platform
                 </span>
                 <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 rounded-full text-[12px] font-bold uppercase tracking-wider">
@@ -168,7 +168,7 @@ export default function PresentationPage() {
         {/* ── SECTION 1: Platform Impact Metrics ── */}
         <div className="mb-4">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-1 h-7 bg-[#6C4CF1] rounded-full" />
+            <div className="w-1 h-7 bg-primary rounded-full" />
             <h2 className="text-[22px] font-black text-slate-900">Platform Impact</h2>
             <span className="text-[13px] font-medium text-slate-400 ml-1">— live metrics</span>
           </div>
@@ -185,7 +185,7 @@ export default function PresentationPage() {
         </div>
 
         {/* ── SECTION 3: Career Growth Highlight ── */}
-        <div className="bg-[#6C4CF1] rounded-3xl p-10 md:p-12 text-white mb-12 shadow-md relative overflow-hidden">
+        <div className="bg-primary rounded-3xl p-10 md:p-12 text-white mb-12 shadow-md relative overflow-hidden">
           <div className="absolute top-0 right-0 max-w-full w-[400px] h-[400px] bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-8">
@@ -264,7 +264,7 @@ export default function PresentationPage() {
 
           {/* Live highlights panel */}
           <div className="bg-slate-900 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-[#6C4CF1] rounded-full opacity-10 blur-3xl" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-primary rounded-full opacity-10 blur-3xl" />
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-2 h-2 bg-emerald-400 rounded-full " />
@@ -290,7 +290,7 @@ export default function PresentationPage() {
           {/* Why OpportunityOS */}
           <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 rounded-xl bg-[#6C4CF1] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
                 <Rocket size={16} className="text-white" />
               </div>
               <h2 className="text-[18px] font-black text-slate-900">Why OpportunityOS?</h2>

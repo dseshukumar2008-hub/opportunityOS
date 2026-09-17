@@ -47,7 +47,7 @@ export default function UserAvatar({ src, name, alt, className = 'w-8 h-8' }) {
       className={`rounded-full flex items-center justify-center bg-indigo-50 border border-indigo-100 overflow-hidden select-none ${className}`}
     >
       <span
-        className="font-bold text-[#6C4CF1] leading-none"
+        className="font-bold text-primary leading-none"
         style={{ fontSize: '40%' }}
       >
         {initial}

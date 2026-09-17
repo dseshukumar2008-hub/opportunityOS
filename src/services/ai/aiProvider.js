@@ -173,7 +173,7 @@ ${JSON.stringify(aiContext)}
     return createErrorResponse(error, targetProviderName, 'unknown');
   }
 
-  const primaryModel = primaryProvider.name === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-2.5-flash';
+  const primaryModel = primaryProvider.name === 'groq' ? 'llama-3.3-70b-versatile' : 'gemini-3.5-flash';
 
   try {
     return await executeAndProcess(primaryProvider.name, primaryModel, request, false);

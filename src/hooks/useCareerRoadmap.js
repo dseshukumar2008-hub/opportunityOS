@@ -17,18 +17,18 @@ const INITIAL = {
 
 function reducer(state, action) {
   switch (action.type) {
-    case 'NO_USER':         return { ...INITIAL, status: 'wizard' };
-    case 'FETCH_START':     return { ...state,   status: 'loading',     uid: action.uid, error: null };
-    case 'FETCH_OK':        return { ...state,   status: 'ready',       roadmap: action.data };
-    case 'NO_ROADMAP':      return { ...state,   status: 'wizard' };
-    case 'FETCH_ERROR':     return { ...state,   status: 'error',       error: action.error };
-    case 'GEN_START':       return { ...state,   status: 'generating',  genError: null };
-    case 'GEN_OK':          return { ...state,   status: 'ready',       roadmap: action.data, genError: null };
-    case 'GEN_ERROR':       return { ...state,   status: 'wizard',      genError: action.error };
-    case 'GEN_TIMEOUT':     return { ...state,   status: 'wizard',      genError: 'Generation timed out after 60 seconds. Please try again.' };
-    case 'RESET':           return { ...state,   status: 'wizard',      roadmap: null, genError: null };
-    case 'TASK_UPDATE':     return { ...state,   roadmap: action.roadmap };
-    default:                return state;
+    case 'NO_USER': return { ...INITIAL, status: 'wizard' };
+    case 'FETCH_START': return { ...state, status: 'loading', uid: action.uid, error: null };
+    case 'FETCH_OK': return { ...state, status: 'ready', roadmap: action.data };
+    case 'NO_ROADMAP': return { ...state, status: 'wizard' };
+    case 'FETCH_ERROR': return { ...state, status: 'error', error: action.error };
+    case 'GEN_START': return { ...state, status: 'generating', genError: null };
+    case 'GEN_OK': return { ...state, status: 'ready', roadmap: action.data, genError: null };
+    case 'GEN_ERROR': return { ...state, status: 'wizard', genError: action.error };
+    case 'GEN_TIMEOUT': return { ...state, status: 'wizard', genError: 'Generation timed out after 60 seconds. Please try again.' };
+    case 'RESET': return { ...state, status: 'wizard', roadmap: null, genError: null };
+    case 'TASK_UPDATE': return { ...state, roadmap: action.roadmap };
+    default: return state;
   }
 }
 
@@ -216,7 +216,7 @@ export function useCareerRoadmap() {
 
     const wizardWithProfile = { ...wizardData, missingSkills: profile?.missingSkills || [] };
     const promptText = buildPrompt(wizardWithProfile);
-    
+
     const request = {
       feature: 'Career Roadmap',
       prompt: promptText,
@@ -229,11 +229,11 @@ export function useCareerRoadmap() {
 
     try {
       const response = await aiGenerate(request);
-      
+
       if (!response.success) {
         throw response.error;
       }
-      
+
       parsed = response.data;
     } catch (err) {
       console.error(`[Roadmap Gen] Generation failed:`, err);
@@ -245,7 +245,7 @@ export function useCareerRoadmap() {
     }
 
     try {
-      // Ensure IDs
+
       (parsed.phases || []).forEach((p, i) => {
         if (!p.id) p.id = `phase_${i + 1}`;
         (p.tasks || []).forEach((t, j) => {
@@ -265,13 +265,13 @@ export function useCareerRoadmap() {
 
       await setDoc(doc(db, 'career_roadmaps', uid), docData);
       dispatch({ type: 'GEN_OK', data: { ...docData, createdAt: new Date() } });
-      
+
       const actualTotalTasks = (parsed.phases || []).reduce((acc, p) => acc + (p.tasks?.length || 0), 0);
 
-      await mergeProfileData({ 
+      await mergeProfileData({
         targetRole: wizardData.targetCareer,
         hasRoadmap: true,
-        roadmapProgress: { totalTasks: actualTotalTasks, completedTasks: 0 } 
+        roadmapProgress: { totalTasks: actualTotalTasks, completedTasks: 0 }
       });
 
       if (addActivity) {
@@ -309,11 +309,11 @@ export function useCareerRoadmap() {
       const validCompleted = (state.roadmap.roadmapData?.phases || []).reduce((acc, p) => acc + (p.tasks?.filter(t => next.includes(t.id)).length || 0), 0);
 
       await updateDoc(doc(db, 'career_roadmaps', uid), { completedTasks: next, updatedAt: serverTimestamp() });
-      
-      await mergeProfileData({ 
-        roadmapProgress: { totalTasks: actualTotalTasks, completedTasks: validCompleted } 
+
+      await mergeProfileData({
+        roadmapProgress: { totalTasks: actualTotalTasks, completedTasks: validCompleted }
       });
-      
+
       if (done) {
         const phase = state.roadmap.roadmapData?.phases?.find(p => p.tasks.some(t => t.id === taskId));
         if (phase) {
@@ -321,7 +321,7 @@ export function useCareerRoadmap() {
           const wereAllCompleted = allPhaseTasks.every(id => prev.includes(id));
           const areAllCompleted = allPhaseTasks.every(id => next.includes(id));
           if (!wereAllCompleted && areAllCompleted) {
-             console.log(`Phase "${phase.title}" completed`);
+            console.log(`Phase "${phase.title}" completed`);
           }
         }
       }

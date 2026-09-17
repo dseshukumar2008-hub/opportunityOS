@@ -449,7 +449,7 @@ export default function ResumeBuilderPage() {
       {/* Preview Modal */}
       {isPreviewModalOpen && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-8"
+          className="modal-overlay "
           role="dialog"
           aria-modal="true"
           aria-labelledby="preview-modal-title"
@@ -458,7 +458,7 @@ export default function ResumeBuilderPage() {
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-slate-200 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-[#6C4CF1]">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-primary">
                   <Eye size={20} strokeWidth={2.5} />
                 </div>
                 <div>

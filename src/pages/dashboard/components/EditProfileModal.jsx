@@ -149,28 +149,28 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
           <div className="w-full lg:w-[240px] shrink-0 border-r border-slate-100 p-6 flex flex-col gap-2 overflow-y-auto">
             <button 
               onClick={() => scrollToSection('personal-info')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[14px] transition-colors ${activeSection === 'personal-info' ? 'bg-[#F3F0FF] text-[#6C4CF1]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[14px] transition-colors ${activeSection === 'personal-info' ? 'bg-[#F3F0FF] text-primary' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
             >
               <User size={18} />
               Personal Info
             </button>
             <button 
               onClick={() => scrollToSection('about-me')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[14px] transition-colors ${activeSection === 'about-me' ? 'bg-[#F3F0FF] text-[#6C4CF1]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[14px] transition-colors ${activeSection === 'about-me' ? 'bg-[#F3F0FF] text-primary' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
             >
               <FileText size={18} />
               About Me
             </button>
             <button 
               onClick={() => scrollToSection('skills')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[14px] transition-colors ${activeSection === 'skills' ? 'bg-[#F3F0FF] text-[#6C4CF1]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[14px] transition-colors ${activeSection === 'skills' ? 'bg-[#F3F0FF] text-primary' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
             >
               <Code size={18} />
               Skills
             </button>
             <button 
               onClick={() => scrollToSection('links')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[14px] transition-colors ${activeSection === 'links' ? 'bg-[#F3F0FF] text-[#6C4CF1]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-[14px] transition-colors ${activeSection === 'links' ? 'bg-[#F3F0FF] text-primary' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
             >
               <LinkIcon size={18} />
               Links
@@ -194,7 +194,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                             type="text" 
                             value={editForm.name} 
                             onChange={e => setEditForm({...editForm, name: e.target.value})}
-                            className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700"
+                            className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-primary rounded-xl text-[14px] outline-none transition-all text-slate-700"
                           />
                         </div>
                         <div>
@@ -204,7 +204,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                             type="email" 
                             value={editForm.email} 
                             onChange={e => setEditForm({...editForm, email: e.target.value})}
-                            className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700"
+                            className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-primary rounded-xl text-[14px] outline-none transition-all text-slate-700"
                           />
                         </div>
                         
@@ -215,7 +215,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                             type="text" 
                             value={editForm.college} 
                             onChange={e => setEditForm({...editForm, college: e.target.value})}
-                            className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700"
+                            className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-primary rounded-xl text-[14px] outline-none transition-all text-slate-700"
                           />
                         </div>
                         <div>
@@ -225,7 +225,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                               id="profile-branch"
                               value={editForm.branch || ""} 
                               onChange={e => setEditForm({...editForm, branch: e.target.value})}
-                              className="w-full h-[52px] px-4 pr-10 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700 appearance-none"
+                              className="w-full h-[52px] px-4 pr-10 bg-white border border-slate-200 focus:border-primary rounded-xl text-[14px] outline-none transition-all text-slate-700 appearance-none"
                             >
                               <option value="" disabled>Select a branch</option>
                               <option value="Computer Science">Computer Science</option>
@@ -248,7 +248,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                               id="profile-grad-year"
                               value={editForm.expectedGraduation || "2029"}
                               onChange={e => setEditForm({...editForm, expectedGraduation: e.target.value})}
-                              className="w-full h-[52px] px-4 pr-10 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700 appearance-none"
+                              className="w-full h-[52px] px-4 pr-10 bg-white border border-slate-200 focus:border-primary rounded-xl text-[14px] outline-none transition-all text-slate-700 appearance-none"
                             >
                               <option>2026</option>
                               <option>2027</option>
@@ -265,7 +265,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                               id="profile-current-year"
                               value={editForm.year}
                               onChange={e => setEditForm({...editForm, year: e.target.value})}
-                              className="w-full h-[52px] px-4 pr-10 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700 appearance-none"
+                              className="w-full h-[52px] px-4 pr-10 bg-white border border-slate-200 focus:border-primary rounded-xl text-[14px] outline-none transition-all text-slate-700 appearance-none"
                             >
                               <option>1st Year</option>
                               <option>2nd Year</option>
@@ -283,7 +283,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                             type="text" 
                             value={editForm.country} 
                             onChange={e => setEditForm({...editForm, country: e.target.value})}
-                            className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700"
+                            className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-primary rounded-xl text-[14px] outline-none transition-all text-slate-700"
                           />
                         </div>
                         <div>
@@ -293,7 +293,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                             type="text" 
                             value={editForm.state} 
                             onChange={e => setEditForm({...editForm, state: e.target.value})}
-                            className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700"
+                            className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-primary rounded-xl text-[14px] outline-none transition-all text-slate-700"
                           />
                         </div>
                         <div>
@@ -303,7 +303,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                             type="text" 
                             value={editForm.city} 
                             onChange={e => setEditForm({...editForm, city: e.target.value})}
-                            className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all text-slate-700"
+                            className="w-full h-[52px] px-4 bg-white border border-slate-200 focus:border-primary rounded-xl text-[14px] outline-none transition-all text-slate-700"
                           />
                         </div>
                       </div>
@@ -316,7 +316,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                       <label htmlFor="profile-skills" className="block text-[13px] font-semibold text-slate-700 mb-2">Skills Editor (Type and press Enter)</label>
                       <div className="p-4 bg-white border border-slate-200 rounded-xl flex flex-wrap gap-2 items-center min-h-[52px]">
                         {editForm.skills && editForm.skills.split(',').map((skill, index) => skill.trim() && (
-                          <span key={index} className="px-3 py-1.5 bg-[#F3F0FF] text-[#6C4CF1] rounded-[8px] text-[13px] font-semibold flex items-center gap-1.5">
+                          <span key={index} className="px-3 py-1.5 bg-[#F3F0FF] text-primary rounded-[8px] text-[13px] font-semibold flex items-center gap-1.5">
                             {skill.trim()}
                             <button 
                               aria-label={`Remove ${skill.trim()}`}
@@ -350,7 +350,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                         value={editForm.bio} 
                         onChange={e => setEditForm({...editForm, bio: e.target.value})}
                         rows={6}
-                        className="w-full p-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[14px] outline-none transition-all resize-none text-slate-600 leading-[1.7]"
+                        className="w-full p-4 bg-white border border-slate-200 focus:border-primary rounded-xl text-[14px] outline-none transition-all resize-none text-slate-600 leading-[1.7]"
                       ></textarea>
                     </div>
                   );
@@ -371,7 +371,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                               value={editForm.socialLinks?.linkedin || ''}
                               onChange={e => setEditForm({ ...editForm, socialLinks: { ...editForm.socialLinks, linkedin: e.target.value } })}
                               placeholder="https://linkedin.com/in/yourprofile"
-                              className="w-full h-[48px] pl-11 pr-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[13px] outline-none transition-all text-slate-500"
+                              className="w-full h-[48px] pl-11 pr-4 bg-white border border-slate-200 focus:border-primary rounded-xl text-[13px] outline-none transition-all text-slate-500"
                             />
                           </div>
                         </div>
@@ -387,7 +387,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                               value={editForm.socialLinks?.github || ''}
                               onChange={e => setEditForm({ ...editForm, socialLinks: { ...editForm.socialLinks, github: e.target.value } })}
                               placeholder="https://github.com/yourusername"
-                              className="w-full h-[48px] pl-11 pr-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[13px] outline-none transition-all text-slate-500"
+                              className="w-full h-[48px] pl-11 pr-4 bg-white border border-slate-200 focus:border-primary rounded-xl text-[13px] outline-none transition-all text-slate-500"
                             />
                           </div>
                         </div>
@@ -403,7 +403,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                               value={editForm.socialLinks?.portfolio || ''}
                               onChange={e => setEditForm({ ...editForm, socialLinks: { ...editForm.socialLinks, portfolio: e.target.value } })}
                               placeholder="https://yourportfolio.com"
-                              className="w-full h-[48px] pl-11 pr-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[13px] outline-none transition-all text-slate-500"
+                              className="w-full h-[48px] pl-11 pr-4 bg-white border border-slate-200 focus:border-primary rounded-xl text-[13px] outline-none transition-all text-slate-500"
                             />
                           </div>
                         </div>
@@ -419,7 +419,7 @@ export default function EditProfileModal({ isOpen, onClose, initialData }) {
                               value={editForm.socialLinks?.twitter || ''}
                               onChange={e => setEditForm({ ...editForm, socialLinks: { ...editForm.socialLinks, twitter: e.target.value } })}
                               placeholder="https://twitter.com/yourusername"
-                              className="w-full h-[48px] pl-11 pr-4 bg-white border border-slate-200 focus:border-[#6C4CF1] rounded-xl text-[13px] outline-none transition-all text-slate-500"
+                              className="w-full h-[48px] pl-11 pr-4 bg-white border border-slate-200 focus:border-primary rounded-xl text-[13px] outline-none transition-all text-slate-500"
                             />
                           </div>
                         </div>

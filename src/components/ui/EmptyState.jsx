@@ -49,7 +49,7 @@ export default function EmptyState({
       <div className={`flex flex-col items-center justify-center p-8 text-center rounded-2xl border border-slate-100 bg-white ${className}`}>
         {Icon && (
           <div className="w-14 h-14 bg-[#F4F2FF] rounded-2xl flex items-center justify-center mb-4">
-            <Icon size={26} strokeWidth={1.5} className="text-[#6C4CF1]" />
+            <Icon size={26} strokeWidth={1.5} className="text-primary" />
           </div>
         )}
         <h3 className="text-[16px] font-bold text-slate-900 mb-1">{title}</h3>
@@ -75,13 +75,13 @@ export default function EmptyState({
       {/* Decorative rings */}
       <div className="relative mb-8">
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-32 h-32 rounded-full bg-[#6C4CF1]/5" />
+          <div className="w-32 h-32 rounded-full bg-primary/5" />
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-24 h-24 rounded-full bg-[#6C4CF1]/8" />
+          <div className="w-24 h-24 rounded-full bg-primary/8" />
         </div>
-        <div className="relative w-20 h-20 bg-gradient-to-br from-[#6C4CF1]/15 to-[#6C4CF1]/5 rounded-full flex items-center justify-center border border-[#6C4CF1]/10">
-          {Icon && <Icon size={34} strokeWidth={1.5} className="text-[#6C4CF1]" />}
+        <div className="relative w-20 h-20 bg-gradient-to-br from-[#6C4CF1]/15 to-[#6C4CF1]/5 rounded-full flex items-center justify-center border border-primary/10">
+          {Icon && <Icon size={34} strokeWidth={1.5} className="text-primary" />}
         </div>
       </div>
 

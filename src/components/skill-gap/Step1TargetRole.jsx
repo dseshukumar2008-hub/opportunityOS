@@ -3,9 +3,9 @@ import { Target, ChevronRight, Code, Bot, BarChart2, Layers, ShieldCheck, Cloud,
 
 
 const ROLES = [
-  { id: 'Software Engineer', title: 'Software Engineer', desc: 'Design, build and maintain scalable software systems.', icon: Code, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F1FE]' },
-  { id: 'AI Engineer', title: 'AI Engineer', desc: 'Build intelligent systems using ML, NLP and GenAI.', icon: Bot, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F1FE]' },
-  { id: 'Data Scientist', title: 'Data Scientist', desc: 'Extract insights from data and build predictive models.', icon: BarChart2, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F1FE]' },
+  { id: 'Software Engineer', title: 'Software Engineer', desc: 'Design, build and maintain scalable software systems.', icon: Code, color: 'text-primary', bg: 'bg-[#F4F1FE]' },
+  { id: 'AI Engineer', title: 'AI Engineer', desc: 'Build intelligent systems using ML, NLP and GenAI.', icon: Bot, color: 'text-primary', bg: 'bg-[#F4F1FE]' },
+  { id: 'Data Scientist', title: 'Data Scientist', desc: 'Extract insights from data and build predictive models.', icon: BarChart2, color: 'text-primary', bg: 'bg-[#F4F1FE]' },
   { id: 'Full Stack Developer', title: 'Full Stack Developer', desc: 'Work on frontend, backend and databases.', icon: Layers, color: 'text-[#10B981]', bg: 'bg-emerald-50' },
   { id: 'Cyber Security Engineer', title: 'Cyber Security Engineer', desc: 'Protect systems and data from cyber threats.', icon: ShieldCheck, color: 'text-[#EF4444]', bg: 'bg-red-50' },
   { id: 'Cloud Engineer', title: 'Cloud Engineer', desc: 'Design and manage secure cloud infrastructure.', icon: Cloud, color: 'text-[#0EA5E9]', bg: 'bg-sky-50' },
@@ -63,7 +63,7 @@ export default function Step1TargetRole({ onSubmit, initialRole }) {
         {/* Top Section */}
         <div className="flex flex-col items-center text-center mb-5">
           <div className="w-10 h-10 bg-[#F8F6FE] rounded-xl flex items-center justify-center mb-3 border border-[#E9E4FC] shadow-sm">
-            <Target size={20} className="text-[#6C4CF1]" />
+            <Target size={20} className="text-primary" />
           </div>
           <h1 className="text-xl lg:text-2xl font-black text-slate-900 mb-1 tracking-tight">What role are you preparing for?</h1>
           <p className="text-slate-500 font-medium text-[13px] max-w-xl">
@@ -83,13 +83,13 @@ export default function Step1TargetRole({ onSubmit, initialRole }) {
                   role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRoleSelect(r.id); } }} onClick={() => handleRoleSelect(r.id)}
                   className={`relative p-3 rounded-xl border-2 transition-all cursor-pointer group flex flex-col min-h-[90px] ${
                     isSelected 
-                      ? 'border-[#6C4CF1] bg-[#F8F6FE] shadow-[0_4px_12px_-4px_rgba(108,76,241,0.12)]' 
+                      ? 'border-primary bg-[#F8F6FE] shadow-[0_4px_12px_-4px_rgba(108,76,241,0.12)]' 
                       : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50/50'
                   }`}
                 >
                   <div className="absolute top-3 right-3">
                     {isSelected ? (
-                      <div className="w-4 h-4 rounded-full bg-[#6C4CF1] flex items-center justify-center shadow-sm">
+                      <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shadow-sm">
                         <CheckCircle2 size={10} className="text-white" />
                       </div>
                     ) : (
@@ -123,12 +123,12 @@ export default function Step1TargetRole({ onSubmit, initialRole }) {
           }}
           className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all cursor-text mb-6 ${
             role === 'other'
-              ? 'border-[#6C4CF1] bg-[#F8F6FE] shadow-[0_4px_12px_-4px_rgba(108,76,241,0.12)]'
+              ? 'border-primary bg-[#F8F6FE] shadow-[0_4px_12px_-4px_rgba(108,76,241,0.12)]'
               : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50/50'
           }`}
         >
           <div className="w-8 h-8 rounded-lg bg-[#F8F6FE] flex items-center justify-center shrink-0">
-            <Edit2 size={16} className="text-[#6C4CF1]" />
+            <Edit2 size={16} className="text-primary" />
           </div>
           <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <div className="min-w-[140px]">
@@ -144,7 +144,7 @@ export default function Step1TargetRole({ onSubmit, initialRole }) {
               maxLength={50}
               className={`flex-1 w-full px-3 py-2 rounded-lg border text-[13px] font-semibold outline-none transition-all placeholder:font-medium placeholder:text-slate-400 ${
                 role === 'other'
-                  ? 'bg-white border-[#6C4CF1]/30 shadow-sm focus:border-[#6C4CF1] focus:ring-2 focus:ring-[#6C4CF1]/10 text-slate-900'
+                  ? 'bg-white border-primary/30 shadow-sm focus:border-primary focus:ring-2 focus:ring-[#6C4CF1]/10 text-slate-900'
                   : 'bg-white border-slate-200 text-slate-900'
               }`}
             />
@@ -158,7 +158,7 @@ export default function Step1TargetRole({ onSubmit, initialRole }) {
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Selected Role</span>
           {activeRoleText ? (
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-[6px] bg-[#6C4CF1] flex items-center justify-center">
+              <div className="w-5 h-5 rounded-[6px] bg-primary flex items-center justify-center">
                 <Code size={10} className="text-white" />
               </div>
               <span className="font-black text-slate-900 text-[14px]">{activeRoleText}</span>
@@ -167,7 +167,7 @@ export default function Step1TargetRole({ onSubmit, initialRole }) {
                   setRole('');
                   setCustomRole('');
                 }}
-                className="text-[11px] font-bold text-[#6C4CF1] hover:text-[#5a3bc2] transition-colors ml-2"
+                className="text-[11px] font-bold text-primary hover:text-[#5a3bc2] transition-colors ml-2"
               >
                 Change
               </button>
@@ -180,7 +180,7 @@ export default function Step1TargetRole({ onSubmit, initialRole }) {
         <button
           onClick={handleSubmit}
           disabled={!canContinue}
-          className="w-[220px] h-[52px] bg-[#6C4CF1] hover:bg-[#5A3BC2] disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-[14px] font-semibold text-[16px] flex items-center justify-center gap-[10px] shadow-[0_4px_14px_rgba(108,76,241,0.39)] hover:shadow-[0_6px_20px_rgba(108,76,241,0.23)] hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:shadow-none transition-all duration-200 active:scale-[0.98] disabled:active:scale-100 overflow-visible"
+          className="w-[220px] h-[52px] bg-primary hover:bg-[#5A3BC2] disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-[14px] font-semibold text-[16px] flex items-center justify-center gap-[10px] shadow-[0_4px_14px_rgba(108,76,241,0.39)] hover:shadow-[0_6px_20px_rgba(108,76,241,0.23)] hover:-translate-y-0.5 disabled:hover:translate-y-0 disabled:shadow-none transition-all duration-200 active:scale-[0.98] disabled:active:scale-100 overflow-visible"
         >
           Continue <ChevronRight size={18} className="text-white" strokeWidth={2.5} />
         </button>

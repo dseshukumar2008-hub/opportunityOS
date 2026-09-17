@@ -291,7 +291,7 @@ export default function Step2bInputCollection({ sources, onSubmit, onBack, initi
         <button
           onClick={handleSubmit}
           disabled={!canContinue}
-          className="bg-[#6C4CF1] hover:bg-indigo-600 text-white font-bold rounded-xl px-8 py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+          className="bg-primary hover:bg-indigo-600 text-white font-bold rounded-xl px-8 py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
         >
           Analyze Skills
           <ChevronRight size={20} color="#FFFFFF" />

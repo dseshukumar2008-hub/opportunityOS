@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
-import { 
-  User, Mail, BookOpen, GraduationCap, Calendar, 
+import {
+  User, Mail, BookOpen, GraduationCap, Calendar,
   Edit, FileText, Award,
   Code, BarChart3, Trophy, Globe, GitBranch
 } from 'lucide-react';
 import UserAvatar from '../../components/ui/UserAvatar';
-import CareerReadinessPanel from '../../components/dashboard/CareerReadinessPanel';
 import { getUserFullName } from '../../utils/userUtils';
 import { useDashboardInsights } from '../../hooks/useDashboardInsights';
 import { useResumeInsights } from '../../hooks/useResumeInsights';
@@ -22,7 +21,7 @@ export default function ProfilePage() {
   const { score: readinessScore } = useCareerReadiness();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
+
   const profileData = {
     name: profile?.name || profile?.profile?.fullName || user?.name || getUserFullName(user, null),
     email: profile?.email || user?.email || '',
@@ -50,10 +49,10 @@ export default function ProfilePage() {
   };
 
   const skillsList = parseSkillsString(profileData.skills);
-  
+
   const hasGithub = !!profile?.githubAnalysis;
   const githubScore = profile?.githubAnalysis?.alignmentScore || 0;
-  
+
   const stats = [
     { label: 'Resume Score', value: hasInsights && atsScore ? `${atsScore}%` : 'Not analyzed', icon: FileText, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
     { label: 'Profile Completion', value: `${profileCompletion?.score ?? 0}%`, icon: Trophy, color: 'text-[#6C4CF1]', bg: 'bg-[#F4F2FF]' },
@@ -63,14 +62,14 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-[1200px] mx-auto pb-10 p-4 lg:p-6">
-      
+
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">My Profile</h1>
           <p className="text-[14px] text-slate-500 mt-1">Manage your profile and track your progress</p>
         </div>
-        <button 
+        <button
           onClick={handleEditClick}
           className="flex items-center gap-2 bg-[#6C4CF1] hover:bg-[#5b3fda] text-white px-5 py-2.5 rounded-xl text-[14px] font-bold transition-all shadow-[0_2px_10px_rgba(108,76,241,0.2)] w-full sm:w-auto justify-center"
         >
@@ -80,7 +79,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="space-y-6">
-        
+
         {/* Profile Hero Card */}
         <div className="bg-white rounded-[16px] border border-slate-100 shadow-sm p-8">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
@@ -89,12 +88,11 @@ export default function ProfilePage() {
               <div className="relative shrink-0">
                 <UserAvatar
                   src={profile?.avatar_url || profile?.avatarUrl || profile?.photoURL || user?.photoURL}
-                  name={profileData.name || profile?.name || user?.displayName}
                   alt="Profile Avatar"
                   className="w-[120px] h-[120px] rounded-full border border-slate-200 bg-slate-100 object-cover"
                 />
               </div>
-              
+
               <div className="text-center sm:text-left mt-2">
                 <h2 className="text-[24px] font-bold text-slate-900 tracking-tight mb-2">{profileData.name}</h2>
                 <div className="inline-block px-3 py-1 bg-[#F4F2FF] text-[#6C4CF1] rounded-[6px] text-[12px] font-bold mb-4">
@@ -107,7 +105,7 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
-            
+
             {/* Right Side: Academic Info */}
             <div className="flex flex-col gap-4 text-[14px] font-medium text-slate-600 lg:pl-12 lg:border-l lg:border-slate-100 lg:min-w-[280px]">
               <span className="flex items-center gap-3">
@@ -126,12 +124,9 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Career Readiness Panel */}
-        <CareerReadinessPanel />
-
         {/* Action Buttons */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
+
           {/* Personal Information (Left) */}
           <div className="bg-white rounded-[16px] border border-slate-100 shadow-sm p-7 flex flex-col">
             <div className="flex items-center gap-3 mb-6">
@@ -140,7 +135,7 @@ export default function ProfilePage() {
               </div>
               <h3 className="text-[16px] font-bold text-slate-900">Personal Information</h3>
             </div>
-            
+
             <div className="flex-1 flex flex-col">
               <div className="flex justify-between items-center py-4 border-b border-slate-100">
                 <span className="text-[13px] font-bold text-slate-900">Full Name</span>
@@ -158,7 +153,7 @@ export default function ProfilePage() {
                 <span className="text-[13px] font-bold text-slate-900">College</span>
                 <span className="text-[13px] text-slate-500 font-medium">{profileData.college}</span>
               </div>
-              <div className="flex justify-between items-center py-4 border-b border-slate-100">
+              <div className="flex justify-between items-center py-4 bdaworder-b border-slate-100">
                 <span className="text-[13px] font-bold text-slate-900">Branch</span>
                 <span className="text-[13px] text-slate-500 font-medium">{profileData.branch}</span>
               </div>
@@ -175,7 +170,7 @@ export default function ProfilePage() {
 
           {/* Right Column (Skills & About Me) */}
           <div className="space-y-6 flex flex-col">
-            
+
             {/* Skills */}
             <div className="bg-white rounded-[16px] border border-slate-100 shadow-sm p-7">
               <div className="flex items-center gap-3 mb-6">
@@ -186,7 +181,7 @@ export default function ProfilePage() {
               </div>
               <div className="flex flex-wrap gap-2.5">
                 {skillsList.map((skill, index) => (
-                  <span 
+                  <span
                     key={index}
                     className="px-4 py-1.5 bg-[#F4F2FF] text-[#6C4CF1] text-[13px] font-bold rounded-[8px] cursor-default"
                   >
@@ -269,7 +264,7 @@ export default function ProfilePage() {
                   <div className="flex flex-col pt-0.5">
                     <span className="text-2xl font-bold text-slate-900 leading-none mb-1.5">{stat.value}</span>
                     <span className="text-[12px] font-medium text-slate-500 leading-tight">
-                      {stat.label.split(' ')[0]}<br/>{stat.label.split(' ')[1]}
+                      {stat.label.split(' ')[0]}<br />{stat.label.split(' ')[1]}
                     </span>
                   </div>
                 </div>
@@ -280,10 +275,10 @@ export default function ProfilePage() {
 
       </div>
       {/* Edit Profile Modal */}
-      <EditProfileModal 
-        isOpen={isEditModalOpen} 
-        onClose={() => setIsEditModalOpen(false)} 
-        initialData={profileData} 
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        initialData={profileData}
       />
 
     </div>

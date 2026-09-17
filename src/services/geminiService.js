@@ -578,11 +578,31 @@ OUTPUT ONLY RAW, VALID JSON. Do not include markdown formatting, \`\`\`json fenc
         throw new Error("Invalid response from Gemini API");
       }
 
+      if (rawProjects.length === 0) {
+        throw new Error("Invalid response from Gemini API: No projects returned");
+      }
+
+      for (const proj of rawProjects) {
+        if (
+          !proj ||
+          typeof proj !== "object" ||
+          typeof proj.title !== "string" ||
+          !proj.title.trim() ||
+          typeof proj.description !== "string" ||
+          !proj.description.trim() ||
+          !Array.isArray(proj.technologies) ||
+          typeof proj.whyThisProject !== "string" ||
+          !proj.whyThisProject.trim()
+        ) {
+          throw new Error("Invalid project recommendation format returned by AI");
+        }
+      }
+
       const formattedProjects = rawProjects.map(proj => createRecommendation({
-        title: proj?.title || "Untitled Project",
-        description: proj?.description || "A recommended project to build your skills.",
-        technologies: Array.isArray(proj?.technologies) ? proj.technologies : [],
-        whyThisProject: proj?.whyThisProject || "This project is highly recommended for your target role.",
+        title: proj.title,
+        description: proj.description,
+        technologies: proj.technologies,
+        whyThisProject: proj.whyThisProject,
         isMock: false
       }));
 

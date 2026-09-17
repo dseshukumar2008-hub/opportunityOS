@@ -128,7 +128,7 @@ app.post('/api/ai/generate', verifyAuth, async (req, res) => {
 
 async function callGemini(apiKey, prompt, responseType, options = {}) {
   if (!apiKey) throw new Error("GEMINI_API_KEY is not configured on the server.");
-  const modelName = options.model || (responseType === "json" ? "gemini-2.5-flash" : "gemini-1.5-pro");
+  const modelName = options.model || "gemini-3.5-flash";
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   
   let finalContents;

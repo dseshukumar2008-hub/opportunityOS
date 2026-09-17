@@ -218,7 +218,7 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
         >
           {(messages || []).length === 0 && !isTyping && (
              <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-[#6C4CF1] mb-4">
+                <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-primary mb-4">
                   <Bot size={32} />
                 </div>
                 <h3 className="text-[16px] font-bold text-slate-900 mb-2">Ready to assist you</h3>
@@ -232,7 +232,7 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
               <div key={msg.id || index} className={`flex ${isUser ? 'justify-end' : 'justify-start'} group/msg`}>
                 <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-[14px] relative ${
                   isUser 
-                    ? 'bg-[#6C4CF1] text-white rounded-br-none shadow-md shadow-indigo-500/10' 
+                    ? 'bg-primary text-white rounded-br-none shadow-md shadow-indigo-500/10' 
                     : 'bg-white text-slate-700 rounded-bl-none shadow-sm border border-slate-100'
                 }`}>
                   {isUser ? (
@@ -249,7 +249,7 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                       </button>
-                      <div className="prose prose-sm prose-slate max-w-none prose-p:leading-relaxed prose-a:text-[#6C4CF1] prose-strong:text-slate-900">
+                      <div className="prose prose-sm prose-slate max-w-none prose-p:leading-relaxed prose-a:text-primary prose-strong:text-slate-900">
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
                       </div>
                     </>
@@ -262,9 +262,9 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
           {isTyping && (
             <div className="flex justify-start">
               <div className="bg-white border border-slate-100 rounded-2xl rounded-bl-none px-4 py-3 shadow-sm flex items-center gap-1.5 h-[44px]">
-                <div className="w-1.5 h-1.5 bg-[#6C4CF1]/60 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                <div className="w-1.5 h-1.5 bg-[#6C4CF1]/60 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                <div className="w-1.5 h-1.5 bg-[#6C4CF1]/60 rounded-full animate-bounce"></div>
+                <div className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce"></div>
               </div>
             </div>
           )}
@@ -279,7 +279,7 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
                 <button
                   key={i}
                   onClick={() => { setInput(prompt); }}
-                  className="px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 hover:text-[#6C4CF1] border border-slate-200 hover:border-indigo-200 rounded-full text-[12px] font-semibold text-slate-600 transition-colors"
+                  className="px-3 py-1.5 bg-slate-50 hover:bg-indigo-50 hover:text-primary border border-slate-200 hover:border-indigo-200 rounded-full text-[12px] font-semibold text-slate-600 transition-colors"
                 >
                   {prompt}
                 </button>
@@ -295,13 +295,13 @@ export default function OpportunityOSCopilot({ mode = 'student', contextData }) 
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask Copilot..."
               maxLength={1000}
-              className="w-full pl-4 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#6C4CF1] focus:ring-4 focus:ring-[#6C4CF1]/10 transition-all"
+              className="w-full pl-4 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-4 focus:ring-[#6C4CF1]/10 transition-all"
             />
             <button
               type="submit"
               disabled={!input.trim() || isTyping}
               aria-label="Send Message"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#6C4CF1] hover:bg-indigo-600 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-lg flex items-center justify-center transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-primary hover:bg-indigo-600 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-lg flex items-center justify-center transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none"
             >
               {isTyping ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
             </button>

@@ -40,3 +40,5 @@ export default function ProjectRecommendationCard({ project }) {
     </div>
   );
 }
+
+

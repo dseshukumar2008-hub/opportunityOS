@@ -60,17 +60,17 @@ function OptionButton({ label, icon, selected, onClick }) {
       onClick={onClick}
       className={`relative flex flex-col items-start gap-2 p-4 rounded-2xl border-2 text-left transition-all duration-200 ${
         selected
-          ? 'border-[#6C4CF1] bg-[#6C4CF1]/5 shadow-md'
+          ? 'border-primary bg-primary/5 shadow-md'
           : 'border-slate-100 bg-white hover:border-indigo-200 hover:bg-slate-50'
       }`}
     >
       {selected && (
-        <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-[#6C4CF1] flex items-center justify-center">
+        <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
           <CheckCircle2 size={12} strokeWidth={3} className="text-white" />
         </div>
       )}
       {icon && <span className="text-2xl leading-none">{icon}</span>}
-      <span className={`text-[13px] font-bold leading-snug ${selected ? 'text-[#6C4CF1]' : 'text-slate-800'}`}>{label}</span>
+      <span className={`text-[13px] font-bold leading-snug ${selected ? 'text-primary' : 'text-slate-800'}`}>{label}</span>
     </button>
   );
 }
@@ -81,18 +81,18 @@ function CareerOptionButton({ label, icon: Icon, desc, selected, onClick }) {
       onClick={onClick}
       className={`relative flex flex-col items-start gap-2 p-4 rounded-2xl border text-left transition-all duration-200 h-[115px] ${
         selected
-          ? 'border-[#6C4CF1] bg-[#6C4CF1]/5 shadow-md shadow-indigo-100'
-          : 'border-slate-200 bg-white hover:border-[#6C4CF1]/40 hover:shadow-md hover:-translate-y-0.5'
+          ? 'border-primary bg-primary/5 shadow-md shadow-indigo-100'
+          : 'border-slate-200 bg-white hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5'
       }`}
     >
       {selected && (
-        <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-[#6C4CF1] flex items-center justify-center">
+        <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
           <CheckCircle2 size={12} strokeWidth={3} className="text-white" />
         </div>
       )}
-      {Icon && <Icon size={20} className={selected ? 'text-[#6C4CF1]' : 'text-slate-500'} />}
+      {Icon && <Icon size={20} className={selected ? 'text-primary' : 'text-slate-500'} />}
       <div className="mt-auto w-full">
-        <span className={`block text-[13px] font-bold leading-tight mb-1 truncate ${selected ? 'text-[#6C4CF1]' : 'text-slate-800'}`}>{label}</span>
+        <span className={`block text-[13px] font-bold leading-tight mb-1 truncate ${selected ? 'text-primary' : 'text-slate-800'}`}>{label}</span>
         <span className={`block text-[11px] font-medium leading-tight line-clamp-2 ${selected ? 'text-indigo-600/80' : 'text-slate-500'}`}>{desc}</span>
       </div>
     </button>
@@ -111,7 +111,7 @@ function StepTrack({ current }) {
         return (
           <div key={s.num} className="flex items-center gap-1.5">
             <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-              past ? 'bg-emerald-500' : active ? 'bg-[#6C4CF1]' : 'bg-slate-100'
+              past ? 'bg-emerald-500' : active ? 'bg-primary' : 'bg-slate-100'
             }`}>
               {past
                 ? <CheckCircle2 size={14} className="text-white" strokeWidth={3} />
@@ -158,7 +158,7 @@ function GeneratingScreen({ targetCareer }) {
       <h2 className="text-2xl font-extrabold text-slate-900 mb-2">Building Your Career OS</h2>
       <p className="text-slate-500 text-sm font-medium mb-8">
         Creating a personalized roadmap for{' '}
-        <span className="text-[#6C4CF1] font-bold">{targetCareer}</span>
+        <span className="text-primary font-bold">{targetCareer}</span>
       </p>
       <div className="space-y-3 w-full max-w-xs">
         {GEN_STAGES.map((stage, i) => (
@@ -168,7 +168,7 @@ function GeneratingScreen({ targetCareer }) {
           >
             <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
               i < stageIdx   ? 'bg-emerald-500' :
-              i === stageIdx ? 'bg-[#6C4CF1] animate-pulse' : 'bg-slate-200'
+              i === stageIdx ? 'bg-primary animate-pulse' : 'bg-slate-200'
             }`}>
               {i < stageIdx
                 ? <CheckCircle2 size={11} strokeWidth={3} className="text-white" />
@@ -352,7 +352,7 @@ export default function RoadmapWizard({ onGenerate, isGenerating, genError }) {
             className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-white transition-all disabled:opacity-40 ${
               step === 5
                 ? 'bg-gradient-to-r from-indigo-500 to-[#6C4CF1] hover:shadow-lg hover:shadow-indigo-200 hover:-translate-y-0.5'
-                : 'bg-[#6C4CF1] hover:bg-indigo-700'
+                : 'bg-primary hover:bg-indigo-700'
             }`}
           >
             {step === 5

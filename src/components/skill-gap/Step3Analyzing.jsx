@@ -106,8 +106,8 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
       <div className="flex flex-col items-center text-center mb-8">
         <div className="w-20 h-20 bg-[#F4F2FF] rounded-full flex items-center justify-center mb-6 relative">
 
-          <div className="absolute inset-0 border-4 border-[#6C4CF1] border-t-transparent rounded-full animate-spin opacity-30" />
-          <div className="absolute inset-[-8px] border-2 border-[#6C4CF1] border-b-transparent rounded-full animate-spin-[3s_linear_infinite] opacity-10" />
+          <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin opacity-30" />
+          <div className="absolute inset-[-8px] border-2 border-primary border-b-transparent rounded-full animate-spin-[3s_linear_infinite] opacity-10" />
         </div>
         <h1 className="text-2xl font-black text-slate-900 mb-2">Analyzing Your Skills</h1>
         <p className="text-slate-500 font-medium">OpportunityOS Copilot is generating your report...</p>
@@ -129,12 +129,12 @@ export default function Step3Analyzing({ targetRole, sources, inputData, onCompl
                 {isDone ? (
                   <CheckCircle2 size={24} className="text-[#10B981]" />
                 ) : isActive ? (
-                  <Loader2 size={24} className="text-[#6C4CF1] animate-spin" />
+                  <Loader2 size={24} className="text-primary animate-spin" />
                 ) : (
                   <div className="w-6 h-6 rounded-full border-2 border-slate-300" />
                 )}
               </div>
-              <span className={`font-bold ${isActive ? 'text-[#6C4CF1]' :
+              <span className={`font-bold ${isActive ? 'text-primary' :
                 isDone ? 'text-slate-700' : 'text-slate-500'
                 }`}>
                 {step}

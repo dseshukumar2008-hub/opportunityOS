@@ -154,7 +154,7 @@ export default function RecommendationHistoryPage() {
           <div className="flex items-center gap-2">
             <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-[#6C4CF1] rounded-full transition-all duration-1000" 
+                className="h-full bg-primary rounded-full transition-all duration-1000" 
                 style={{ width: `${newestSnapshot.atsScore || 85}%` }}
               />
             </div>
@@ -200,7 +200,7 @@ export default function RecommendationHistoryPage() {
           />
         </div>
 
-        <div className="bg-[#6C4CF1] rounded-2xl p-6 shadow-md text-white flex flex-col justify-between relative overflow-hidden">
+        <div className="bg-primary rounded-2xl p-6 shadow-md text-white flex flex-col justify-between relative overflow-hidden">
           <div className="absolute top-0 right-0 p-6 opacity-[0.07] translate-x-4 -translate-y-4">
             <Award size={180} />
           </div>

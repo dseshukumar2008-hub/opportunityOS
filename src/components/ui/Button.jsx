@@ -18,7 +18,7 @@ const Button = forwardRef(({
   
   // Variant classes
   const variants = {
-    primary: 'bg-[#6C4CF1] hover:bg-indigo-700 text-white shadow-sm hover:shadow-md focus-visible:ring-[#6C4CF1]',
+    primary: 'bg-primary hover:bg-indigo-700 text-white shadow-sm hover:shadow-md focus-visible:ring-[#6C4CF1]',
     secondary: 'bg-slate-100 hover:bg-slate-200 text-slate-700 focus-visible:ring-slate-400',
     outline: 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 focus-visible:ring-slate-400 shadow-sm',
     danger: 'bg-red-600 hover:bg-red-700 text-white shadow-sm hover:shadow-md focus-visible:ring-red-600',

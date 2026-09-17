@@ -12,7 +12,7 @@ import ConfirmationModal from '../common/ConfirmationModal';
 import { useModalBehavior } from '../../hooks/useModalBehavior';
 
 const PHASE_COLORS = [
-  { bg: 'bg-[#6C4CF1]', text: 'text-[#6C4CF1]', light: 'bg-indigo-50', border: 'border-[#6C4CF1]' },
+  { bg: 'bg-primary', text: 'text-primary', light: 'bg-indigo-50', border: 'border-primary' },
   { bg: 'bg-emerald-500', text: 'text-emerald-500', light: 'bg-emerald-50', border: 'border-emerald-400' },
   { bg: 'bg-amber-500', text: 'text-amber-500', light: 'bg-amber-50', border: 'border-amber-400' },
   { bg: 'bg-blue-500', text: 'text-blue-500', light: 'bg-blue-50', border: 'border-blue-400' },
@@ -69,7 +69,7 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
   const Icon = index === 0 ? BookOpen : index === 1 ? Code : index === 2 ? FolderOpen : index === 3 ? Briefcase : Target;
 
   return (
-    <div className={`bg-white rounded-2xl border transition-all duration-300 mb-4 ${isActive ? 'border-[#6C4CF1]/30 shadow-[0_8px_30px_rgba(108,76,241,0.08)]' : 'border-slate-200 shadow-sm hover:border-slate-300'}`}>
+    <div className={`bg-white rounded-2xl border transition-all duration-300 mb-4 ${isActive ? 'border-primary/30 shadow-[0_8px_30px_rgba(108,76,241,0.08)]' : 'border-slate-200 shadow-sm hover:border-slate-300'}`}>
       
       {/* Clickable Header */}
       <div 
@@ -80,13 +80,13 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
         className="py-3 px-5 md:py-4 md:px-6 flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/50 transition-colors rounded-t-2xl outline-none focus-visible:ring-2 focus-visible:ring-[#6C4CF1]"
       >
         <div className="flex items-center gap-4 overflow-hidden">
-          <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 transition-colors ${isActive ? 'bg-[#6C4CF1] text-white shadow-md shadow-indigo-200' : `${pcol.light} ${pcol.text}`}`}>
+          <div className={`w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 transition-colors ${isActive ? 'bg-primary text-white shadow-md shadow-indigo-200' : `${pcol.light} ${pcol.text}`}`}>
             <Icon size={22} />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-3 mb-0.5">
               <h3 className="text-lg font-semibold text-slate-900 truncate leading-tight">{phase.title}</h3>
-              {isActive && <span className="shrink-0 px-2 py-0.5 bg-indigo-50 text-[#6C4CF1] text-[10px] font-bold rounded-md uppercase tracking-wider leading-none">Current Phase</span>}
+              {isActive && <span className="shrink-0 px-2 py-0.5 bg-indigo-50 text-primary text-[10px] font-bold rounded-md uppercase tracking-wider leading-none">Current Phase</span>}
             </div>
             <p className="text-sm text-slate-500 truncate leading-tight">{phase.description}</p>
           </div>
@@ -112,7 +112,7 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`whitespace-nowrap px-4 py-4 text-sm font-bold border-b-2 transition-colors ${activeTab === tab ? 'border-[#6C4CF1] text-[#6C4CF1]' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
+                className={`whitespace-nowrap px-4 py-4 text-sm font-bold border-b-2 transition-colors ${activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
               >
                 {tab}
               </button>
@@ -148,10 +148,10 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
                       tabIndex={0}
                       onClick={() => toggleTask(t.id, !isDone)} 
                       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTask(t.id, !isDone); } }}
-                      className="flex items-center justify-between p-4 rounded-2xl border border-slate-200 hover:border-[#6C4CF1]/30 hover:shadow-sm transition-all cursor-pointer group bg-white outline-none focus-visible:ring-2 focus-visible:ring-[#6C4CF1]"
+                      className="flex items-center justify-between p-4 rounded-2xl border border-slate-200 hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer group bg-white outline-none focus-visible:ring-2 focus-visible:ring-[#6C4CF1]"
                     >
                       <div className="flex items-center gap-4 pr-4">
-                        <button className={`shrink-0 transition-colors ${isDone ? 'text-emerald-500' : 'text-slate-300 group-hover:text-[#6C4CF1]'}`}>
+                        <button className={`shrink-0 transition-colors ${isDone ? 'text-emerald-500' : 'text-slate-300 group-hover:text-primary'}`}>
                           {isDone ? <CheckCircle2 size={24}/> : <Circle size={24}/>}
                         </button>
                         <span className={`text-[14px] font-bold ${isDone ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{t.title}</span>
@@ -183,13 +183,13 @@ function PhaseCard({ phase, index, isActive, isExpanded, onToggle, completedTask
                       href={finalUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-4 bg-white border border-slate-200 rounded-2xl flex flex-col gap-2 cursor-pointer hover:shadow-sm hover:border-[#6C4CF1]/30 hover:-translate-y-0.5 transition-all group"
+                      className="p-4 bg-white border border-slate-200 rounded-2xl flex flex-col gap-2 cursor-pointer hover:shadow-sm hover:border-primary/30 hover:-translate-y-0.5 transition-all group"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="w-max px-2 py-1 bg-indigo-50 text-[#6C4CF1] text-[10px] font-black uppercase rounded">{r.type || 'Resource'}</span>
+                        <span className="w-max px-2 py-1 bg-indigo-50 text-primary text-[10px] font-black uppercase rounded">{r.type || 'Resource'}</span>
                         {r.provider && <span className="text-[11px] font-bold text-slate-400 truncate">{r.provider}</span>}
                       </div>
-                      <p className="font-bold text-slate-800 text-sm line-clamp-2 group-hover:text-[#6C4CF1] transition-colors">{r.title}</p>
+                      <p className="font-bold text-slate-800 text-sm line-clamp-2 group-hover:text-primary transition-colors">{r.title}</p>
                     </a>
                   );
                 })}
@@ -376,7 +376,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
         {/* Stats Strip */}
         <div className="relative bg-white rounded-2xl p-3 px-5 flex flex-wrap items-center justify-between gap-3 z-10 shadow-lg text-slate-800">
           <div className="flex items-center gap-3 flex-1 min-w-[120px]">
-            <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center"><TrendingUp size={16} className="text-[#6C4CF1]"/></div>
+            <div className="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center"><TrendingUp size={16} className="text-primary"/></div>
             <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Phases</p><p className="text-[15px] font-black leading-tight">{phases.length}</p></div>
           </div>
           <div className="hidden sm:block w-px h-8 bg-slate-100"></div>
@@ -399,7 +399,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
 
       {/* ── RESET MODAL ── */}
       {showResetModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setShowResetModal(false)}>
+        <div className="modal-overlay animate-in fade-in duration-200" onClick={() => setShowResetModal(false)}>
           <div 
             ref={resetModalRef}
             tabIndex={-1}
@@ -427,7 +427,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
                   setShowResetModal(false);
                   onReset();
                 }}
-                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[#6C4CF1] hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all"
+                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-primary hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all"
               >
                 Start Again
               </button>
@@ -466,7 +466,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
             
             const isPathActive = isDone || (i < activePhaseIdx);
             
-            const iconBg = isDone ? 'bg-[#6C4CF1]' : isActive ? 'bg-[#6C4CF1]' : 'bg-white';
+            const iconBg = isDone ? 'bg-primary' : isActive ? 'bg-primary' : 'bg-white';
             const iconBorder = isDone || isActive ? 'border-transparent' : 'border-slate-200';
             const iconCol = isDone || isActive ? 'text-white' : 'text-slate-400';
             
@@ -482,8 +482,8 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
                      <Target size={28} className={iconCol}/>}
                   </div>
                   <div className="text-center mt-1 w-24">
-                    <p className={`text-[12px] sm:text-[11px] font-bold ${isActive ? 'text-[#6C4CF1]' : 'text-slate-600'}`}>{p.title}</p>
-                    <p className={`text-[11px] sm:text-[10px] font-extrabold ${isDone ? 'text-[#6C4CF1]' : 'text-slate-400'}`}>
+                    <p className={`text-[12px] sm:text-[11px] font-bold ${isActive ? 'text-primary' : 'text-slate-600'}`}>{p.title}</p>
+                    <p className={`text-[11px] sm:text-[10px] font-extrabold ${isDone ? 'text-primary' : 'text-slate-400'}`}>
                       {tks.length > 0 ? Math.round((tks.filter(t => completedTasks.includes(t.id)).length / tks.length) * 100) : 100}%
                     </p>
                   </div>
@@ -494,9 +494,9 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
                   <div className="flex sm:flex-1 items-center justify-center py-3 sm:py-0 sm:px-2 w-full h-12 sm:h-auto">
                     <div className="flex items-center justify-center relative w-1 h-full sm:w-full sm:h-1">
                       {/* Line */}
-                      <div className={`absolute w-1 h-full sm:w-full sm:h-[3px] rounded-full ${isPathActive ? 'bg-[#6C4CF1]' : 'bg-slate-100'}`}></div>
+                      <div className={`absolute w-1 h-full sm:w-full sm:h-[3px] rounded-full ${isPathActive ? 'bg-primary' : 'bg-slate-100'}`}></div>
                       {/* Arrow Icon */}
-                      <div className={`relative z-10 bg-white p-1 rounded-full ${isPathActive ? 'text-[#6C4CF1]' : 'text-slate-300'}`}>
+                      <div className={`relative z-10 bg-white p-1 rounded-full ${isPathActive ? 'text-primary' : 'text-slate-300'}`}>
                         <ArrowRight size={16} className="rotate-90 sm:rotate-0" />
                       </div>
                     </div>
@@ -532,7 +532,7 @@ export default function RoadmapDashboard({ roadmap, toggleTask, onReset }) {
           {/* Current Focus */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <Target size={16} className="text-[#6C4CF1]"/>
+              <Target size={16} className="text-primary"/>
               <h3 className="text-[14px] font-extrabold text-slate-900">Current Focus</h3>
             </div>
             <div className="bg-indigo-50/60 rounded-2xl p-6 border border-indigo-100/50">

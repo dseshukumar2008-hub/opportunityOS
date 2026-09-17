@@ -6,7 +6,7 @@ export default function AuthLayout({ children }) {
     <div className="min-h-screen bg-white flex font-sans">
       
       {/* Left Sidebar - Hidden on mobile, visible on lg screens */}
-      <div className="hidden lg:flex lg:flex-col lg:w-[45%] xl:w-5/12 bg-[#6C4CF1] text-white p-12 xl:p-16 relative overflow-hidden">
+      <div className="hidden lg:flex lg:flex-col lg:w-[45%] xl:w-5/12 bg-primary text-white p-12 xl:p-16 relative overflow-hidden">
         
         {/* Background Decorative Pattern */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
@@ -74,7 +74,7 @@ export default function AuthLayout({ children }) {
             <div className="relative flex items-center justify-center w-8 h-8">
               <div className="absolute inset-0 border-4 border-indigo-600 rounded-full opacity-50"></div>
               <div className="absolute inset-1 border-4 border-indigo-600 rounded-full opacity-80"></div>
-              <div className="absolute inset-2 bg-[#6C4CF1] rounded-full"></div>
+              <div className="absolute inset-2 bg-primary rounded-full"></div>
             </div>
             <span className="font-bold text-2xl tracking-tight text-slate-900">OpportunityOS</span>
           </Link>

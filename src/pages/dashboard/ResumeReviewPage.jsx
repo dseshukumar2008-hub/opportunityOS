@@ -7,7 +7,7 @@ import ResumeUploadZone from '../../components/resume/ResumeUploadZone';
 import ResumeAnalysisResults from '../../components/resume/ResumeAnalysisResults';
 import ResumeSmartSuggestions from '../../components/resume/ResumeSmartSuggestions';
 import ResumeContentSuggestions from '../../components/resume/ResumeContentSuggestions';
-import ResumeHistory from '../../components/resume/ResumeHistory';
+
 import ResumeAnalysisHowItWorksModal from '../../components/resume/ResumeAnalysisHowItWorksModal';
 import { WidgetErrorBoundary } from '../../components/common/GlobalErrorBoundary';
 import { Sparkles, FileText, Activity, CheckCircle2, Info, Lock } from 'lucide-react';
@@ -23,12 +23,11 @@ const LOADING_STEPS = [
 
 export default function ResumeReviewPage() {
   const { analyzeResume, resetAnalysis, isAnalyzing, analysisStatus, uploadProgress, progressText, analysisResults } = useResumeAnalysis();
-  const { history, addHistory, getBestVersion, compareVersions } = useResumeHistory();
+  const { addHistory } = useResumeHistory();
   const { resumeData, activeResumeId, getResumeStrength } = useResume();
   const { matchResume } = useMatchResume();
 
   const hasAnalysis = analysisStatus === 'completed' && !!analysisResults;
-  const hasHistory = history && history.length > 0;
 
   const [activeTab, setActiveTab] = useState('Review');
   const [showHowItWorks, setShowHowItWorks] = useState(false);
@@ -220,15 +219,7 @@ export default function ResumeReviewPage() {
                   )}
 
 
-                  {hasHistory && (
-                    <div className="w-full mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                      <ResumeHistory 
-                        history={history}
-                        getBestVersion={getBestVersion}
-                        compareVersions={compareVersions}
-                      />
-                    </div>
-                  )}
+                  
                 </div>
               )}
 

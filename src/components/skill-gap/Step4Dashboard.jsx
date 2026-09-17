@@ -52,7 +52,7 @@ export default function Step4Dashboard({ data, onReset }) {
         </p>
         <button 
           onClick={onReset}
-          className="px-8 py-3 bg-[#6C4CF1] hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-md flex items-center gap-2"
+          className="px-8 py-3 bg-primary hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-md flex items-center gap-2"
         >
           <RefreshCw size={18} /> Retry Analysis
         </button>
@@ -73,7 +73,7 @@ export default function Step4Dashboard({ data, onReset }) {
         </div>
         <button 
           onClick={onReset}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-[#6C4CF1] hover:bg-indigo-50 hover:text-[#6C4CF1] text-slate-700 rounded-xl font-bold transition-all shadow-sm shrink-0"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:border-primary hover:bg-indigo-50 hover:text-primary text-slate-700 rounded-xl font-bold transition-all shadow-sm shrink-0"
         >
           <RefreshCw size={16} /> Start New Analysis
         </button>
@@ -87,7 +87,7 @@ export default function Step4Dashboard({ data, onReset }) {
           <div className="bg-white rounded-[24px] border border-slate-100 p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow duration-300 h-full w-full">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
-                <Briefcase size={28} className="text-[#6C4CF1]" />
+                <Briefcase size={28} className="text-primary" />
               </div>
               <div>
                 <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Target Role</p>
@@ -95,7 +95,7 @@ export default function Step4Dashboard({ data, onReset }) {
               </div>
             </div>
             <div className="mt-auto pt-4 border-t border-slate-50">
-              <button onClick={onReset} className="text-[13px] font-bold text-[#6C4CF1] hover:text-indigo-700 transition-colors">Change Goal →</button>
+              <button onClick={onReset} className="text-[13px] font-bold text-primary hover:text-indigo-700 transition-colors">Change Goal →</button>
             </div>
           </div>
 
@@ -106,7 +106,7 @@ export default function Step4Dashboard({ data, onReset }) {
             </div>
             <div className="flex-1 flex flex-col justify-center">
               <p className="font-black text-slate-900 text-[18px] mb-2 leading-tight">Overall Readiness</p>
-              <p className="text-[13px] text-slate-500 font-medium leading-snug">You are <strong className="text-[#6C4CF1]">{readinessScore}%</strong> ready for your target role.</p>
+              <p className="text-[13px] text-slate-500 font-medium leading-snug">You are <strong className="text-primary">{readinessScore}%</strong> ready for your target role.</p>
             </div>
           </div>
 
@@ -126,7 +126,7 @@ export default function Step4Dashboard({ data, onReset }) {
         {data?.aiAdvice && (
           <div className="bg-indigo-50/50 border border-indigo-100 rounded-[24px] p-6 w-full shadow-sm flex flex-col sm:flex-row sm:items-start gap-4">
             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
-              <Sparkles size={24} className="text-[#6C4CF1]" />
+              <Sparkles size={24} className="text-primary" />
             </div>
             <div className="flex-1">
               <h3 className="font-black text-slate-900 text-[16px] mb-2">AI Career Advice</h3>
@@ -157,7 +157,7 @@ export default function Step4Dashboard({ data, onReset }) {
               </div>
               <div className="flex flex-wrap gap-2 relative z-10">
                 {(showAllSkills ? currentSkills : currentSkills?.slice(0, 8) || []).map(s => (
-                  <span key={s} className="px-3 py-1.5 bg-white border border-slate-200 text-slate-700 text-[12px] font-bold rounded-lg shadow-sm hover:border-[#6C4CF1] transition-colors hover:text-[#6C4CF1] cursor-default">
+                  <span key={s} className="px-3 py-1.5 bg-white border border-slate-200 text-slate-700 text-[12px] font-bold rounded-lg shadow-sm hover:border-primary transition-colors hover:text-primary cursor-default">
                     {s}
                   </span>
                 ))}
@@ -309,13 +309,13 @@ export default function Step4Dashboard({ data, onReset }) {
               
               {(learningPath || []).map((step, idx) => (
                 <div key={idx} className="flex flex-col items-center w-36 relative z-10 group shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-indigo-50 text-[#6C4CF1] flex items-center justify-center text-[12px] font-black mb-4 border-2 border-white ring-4 ring-white shadow-sm transition-transform group-hover:scale-110">
+                  <div className="w-8 h-8 rounded-full bg-indigo-50 text-primary flex items-center justify-center text-[12px] font-black mb-4 border-2 border-white ring-4 ring-white shadow-sm transition-transform group-hover:scale-110">
                     {idx + 1}
                   </div>
-                  <div className="w-14 h-14 bg-white rounded-[16px] border border-slate-200 group-hover:border-[#6C4CF1] group-hover:bg-[#6C4CF1]/5 flex items-center justify-center mb-4 shadow-sm transition-all">
-                    <Code size={24} className="text-slate-400 group-hover:text-[#6C4CF1] transition-colors" />
+                  <div className="w-14 h-14 bg-white rounded-[16px] border border-slate-200 group-hover:border-primary group-hover:bg-primary/5 flex items-center justify-center mb-4 shadow-sm transition-all">
+                    <Code size={24} className="text-slate-400 group-hover:text-primary transition-colors" />
                   </div>
-                  <h5 className="text-[13px] font-bold text-slate-800 text-center leading-tight mb-1.5 px-2 group-hover:text-[#6C4CF1] transition-colors">{step.title}</h5>
+                  <h5 className="text-[13px] font-bold text-slate-800 text-center leading-tight mb-1.5 px-2 group-hover:text-primary transition-colors">{step.title}</h5>
                   <span className="text-[11px] font-bold text-slate-400 bg-slate-50 px-2.5 py-0.5 rounded-md">{step.time}</span>
                 </div>
               ))}

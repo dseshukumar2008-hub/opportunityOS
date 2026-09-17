@@ -48,7 +48,7 @@ export default function ResumeHistory({ history, getBestVersion, compareVersions
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Trend Chart */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 p-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
           <div className="flex items-center gap-2 mb-6">
             <TrendingUp size={18} className="text-indigo-500" />
             <h3 className="text-lg font-bold text-slate-900">Improvement Trend</h3>
@@ -132,7 +132,7 @@ export default function ResumeHistory({ history, getBestVersion, compareVersions
 
       {/* Comparison Engine */}
       {history.length > 1 && (
-        <div className="bg-white rounded-2xl shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <History size={18} className="text-indigo-500" />

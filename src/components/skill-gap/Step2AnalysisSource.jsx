@@ -42,7 +42,7 @@ export default function Step2AnalysisSource({ onSubmit, onBack, initialSources }
               onClick={() => toggleSource(source.id)}
               className={`flex flex-col items-start p-3 sm:p-4 rounded-xl border-2 transition-all text-left max-h-[140px] ${
                 isSelected 
-                  ? 'border-[#6C4CF1] bg-indigo-50/50 shadow-sm' 
+                  ? 'border-primary bg-indigo-50/50 shadow-sm' 
                   : 'border-slate-100 bg-white hover:border-indigo-200 hover:bg-slate-50 hover:shadow-md'
               }`}
             >
@@ -51,12 +51,12 @@ export default function Step2AnalysisSource({ onSubmit, onBack, initialSources }
                   <Icon size={18} className={source.color} />
                 </div>
                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
-                  isSelected ? 'border-[#6C4CF1] bg-[#6C4CF1]' : 'border-slate-300'
+                  isSelected ? 'border-primary bg-primary' : 'border-slate-300'
                 }`}>
                   {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                 </div>
               </div>
-              <h3 className={`font-bold text-[14px] mb-0.5 ${isSelected ? 'text-[#6C4CF1]' : 'text-slate-800'}`}>
+              <h3 className={`font-bold text-[14px] mb-0.5 ${isSelected ? 'text-primary' : 'text-slate-800'}`}>
                 {source.title}
               </h3>
               <p className="text-[12px] text-slate-500 font-medium leading-tight">
@@ -77,7 +77,7 @@ export default function Step2AnalysisSource({ onSubmit, onBack, initialSources }
         <button
           onClick={handleSubmit}
           disabled={selected.length === 0}
-          className="bg-[#6C4CF1] hover:bg-indigo-600 text-white font-bold rounded-xl px-8 py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+          className="bg-primary hover:bg-indigo-600 text-white font-bold rounded-xl px-8 py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
         >
           Continue
           <ChevronRight size={20} color="#FFFFFF" />

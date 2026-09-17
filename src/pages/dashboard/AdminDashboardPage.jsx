@@ -137,7 +137,7 @@ export default function AdminDashboardPage() {
   if (isLoading) {
     return (
       <div className="p-8 max-w-6xl mx-auto flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-[#6C4CF1] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -251,7 +251,7 @@ export default function AdminDashboardPage() {
                     {opp.skills?.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {opp.skills.map((skill, i) => (
-                          <span key={i} className="px-2.5 py-1 bg-[#F4F2FF] text-[#6C4CF1] text-xs font-bold rounded-lg">
+                          <span key={i} className="px-2.5 py-1 bg-[#F4F2FF] text-primary text-xs font-bold rounded-lg">
                             {skill}
                           </span>
                         ))}

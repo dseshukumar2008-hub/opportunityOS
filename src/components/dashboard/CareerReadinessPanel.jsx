@@ -12,7 +12,7 @@ export default function CareerReadinessPanel() {
   if (status === 'Beginner') { color = 'text-orange-500'; bg = 'bg-orange-50'; gradient = 'from-orange-400 to-orange-500'; }
   else if (status === 'Intermediate') { color = 'text-indigo-500'; bg = 'bg-indigo-50'; gradient = 'from-indigo-400 to-indigo-500'; }
   else if (status === 'Advanced') { color = 'text-emerald-500'; bg = 'bg-emerald-50'; gradient = 'from-emerald-400 to-emerald-500'; }
-  else if (status === 'Career Ready') { color = 'text-[#6C4CF1]'; bg = 'bg-[#6C4CF1]/10'; gradient = 'from-[#6C4CF1] to-[#8c74f5]'; }
+  else if (status === 'Career Ready') { color = 'text-primary'; bg = 'bg-primary/10'; gradient = 'from-[#6C4CF1] to-[#8c74f5]'; }
 
   const radius = 60;
   const circumference = 2 * Math.PI * radius;
@@ -28,7 +28,7 @@ export default function CareerReadinessPanel() {
         <p className="text-[14px] text-slate-500 max-w-md mx-auto mb-6">
           Complete your profile and resume to calculate your readiness score and get personalized improvement insights.
         </p>
-        <Link to="/profile" className="flex items-center gap-2 bg-[#6C4CF1] hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-[14px] transition-all">
+        <Link to="/profile" className="flex items-center gap-2 bg-primary hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold text-[14px] transition-all">
           Complete Profile
         </Link>
       </div>

@@ -53,7 +53,7 @@ export default function GameResultsView({ gameResult, onPlayAgain, onPlayAgainSa
   return (
     <div className="flex flex-col items-center justify-center h-full p-8 bg-white text-center">
       <div className="w-20 h-20 bg-[#EBE8FF] rounded-[20px] flex items-center justify-center mb-6 shadow-sm shadow-[#6C4CF1]/20">
-        <Trophy size={40} className="text-[#6C4CF1]" />
+        <Trophy size={40} className="text-primary" />
       </div>
 
       <h2
@@ -75,11 +75,11 @@ export default function GameResultsView({ gameResult, onPlayAgain, onPlayAgainSa
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl mb-8">
         <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex flex-col items-center">
           <p className="text-[12px] font-bold text-slate-400 uppercase tracking-wider mb-2" aria-hidden="true">Score</p>
-          <p className="text-[28px] font-black text-[#6C4CF1]" aria-label={`Score: ${visualScore} points`}>{visualScore}</p>
+          <p className="text-[28px] font-black text-primary" aria-label={`Score: ${visualScore} points`}>{visualScore}</p>
           <div className="flex flex-col items-center gap-1 mt-1">
             {isPracticeMode && <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">PRACTICE</span>}
             {isSpeedMode && <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">SPEED RUN</span>}
-            {!isPracticeMode && isNewHighScore && <span aria-label="New high score!" className="text-[10px] font-bold text-white bg-[#6C4CF1] px-2 py-0.5 rounded-full">NEW HIGH!</span>}
+            {!isPracticeMode && isNewHighScore && <span aria-label="New high score!" className="text-[10px] font-bold text-white bg-primary px-2 py-0.5 rounded-full">NEW HIGH!</span>}
             {!isPracticeMode && gameResult.isPersonalBest && !isNewHighScore && <span aria-label="New personal best!" className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">PERSONAL BEST</span>}
             {!isPracticeMode && gameResult.previousSession && !isNewHighScore && !gameResult.isPersonalBest && (
               <span className={`text-[10px] font-bold ${visualScore >= (gameResult.previousSession.score || 0) ? 'text-emerald-600' : 'text-rose-500'}`}>
@@ -112,9 +112,9 @@ export default function GameResultsView({ gameResult, onPlayAgain, onPlayAgainSa
       </div>
 
       {game === BUG_HUNTER_CONFIG.id && gameResult.totalQuestions && (
-        <div className="w-full max-w-2xl bg-[#F8F7FF] border border-[#6C4CF1]/20 rounded-2xl p-6 mb-10 text-left">
+        <div className="w-full max-w-2xl bg-[#F8F7FF] border border-primary/20 rounded-2xl p-6 mb-10 text-left">
           <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <Target size={20} className="text-[#6C4CF1]" />
+            <Target size={20} className="text-primary" />
             Session Recap
           </h3>
 
@@ -145,7 +145,7 @@ export default function GameResultsView({ gameResult, onPlayAgain, onPlayAgainSa
             </div>
             <div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Score</p>
-              <p className="text-sm font-bold text-[#6C4CF1]">{visualScore}</p>
+              <p className="text-sm font-bold text-primary">{visualScore}</p>
             </div>
           </div>
 
@@ -175,7 +175,7 @@ export default function GameResultsView({ gameResult, onPlayAgain, onPlayAgainSa
             <>
               {validLanguageStats.length > 0 && (
                 <>
-                  <div className="h-px bg-[#6C4CF1]/10 w-full my-5"></div>
+                  <div className="h-px bg-primary/10 w-full my-5"></div>
                   <div className="text-left w-full mb-6">
                     <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3">Language Performance</h3>
                     <div className="flex flex-wrap gap-3">
@@ -193,7 +193,7 @@ export default function GameResultsView({ gameResult, onPlayAgain, onPlayAgainSa
               )}
               {validCategoryStats.length > 0 && (
                 <>
-                  <div className="h-px bg-[#6C4CF1]/10 w-full my-5"></div>
+                  <div className="h-px bg-primary/10 w-full my-5"></div>
                   <div className="text-left w-full mb-6">
                     <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3">Category Breakdown</h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -211,7 +211,7 @@ export default function GameResultsView({ gameResult, onPlayAgain, onPlayAgainSa
               )}
               {missedQuestions.length > 0 && (
                 <>
-                  <div className="h-px bg-[#6C4CF1]/10 w-full my-5"></div>
+                  <div className="h-px bg-primary/10 w-full my-5"></div>
                   <div>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Bugs to Review</p>
                     <div className="flex flex-col gap-3">
@@ -297,7 +297,7 @@ export default function GameResultsView({ gameResult, onPlayAgain, onPlayAgainSa
           <>
             <button
               onClick={onPlayAgainSameSettings}
-              className="flex items-center justify-center gap-2 bg-[#6C4CF1] hover:bg-[#5A3EE0] text-white px-8 py-3.5 rounded-xl font-bold text-[15px] transition-colors shadow-md shadow-[#6C4CF1]/30 w-full sm:w-auto focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#6C4CF1] outline-none"
+              className="flex items-center justify-center gap-2 bg-primary hover:bg-[#5A3EE0] text-white px-8 py-3.5 rounded-xl font-bold text-[15px] transition-colors shadow-md shadow-[#6C4CF1]/30 w-full sm:w-auto focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#6C4CF1] outline-none"
             >
               <Play size={18} className="fill-white shrink-0" /> Play Again
             </button>
@@ -311,7 +311,7 @@ export default function GameResultsView({ gameResult, onPlayAgain, onPlayAgainSa
         ) : (
           <button
             onClick={onPlayAgain}
-            className="flex items-center justify-center gap-2 bg-[#6C4CF1] hover:bg-[#5A3EE0] text-white px-8 py-3.5 rounded-xl font-bold text-[15px] transition-colors w-full sm:w-auto outline-none"
+            className="flex items-center justify-center gap-2 bg-primary hover:bg-[#5A3EE0] text-white px-8 py-3.5 rounded-xl font-bold text-[15px] transition-colors w-full sm:w-auto outline-none"
           >
             <Play size={18} className="fill-white shrink-0" /> Play Again
           </button>

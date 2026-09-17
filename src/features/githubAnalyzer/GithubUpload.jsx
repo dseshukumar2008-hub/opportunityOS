@@ -88,7 +88,7 @@ export default function GithubUpload({ onAnalyze, loading }) {
       <div className="flex flex-col lg:flex-row items-center justify-between gap-6 mb-6">
         {/* Left: Text Content */}
         <div className="flex-1 space-y-3 text-center lg:text-left">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#F4F2FF] text-[#6C4CF1] rounded-full text-[13px] font-bold tracking-wide">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#F4F2FF] text-primary rounded-full text-[13px] font-bold tracking-wide">
             <Sparkles size={16} /> OpportunityOS GitHub Analyzer
           </div>
           <div className="flex items-center justify-between gap-4">
@@ -98,7 +98,7 @@ export default function GithubUpload({ onAnalyze, loading }) {
             <button 
               type="button"
               onClick={() => setShowHowItWorks(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 text-[#6C4CF1] hover:bg-indigo-100 transition-colors text-sm font-bold shadow-sm shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 text-primary hover:bg-indigo-100 transition-colors text-sm font-bold shadow-sm shrink-0"
             >
               <Info size={16} /> How It Works
             </button>
@@ -132,8 +132,8 @@ export default function GithubUpload({ onAnalyze, loading }) {
             </svg>
             
             {/* Glow rings */}
-            <div className="absolute inset-0 rounded-full border border-[#6C4CF1]/20 scale-[1.3]"></div>
-            <div className="absolute inset-0 rounded-full border border-[#6C4CF1]/10 scale-[1.6]"></div>
+            <div className="absolute inset-0 rounded-full border border-primary/20 scale-[1.3]"></div>
+            <div className="absolute inset-0 rounded-full border border-primary/10 scale-[1.6]"></div>
           </div>
 
           {/* Decorative Badges */}
@@ -185,7 +185,7 @@ export default function GithubUpload({ onAnalyze, loading }) {
                 className={`w-full px-4 py-2.5 bg-white border rounded-xl focus:bg-slate-50 focus:ring-4 transition-all outline-none font-medium text-slate-900 placeholder:text-slate-400 ${
                   error 
                     ? 'border-red-300 focus:border-red-400 focus:ring-red-50' 
-                    : 'border-slate-200 focus:border-[#6C4CF1] focus:ring-[#6C4CF1]/10'
+                    : 'border-slate-200 focus:border-primary focus:ring-[#6C4CF1]/10'
                 }`}
                 required
                 maxLength={39}
@@ -203,14 +203,14 @@ export default function GithubUpload({ onAnalyze, loading }) {
             {/* Target Role Field */}
             <div className="space-y-1.5">
               <label htmlFor="github-target-role" className="flex items-center gap-1.5 text-[13px] font-bold text-slate-700">
-                <Target size={14} className="text-[#6C4CF1]" /> Target Role
+                <Target size={14} className="text-primary" /> Target Role
               </label>
               <div className="relative">
                 <select
                   id="github-target-role"
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:bg-slate-50 focus:border-[#6C4CF1] focus:ring-4 focus:ring-[#6C4CF1]/10 transition-all outline-none font-medium text-slate-900 appearance-none"
+                  className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:bg-slate-50 focus:border-primary focus:ring-4 focus:ring-[#6C4CF1]/10 transition-all outline-none font-medium text-slate-900 appearance-none"
                 >
                   {ROLES.map(role => (
                     <option key={role} value={role}>{role}</option>

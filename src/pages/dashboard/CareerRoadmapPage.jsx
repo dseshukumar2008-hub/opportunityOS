@@ -44,7 +44,7 @@ export default function CareerRoadmapPage() {
         </div>
         <button
           onClick={() => window.location.reload()}
-          className="flex items-center gap-2 bg-[#6C4CF1] text-white font-bold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200"
+          className="flex items-center gap-2 bg-primary text-white font-bold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200"
         >
           <RefreshCw size={15} /> Try Again
         </button>

@@ -96,7 +96,7 @@ export default function GithubResults({ results, onReset }) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-5">
         <div>
           <h2 className="text-2xl font-extrabold text-slate-900 flex items-center gap-2 tracking-tight">
-            GitHub Analysis <span className="text-[#6C4CF1]">@{username}</span>
+            GitHub Analysis <span className="text-primary">@{username}</span>
           </h2>
           <div className="flex items-center gap-3 mt-1.5 text-sm font-medium text-slate-500">
             <span>Target Role: <strong className="text-slate-700">{targetRole}</strong></span>
@@ -125,7 +125,7 @@ export default function GithubResults({ results, onReset }) {
             const Icon = stat.icon;
             return (
               <div key={idx} className="flex flex-col p-6 lg:p-8 items-start lg:items-center text-left lg:text-center hover:bg-slate-50 transition-colors">
-                <div className="text-[#6C4CF1] bg-[#F4F2FF] w-10 h-10 rounded-[10px] flex items-center justify-center mb-4">
+                <div className="text-primary bg-[#F4F2FF] w-10 h-10 rounded-[10px] flex items-center justify-center mb-4">
                   <Icon size={18} strokeWidth={2.5} />
                 </div>
                 <span className="text-3xl font-black text-slate-900 tracking-tight mb-1.5">{stat.val}</span>
@@ -179,8 +179,8 @@ export default function GithubResults({ results, onReset }) {
            <div className="flex flex-col items-center shrink-0">
              <h3 className="text-[13px] font-bold text-slate-500 uppercase tracking-wider mb-3">Career Match</h3>
              <div className="w-[100px] h-[100px] bg-slate-50 rounded-[16px] border border-slate-100 flex flex-col items-center justify-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
-               <div className="text-4xl font-extrabold text-[#6C4CF1] tracking-tight leading-none">
-                 {alignmentScore}<span className="text-xl text-[#6C4CF1] ml-0.5">%</span>
+               <div className="text-4xl font-extrabold text-primary tracking-tight leading-none">
+                 {alignmentScore}<span className="text-xl text-primary ml-0.5">%</span>
                </div>
              </div>
            </div>
@@ -299,7 +299,7 @@ export default function GithubResults({ results, onReset }) {
       {/* 7. PERSONALIZED RECOMMENDATIONS (Next Best Actions) */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2 bg-slate-50/50">
-           <Rocket size={16} className="text-[#6C4CF1]" strokeWidth={2.5} />
+           <Rocket size={16} className="text-primary" strokeWidth={2.5} />
            <h3 className="text-sm font-bold text-slate-900 tracking-tight">Next Best Actions</h3>
         </div>
         <div className="divide-y divide-slate-100">

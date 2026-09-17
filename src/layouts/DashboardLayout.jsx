@@ -31,7 +31,7 @@ const NavItem = ({ item, isActive, navigate, setIsSidebarOpen }) => {
         setIsSidebarOpen(false);
       }}
       className={`flex items-center gap-3 px-4 py-2.5 rounded-[12px] text-[14px] font-semibold transition-colors w-full ${
-        isActive ? 'bg-[#6C4CF1]/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+        isActive ? 'bg-primary/15 text-[#6D5DF6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
       }`}
     >
       <Icon size={18} className={isActive ? 'text-[#6D5DF6]' : 'text-slate-400'} />
@@ -119,7 +119,7 @@ export default function DashboardLayout() {
             <div className="relative flex items-center justify-center w-7 h-7">
               <div className="absolute inset-0 border-[3px] border-indigo-600 rounded-full opacity-50"></div>
               <div className="absolute inset-1 border-[3px] border-indigo-600 rounded-full opacity-80"></div>
-              <div className="absolute inset-2 bg-[#6C4CF1] rounded-full"></div>
+              <div className="absolute inset-2 bg-primary rounded-full"></div>
             </div>
             <span className="font-bold tracking-tight text-slate-900">OpportunityOS</span>
           </button>

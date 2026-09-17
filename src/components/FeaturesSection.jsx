@@ -1,4 +1,4 @@
-import { ArrowRight, FileText, MessageCircle, BarChart2, Wand2 } from 'lucide-react';
+import { FileText, MessageCircle, BarChart2, Wand2 } from 'lucide-react';
 
 export default function FeaturesSection() {
   const showcases = [
@@ -37,15 +37,12 @@ export default function FeaturesSection() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl">
         {showcases.map((feature, idx) => (
-          <div key={idx} className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm flex flex-col">
+          <div key={idx} className="card-standard p-8 flex flex-col">
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 ${feature.colorClass}`}>
               {feature.icon}
             </div>
             <h3 className="text-[20px] font-bold text-slate-900 mb-2">{feature.title}</h3>
-            <p className="text-slate-600 text-[15px] leading-relaxed mb-6 flex-1">{feature.desc}</p>
-            <button className="text-indigo-600 font-bold text-[15px] flex items-center gap-1.5 w-max hover:gap-2 transition-all outline-none">
-              Learn More <ArrowRight size={18} />
-            </button>
+            <p className="text-slate-600 text-[15px] leading-relaxed flex-1">{feature.desc}</p>
           </div>
         ))}
       </div>

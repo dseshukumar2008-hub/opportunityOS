@@ -69,7 +69,7 @@ export default function ResumeDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-[28px] font-extrabold text-slate-900 flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 bg-indigo-50 text-[#6C4CF1] rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-indigo-50 text-primary rounded-xl flex items-center justify-center">
               <FileText size={20} strokeWidth={2.5} />
             </div>
             My Resumes
@@ -85,7 +85,7 @@ export default function ResumeDashboardPage() {
               navigate(`/resume-builder/${newId}`);
             }
           }}
-          className="bg-[#6C4CF1] hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm flex items-center justify-center gap-2"
+          className="btn-primary px-5 py-2.5 shadow-sm flex items-center justify-center gap-2"
         >
           <Plus size={20} />
           Create New Resume
@@ -115,7 +115,7 @@ export default function ResumeDashboardPage() {
                 navigate(`/resume-builder/${newId}`);
               }
             }}
-            className="bg-[#6C4CF1] hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-sm flex items-center gap-2"
+            className="btn-primary px-6 py-3 shadow-sm flex items-center gap-2"
           >
             <Sparkles size={20} />
             Build My Resume
@@ -128,7 +128,7 @@ export default function ResumeDashboardPage() {
             return (
               <div 
                 key={resume.id} 
-                className="bg-white rounded-[20px] border border-slate-200 overflow-hidden hover:border-[#6C4CF1]/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 transition-all duration-300 group flex flex-col relative"
+                className="bg-white rounded-[20px] border border-slate-200 overflow-hidden hover:border-primary/30 hover:shadow-card hover:-translate-y-1 transition-all duration-300 group flex flex-col relative"
               >
                 {/* Menu Button */}
                 <div className="absolute top-4 right-4 z-10">
@@ -233,7 +233,7 @@ export default function ResumeDashboardPage() {
                   </div>
                   <button 
                     onClick={(e) => { e.stopPropagation(); openResume(resume.id); }}
-                    className="text-[12px] font-bold text-[#6C4CF1] hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+                    className="text-[12px] font-bold text-primary hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
                   >
                     Open Editor
                   </button>

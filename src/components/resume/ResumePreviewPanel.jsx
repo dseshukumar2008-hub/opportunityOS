@@ -643,7 +643,7 @@ const ResumePreviewPanel = forwardRef((props, ref) => {
               onClick={() => setActiveTemplate && setActiveTemplate(t)}
               className={`px-4 py-1.5 rounded-md text-[12px] font-bold transition-all flex items-center gap-2 ${
                 activeTemplate === t 
-                  ? 'bg-white text-[#6C4CF1] shadow-sm' 
+                  ? 'bg-white text-primary shadow-sm' 
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >

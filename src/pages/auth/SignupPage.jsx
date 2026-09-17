@@ -80,7 +80,7 @@ export default function SignupPage() {
   if (success) {
     return (
       <AuthLayout>
-        <div className="bg-white py-12 px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-2xl sm:px-10 border border-slate-100 flex flex-col items-center text-center">
+        <div className="bg-white py-12 px-6 shadow-card sm:rounded-2xl sm:px-10 border border-slate-100 flex flex-col items-center text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
             <CheckCircle2 className="text-green-600 w-8 h-8" />
           </div>
@@ -88,7 +88,7 @@ export default function SignupPage() {
           <p className="text-slate-600 mb-8">
             Your account has been successfully created. Logging you in...
           </p>
-          <Link to={from} replace className="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#6C4CF1] hover:bg-indigo-700 transition-colors">
+          <Link to={from} replace className="btn-primary w-full flex justify-center items-center text-sm">
             Go to Dashboard
           </Link>
         </div>
@@ -116,7 +116,7 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <div className="bg-white py-8 px-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] sm:rounded-2xl sm:px-10 border border-slate-100">
+        <div className="bg-white py-8 px-6 shadow-card sm:rounded-2xl sm:px-10 border border-slate-100">
           <form className="space-y-5" onSubmit={handleSubmit} noValidate>
 
             {error && (
@@ -146,7 +146,7 @@ export default function SignupPage() {
                 onChange={handleChange}
                 aria-invalid={error.includes('name') ? 'true' : 'false'}
                 aria-describedby={error ? 'signup-error' : undefined}
-                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('name') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+                className={`input-standard pl-10 text-sm ${error.includes('name') ? 'border-red-300 ring-2 ring-red-100' : ''} disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="John Doe"
               />
             </div>
@@ -172,7 +172,7 @@ export default function SignupPage() {
                 onChange={handleChange}
                 aria-invalid={error.includes('email') ? 'true' : 'false'}
                 aria-describedby={error ? 'signup-error' : undefined}
-                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('email') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+                className={`input-standard pl-10 text-sm ${error.includes('email') ? 'border-red-300 ring-2 ring-red-100' : ''} disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="you@university.edu"
               />
             </div>
@@ -198,7 +198,7 @@ export default function SignupPage() {
                 onChange={handleChange}
                 aria-invalid={error.includes('Password') || error.includes('characters') ? 'true' : 'false'}
                 aria-describedby={error ? 'signup-error' : undefined}
-                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('Password') || error.includes('characters') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+                className={`input-standard pl-10 text-sm ${error.includes('Password') || error.includes('characters') ? 'border-red-300 ring-2 ring-red-100' : ''} disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="••••••••"
               />
             </div>
@@ -224,7 +224,7 @@ export default function SignupPage() {
                 onChange={handleChange}
                 aria-invalid={error.includes('match') ? 'true' : 'false'}
                 aria-describedby={error ? 'signup-error' : undefined}
-                className={`block w-full pl-10 pr-3 py-2.5 border ${error.includes('match') ? 'border-red-300 ring-red-100' : 'border-slate-200 focus:ring-indigo-100'} rounded-lg text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed`}
+                className={`input-standard pl-10 text-sm ${error.includes('match') ? 'border-red-300 ring-2 ring-red-100' : ''} disabled:opacity-50 disabled:cursor-not-allowed`}
                 placeholder="••••••••"
               />
             </div>
@@ -234,7 +234,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#6C4CF1] hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+              className="btn-primary w-full flex justify-center items-center gap-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Creating Account...' : 'Create Account'}
               {!isLoading && <ArrowRight size={16} />}

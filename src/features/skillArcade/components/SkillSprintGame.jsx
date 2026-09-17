@@ -185,12 +185,12 @@ export default function SkillSprintGame({ onClose }) {
           </button>
 
           <div className="flex items-center gap-4 shrink-0">
-            <div className="w-14 h-14 bg-[#F3F0FF] rounded-2xl flex items-center justify-center shrink-0 border border-[#6C4CF1]/20">
-              <Zap size={28} className="text-[#6C4CF1] fill-[#6C4CF1]" />
+            <div className="w-14 h-14 bg-[#F3F0FF] rounded-2xl flex items-center justify-center shrink-0 border border-primary/20">
+              <Zap size={28} className="text-primary fill-[#6C4CF1]" />
             </div>
             <div className="min-w-0">
               <h1 className="text-[20px] md:text-[24px] font-bold text-slate-900 leading-tight flex items-center gap-2 truncate">
-                Skill Sprint <Zap size={20} className="text-[#6C4CF1] fill-[#6C4CF1] shrink-0" />
+                Skill Sprint <Zap size={20} className="text-primary fill-[#6C4CF1] shrink-0" />
               </h1>
               <p className="text-[14px] font-medium text-slate-500 truncate">
                 Question {currentQNum} of {totalQ}
@@ -202,7 +202,7 @@ export default function SkillSprintGame({ onClose }) {
         <div className="flex items-center gap-6 shrink-0 md:pr-4 md:pl-4 justify-between md:justify-end overflow-visible">
           <div className="text-right">
             <p className="text-[13px] font-medium text-slate-500 mb-0.5" aria-hidden="true">Score</p>
-            <p className="text-[28px] font-black text-[#6C4CF1] leading-none tabular-nums" aria-label={`Score: ${score} points`}>{score}</p>
+            <p className="text-[28px] font-black text-primary leading-none tabular-nums" aria-label={`Score: ${score} points`}>{score}</p>
           </div>
 
           <div className="h-16 w-[1px] bg-slate-200 shrink-0" />
@@ -230,7 +230,7 @@ export default function SkillSprintGame({ onClose }) {
         <div aria-live="assertive" className="sr-only">{timerAnnouncement}</div>
         <div aria-live="polite" className="sr-only">{feedbackAnnouncement}</div>
 
-        <div className="flex items-center gap-2 bg-[#F3F0FF] text-[#6C4CF1] px-4 py-1.5 rounded-full text-[12px] font-bold tracking-wide uppercase mb-6 border border-[#6C4CF1]/20 shrink-0">
+        <div className="flex items-center gap-2 bg-[#F3F0FF] text-primary px-4 py-1.5 rounded-full text-[12px] font-bold tracking-wide uppercase mb-6 border border-primary/20 shrink-0">
           <Zap size={14} className="fill-[#6C4CF1]" /> QUICK CHALLENGE
         </div>
 
@@ -247,8 +247,8 @@ export default function SkillSprintGame({ onClose }) {
             const letters = ['A', 'B', 'C', 'D'];
             const letter = letters[i];
 
-            let cardClass = "bg-white border border-slate-200 hover:border-[#6C4CF1]/40 hover:shadow-md hover:-translate-y-0.5 cursor-pointer";
-            let letterBgClass = "bg-[#F3F0FF] text-[#6C4CF1]";
+            let cardClass = "bg-white border border-slate-200 hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 cursor-pointer";
+            let letterBgClass = "bg-[#F3F0FF] text-primary";
             let textClass = "text-slate-700";
             let ariaLabel = opt;
 

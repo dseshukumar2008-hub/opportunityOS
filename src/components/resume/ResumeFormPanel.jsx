@@ -198,7 +198,7 @@ export default function ResumeFormPanel() {
           {renderAiDraft('summary', 'summary-1')}
         </div>
         <div className="flex justify-end mt-4">
-          <button onClick={handleNext} className="bg-[#6C4CF1] hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
+          <button onClick={handleNext} className="bg-primary hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
         </div>
       </div>
     );
@@ -288,7 +288,7 @@ export default function ResumeFormPanel() {
       <div className="flex justify-end mt-4">
         <button 
           onClick={handleNext}
-          className="bg-[#6C4CF1] hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg"
+          className="bg-primary hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg"
         >
           Next <ArrowRight size={18} strokeWidth={2.5} />
         </button>
@@ -357,7 +357,7 @@ export default function ResumeFormPanel() {
         <Plus size={18} strokeWidth={2.5} /> Add Education
       </button>
       <div className="flex justify-end mt-4">
-        <button onClick={handleNext} className="bg-[#6C4CF1] hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
+        <button onClick={handleNext} className="bg-primary hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
       </div>
     </div>
   );
@@ -392,7 +392,7 @@ export default function ResumeFormPanel() {
         />
       </div>
       <div className="flex justify-end mt-4">
-        <button onClick={handleNext} className="bg-[#6C4CF1] hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
+        <button onClick={handleNext} className="bg-primary hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
       </div>
     </div>
   );
@@ -458,7 +458,7 @@ export default function ResumeFormPanel() {
         <Plus size={18} strokeWidth={2.5} /> Add Project
       </button>
       <div className="flex justify-end mt-4">
-        <button onClick={handleNext} className="bg-[#6C4CF1] hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
+        <button onClick={handleNext} className="bg-primary hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
       </div>
     </div>
   );
@@ -523,7 +523,7 @@ export default function ResumeFormPanel() {
         <Plus size={18} strokeWidth={2.5} /> Add Experience
       </button>
       <div className="flex justify-end mt-4">
-        <button onClick={handleNext} className="bg-[#6C4CF1] hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
+        <button onClick={handleNext} className="bg-primary hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
       </div>
     </div>
   );
@@ -577,7 +577,7 @@ export default function ResumeFormPanel() {
         <Plus size={18} strokeWidth={2.5} /> Add Certification
       </button>
       <div className="flex justify-end mt-4">
-        <button onClick={handleNext} className="bg-[#6C4CF1] hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
+        <button onClick={handleNext} className="bg-primary hover:bg-indigo-700 text-white font-bold text-[14px] px-8 py-3 rounded-xl flex items-center gap-2 transition-all shadow-md hover:shadow-lg">Next <ArrowRight size={18} strokeWidth={2.5} /></button>
       </div>
     </div>
   );
@@ -647,7 +647,7 @@ export default function ResumeFormPanel() {
               className={`flex items-center justify-between p-5 cursor-pointer transition-colors ${isActive ? 'bg-slate-50/50' : 'hover:bg-slate-50'}`}
             >
               <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isActive || isComplete ? 'bg-indigo-50 text-[#6C4CF1]' : 'bg-slate-50 text-slate-400'}`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isActive || isComplete ? 'bg-indigo-50 text-primary' : 'bg-slate-50 text-slate-400'}`}>
                   <Icon size={18} strokeWidth={2.5} />
                 </div>
                 <div>

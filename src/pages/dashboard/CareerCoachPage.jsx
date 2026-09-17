@@ -45,12 +45,12 @@ const MessageBubble = React.memo(function MessageBubble({ message }) {
   return (
     <div className={`flex gap-3 mb-6 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
       {!isUser && (
-        <div className="w-9 h-9 rounded-2xl bg-[#6C4CF1] flex items-center justify-center shrink-0 shadow-sm">
+        <div className="w-9 h-9 rounded-2xl bg-primary flex items-center justify-center shrink-0 shadow-sm">
           <Sparkles size={16} className="text-white" />
         </div>
       )}
       <div className={`max-w-[75%] rounded-[20px] px-5 py-4 shadow-sm ${isUser
-        ? 'bg-[#6C4CF1] text-white rounded-tr-sm'
+        ? 'bg-primary text-white rounded-tr-sm'
         : 'bg-white border border-slate-100 text-slate-800 rounded-tl-sm'
         }`}>
         {message.content.split('\n').map((line, i) => {
@@ -84,7 +84,7 @@ const MessageBubble = React.memo(function MessageBubble({ message }) {
 function TypingIndicator() {
   return (
     <div className="flex gap-3 mb-6">
-      <div className="w-9 h-9 rounded-2xl bg-[#6C4CF1] flex items-center justify-center shrink-0 shadow-sm">
+      <div className="w-9 h-9 rounded-2xl bg-primary flex items-center justify-center shrink-0 shadow-sm">
         <Sparkles size={16} className="text-white" />
       </div>
       <div className="bg-white border border-slate-100 rounded-[20px] rounded-tl-sm px-5 py-4 shadow-sm">
@@ -229,7 +229,7 @@ export default function CareerCoachPage() {
       {/* ── Header ── */}
       <div className="shrink-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-11 h-11 rounded-2xl bg-[#6C4CF1] flex items-center justify-center shadow-sm">
+          <div className="w-11 h-11 rounded-2xl bg-primary flex items-center justify-center shadow-sm">
             <Sparkles size={20} className="text-white" />
           </div>
           <div>
@@ -315,7 +315,7 @@ export default function CareerCoachPage() {
             <button
               type="submit"
               disabled={!input.trim() || isTyping}
-              className="w-12 h-12 rounded-2xl bg-[#6C4CF1] text-white flex items-center justify-center hover:bg-[#5a4add] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm shrink-0"
+              className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center hover:bg-[#5a4add] disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm shrink-0"
             >
               <Send size={18} />
             </button>

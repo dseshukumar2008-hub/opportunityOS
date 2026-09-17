@@ -233,7 +233,7 @@ function MessagesSkeleton() {
           {[0,1,2,3].map(i => (
             <div key={i} className={`flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}>
               {i % 2 === 0 && <SkeletonCircle size="w-8 h-8" className="mr-2 mt-1" />}
-              <SkeletonRect w={i % 2 === 0 ? 'w-48' : 'w-56'} h="h-12" rounded="rounded-2xl" className={i % 2 === 0 ? '' : 'bg-[#6C4CF1]/10'} />
+              <SkeletonRect w={i % 2 === 0 ? 'w-48' : 'w-56'} h="h-12" rounded="rounded-2xl" className={i % 2 === 0 ? '' : 'bg-primary/10'} />
             </div>
           ))}
         </div>

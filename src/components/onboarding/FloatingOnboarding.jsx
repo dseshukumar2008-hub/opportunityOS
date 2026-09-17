@@ -178,7 +178,7 @@ export default function FloatingOnboarding() {
         {/* Ambient lighting blobs */}
         <div className="absolute top-[-10%] left-[-5%] max-w-full w-[800px] h-[800px] bg-[#E9D5FF]/30 rounded-full blur-[150px]" />
         <div className="absolute bottom-[-10%] right-[-5%] max-w-full w-[900px] h-[900px] bg-[#BAE6FD]/20 rounded-full blur-[150px]" />
-        <div className="absolute inset-0 bg-[#6C4CF1]/5 rounded-[36px]"></div>
+        <div className="absolute inset-0 bg-primary/5 rounded-[36px]"></div>
       </div>
 
       {/* Main Glass Card - 16:9 aspect ratio approx */}

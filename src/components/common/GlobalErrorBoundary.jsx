@@ -33,7 +33,7 @@ function FallbackUI({ error, resetErrorBoundary, type = 'global' }) {
       <div className="flex items-center gap-3">
         <button
           onClick={resetErrorBoundary}
-          className="flex items-center gap-2 px-4 py-2 bg-[#6C4CF1] hover:bg-[#5b3fda] text-white text-[13px] font-bold rounded-xl transition-all shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-[#5b3fda] text-white text-[13px] font-bold rounded-xl transition-all shadow-sm"
         >
           <RefreshCw size={14} />
           Retry

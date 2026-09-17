@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getRelativeTime } from '../../utils/formatUtils';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../contexts/ProfileContext';
 import { useResume } from '../../contexts/ResumeContext';
@@ -22,11 +21,10 @@ import { useUserDirectory } from '../../hooks/useUserDirectory';
 import toast from 'react-hot-toast';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
 
-// 
 function SectionHeader({ icon: Icon, title }) {
   return (
     <div className="flex items-center gap-3 mb-5">
-      <div className="w-9 h-9 bg-[#F4F2FF] text-[#6C4CF1] rounded-xl flex items-center justify-center shrink-0">
+      <div className="w-9 h-9 bg-[#F4F2FF] text-primary rounded-xl flex items-center justify-center shrink-0">
         <Icon size={17} />
       </div>
       <h2 className="text-[16px] font-bold text-slate-900">{title}</h2>
@@ -44,7 +42,7 @@ function Card({ children, className = '' }) {
 
 function SkillChip({ label }) {
   return (
-    <span className="px-3 py-1.5 bg-[#F4F2FF] text-[#6C4CF1] text-[12px] font-bold rounded-lg cursor-default hover:bg-indigo-100 transition-colors">
+    <span className="px-3 py-1.5 bg-[#F4F2FF] text-primary text-[12px] font-bold rounded-lg cursor-default hover:bg-indigo-100 transition-colors">
       {label}
     </span>
   );
@@ -63,6 +61,16 @@ function StatCard({ icon: Icon, label, value, color }) {
     </div>
   );
 }
+
+const timeAgo = (isoString) => {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  const now = new Date();
+  const diff = Math.floor((now - date) / 60000);
+  if (diff < 60) return `${Math.max(1, diff)}m ago`;
+  if (diff < 1440) return `${Math.floor(diff / 60)}h ago`;
+  return `${Math.floor(diff / 1440)}d ago`;
+};
 
 // 
 export default function UserProfilePage() {
@@ -85,15 +93,12 @@ export default function UserProfilePage() {
     connections,
   } = useConnections();
   const { users: allUsers } = useUserDirectory();
-    const { getUserActivities } = useActivity();
+  const { getUserActivities } = useActivity();
 
   const [fetchedProfile, setFetchedProfile] = useState(null);
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [isDisconnecting, setIsDisconnecting] = useState(false);
 
-  // Resolve which user we're viewing
+
   const isOwnProfile = !userId || userId === 'me' || userId === user?.id || userId === user?.email;
 
   useEffect(() => {
@@ -101,15 +106,10 @@ export default function UserProfilePage() {
       const directoryUser = allUsers.find(u => u.id === userId);
       if (!directoryUser) {
         let isMounted = true;
-        setIsLoadingProfile(true);
         fetchUserProfile(userId).then(res => {
-          if (isMounted) {
-            if (res?.data) setFetchedProfile(res.data);
-            setIsLoadingProfile(false);
-          }
+          if (isMounted && res?.data) setFetchedProfile(res.data);
         }).catch(err => {
           console.error("Failed to fetch profile:", err);
-          if (isMounted) setIsLoadingProfile(false);
         });
         return () => { isMounted = false; };
       }
@@ -118,34 +118,27 @@ export default function UserProfilePage() {
 
   const viewedProfile = isOwnProfile ? ownProfile : (allUsers.find(u => u.id === userId) || fetchedProfile);
 
-  // For other users, look them up; for own profile use auth user
-  // Connection state for the viewed user
+
   const targetUserId = isOwnProfile ? null : userId;
   const relationship = targetUserId ? getRelationship(targetUserId) : 'self';
   const incomingRequestId = targetUserId ? getIncomingRequestId(targetUserId) : null;
   const myConnectionCount = getConnectionCount();
   const viewedUserConnectionCount = targetUserId ? getConnectionCount(targetUserId) : myConnectionCount;
 
-  const handleConnect = async () => {
-    if (!targetUserId || isConnecting) return;
-    setIsConnecting(true);
-    await sendConnectionRequest(targetUserId);
-    setIsConnecting(false);
-      };
+  const handleConnect = () => {
+    if (!targetUserId) return;
+    sendConnectionRequest(targetUserId);
+  };
 
-  const handleAccept = async () => {
-    if (!incomingRequestId || isConnecting) return;
-    setIsConnecting(true);
-    await acceptConnectionRequest(incomingRequestId);
-    setIsConnecting(false);
-      };
+  const handleAccept = () => {
+    if (!incomingRequestId) return;
+    acceptConnectionRequest(incomingRequestId);
+  };
 
-  const handleReject = async () => {
-    if (!incomingRequestId || isConnecting) return;
-    setIsConnecting(true);
-    await rejectConnectionRequest(incomingRequestId);
-    setIsConnecting(false);
-      };
+  const handleReject = () => {
+    if (!incomingRequestId) return;
+    rejectConnectionRequest(incomingRequestId);
+  };
 
   const handleDisconnect = () => {
     setShowDisconnectConfirm(true);
@@ -157,14 +150,12 @@ export default function UserProfilePage() {
         (c.userId1 === targetUserId && c.userId2 === (user?.id || 'me'))
     );
     if (conn) {
-      setIsDisconnecting(true);
       await removeConnection(conn.id);
-      setIsDisconnecting(false);
     }
     setShowDisconnectConfirm(false);
   };
 
-  // ── Pull all data from contexts ─────────────────────────────
+
   const pi = resumeData.personalInfo;
 
   const location = pi.location || 'India';
@@ -172,7 +163,7 @@ export default function UserProfilePage() {
   const linkedin = pi.linkedin;
   const portfolio = pi.portfolio;
 
-  // Profile fields from AuthContext (set via ProfilePage)
+
   const fullName = viewedProfile?.full_name || pi.fullName || user?.name || 'Your Name';
   const college = viewedProfile?.education?.[0]?.institution || viewedProfile?.college || 'NIAT';
   const branch = viewedProfile?.education?.[0]?.field || viewedProfile?.branch || 'Computer Science Engineering';
@@ -189,7 +180,7 @@ export default function UserProfilePage() {
   const myTeams = (teams || []).filter(t => t.members.includes(currentUserId));
   const resumeScore = getResumeStrength();
 
-  // ── Activity feed from ActivityContext ───────────────────────
+
   const [activityFilter, setActivityFilter] = useState('All');
 
   const allActivities = getUserActivities(isOwnProfile ? currentUserId : targetUserId);
@@ -205,19 +196,8 @@ export default function UserProfilePage() {
     User
   };
 
-  // ── Message handler ─────────────────────────────────────────
-  const handleMessage = () => toast.success('Messaging feature is coming soon!');
 
-  if (isLoadingProfile && !isOwnProfile && !fetchedProfile) {
-    return (
-      <div className="bg-[#F8FAFC] min-h-screen flex items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
-          <p className="text-[14px] font-bold text-slate-500">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleMessage = () => toast.success('Messaging feature is coming soon!');
 
   return (
     <div className="bg-[#F8FAFC] pb-20 font-sans p-4 lg:p-6">
@@ -226,7 +206,7 @@ export default function UserProfilePage() {
         {/* ── HERO CARD ─────────────────────────────────────────── */}
         <div className="relative bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden mb-6">
           {/* Banner */}
-          <div className="h-36 bg-[#6C4CF1]" />
+          <div className="h-36 bg-gradient-to-br from-[#6C4CF1] via-indigo-600 to-violet-500" />
 
           <div className="px-6 sm:px-8 pb-6 -mt-16 relative">
             {/* Avatar */}
@@ -250,17 +230,17 @@ export default function UserProfilePage() {
                   <p className="text-[13px] font-semibold text-slate-500 mt-1">{headline}</p>
                   <div className="flex flex-wrap items-center gap-3 mt-2 text-[12px] font-semibold text-slate-500">
                     <span className="flex items-center gap-1.5">
-                      <GraduationCap size={13} className="text-[#6C4CF1]" /> {college}
+                      <GraduationCap size={13} className="text-primary" /> {college}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <BookOpen size={13} className="text-[#6C4CF1]" /> {branch}
+                      <BookOpen size={13} className="text-primary" /> {branch}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <Calendar size={13} className="text-[#6C4CF1]" /> {gradYear} Batch
+                      <Calendar size={13} className="text-primary" /> {gradYear} Batch
                     </span>
                     {location && (
                       <span className="flex items-center gap-1.5">
-                        <MapPin size={13} className="text-[#6C4CF1]" /> {location}
+                        <MapPin size={13} className="text-primary" /> {location}
                       </span>
                     )}
                   </div>
@@ -274,7 +254,7 @@ export default function UserProfilePage() {
                   <div
                     className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-white border border-slate-200 text-slate-600"
                   >
-                    <Link2 size={15} className="text-[#6C4CF1]" />
+                    <Link2 size={15} className="text-primary" />
                     {myConnectionCount} Connection{myConnectionCount !== 1 ? 's' : ''}
                   </div>
                 ) : (
@@ -283,11 +263,10 @@ export default function UserProfilePage() {
                     {relationship === 'none' && (
                       <button
                         onClick={handleConnect}
-                        disabled={isConnecting}
-                        className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-[#6C4CF1] text-white border-transparent hover:bg-indigo-700 shadow-[0_2px_10px_rgba(108,76,241,0.25)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-primary text-white border-transparent hover:bg-indigo-700 shadow-[0_2px_10px_rgba(108,76,241,0.25)] transition-all"
                       >
                         <UserPlus size={15} />
-                        {isConnecting ? 'Connecting...' : 'Connect'}
+                        Connect
                       </button>
                     )}
                     {/* Request sent */}
@@ -305,16 +284,14 @@ export default function UserProfilePage() {
                       <>
                         <button
                           onClick={handleAccept}
-                          disabled={isConnecting}
-                          className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-[#6C4CF1] text-white hover:bg-indigo-700 shadow-[0_2px_10px_rgba(108,76,241,0.25)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-primary text-white hover:bg-indigo-700 shadow-[0_2px_10px_rgba(108,76,241,0.25)] transition-all"
                         >
                           <UserCheck size={15} />
-                          {isConnecting ? 'Accepting...' : 'Accept'}
+                          Accept
                         </button>
                         <button
                           onClick={handleReject}
-                          disabled={isConnecting}
-                          className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-white border border-slate-200 text-slate-700 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-white border border-slate-200 text-slate-700 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all"
                         >
                           <UserX size={15} />
                           Reject
@@ -325,7 +302,7 @@ export default function UserProfilePage() {
                     {relationship === 'connected' && (
                       <button
                         onClick={handleDisconnect}
-                        className="group flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-white border border-[#6C4CF1]/30 text-[#6C4CF1] hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all"
+                        className="group flex items-center gap-2 px-5 h-10 rounded-xl text-[13px] font-bold bg-white border border-primary/30 text-primary hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all"
                       >
                         <UserCheck size={15} className="group-hover:hidden" />
                         <UserX size={15} className="hidden group-hover:block" />
@@ -360,17 +337,17 @@ export default function UserProfilePage() {
             {(github || linkedin || portfolio) && (
               <div className="flex items-center gap-3 mt-5 flex-wrap">
                 {linkedin && (
-                  <a href={linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-[#6C4CF1] transition-colors">
+                  <a href={linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-primary transition-colors">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg> LinkedIn
                   </a>
                 )}
                 {github && (
-                  <a href={github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-[#6C4CF1] transition-colors">
+                  <a href={github} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-primary transition-colors">
                     <GitBranch size={14} /> GitHub
                   </a>
                 )}
                 {portfolio && (
-                  <a href={portfolio} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-[#6C4CF1] transition-colors">
+                  <a href={portfolio} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 hover:text-primary transition-colors">
                     <Globe size={14} /> Portfolio
                   </a>
                 )}
@@ -411,7 +388,7 @@ export default function UserProfilePage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-[13px] text-slate-400 font-medium">No skills added yet. Build your resume or update your profile to highlight your skills.</p>
+                <p className="text-[13px] text-slate-400 font-medium">No skills added yet. Update your Create Resume tool.</p>
               )}
             </Card>
 
@@ -429,7 +406,7 @@ export default function UserProfilePage() {
                             href={proj.link || proj.github}
                             target="_blank"
                             rel="noreferrer"
-                            className="flex items-center gap-1 text-[11px] font-bold text-[#6C4CF1] hover:underline shrink-0"
+                            className="flex items-center gap-1 text-[11px] font-bold text-primary hover:underline shrink-0"
                           >
                             <GitBranch size={12} /> GitHub <ExternalLink size={10} />
                           </a>
@@ -484,7 +461,7 @@ export default function UserProfilePage() {
                       key={filter}
                       onClick={() => setActivityFilter(filter)}
                       className={`px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-colors ${activityFilter === filter
-                        ? 'bg-[#6C4CF1] text-white'
+                        ? 'bg-primary text-white'
                         : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
                         }`}
                     >
@@ -508,7 +485,7 @@ export default function UserProfilePage() {
                           <p className="text-[11px] font-medium text-slate-500 truncate">{act.description}</p>
                         </div>
                         {act.timestamp && (
-                          <span className="text-[11px] font-medium text-slate-400 shrink-0">{getRelativeTime(act.timestamp)}</span>
+                          <span className="text-[11px] font-medium text-slate-400 shrink-0">{timeAgo(act.timestamp)}</span>
                         )}
                       </div>
                     );
@@ -535,7 +512,7 @@ export default function UserProfilePage() {
                   {(resumeData.education ?? []).map((edu, i) => (
                     <div key={edu.id || i} className={i < (resumeData.education ?? []).length - 1 ? 'pb-5 border-b border-slate-100' : ''}>
                       <p className="text-[14px] font-bold text-slate-900">{edu.institution || edu.school}</p>
-                      <p className="text-[12px] font-semibold text-[#6C4CF1] mt-0.5">{edu.degree}{edu.field ? ` · ${edu.field}` : ''}</p>
+                      <p className="text-[12px] font-semibold text-primary mt-0.5">{edu.degree}{edu.field ? ` · ${edu.field}` : ''}</p>
                       <p className="text-[11px] font-medium text-slate-400 mt-0.5">
                         {edu.startYear || edu.from}{(edu.startYear || edu.from) && (edu.endYear || edu.to) && ' — '}{edu.endYear || edu.to}
                       </p>
@@ -548,11 +525,11 @@ export default function UserProfilePage() {
                 <SectionHeader icon={GraduationCap} title="Education" />
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 bg-[#F4F2FF] rounded-xl flex items-center justify-center shrink-0">
-                    <GraduationCap size={18} className="text-[#6C4CF1]" />
+                    <GraduationCap size={18} className="text-primary" />
                   </div>
                   <div>
                     <p className="text-[14px] font-bold text-slate-900">{college}</p>
-                    <p className="text-[12px] font-semibold text-[#6C4CF1] mt-0.5">{branch}</p>
+                    <p className="text-[12px] font-semibold text-primary mt-0.5">{branch}</p>
                     <p className="text-[11px] font-medium text-slate-400 mt-0.5">Class of {gradYear}</p>
                   </div>
                 </div>
@@ -571,7 +548,7 @@ export default function UserProfilePage() {
                       className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors text-left group"
                     >
                       <div className="w-9 h-9 rounded-xl bg-[#F4F2FF] flex items-center justify-center shrink-0">
-                        <Users size={16} className="text-[#6C4CF1]" />
+                        <Users size={16} className="text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-bold text-slate-900 truncate">{team.name}</p>
@@ -614,7 +591,7 @@ export default function UserProfilePage() {
               </div>
               <button
                 onClick={() => navigate('/resume-builder')}
-                className="w-full h-10 flex items-center justify-center gap-2 bg-[#F4F2FF] text-[#6C4CF1] text-[13px] font-bold rounded-xl hover:bg-indigo-100 transition-colors"
+                className="w-full h-10 flex items-center justify-center gap-2 bg-[#F4F2FF] text-primary text-[13px] font-bold rounded-xl hover:bg-indigo-100 transition-colors"
               >
                 <FileText size={14} /> Edit Resume
               </button>
@@ -630,7 +607,6 @@ export default function UserProfilePage() {
         title="Disconnect User?"
         message={`Are you sure you want to disconnect from ${fullName}? You will need to send another connection request to reconnect.`}
         confirmText="Disconnect"
-        isLoading={isDisconnecting}
       />
     </div>
   );

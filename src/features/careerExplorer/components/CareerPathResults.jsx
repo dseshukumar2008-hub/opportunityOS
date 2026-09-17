@@ -145,7 +145,7 @@ export default function CareerPathResults({ userProfile, onRetake, resumeData, p
           temperature: 0.4,
           timeoutMs: 45000,
           maxTokens: 3000,
-          model: 'gemini-1.5-flash'
+          model: 'gemini-3.5-flash'
         },
       };
 
